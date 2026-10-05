@@ -4,8 +4,9 @@
 //
 // Network-first: every load tries the network first so you always get the
 // latest version after an update, and only falls back to the cached copy if
-// you're offline.
-const CACHE_NAME = 'hse-tracker-shell-v4';
+// you're offline. (Previous versions were cache-first, which is why updates
+// only ever showed up in Incognito — this fixes that for good.)
+const CACHE_NAME = 'hse-tracker-shell-v5';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -40,7 +41,8 @@ self.addEventListener('fetch', (event) => {
 
   // Page loads (including worker QR links like ?worker=123) are all the same app page:
   // keep ONE cached copy under ./index.html instead of a copy per link.
-  const isPage = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
+  // Other pages (site.html — the scaffolding site form) keep their own cached copy.
+  const isPage = url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
   const cacheKey = isPage ? new URL('./index.html', self.registration.scope).href : req;
 
   event.respondWith(
