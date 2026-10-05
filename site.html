@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b2140">
+<title>Burhan — Scaffolding Site Entry</title>
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--navy:#0b2140; --navy2:#13325c; --red:#b3121a; --red-bg:#fdecec; --ink:#16202e; --muted:#5d6878; --line:#d9dee6; --bg:#f3f5f8; --card:#fff; --ok:#1e7a4c; --ok-bg:#e3f4ea; --warn:#9a6a00; --warn-bg:#fff6de; --focus:#1f6fd1;}
+*{box-sizing:border-box;}
+html,body{margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; -webkit-text-size-adjust:100%;}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2)); color:#fff; padding:14px 16px 16px; display:flex; gap:12px; align-items:center;}
+header img{width:46px; height:46px; object-fit:contain; background:#fff; border-radius:10px; padding:4px; flex:none;}
+header .t1{font-weight:800; font-size:17px; letter-spacing:.01em;} header .t2{font-size:13px; opacity:.85;}
+main{max-width:620px; margin:0 auto; padding:14px 16px 40px;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.proj{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
+.proj .k{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700;}
+.proj .v{font-size:18px; font-weight:800;}
+.choose{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.big{appearance:none; border:2px solid var(--line); background:#fff; border-radius:14px; padding:18px 10px; font:inherit; font-weight:800; font-size:18px; color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px;}
+.big small{font-weight:500; font-size:12.5px; color:var(--muted);}
+.big.on{border-color:var(--red); background:var(--red-bg); color:var(--red);}
+.big svg{width:30px; height:30px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+h2{font-size:17px; margin:0 0 12px;}
+label{display:block; font-weight:650; font-size:14px; margin:0 0 12px;}
+label .opt{font-weight:400; color:var(--muted);}
+input,select,textarea{display:block; width:100%; margin-top:5px; padding:12px; font:inherit; font-size:16px; color:var(--ink); background:#fff; border:1.5px solid var(--line); border-radius:10px;}
+textarea{min-height:76px; resize:vertical;}
+input:focus,select:focus,textarea:focus,.big:focus-visible,button:focus-visible{outline:3px solid color-mix(in srgb,var(--focus) 35%,transparent); border-color:var(--focus);}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.seg{display:flex; gap:8px; margin-top:6px;} .seg button{flex:1; padding:11px 6px; border:1.5px solid var(--line); border-radius:10px; background:#fff; font:inherit; font-weight:700; color:var(--ink);}
+.seg button.on{border-color:var(--red); background:var(--red-bg); color:var(--red);}
+.crewbox{border:1.5px solid var(--line); border-radius:10px; margin-top:6px; overflow:hidden;}
+.crewbox input[type=search]{border:0; border-bottom:1px solid var(--line); border-radius:0; margin:0;}
+.crewlist{max-height:280px; overflow:auto;}
+.crewlist label{display:flex; align-items:center; gap:10px; margin:0; padding:11px 12px; border-bottom:1px solid #eef1f5; font-weight:500;}
+.crewlist input{width:22px; height:22px; margin:0; flex:none; accent-color:var(--red);}
+.crewcount{font-size:13px; color:var(--muted); font-weight:600; margin-top:6px;}
+.scaf{display:flex; gap:10px; align-items:flex-start; padding:12px; border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; font-weight:500; background:#fff;}
+.scaf input{width:22px; height:22px; margin:2px 0 0; flex:none; accent-color:var(--red);}
+.scaf b{display:block;} .scaf span{font-size:13px; color:var(--muted);}
+.btn{display:block; width:100%; padding:15px; border:0; border-radius:12px; font:inherit; font-size:17px; font-weight:800; background:var(--red); color:#fff; cursor:pointer;}
+.btn:disabled{opacity:.6;} .btn.ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line);}
+.err{background:var(--red-bg); color:var(--red); border:1px solid #f3b9bc; padding:11px 12px; border-radius:10px; font-size:14px; font-weight:600; margin-bottom:12px;}
+.note{font-size:13px; color:var(--muted);}
+.done{text-align:center; padding:26px 16px;} .done .tick{width:64px; height:64px; border-radius:50%; background:var(--ok-bg); color:var(--ok); display:grid; place-items:center; margin:0 auto 12px; font-size:34px; font-weight:900;}
+.done h2{font-size:21px;} .wait{background:var(--warn-bg); color:var(--warn); border-radius:10px; padding:10px 12px; font-size:14px; font-weight:600; margin-top:12px;}
+.hidden{display:none !important;}
+.center{text-align:center; padding:40px 16px; color:var(--muted);}
+footer{text-align:center; font-size:12px; color:var(--muted); padding:0 16px 24px;}
+</style>
+</head>
+<body>
+<header><img src="logo.png" alt="Burhan Oil &amp; Trade Services"><div><div class="t1">Scaffolding Site Entry</div><div class="t2">Burhan Oil &amp; Trade Services · Think Safe, Work Safe, Home Safe</div></div></header>
+<main>
+  <div id="loading" class="center">Opening…</div>
+  <div id="bad" class="card hidden"><h2>This link is not active</h2><p class="note" id="badMsg">Ask the HSE department for a new site link or QR code.</p></div>
+
+  <div id="app" class="hidden">
+    <div class="card proj"><div><div class="k">Project</div><div class="v" id="projName">—</div><div class="note" id="projClient"></div></div></div>
+
+    <div id="step1">
+      <div class="choose" role="group" aria-label="What are you entering?">
+        <button type="button" class="big" data-kind="rigup"><svg viewBox="0 0 24 24"><path d="M4 20V4M20 20V4M4 8h16M4 14h16M4 8l16 6"/></svg>Rig-up<small>Scaffold put up</small></button>
+        <button type="button" class="big" data-kind="rigdown"><svg viewBox="0 0 24 24"><path d="M12 4v13M6 11l6 6 6-6M4 20h16"/></svg>Rig-down<small>Scaffold taken down</small></button>
+      </div>
+      <p class="note" style="margin-top:12px;">Your entry goes to the HSE department for approval before it is added to the tracker.</p>
+    </div>
+
+    <form id="form" class="card hidden" novalidate autocomplete="off">
+      <h2 id="formTitle">Rig-up</h2>
+      <div id="formErr" class="err hidden" role="alert"></div>
+
+      <div data-for="rigdown">
+        <label>Which scaffold came down? *</label>
+        <div id="standingList"></div>
+      </div>
+
+      <div class="row2">
+        <label>Date *<input type="date" name="date" required></label>
+        <label data-for="rigup">Tag no. <span class="opt">(optional)</span><input name="tagNo" maxlength="40" inputmode="text"></label>
+      </div>
+
+      <div data-for="rigup">
+        <label>Location / well head *<input name="location" maxlength="120" list="dlPlaces" placeholder="e.g. Well head NM-123"></label>
+        <div class="row2">
+          <label>Volume *<select name="volume"><option value="">Select…</option></select></label>
+          <label>Lifts / floors<input name="lifts" type="number" min="0" max="60" inputmode="numeric"></label>
+        </div>
+      </div>
+
+      <label>Outcome
+        <div class="seg" id="outcomeSeg"><button type="button" class="on" data-out="Completed">Completed</button><button type="button" data-out="Cancelled">Cancelled</button></div>
+      </label>
+      <div id="cancelBox" class="hidden">
+        <label>When cancelled<select name="stage"></select></label>
+        <label>Reason *<input name="reason" maxlength="200" placeholder="e.g. Permit not ready, client stopped work"></label>
+        <label>Cancelled by <span class="opt">(optional)</span><input name="cancelledBy" maxlength="80"></label>
+      </div>
+
+      <div class="row2">
+        <label>Requested by <span class="opt">(optional)</span><input name="requestedBy" maxlength="80"></label>
+        <label>Work order no. <span class="opt">(optional)</span><input name="workOrder" maxlength="60"></label>
+      </div>
+      <label data-for="rigup">Requester phone <span class="opt">(optional)</span><input name="requesterPhone" type="tel" maxlength="30" inputmode="tel" placeholder="+968 …"></label>
+      <div class="row2">
+        <label>Started from <span class="opt">(optional)</span><input name="from" maxlength="80" list="dlPlaces" placeholder="e.g. Camp / Yard"></label>
+        <label>Vehicle <span class="opt">(optional)</span><input name="vehicle" maxlength="30" list="dlVehicles"></label>
+      </div>
+
+      <label data-for="rigup">Chargehand *<select name="chargehand"><option value="">Select…</option></select></label>
+      <label>Crew</label>
+      <div class="crewbox"><input type="search" id="crewSearch" placeholder="Search name…" aria-label="Search crew"><div class="crewlist" id="crewList"></div></div>
+      <div class="crewcount" id="crewCount">0 selected</div>
+
+      <label style="margin-top:12px;">Notes <span class="opt">(optional)</span><textarea name="notes" maxlength="500"></textarea></label>
+      <label>Your name *<input name="by" maxlength="80" autocomplete="name"></label>
+
+      <button type="submit" class="btn" id="sendBtn">Send for approval</button>
+      <button type="button" class="btn ghost" id="backBtn" style="margin-top:10px;">Back</button>
+    </form>
+
+    <div id="done" class="card done hidden">
+      <div class="tick" aria-hidden="true">✓</div>
+      <h2>Sent for approval</h2>
+      <p class="note" id="doneMsg">The HSE department will check it and add it to the tracker.</p>
+      <div id="waitMsg" class="wait hidden">No signal right now — keep this page open. It will send automatically when the phone is back online.</div>
+      <button type="button" class="btn" id="againBtn" style="margin-top:16px;">Send another entry</button>
+    </div>
+  </div>
+  <datalist id="dlPlaces"></datalist><datalist id="dlVehicles"></datalist>
+</main>
+<footer>Entries are checked by the HSE department before they are added.</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhQDmL7V0IyMnFZmrLNCo1hJqW5rPZt5Q",
+    authDomain: "workforce-hse.firebaseapp.com",
+    projectId: "workforce-hse",
+    storageBucket: "workforce-hse.firebasestorage.app",
+    messagingSenderId: "123036825493",
+    appId: "1:123036825493:web:41cc96578f1d55807ba89c"
+  };
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const today=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  const store={ get(k){ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} } };
+  const show=(id,on)=>$(id).classList.toggle('hidden',!on);
+  function fail(msg){ show('loading',false); show('app',false); show('bad',true); if(msg) $('badMsg').textContent=msg; }
+
+  const token=new URLSearchParams(location.search).get('t')||'';
+  if(!/^[A-Za-z0-9]{16,40}$/.test(token)){ fail('This link is incomplete. Scan the QR code again, or ask the HSE department for the site link.'); return; }
+  let db;
+  try{ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); }catch(e){ fail('The page could not start. Check the internet connection and open the link again.'); return; }
+
+  let link=null, kind='rigup', outcome='Completed', crewSel=new Set();
+  db.collection('siteLinks').doc(token).get().then(snap=>{
+    if(!snap.exists){ fail(); return; }
+    link=snap.data()||{};
+    if(link.active===false){ fail(); return; }
+    setup();
+  }).catch(err=>{ console.warn(err); fail(err && err.code==='permission-denied' ? 'This link has been switched off. Ask the HSE department for a new site link or QR code.' : 'Could not open the link. Check the internet connection and try again.'); });
+
+  function setup(){
+    $('projName').textContent=link.projectName||'—';
+    $('projClient').textContent=link.clientName?('Client: '+link.clientName):'';
+    const f=$('form');
+    f.volume.insertAdjacentHTML('beforeend',(link.volumes||[]).map(v=>`<option>${esc(v)}</option>`).join(''));
+    f.stage.innerHTML=(link.stages||['Before leaving','On the road','At site']).map(v=>`<option>${esc(v)}</option>`).join('');
+    f.chargehand.insertAdjacentHTML('beforeend',(link.crew||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join(''));
+    $('dlPlaces').innerHTML=(link.places||[]).map(v=>`<option value="${esc(v)}">`).join('');
+    $('dlVehicles').innerHTML=(link.vehicles||[]).map(v=>`<option value="${esc(v)}">`).join('');
+    renderCrew();
+    show('loading',false); show('app',true);
+  }
+  function renderCrew(){
+    const q=$('crewSearch').value.trim().toLowerCase(), list=(link.crew||[]).filter(c=>!q || String(c.name).toLowerCase().includes(q));
+    $('crewList').innerHTML=list.length?list.map(c=>`<label><input type="checkbox" value="${esc(c.id)}" ${crewSel.has(c.id)?'checked':''}>${esc(c.name)}</label>`).join(''):'<div class="note" style="padding:12px;">No names found.</div>';
+    $('crewCount').textContent=crewSel.size+' selected';
+  }
+  $('crewSearch').addEventListener('input', renderCrew);
+  $('crewList').addEventListener('change', e=>{ const cb=e.target; if(cb.type!=='checkbox') return; if(cb.checked) crewSel.add(cb.value); else crewSel.delete(cb.value); $('crewCount').textContent=crewSel.size+' selected'; });
+  $('form').chargehand.addEventListener('change', e=>{ if(e.target.value){ crewSel.add(e.target.value); renderCrew(); } });
+
+  function openForm(k){
+    kind=k; const f=$('form'); f.reset(); crewSel=new Set(); outcome='Completed';
+    document.querySelectorAll('[data-for]').forEach(el=>el.classList.toggle('hidden', el.dataset.for!==k));
+    document.querySelectorAll('.big').forEach(b=>b.classList.toggle('on', b.dataset.kind===k));
+    $('formTitle').textContent = k==='rigup' ? 'Rig-up — scaffold put up' : 'Rig-down — scaffold taken down';
+    f.date.value=today(); f.date.max=today(); f.by.value=store.get('siteEntryName');
+    setOutcome('Completed'); $('crewSearch').value=''; renderCrew(); show('formErr',false);
+    if(k==='rigdown'){
+      const st=link.standing||[];
+      $('standingList').innerHTML = st.length ? st.map(s=>`<label class="scaf"><input type="radio" name="jobId" value="${esc(s.id)}"><div><b>${esc(s.location||'Scaffold')}</b><span>${[s.tagNo?'Tag '+esc(s.tagNo):'', s.volume?esc(s.volume):'', s.rigUpDate?'Up since '+esc(s.rigUpDate):'', s.jobNo?esc(s.jobNo):''].filter(Boolean).join(' · ')}</span></div></label>`).join('')
+        : '<div class="err" style="background:#fff6de;color:#9a6a00;border-color:#efd9a0;">No standing scaffolds are listed for this project. Tell the HSE department.</div>';
+    }
+    show('step1',false); show('done',false); show('form',true); window.scrollTo(0,0);
+  }
+  document.querySelectorAll('.big').forEach(b=>b.addEventListener('click',()=>openForm(b.dataset.kind)));
+  function setOutcome(v){ outcome=v; document.querySelectorAll('#outcomeSeg button').forEach(b=>b.classList.toggle('on', b.dataset.out===v)); show('cancelBox', v==='Cancelled'); }
+  $('outcomeSeg').addEventListener('click', e=>{ const b=e.target.closest('[data-out]'); if(b) setOutcome(b.dataset.out); });
+  $('backBtn').addEventListener('click', ()=>{ show('form',false); show('step1',true); document.querySelectorAll('.big').forEach(b=>b.classList.remove('on')); window.scrollTo(0,0); });
+  $('againBtn').addEventListener('click', ()=>{ show('done',false); show('step1',true); window.scrollTo(0,0); });
+
+  $('form').addEventListener('submit', e=>{
+    e.preventDefault();
+    const f=$('form'), v=n=>String((f[n]&&f[n].value)||'').trim();
+    const errs=[];
+    if(!v('date')) errs.push('Pick the date.'); else if(v('date')>today()) errs.push('The date cannot be in the future.');
+    let job=null;
+    if(kind==='rigdown'){ const r=f.querySelector('input[name="jobId"]:checked'); if(!r) errs.push('Choose which scaffold came down.'); else job=(link.standing||[]).find(s=>s.id===r.value)||null; }
+    else { if(!v('location')) errs.push('Enter the location / well head.'); if(!v('volume')) errs.push('Choose the volume.'); if(!v('chargehand')) errs.push('Choose the chargehand.'); }
+    if(outcome==='Cancelled' && !v('reason')) errs.push('Enter the reason it was cancelled.');
+    if(!v('by')) errs.push('Enter your name.');
+    if(errs.length){ $('formErr').innerHTML=errs.map(esc).join('<br>'); show('formErr',true); $('formErr').scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    show('formErr',false);
+    const data={date:v('date'), outcome, requestedBy:v('requestedBy'), workOrder:v('workOrder'), from:v('from'), vehicle:v('vehicle'), crew:[...crewSel].slice(0,60), notes:v('notes')};
+    if(outcome==='Cancelled'){ data.stage=v('stage'); data.reason=v('reason'); data.cancelledBy=v('cancelledBy'); }
+    if(kind==='rigup'){ Object.assign(data, {location:v('location'), volume:v('volume'), lifts:v('lifts'), tagNo:v('tagNo'), requesterPhone:v('requesterPhone'), chargehand:v('chargehand')}); }
+    else { data.jobId=job.id; data.jobLabel=[job.location, job.tagNo?'tag '+job.tagNo:''].filter(Boolean).join(' · '); }
+    store.set('siteEntryName', v('by'));
+    const btn=$('sendBtn'); btn.disabled=true; btn.textContent='Sending…';
+    const waitT=setTimeout(()=>{ show('waitMsg',true); }, 8000);
+    const sent=db.collection('siteSubmissions').add({token, projectId:link.projectId||'', kind, status:'pending', data, by:v('by'), submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    // show the confirmation at once; the entry stays queued on the phone until it reaches the server
+    $('doneMsg').textContent = (kind==='rigup' ? 'Rig-up' : 'Rig-down') + (outcome==='Cancelled'?' (cancelled)':'') + ` for ${link.projectName||'this project'} — the HSE department will check it and add it to the tracker.`;
+    show('waitMsg',false); show('form',false); show('done',true); window.scrollTo(0,0);
+    sent.then(()=>{ clearTimeout(waitT); show('waitMsg',false); })
+      .catch(err=>{ clearTimeout(waitT); console.warn(err); show('done',false); show('form',true);
+        $('formErr').textContent = err && err.code==='permission-denied' ? 'Not sent — this link has been switched off. Ask the HSE department for a new link.' : 'Not sent — please try again.';
+        show('formErr',true); })
+      .finally(()=>{ btn.disabled=false; btn.textContent='Send for approval'; });
+  });
+})();
+</script>
+</body>
+</html>

@@ -239,6 +239,16 @@ button.att-link.att-remove{color:var(--danger);}
 .sig-canvas{width:100%; max-width:420px; height:140px; display:block; background:#ffffff; border:1px dashed var(--line); border-radius:8px; touch-action:none; cursor:crosshair;}
 
 /* ---- record cards ---- */
+.site-strip{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:10px 14px; margin:0 0 14px; border:1px solid color-mix(in srgb, var(--warn) 55%, transparent); background:var(--warn-bg); border-radius:10px;}
+.site-panel-head{display:flex; align-items:center; justify-content:space-between; gap:10px;} .site-panel-head h3{margin:0;}
+.site-links{display:grid; gap:8px;} .site-link-row{display:grid; grid-template-columns:1fr auto; gap:8px 12px; align-items:center; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2);}
+.site-link-row.off{opacity:.7;} .site-link-acts{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+.site-qr{grid-column:1/-1; display:flex; gap:14px; align-items:center; flex-wrap:wrap; padding-top:8px; border-top:1px dashed var(--line);} .site-qr-img canvas{display:block; width:160px; height:160px; border-radius:6px;}
+.site-url{font-size:11.5px; word-break:break-all; margin:6px 0 8px; color:var(--ink-muted);}
+.site-new{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-top:12px;} .site-new label{min-width:240px;}
+.site-sub.busy{border-color:var(--accent);} .site-sub-bits{display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:6px; font-size:12.5px;}
+.site-review-note{padding:9px 12px; margin:0 0 12px; border-radius:8px; border:1px solid var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); font-size:13px;}
+@media (max-width:640px){ .site-link-row{grid-template-columns:1fr;} .site-link-acts{justify-content:flex-start;} }
 .record-card{border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:10px; background:var(--surface-2);}
 .record-card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
 .record-card-title{font-weight:700; font-size:13.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
@@ -2742,7 +2752,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b61';
+const APP_BUILD='b63';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -5554,7 +5564,7 @@ function openRegDrawer(key, id, tab){
   raiseDrawer('regDrawerOverlay','regDrawer'); activeReg=key; activeRegId=id; activeRegTab=tab||REG[key].tabs[0].key; regSubOpen=null; regSubEdit=null;
   document.getElementById('regDrawerOverlay').hidden=false; document.getElementById('regDrawer').hidden=false; renderRegDrawer();
 }
-function closeRegDrawer(){ activeRegId=null; document.getElementById('regDrawerOverlay').hidden=true; document.getElementById('regDrawer').hidden=true; }
+function closeRegDrawer(){ if(typeof siteSubApproving!=='undefined' && siteSubApproving && siteSubApproving.kind==='rigdown') siteCancelReview(); activeRegId=null; document.getElementById('regDrawerOverlay').hidden=true; document.getElementById('regDrawer').hidden=true; }
 function regTabsFor(cfg, r){ return cfg.tabs.filter(t=>!t.showIf || t.showIf(r)).concat(cfg.files||cfg.multiFiles?[{key:'files', label:'Files'}]:[]).concat([{key:'history', label:'History'}]); }
 function renderRegDrawer(){
   const r=regCurrent(), cfg=REG[activeReg]; if(!r || r.deleted){ closeRegDrawer(); return; } if(regBusy || formDirtyIn('regDrawerBody')) return;
@@ -7711,7 +7721,7 @@ regDefine({
   key:'scaff', collection:'scaffJobs', singular:'Scaffold job', title:'Scaffolding Jobs', tagline:'Rig up · Rig down · Every well head',
   addLabel:'+ Rig-up', addTitle:'New rig-up', noField:'jobNo', noPrefix:'SCF', noYear:true, dateField:'rigUpDate',
   listen:scaffListen, topPanel:()=>renderScaffTop(),
-  headerButtons:'<button class="btn btn-sm" type="button" id="scaffExportBtn">'+ic('download')+' Export Excel</button>',
+  headerButtons:'<button class="btn btn-sm" type="button" id="scaffSiteBtn" hidden>'+ic('qr')+' Site links</button><button class="btn btn-sm" type="button" id="scaffExportBtn">'+ic('download')+' Export Excel</button>',
   searchPlaceholder:'Search location, tag, job no., crew…', emptyEditor:'No scaffolding jobs yet — click “+ Rig-up” for each scaffold put up today. When it comes down, click “Rig down” on its row.', emptyViewer:'No scaffolding jobs recorded yet.',
   titleOf:r=>r.location||'Scaffold', subOf:r=>[r.projectId?projectName(r.projectId):'', r.volume, r.rigUpDate?'up '+r.rigUpDate:'', r.rigDownDate?'down '+r.rigDownDate:'standing'].filter(Boolean).join(' · '),
   badgesOf:r=>(!scaffUpDone(r)?`<span class="badge muted">Rig-up cancelled</span>`:scaffStanding(r)?`<span class="badge warn">Standing · ${scaffDays(r)??'—'} days</span>`:`<span class="badge ok">Rigged down · stood ${scaffDays(r)} days</span>`)+((r.downCancels||[]).length?` <span class="badge warn">${r.downCancels.length} cancelled rig-down trip${r.downCancels.length===1?'':'s'}</span>`:''),
@@ -7812,6 +7822,7 @@ REG.scaff.beforeUpdate=(data, cur)=>{
 };
 // before saving: look up the places / road route (max 6 s — otherwise the estimate is saved)
 REG.scaff.prepare=(d, data, cur)=>{ if(data && !scaffTripChanged(data, cur) && ((cur.upKm!=='' && cur.upKm!=null) || !('upFrom' in data || 'location' in data))) return; const x=scaffDistance(d.upFrom, d.location); if(d.upFrom && d.location && (!x || x.src!=='road')) toast('Working out the distance…'); return Promise.race([ensureDistance(d.upFrom, d.location), new Promise(r=>setTimeout(r, 6000))]); };
+REG.scaff.onData=()=>{ scaffDataLoaded=true; renderSitePanel(); siteLinksSyncSoon(); };
 REG.scaff.afterSave=r=>{ if(scaffOlder.has(r.id)){ scaffOlder.set(r.id, {...scaffOlder.get(r.id), ...r}); if(scaffRefresh) scaffRefresh(); } };
 REG.scaff.customSubmit={
   down: async (r, form)=>{
@@ -7824,14 +7835,210 @@ REG.scaff.customSubmit={
     if(q('downOutcome')==='Cancelled'){
       const reason=q('reason'); if(!reason){ toast('Enter the reason the trip was cancelled'); return; }
       const c={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), date, stage:q('stage'), reason, cancelledBy:q('cancelledBy'), crew, from, vehicle:veh, km:q('stage')==='Before leaving'?'':km, kmSrc:q('stage')==='Before leaving'?'':kmSrc};
-      if(await regUpdate('scaff', r.id, {downCancels:(r.downCancels||[]).concat([c])}, true)){ toast('Cancelled rig-down trip saved — the scaffold is still standing'); }
-      return;
+      if(await regUpdate('scaff', r.id, {downCancels:(r.downCancels||[]).concat([c])}, true)){ toast('Cancelled rig-down trip saved — the scaffold is still standing'); return true; }
+      return false;
     }
     const upd={rigDownDate:date, rigDownCrew:crew, downFrom:from, downVehicle:veh, downKm:km, downKmSrc:kmSrc, downRequestedBy:q('downRequestedBy'), downWorkOrder:q('downWorkOrder')};
-    if(await regUpdate('scaff', r.id, upd, true)) toast(`Rig-down saved — stood ${Math.max(0, daysBetween(r.rigUpDate||date, date))} days`);
+    if(await regUpdate('scaff', r.id, upd, true)){ toast(`Rig-down saved — stood ${Math.max(0, daysBetween(r.rigUpDate||date, date))} days`); return true; }
+    return false;
   },
 };
 
+
+/* =====================================================================
+   Batch 63: SCAFFOLDING SITE LINKS — a simple phone page (site.html) for chargehands.
+   • One link (or QR) per project: site.html?t=<token>. The page is not signed in.
+   • It can read only its own siteLinks/<token> document (project name, Scaffolding crew names,
+     standing scaffolds at that project, places, vehicles) and can only ADD a pending entry to siteSubmissions.
+   • Entries wait in "Pending from site" on Scaffolding Jobs. Approve opens the normal rig-up form (or the
+     scaffold's Rig down tab) already filled in — check it and press Save. Reject keeps it out of the tracker.
+   ===================================================================== */
+let siteLinks=[], siteSubs=[], unsubSiteLinks=null, unsubSiteSubs=null;
+let sitePanelOpen=false, siteSubApproving=null, siteQrOpen=null, siteSyncTimer=null, scaffDataLoaded=false;
+function siteNewToken(){
+  const abc='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789', a=new Uint8Array(24);
+  (window.crypto||window.msCrypto).getRandomValues(a); return [...a].map(x=>abc[x % abc.length]).join('');
+}
+function siteLinkUrl(token){ return location.origin + location.pathname.replace(/[^/]*$/, '') + 'site.html?t=' + encodeURIComponent(token); }
+function siteSubCount(){ return siteSubs.filter(s=>s.status==='pending').length; }
+function startSiteLinkData(){
+  stopSiteLinkData();
+  if(!canEdit()) return;
+  try{
+    unsubSiteLinks=db.collection('siteLinks').onSnapshot(snap=>{ siteLinks=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); renderSitePanel(); siteLinksSyncSoon(); },
+      err=>{ console.warn('siteLinks', err); siteLinks=[]; renderSitePanel(); });
+    unsubSiteSubs=db.collection('siteSubmissions').where('status','==','pending').onSnapshot(snap=>{ siteSubs=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); renderSitePanel(); },
+      err=>{ console.warn('siteSubmissions', err); siteSubs=[]; renderSitePanel(); });
+  }catch(e){ console.error(e); }
+}
+function stopSiteLinkData(){
+  if(unsubSiteLinks){ try{ unsubSiteLinks(); }catch(e){} unsubSiteLinks=null; }
+  if(unsubSiteSubs){ try{ unsubSiteSubs(); }catch(e){} unsubSiteSubs=null; }
+  siteLinks=[]; siteSubs=[]; siteSubApproving=null; scaffDataLoaded=false;
+}
+// keep each active link's lists (crew names, standing scaffolds, places, vehicles) up to date — written only when something changed
+function siteLinkPayload(link){
+  const crew=activeWorkers().filter(w=>(w.status||'active')!=='inactive' && workerDivKey(w)==='Scaffolding')
+    .map(w=>({id:w.id, name:w.fullName||'—'})).sort((a,b)=>a.name.localeCompare(b.name));
+  const standing=regActive('scaff').filter(r=>scaffStanding(r) && r.projectId===link.projectId)
+    .sort((a,b)=>String(b.rigUpDate||'').localeCompare(String(a.rigUpDate||'')))
+    .map(r=>({id:r.id, location:r.location||'', tagNo:r.tagNo||'', jobNo:r.jobNo||'', rigUpDate:r.rigUpDate||'', volume:r.volume||''}));
+  const site=activeSites().find(s=>s.id===link.projectId);
+  return {projectName:link.projectId?projectName(link.projectId):'', clientName:(site&&site.clientName)||'', crew, standing,
+    places:scaffPlaceOptions().slice(0,200), vehicles:scaffVehicleOptions().slice(0,200), volumes:SCAFF_VOLUMES, stages:SCAFF_CANCEL_STAGES};
+}
+function siteHash(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36); }
+function siteLinksSyncSoon(){ clearTimeout(siteSyncTimer); siteSyncTimer=setTimeout(siteLinksSync, 1500); }
+async function siteLinksSync(){
+  if(!canEdit() || !scaffDataLoaded || !workers.length) return;
+  for(const link of siteLinks.filter(l=>l.active)){
+    const p=siteLinkPayload(link), sig=siteHash(JSON.stringify(p));
+    if(link.sig===sig) continue;
+    try{ await db.collection('siteLinks').doc(link.id).update({...p, sig, syncedAt:new Date().toISOString()}); link.sig=sig; }
+    catch(e){ console.warn('site link sync', e); }
+  }
+}
+async function siteLinkCreate(projectId){
+  if(!canEdit()) return;
+  if(!projectId){ toast('Choose the project for the link'); return; }
+  const token=siteNewToken(), u=auth.currentUser, link={projectId, active:true, division:'Scaffolding', createdAt:new Date().toISOString(), createdBy:(u&&u.email)||''};
+  const p=siteLinkPayload(link);
+  siteQrOpen=token;
+  try{ await db.collection('siteLinks').doc(token).set({...link, ...p, sig:siteHash(JSON.stringify(p)), syncedAt:new Date().toISOString()}); toast('Site link created — share it or print the QR code'); renderSitePanel(); }
+  catch(e){ console.error(e); siteQrOpen=null; toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not create the link'); }
+}
+async function siteLinkSetActive(token, on){
+  try{ await db.collection('siteLinks').doc(token).update({active:!!on, ...(on?{}:{switchedOffAt:new Date().toISOString()})}); toast(on?'Link switched on':'Link switched off — it no longer opens'); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
+}
+async function siteLinkDelete(token){
+  try{ await db.collection('siteLinks').doc(token).delete(); toast('Link deleted'); if(siteQrOpen===token) siteQrOpen=null; }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not delete'); }
+}
+async function siteSubSetStatus(id, status, extra){
+  const u=auth.currentUser;
+  try{ await db.collection('siteSubmissions').doc(id).update({status, reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString(), ...(extra||{})}); return true; }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not update the site entry'); return false; }
+}
+function siteCrewNames(ids){ return (ids||[]).map(id=>{ const w=workers.find(x=>x.id===id); return w?(w.fullName||'—'):''; }).filter(Boolean); }
+function siteSubWhen(s){ const t=s.submittedAt; const d=t && typeof t.toDate==='function' ? t.toDate() : (t ? new Date(t) : null); return d && !isNaN(d) ? d.toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : ''; }
+function siteSubSummary(s){
+  const d=s.data||{}, job=s.kind==='rigdown' ? regActive('scaff').find(r=>r.id===d.jobId) : null;
+  const cancelled=d.outcome==='Cancelled';
+  const head = s.kind==='rigdown'
+    ? `<span class="badge ${cancelled?'warn':'ok'}">${cancelled?'Rig-down cancelled':'Rig-down'}</span> ${esc(job?job.location:(d.jobLabel||'scaffold'))}${job&&job.tagNo?' · tag '+esc(job.tagNo):''}`
+    : `<span class="badge ${cancelled?'warn':'ok'}">${cancelled?'Rig-up cancelled':'Rig-up'}</span> ${esc(d.location||'—')}${d.volume?' · '+esc(d.volume):''}${d.lifts?' · '+esc(String(d.lifts))+' lifts':''}${d.tagNo?' · tag '+esc(d.tagNo):''}`;
+  const crew=siteCrewNames(d.crew), ch=siteCrewNames([d.chargehand])[0];
+  const bits=[d.date?'Date '+d.date:'', ch?'Chargehand '+ch:'', crew.length?`Crew ${crew.length}: ${crew.slice(0,4).join(', ')}${crew.length>4?' …':''}`:'', d.vehicle?'Vehicle '+d.vehicle:'', cancelled&&d.reason?'Reason: '+d.reason:'', d.notes?'Notes: '+d.notes:''].filter(Boolean);
+  return {head, bits};
+}
+function renderSitePanel(){
+  const btn=document.getElementById('scaffSiteBtn');
+  if(btn){ const n=siteSubCount(); btn.innerHTML=`${ic('qr')} Site links${n?` <span class="badge warn site-count">${n} pending</span>`:''}`; btn.hidden=!canEdit(); }
+  let box=document.getElementById('scaffSiteBox');
+  if(!box){ const top=document.getElementById('scaffTop'); if(!top) return; top.insertAdjacentHTML('beforebegin', '<div id="scaffSiteBox"></div>'); box=document.getElementById('scaffSiteBox'); }
+  const n=siteSubCount();
+  if(!canEdit()){ box.innerHTML=''; return; }
+  if(!sitePanelOpen){
+    box.innerHTML = n ? `<div class="site-strip"><span>${ic('qr')} <strong>${n}</strong> scaffold ${n===1?'entry':'entries'} from site waiting for approval</span><button type="button" class="btn btn-sm btn-primary" data-site-open="1">Review</button></div>` : '';
+    return;
+  }
+  const projOpts=scaffProjects().slice().sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))).map(s=>`<option value="${esc(s.id)}">${esc(s.siteName||'—')}${s.division?' · '+esc(s.division):''}</option>`).join('');
+  const links=siteLinks.slice().sort((a,b)=>(b.active?1:0)-(a.active?1:0) || String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  const linkRows=links.length ? links.map(l=>`<div class="site-link-row${l.active?'':' off'}">
+      <div><strong>${esc(l.projectId?projectName(l.projectId):'—')}</strong> ${l.active?'<span class="badge ok">Active</span>':'<span class="badge muted">Switched off</span>'}
+        <div class="wsub">Created ${esc(String(l.createdAt||'').slice(0,10))} · ${(l.standing||[]).length} standing · ${(l.crew||[]).length} crew names on the link</div></div>
+      <div class="site-link-acts">
+        ${l.active?`<button type="button" class="btn btn-sm" data-site-copy="${esc(l.id)}">${ic('clipboard')} Copy link</button><button type="button" class="btn btn-sm" data-site-qr="${esc(l.id)}">QR code</button><button type="button" class="btn btn-sm" data-site-off="${esc(l.id)}" data-armed="0">Switch off</button>`
+          :`<button type="button" class="btn btn-sm" data-site-on="${esc(l.id)}">Switch on</button><button type="button" class="btn btn-sm btn-danger" data-site-del="${esc(l.id)}" data-armed="0">Delete</button>`}
+      </div>
+      ${siteQrOpen===l.id && l.active?`<div class="site-qr"><div class="site-qr-img" data-site-qrbox="${esc(l.id)}"></div><div><div class="wsub">Scan to open the site form for <strong>${esc(l.projectId?projectName(l.projectId):'')}</strong>.</div><div class="mono site-url">${esc(siteLinkUrl(l.id))}</div><button type="button" class="btn btn-sm" data-site-qrdl="${esc(l.id)}">${ic('download')} Download QR (PNG)</button></div></div>`:''}
+    </div>`).join('') : '<p class="wsub" style="margin:0;">No site links yet — create one for each project below.</p>';
+  const subs=siteSubs.filter(s=>s.status==='pending').sort((a,b)=>String(siteSubWhen(a)).localeCompare(String(siteSubWhen(b))));
+  const subRows=subs.length ? subs.map(s=>{ const sm=siteSubSummary(s), busy=siteSubApproving && siteSubApproving.id===s.id;
+      return `<div class="record-card site-sub${busy?' busy':''}"><div class="record-card-top"><div class="record-card-title">${sm.head}</div>
+        <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-site-approve="${esc(s.id)}">${busy?'Reviewing…':'Review &amp; approve'}</button><button type="button" class="btn btn-sm" data-site-reject="${esc(s.id)}" data-armed="0">Reject</button></div></div>
+        <div class="wsub">${esc(s.projectId?projectName(s.projectId):'')} · sent by <strong>${esc(s.by||'—')}</strong> · ${esc(siteSubWhen(s))}</div>
+        ${sm.bits.length?`<div class="site-sub-bits">${sm.bits.map(b=>`<span>${esc(b)}</span>`).join('')}</div>`:''}</div>`; }).join('')
+    : '<p class="wsub" style="margin:0;">Nothing waiting — new entries from site appear here.</p>';
+  box.innerHTML=`<div class="panel site-panel">
+    <div class="site-panel-head"><h3>${ic('qr')} Site links &amp; entries from site</h3><button type="button" class="btn btn-sm" data-site-close="1">Close</button></div>
+    <div class="subhead">Waiting for approval (${subs.length})</div>${subRows}
+    <div class="subhead">Site links</div><div class="site-links">${linkRows}</div>
+    <div class="site-new"><label>New link for project<select id="siteNewProj"><option value="">Choose project…</option>${projOpts}</select></label><button type="button" class="btn btn-sm btn-primary" data-site-create="1">+ Create site link</button></div>
+    <p class="wsub" style="margin:10px 0 0;">The link opens a simple phone form (rig-up / rig-down) for that project. It shows only the project name, Scaffolding crew names and the scaffolds standing at that project, and can only <strong>send</strong> entries — they wait here until you approve them. Switch a link off if it is shared by mistake.</p>
+  </div>`;
+  if(siteQrOpen){ const q=box.querySelector(`[data-site-qrbox="${CSS.escape(siteQrOpen)}"]`); if(q) qrCanvas(siteLinkUrl(siteQrOpen), 220).then(cv=>{ q.innerHTML=''; q.appendChild(cv); }).catch(()=>{ q.textContent='QR library could not load — use Copy link.'; }); }
+}
+function siteSetVal(root, sel, v){ const el=root.querySelector(sel); if(!el || v===undefined || v===null) return; el.value=String(v); }
+function siteTickCrew(root, attr, ids){ const set=new Set(ids||[]); root.querySelectorAll(`[${attr}]`).forEach(cb=>{ if(cb.type==='checkbox') cb.checked=set.has(cb.value); }); }
+function siteApprove(id){
+  const s=siteSubs.find(x=>x.id===id); if(!s || !canEdit()) return;
+  const d=s.data||{};
+  const nav=document.querySelector('.sidenav-btn[data-section="scaff"]'); if(nav && !nav.classList.contains('active')) nav.click();
+  if(s.kind==='rigdown'){
+    const job=regActive('scaff').find(r=>r.id===d.jobId);
+    if(!job){ toast('That scaffold is not in the loaded list — open it from the list, or reject this entry'); return; }
+    if(!scaffStanding(job) && d.outcome!=='Cancelled'){ toast(`${job.location||'This scaffold'} is already rigged down — reject this entry if it is a repeat`); return; }
+    siteSubApproving={id, kind:'rigdown', jobId:job.id};
+    openRegDrawer('scaff', job.id, 'down');
+    const f=document.querySelector('#regDrawerBody form[data-reg-custom="down"]'); if(!f){ siteSubApproving=null; return; }
+    siteSetVal(f, '[data-sd="downOutcome"]', d.outcome==='Cancelled'?'Cancelled':'Completed');
+    siteSetVal(f, '[data-sd="rigDownDate"]', d.date);
+    siteSetVal(f, '[data-sd="stage"]', d.stage); siteSetVal(f, '[data-sd="reason"]', d.reason); siteSetVal(f, '[data-sd="cancelledBy"]', d.cancelledBy);
+    siteSetVal(f, '[data-sd="downRequestedBy"]', d.requestedBy); siteSetVal(f, '[data-sd="downWorkOrder"]', d.workOrder);
+    siteSetVal(f, '[data-sd="downFrom"]', d.from); siteSetVal(f, '[data-sd="downVehicle"]', d.vehicle);
+    siteTickCrew(f, 'data-sd="rigDownCrew"', d.crew);
+    applyShowWhen(f); updateScaffKm(f); updateCrewCheck(f);
+    f.insertAdjacentHTML('afterbegin', `<div class="site-review-note">${ic('qr')} Entry from site by <strong>${esc(s.by||'—')}</strong> — check it and press <strong>Save</strong> to approve.${d.notes?` Notes: ${esc(d.notes)}`:''}</div>`);
+  } else {
+    siteSubApproving={id, kind:'rigup'};
+    openRegAdd('scaff');
+    const f=document.querySelector('form[data-reg-addform="scaff"]'); if(!f){ siteSubApproving=null; return; }
+    const site=activeSites().find(x=>x.id===s.projectId);
+    siteSetVal(f, '[data-rf="rigUpDate"]', d.date); siteSetVal(f, '[data-rf="projectId"]', s.projectId);
+    siteSetVal(f, '[data-rf="client"]', d.client || (site&&site.clientName) || '');
+    for(const [k, v] of [['location',d.location],['volume',d.volume],['lifts',d.lifts],['tagNo',d.tagNo],['requestedBy',d.requestedBy],['requesterPhone',d.requesterPhone],['workOrder',d.workOrder],['upFrom',d.from],['upVehicle',d.vehicle],['chargehand',d.chargehand]]) siteSetVal(f, `[data-rf="${k}"]`, v);
+    siteSetVal(f, '[data-rf="upOutcome"]', d.outcome==='Cancelled'?'Cancelled':'Completed');
+    siteSetVal(f, '[data-rf="upCancelStage"]', d.stage); siteSetVal(f, '[data-rf="upCancelReason"]', d.reason); siteSetVal(f, '[data-rf="upCancelledBy"]', d.cancelledBy);
+    siteSetVal(f, '[data-rf="notes"]', [d.notes, `From site link — sent by ${s.by||'—'}`].filter(Boolean).join('\n'));
+    siteTickCrew(f, 'data-rf="rigUpCrew"', d.crew);
+    applyShowWhen(f); updateScaffKm(f); updateCrewCheck(f);
+    const old=document.getElementById('siteReviewNote'); if(old) old.remove();
+    f.insertAdjacentHTML('beforebegin', `<div class="site-review-note" id="siteReviewNote">${ic('qr')} Reviewing an entry from site by <strong>${esc(s.by||'—')}</strong> (${esc(siteSubWhen(s))}). Check the details, then press <strong>Save &amp; open</strong> to approve it.</div>`);
+    const panel=document.getElementById('scaffAddPanel'); if(panel) panel.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  renderSitePanel();
+}
+async function siteAfterSave(kind, jobId){
+  if(!siteSubApproving || siteSubApproving.kind!==kind) return;
+  if(kind==='rigdown' && siteSubApproving.jobId!==jobId) return;
+  const id=siteSubApproving.id; siteSubApproving=null;
+  const note=document.getElementById('siteReviewNote'); if(note) note.remove();
+  if(await siteSubSetStatus(id, 'approved', {jobId:jobId||''})) toast('Site entry approved');
+  renderSitePanel();
+}
+function siteCancelReview(){ if(siteSubApproving){ siteSubApproving=null; const note=document.getElementById('siteReviewNote'); if(note) note.remove(); renderSitePanel(); } }
+document.addEventListener('click', async e=>{
+  const t=e.target.closest('[data-site-open],[data-site-close],[data-site-create],[data-site-copy],[data-site-qr],[data-site-qrdl],[data-site-off],[data-site-on],[data-site-del],[data-site-approve],[data-site-reject]');
+  if(!t) return;
+  const armed=()=>{ if(t.dataset.armed!=='1'){ t.dataset.armed='1'; const was=t.textContent; t.textContent='Tap again to confirm'; setTimeout(()=>{ if(t.isConnected){ t.dataset.armed='0'; t.textContent=was; } }, 3500); return false; } return true; };
+  if(t.dataset.siteOpen){ sitePanelOpen=true; renderSitePanel(); return; }
+  if(t.dataset.siteClose){ sitePanelOpen=false; siteQrOpen=null; renderSitePanel(); return; }
+  if(t.dataset.siteCreate){ const sel=document.getElementById('siteNewProj'); await siteLinkCreate(sel?sel.value:''); return; }
+  if(t.dataset.siteCopy){ const url=siteLinkUrl(t.dataset.siteCopy); try{ await navigator.clipboard.writeText(url); toast('Link copied — paste it in WhatsApp or email'); }catch(err){ prompt('Copy this link:', url); } return; }
+  if(t.dataset.siteQr){ siteQrOpen = siteQrOpen===t.dataset.siteQr ? null : t.dataset.siteQr; renderSitePanel(); return; }
+  if(t.dataset.siteQrdl){ const tok=t.dataset.siteQrdl, l=siteLinks.find(x=>x.id===tok); try{ const cv=await qrCanvas(siteLinkUrl(tok), 600); const a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=`Site_link_QR_${String(l&&l.projectId?projectName(l.projectId):'project').replace(/[^\w]+/g,'_')}.png`; a.click(); }catch(err){ toast('QR library could not load'); } return; }
+  if(t.dataset.siteOff){ if(!armed()) return; await siteLinkSetActive(t.dataset.siteOff, false); return; }
+  if(t.dataset.siteOn){ await siteLinkSetActive(t.dataset.siteOn, true); siteLinksSyncSoon(); return; }
+  if(t.dataset.siteDel){ if(!armed()) return; await siteLinkDelete(t.dataset.siteDel); return; }
+  if(t.dataset.siteApprove){ siteApprove(t.dataset.siteApprove); return; }
+  if(t.dataset.siteReject){ if(!armed()) return; if(siteSubApproving && siteSubApproving.id===t.dataset.siteReject) siteCancelReview(); if(await siteSubSetStatus(t.dataset.siteReject, 'rejected')) toast('Site entry rejected — it stays out of the tracker'); return; }
+});
+document.addEventListener('click', e=>{
+  if(e.target.closest('#scaffSiteBtn')){ sitePanelOpen=!sitePanelOpen; if(!sitePanelOpen) siteQrOpen=null; renderSitePanel(); return; }
+  if(e.target.closest('[data-reg-addcancel="scaff"]') && siteSubApproving && siteSubApproving.kind==='rigup') siteCancelReview();
+});
 
 /* =====================================================================
    Batch 53: LIFT PLANS — SP-2273 "Lift Planning and Execution" (PDO, Version 4, Feb 2024)
@@ -9169,6 +9376,7 @@ new MutationObserver(()=>lockFormsForViewer()).observe(document.documentElement,
 // Stop the live listeners BEFORE signing out, otherwise Firestore reports a
 // harmless "permission denied" on the way out and the warning banner stuck.
 function stopDataListeners(){
+  stopSiteLinkData();
   if(unsubscribeWorkers){ unsubscribeWorkers(); unsubscribeWorkers=null; }
   if(unsubscribeVehicles){ unsubscribeVehicles(); unsubscribeVehicles=null; }
   if(unsubscribeSiteEquipment){ unsubscribeSiteEquipment(); unsubscribeSiteEquipment=null; }
@@ -9202,6 +9410,7 @@ auth.onAuthStateChanged(user=>{
     startIncidentData();
     startAuditData();
     startRegData();
+    startSiteLinkData();
   } else {
     stopDataListeners();
     document.getElementById('dbUnavailableBanner').hidden=true;
@@ -9226,7 +9435,7 @@ auth.onAuthStateChanged(user=>{
 async function startData(){
   try{
     unsubscribeWorkers = db.collection('workers').orderBy('fullName','asc').onSnapshot(snap=>{
-      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})}));
+      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); if(typeof siteLinksSyncSoon==='function') siteLinksSyncSoon();
       document.getElementById('dbUnavailableBanner').hidden=true;
       renderAll();
     }, err=>{ console.error(err); if(!auth.currentUser) return; toast('Sync error — some data may be stale.'); document.getElementById('dbUnavailableBanner').hidden=false; });
@@ -11050,7 +11259,7 @@ function renderCommandCentre(entries, m, key){
     <div class="cc-col">${tilesL.map(ccTile).join('')}</div>
     <div class="cc-mid">${ccTile(mh)}
       <div class="cc-orb"><span class="cc-ring r4"></span><span class="cc-ring r1"></span><span class="cc-ring r2"></span><span class="cc-ring r3"></span><span class="cc-core"></span>
-        <div class="cc-orb-txt"><div class="cc-orb-k">Days without LTI</div><div class="cc-orb-big" ${orbNum!==null?`data-cc-count="${orbNum}"`:''}>${orbNum!==null?orbNum:'—'}</div>${orbMh}<div class="cc-orb-s">${esc(orbSub)}</div></div>
+        <div class="cc-orb-txt"><div class="cc-orb-k">Days without LTI</div><div class="cc-orb-big" ${orbNum!==null?`data-cc-count="${orbNum}"`:''}>${orbNum!==null?orbNum.toLocaleString():'—'}</div>${orbMh}<div class="cc-orb-s">${esc(orbSub)}</div></div>
       </div>${ccTile(ca)}</div>
     <div class="cc-col">${tilesR.map(ccTile).join('')}</div>`;
   // 12-month trends ending at the period in view
@@ -14427,7 +14636,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const f=e.target.closest('[data-reg-addform]'); if(!f) return; e.preventDefault(); if(!canEdit()) return;
     const k=f.dataset.regAddform, cfg=REG[k];
     const d={...Object.fromEntries(Object.entries(cfg.addDefaults||{}).map(([a,b])=>[a, typeof b==='function'?b():b])), ...regReadForm(f, regFieldsOf(cfg).filter(x=>cfg.addFields.includes(x.key)))};
-    const id=await regCreate(k, d); if(id){ if(cfg.keepAddOpen) cfg.keepAddOpen(f, d); else { f.reset(); $(k+'AddPanel').hidden=true; } }
+    const id=await regCreate(k, d); if(id){ if(k==='scaff' && siteSubApproving && siteSubApproving.kind==='rigup'){ await siteAfterSave('rigup', id); $(k+'AddPanel').hidden=true; return; } if(cfg.keepAddOpen) cfg.keepAddOpen(f, d); else { f.reset(); $(k+'AddPanel').hidden=true; } }
   });
   // drawer
   $('regDrawerClose').addEventListener('click', closeRegDrawer); $('regDrawerOverlay').addEventListener('click', closeRegDrawer);
@@ -14436,7 +14645,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const body=$('regDrawerBody');
   body.addEventListener('submit', async e=>{
     e.preventDefault(); const r=regCurrent(), cfg=REG[activeReg]; if(!r || !canEdit()) return; const f=e.target;
-    if(f.dataset.regCustom){ const fn=(cfg.customSubmit||{})[f.dataset.regCustom]; if(fn) await fn(r, f); return; }
+    if(f.dataset.regCustom){ const fn=(cfg.customSubmit||{})[f.dataset.regCustom]; if(fn){ const ok=await fn(r, f); if(ok && activeReg==='scaff' && f.dataset.regCustom==='down') siteAfterSave('rigdown', r.id); } return; }
     if(f.dataset.regForm){
       const tab=cfg.tabs.find(t=>t.key===f.dataset.regForm); const fields=(tab.groups||[{fields:tab.fields}]).flatMap(g=>g.fields);
       const d=regReadForm(f, fields);
