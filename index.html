@@ -239,6 +239,11 @@ button.att-link.att-remove{color:var(--danger);}
 .sig-canvas{width:100%; max-width:420px; height:140px; display:block; background:#ffffff; border:1px dashed var(--line); border-radius:8px; touch-action:none; cursor:crosshair;}
 
 /* ---- record cards ---- */
+.site-clients{display:flex; flex-wrap:wrap; gap:6px;} .site-chip{display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface-2); font-size:13px; font-weight:600;}
+.site-chip-x{border:0; background:transparent; color:var(--danger); font-size:16px; line-height:1; cursor:pointer; padding:0 2px;}
+.site-sigs{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;} .site-sig{flex:1 1 160px; max-width:260px;} .site-sig-img{height:70px; border:1px solid var(--line); border-radius:8px; background:#fff; display:grid; place-items:center; overflow:hidden;} .site-sig-img img{max-width:100%; max-height:100%;}
+.site-warn{margin-top:6px; color:var(--warn); font-size:12.5px;}
+.site-sub .record-card-top{flex-wrap:wrap; gap:8px;} .site-sub .record-card-actions{flex-wrap:wrap;}
 .site-strip{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:10px 14px; margin:0 0 14px; border:1px solid color-mix(in srgb, var(--warn) 55%, transparent); background:var(--warn-bg); border-radius:10px;}
 .site-panel-head{display:flex; align-items:center; justify-content:space-between; gap:10px;} .site-panel-head h3{margin:0;}
 .site-links{display:grid; gap:8px;} .site-link-row{display:grid; grid-template-columns:1fr auto; gap:8px 12px; align-items:center; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2);}
@@ -2078,7 +2083,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2752,7 +2757,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b63';
+const APP_BUILD='b64';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3594,7 +3599,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -7461,6 +7466,8 @@ function scaffInspState(r){
   if(!l.length) return {key:'nohandover', cls:'danger', text:'Handover inspection not recorded', days:daysBetween(r.rigUpDate||t, t)};
   const c=scaffInspComputed(l);
   if(c.lastTag==='red') return {key:'red', cls:'danger', text:`Red tag since ${c.lastInspection} — do not use`};
+  { const lastMod=(r.modifications||[]).map(x=>x.date||'').sort().pop()||'';
+    if(lastMod && !l.some(x=>/alteration/i.test(x.type||'') && (x.date||'')>=lastMod)) return {key:'altered', cls:'danger', text:`Modified ${lastMod} — “After alteration” inspection needed`}; }
   if(!c.handoverDone) return {key:'nohandover', cls:'danger', text:'Handover inspection not recorded', days:daysBetween(r.rigUpDate||t, t)};
   const d=daysBetween(t, c.inspectionDue);
   if(d<0) return {key:'overdue', cls:'danger', text:`Inspection overdue by ${-d} day${d===-1?'':'s'} (last ${c.lastInspection})`, days:d};
@@ -7614,6 +7621,18 @@ async function exportScaffJobs(){
   const list=scaffJobs().slice().sort((a,b)=>String(a.rigUpDate||'').localeCompare(String(b.rigUpDate||'')) || String(a.jobNo||'').localeCompare(String(b.jobNo||'')));
   const jobs=[['Job no.','Project','Client / company','Requested by','Requester phone','Request / WO no.','Location / well head','Scaffold tag','Volume','Lifts','Rig-up date','Rig-up outcome','Rig-up from','Rig-up vehicle','Rig-up km (one way)','Rig-up km how','Rig-up crew','Rig-down date','Rig-down from','Rig-down vehicle','Rig-down km (one way)','Rig-down km how','Rig-down crew','Cancelled rig-down trips','Days standing','Status','Notes'],
     ...list.map(r=>[r.jobNo||'', r.projectId?projectName(r.projectId):'', r.client||'', r.requestedBy||'', r.requesterPhone||'', r.workOrder||'', r.location||'', r.tagNo||'', r.volume||'', r.lifts===''||r.lifts==null?'':r.lifts, r.rigUpDate||'', scaffUpDone(r)?'Completed':`Cancelled — ${[r.upCancelStage, r.upCancelReason, r.upCancelledBy?'by '+r.upCancelledBy:''].filter(Boolean).join(' · ')}`, r.upFrom||'', r.upVehicle||'', r.upKm??'', kmHow(r.upKmSrc, r.upKm), scaffCrewNames(r.rigUpCrew).join(', '), r.rigDownDate||'', r.downFrom||'', r.downVehicle||'', r.downKm??'', kmHow(r.downKmSrc, r.downKm), scaffCrewNames(r.rigDownCrew).join(', '), (r.downCancels||[]).length||'', scaffDays(r)??'', !scaffUpDone(r)?'Cancelled':scaffStanding(r)?'Standing':'Rigged down', r.notes||''])];
+  // Batch 64: well no., client's supervisor, drivers, modifications (signatures are never exported to Excel)
+  jobs[0].push('Well no.', "Client's supervisor (rig-up)", 'Rig-up driver', "Client's supervisor (rig-down)", 'Rig-down driver', 'Modifications');
+  list.forEach((r,i)=>{ if(jobs[i+1]) jobs[i+1].push(r.wellNo||'', r.clientSupervisor||'', r.upDriver?scaffDriverName(r.upDriver):'', r.downSupervisor||'', r.downDriver?scaffDriverName(r.downDriver):'', (r.modifications||[]).length||''); });
+  const modRows=[['Job no.','Client','Well no.','Location','Date','Scaffolders','Driver','Unit no. / vehicle','Requested by','Phone',"Client's supervisor",'What was changed','From site form']];
+  for(const r of list) for(const m of (r.modifications||[])) modRows.push([r.jobNo||'', r.client||'', r.wellNo||'', r.location||'', m.date||'', scaffCrewNames(m.crew).join(', '), m.driver?scaffDriverName(m.driver):'', m.vehicle||'', m.requestedBy||'', m.requesterPhone||'', m.supervisor||'', m.notes||'', m.fromSite?'Yes':'']);
+  let siteRows=null;
+  if(canEdit()){ try{ const snap=await db.collection('siteSubmissions').get(); const all=(snap.docs||[]).map(d=>({id:d.id, ...(d.data()||{})}));
+    const when=x=>{ const t=x.submittedAt; const d=t && typeof t.toDate==='function' ? t.toDate() : (t ? new Date(t) : null); return d && !isNaN(d) ? d.toISOString().slice(0,16).replace('T',' ') : ''; };
+    siteRows=[['Sent','Sent by','Job','Type','Client','Well no.','Location','Date of work','Status','Reviewed by','Reviewed at','Job no.'],
+      ...all.sort((a,b)=>when(a).localeCompare(when(b))).map(x=>{ const d=x.data||{}, job=x.jobId?regActive('scaff').find(r=>r.id===x.jobId):(d.jobId?regActive('scaff').find(r=>r.id===d.jobId):null);
+        return [when(x), x.by||'', x.kind==='rigdown'?'Rig Down':'Rig Up', (SITE_TYPES[x.kind]||{})[siteSubType(x)]||siteSubType(x), d.client||(job&&job.client)||'', d.wellNo||(job&&job.wellNo)||'', d.location||(job&&job.location)||'', d.date||'', x.status||'', x.reviewedBy||'', String(x.reviewedAt||'').slice(0,16).replace('T',' '), job?job.jobNo||'':''];})]; }
+  catch(e){ console.warn('site entries export', e); } }
   const inspRows=[['Job no.','Location','Project','Date','Time','Inspection','Inspector','Inspector card','Tag','Matters identified','Action','Reported to','Warnings']];
   for(const r of list) for(const x of (r.inspections||[])){ const w=workers.find(q=>q.id===x.inspector), c=w?((w.trainings||[]).map(t=>pdoCourseOf(t.name)).find(k=>k && ['CISRS ASI','CISRS BSI'].includes(k.code)) ? {course:(w.trainings||[]).map(t=>pdoCourseOf(t.name)).filter(k=>k && ['CISRS ASI','CISRS BSI'].includes(k.code)).sort((a,b)=>a.code.localeCompare(b.code))[0]} : scaffCardOf(w, x.date)):null; inspRows.push([r.jobNo||'', r.location||'', r.projectId?projectName(r.projectId):'', x.date||'', x.time||'', x.type||'', w?w.fullName:'', c?c.course.name:'', x.tag||'', x.matters||'', x.action||'', x.reportedTo||'', scaffInspectorIssues(x.inspector, x.date, r).join(' | ')]); }
   const cancRows=[['Date','Trip','Job no.','Project','Client','Location','Stage','Reason','Cancelled by','Crew','Km (one way)','Km how'], ...scaffCancelled(list).map(x=>[x.date, x.kind, x.r.jobNo||'', x.r.projectId?projectName(x.r.projectId):'', x.r.client||'', x.r.location||'', x.stage, x.reason, x.by, scaffCrewNames(x.crew).join(', '), x.km??'', kmHow(x.src, x.km)])];
@@ -7628,6 +7647,8 @@ async function exportScaffJobs(){
   const s3=XLSX.utils.aoa_to_sheet(standing.length>1?standing:[...standing, ['No scaffolds standing']]); s3['!cols']=[{wch:14},{wch:22},{wch:24},{wch:12},{wch:11},{wch:12},{wch:13},{wch:34}];
   XLSX.utils.book_append_sheet(wb, s1, 'Jobs'); XLSX.utils.book_append_sheet(wb, s2, 'Daily summary'); XLSX.utils.book_append_sheet(wb, s3, 'Standing now'); XLSX.utils.book_append_sheet(wb, s4, 'Cancelled trips');
   { const s5=XLSX.utils.aoa_to_sheet(inspRows.length>1?inspRows:[...inspRows, ['No inspections recorded']]); s5['!cols']=inspRows[0].map(h=>({wch:/Matters|Action|Warnings/.test(h)?34:16})); XLSX.utils.book_append_sheet(wb, s5, 'Inspections'); }
+  { const s6=XLSX.utils.aoa_to_sheet(modRows.length>1?modRows:[...modRows, ['No modifications recorded']]); s6['!cols']=modRows[0].map(h=>({wch:/changed|Scaffolders/.test(h)?32:15})); XLSX.utils.book_append_sheet(wb, s6, 'Modifications'); }
+  if(siteRows){ const s7=XLSX.utils.aoa_to_sheet(siteRows.length>1?siteRows:[...siteRows, ['No entries from the site form yet']]); s7['!cols']=siteRows[0].map(()=>({wch:16})); XLSX.utils.book_append_sheet(wb, s7, 'Site form entries'); }
   XLSX.writeFile(wb, `Burhan_Scaffolding_Jobs_${scaffDash.project==='all'?'':projectName(scaffDash.project).replace(/[^\w-]+/g,'_')+'_'}${localToday()}.xlsx`);
 }
 
@@ -7711,23 +7732,34 @@ function scaffDownHtml(r){
       <label data-showwhen="downOutcome=Cancelled">Cancelled by<input data-sd="cancelledBy" placeholder="Name / client"></label>
       <label data-showwhen="downOutcome=Completed">Rig-down requested by<input data-sd="downRequestedBy" value="${esc(r.downRequestedBy||'')}"></label>
       <label data-showwhen="downOutcome=Completed">Request / WO no.<input data-sd="downWorkOrder" value="${esc(r.downWorkOrder||'')}"></label>
+      <label>Driver<select data-sd="downDriver"><option value="">Select…</option>${scaffDriverOptions().map(o=>`<option value="${esc(o.value)}" ${done && r.downDriver===o.value?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label>
+      <label>Client's supervisor<input data-sd="downSupervisor" value="${esc(done?(r.downSupervisor||''):'')}" placeholder="Name"></label>
       ${scaffTripFieldsHtml('down', r, done?{from:r.downFrom, vehicle:r.downVehicle}:{from:lastFrom, vehicle:r.upVehicle||''})}
       ${crewPickHtml({key:'rigDownCrew', label:'Crew', hint:done?'':'Pre-ticked with the rig-up crew — change it if a different crew went.'}, done?(r.rigDownCrew||[]):(r.rigUpCrew||[]), 'data-sd')}
     </div><div class="form-actions">${done?'<button type="button" class="btn btn-sm" data-scaff-undo="1" data-armed="0">Undo rig-down (still standing)</button>':''}<button type="submit" class="btn btn-primary">${done?'Save':'Save'}</button></div></form>
     ${cancList}${scaffDatalistsHtml()}`;
 }
 
+// Batch 64: client list (Site links → Clients), drivers, scaffold inspectors — shared by the tracker form and the site form
+const SCAFF_DEFAULT_CLIENTS=['G-Energy','Falcon','IPC','Schlumberger'];
+function scaffClientList(){ const set=(settingsDocs.scaffSite||{}).clients; return Array.isArray(set) ? set.slice() : SCAFF_DEFAULT_CLIENTS.slice(); }
+function scaffClientOptions(){ return [...new Set([...scaffClientList(), ...regActive('scaff').map(x=>x.client)].filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
+function scaffDrivers(){ return activeWorkers().filter(w=>(w.status||'active')!=='inactive' && /driver/i.test(String(w.designation||''))).sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||'')); }
+function scaffDriverOptions(){ return scaffDrivers().map(w=>({value:w.id, label:w.fullName||'—'})); }
+function scaffDriverName(id){ const w=workers.find(x=>x.id===id); return w?(w.fullName||'—'):(id||''); }
+function scaffWellOptions(){ return [...new Set(regActive('scaff').map(r=>(r.wellNo||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 regDefine({
   key:'scaff', collection:'scaffJobs', singular:'Scaffold job', title:'Scaffolding Jobs', tagline:'Rig up · Rig down · Every well head',
   addLabel:'+ Rig-up', addTitle:'New rig-up', noField:'jobNo', noPrefix:'SCF', noYear:true, dateField:'rigUpDate',
   listen:scaffListen, topPanel:()=>renderScaffTop(),
-  headerButtons:'<button class="btn btn-sm" type="button" id="scaffSiteBtn" hidden>'+ic('qr')+' Site links</button><button class="btn btn-sm" type="button" id="scaffExportBtn">'+ic('download')+' Export Excel</button>',
+  pdf:r=>scaffJobPdf(r), pdfLabel:'Job sheet PDF',
+  headerButtons:'<button class="btn btn-sm" type="button" id="scaffSiteBtn" hidden>'+ic('qr')+' Site form</button><button class="btn btn-sm" type="button" id="scaffExportBtn">'+ic('download')+' Export Excel</button>',
   searchPlaceholder:'Search location, tag, job no., crew…', emptyEditor:'No scaffolding jobs yet — click “+ Rig-up” for each scaffold put up today. When it comes down, click “Rig down” on its row.', emptyViewer:'No scaffolding jobs recorded yet.',
   titleOf:r=>r.location||'Scaffold', subOf:r=>[r.projectId?projectName(r.projectId):'', r.volume, r.rigUpDate?'up '+r.rigUpDate:'', r.rigDownDate?'down '+r.rigDownDate:'standing'].filter(Boolean).join(' · '),
   badgesOf:r=>(!scaffUpDone(r)?`<span class="badge muted">Rig-up cancelled</span>`:scaffStanding(r)?`<span class="badge warn">Standing · ${scaffDays(r)??'—'} days</span>`:`<span class="badge ok">Rigged down · stood ${scaffDays(r)} days</span>`)+((r.downCancels||[]).length?` <span class="badge warn">${r.downCancels.length} cancelled rig-down trip${r.downCancels.length===1?'':'s'}</span>`:''),
   searchText:r=>[r.jobNo, r.location, r.tagNo, r.volume, r.client, r.requestedBy, r.workOrder, r.projectId?projectName(r.projectId):'', ...scaffCrewNames(r.rigUpCrew), ...scaffCrewNames(r.rigDownCrew)].join(' '),
   extraMatch:r=>scaffDash.project==='all' || r.projectId===scaffDash.project,
-  addFields:['rigUpDate','projectId','client','requestedBy','requesterPhone','workOrder','location','volume','lifts','tagNo','upOutcome','upCancelStage','upCancelReason','upCancelledBy','upFrom','upVehicle','upKmNote','rigUpCrew','chargehand','crewCheck','notes'], addDefaults:{rigUpDate:()=>localToday(), projectId:()=>scaffDash.project!=='all'?scaffDash.project:(scaffProjects().length===1?scaffProjects()[0].id:'')},
+  addFields:['rigUpDate','projectId','client','requestedBy','requesterPhone','clientSupervisor','workOrder','wellNo','location','volume','lifts','tagNo','upOutcome','upCancelStage','upCancelReason','upCancelledBy','upFrom','upVehicle','upDriver','upKmNote','rigUpCrew','chargehand','crewCheck','notes'], addDefaults:{rigUpDate:()=>localToday(), projectId:()=>scaffDash.project!=='all'?scaffDash.project:(scaffProjects().length===1?scaffProjects()[0].id:'')},
   keepAddOpen:(f, d)=>{ for(const k of ['location','tagNo','lifts','notes','workOrder','upCancelReason','upCancelledBy']){ const el=f.querySelector(`[data-rf="${k}"]`); if(el) el.value=''; } const v=f.querySelector('[data-rf="volume"]'); if(v) v.value='';
     const dl=document.getElementById('dl_location'); if(dl && d.location && ![...dl.options].some(o=>o.value===d.location)) dl.insertAdjacentHTML('beforeend', `<option value="${esc(d.location)}">`);
     const oc=f.querySelector('[data-rf="upOutcome"]'); if(oc){ oc.value='Completed'; applyShowWhen(f); } updateScaffKm(f);
@@ -7743,12 +7775,14 @@ regDefine({
       {key:'volume', label:'Volume', type:'select', options:SCAFF_VOLUMES, required:true},
       {key:'lifts', label:'Lifts / floors', type:'number', min:0},
       {key:'tagNo', label:'Scaffold tag no.'},
+      {key:'wellNo', label:'Well no.', type:'textlist', options:scaffWellOptions, placeholder:'e.g. NM-123'},
     ]},
     {title:'Requested by', fields:[
-      {key:'client', label:'Client / company', type:'textlist', options:()=>[...new Set([...activeSites().map(x=>x.clientName), ...regActive('scaff').map(x=>x.client)].filter(Boolean))].sort(), placeholder:'e.g. PDO'},
+      {key:'client', label:'Client / company', type:'textlist', options:scaffClientOptions, placeholder:'Choose or type'},
       {key:'requestedBy', label:'Requested by (name)', placeholder:'e.g. Site supervisor'},
       {key:'requesterPhone', label:'Requester phone', type:'tel', placeholder:'+968 …'},
       {key:'workOrder', label:'Request / work order no.'},
+      {key:'clientSupervisor', label:"Client's supervisor (signs)", placeholder:'Name'},
     ]},
     {title:'Trip & outcome', fields:[
       {key:'upOutcome', label:'Outcome', type:'select', options:['Completed','Cancelled'], default:'Completed'},
@@ -7756,7 +7790,8 @@ regDefine({
       {key:'upCancelReason', label:'Reason for cancelling', showWhen:'upOutcome=Cancelled', placeholder:'e.g. Permit not ready, rig moved'},
       {key:'upCancelledBy', label:'Cancelled by', showWhen:'upOutcome=Cancelled', placeholder:'Name / client'},
       {key:'upFrom', label:'Start from', type:'textlist', options:scaffPlaceOptions, placeholder:'e.g. Camp / Yard'},
-      {key:'upVehicle', label:'Vehicle', type:'textlist', options:scaffVehicleOptions, placeholder:'e.g. OM 1234'},
+      {key:'upVehicle', label:'Vehicle / unit no.', type:'textlist', options:scaffVehicleOptions, placeholder:'e.g. OM 1234'},
+      {key:'upDriver', label:'Driver', type:'pick', empty:'Select…', options:scaffDriverOptions},
       {key:'upKmNote', label:'', type:'kmline'},
       {key:'rigUpCrew', label:'Crew', type:'crew'},
       {key:'chargehand', label:'Chargehand (leads the gang)', type:'pick', empty:'Select…', options:()=>activeWorkers().filter(w=>(w.status||'active')!=='inactive' && workerDivKey(w)==='Scaffolding').sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||'')).map(w=>({value:w.id, label:`${w.fullName||'—'}${(c=>c?' — '+(c.course.card?c.course.card+' ':'')+c.code.replace('CISRS ',''):'')(scaffCardOf(w))}`}))},
@@ -7764,6 +7799,7 @@ regDefine({
       {key:'notes', label:'Notes', type:'textarea', wide:true},
     ]}]},
     {key:'sub:inspections', label:'Inspections', sub:'inspections', showIf:r=>scaffUpDone(r), pre:r=>scaffInspSummaryHtml(r)},
+    {key:'sub:modifications', label:'Modifications', sub:'modifications', showIf:r=>scaffUpDone(r), pre:r=>'<p class="wsub" style="margin:0 0 10px;">Each modification (alteration) needs an <strong>“After alteration”</strong> inspection before the scaffold is used again (SP-1257 §5.12).</p>'},
     {key:'down', label:'Rig down', html:r=>scaffDownHtml(r)}],
   subs:{inspections:{label:'Scaffold inspections', addLabel:'Record inspection', empty:'No inspection recorded — SP-1257 needs a handover inspection before first use, then at least every 7 days until dismantled.',
     defaults:r=>({date:localToday(), time:(d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'))(new Date()), type:(r.inspections||[]).length?'7-day inspection':'Handover (before first use)', tag:'Green — safe to use'}),
@@ -7777,7 +7813,19 @@ regDefine({
     hideInCard:['date','time','tag','inspector','type'], sort:(a,b)=>String(b.date||'').localeCompare(String(a.date||'')) || String(b.time||'').localeCompare(String(a.time||'')),
     title:(x, r)=>`<span class="mono">${esc(x.date||'—')}${x.time?' '+esc(x.time):''}</span> · ${esc(x.type||'')} · ${String(x.tag||'').startsWith('Red')?'<span class="badge danger">Red tag</span>':'<span class="badge ok">Green tag</span>'}`,
     body:(x, r)=>{ const w=workers.find(q=>q.id===x.inspector), warn=scaffInspectorIssues(x.inspector, x.date, r); return `<div class="wsub" style="margin:2px 0 4px;">Inspector: <strong>${esc(w?w.fullName:(x.inspectorName||'—'))}</strong>${warn.length?` ${warn.map(m=>`<span class="badge warn" title="${esc(m)}">${esc(m.split(' — ')[0])}</span>`).join(' ')}`:''}</div>`; },
-    onSave:(r, list)=>scaffInspComputed(list)}},
+    onSave:(r, list)=>scaffInspComputed(list)},
+    modifications:{label:'Modifications', addLabel:'Record modification', empty:'No modification recorded.',
+      defaults:r=>({date:localToday(), crew:[]}),
+      fields:[{key:'date', label:'Date', type:'date', required:true},
+        {key:'crew', label:'Scaffolders', type:'crew'},
+        {key:'driver', label:'Driver', type:'pick', empty:'Select…', options:scaffDriverOptions},
+        {key:'vehicle', label:'Vehicle / unit no.', type:'textlist', options:scaffVehicleOptions},
+        {key:'requestedBy', label:'Requested by'},{key:'requesterPhone', label:'Requester phone', type:'tel'},
+        {key:'supervisor', label:"Client's supervisor"},
+        {key:'notes', label:'What was changed', type:'textarea', wide:true}],
+      hideInCard:['date','crew','driver'], sort:(a,b)=>String(b.date||'').localeCompare(String(a.date||'')),
+      title:(x, r)=>`<span class="mono">${esc(x.date||'—')}</span> · Modification${x.sigId?' · <span class="badge ok">Signed</span>':''}`,
+      body:(x, r)=>`<div class="wsub">${esc([scaffCrewNames(x.crew).join(', '), x.driver?'Driver '+scaffDriverName(x.driver):''].filter(Boolean).join(' · '))}</div>`}},
   columns:[
     {label:'Job', cls:'mono', html:r=>`<strong>${esc(r.jobNo||'—')}</strong><div class="wsub">${esc(r.rigUpDate||'')}</div>`},
     {label:'Location', html:r=>`<div class="wname">${esc(r.location||'—')}</div><div class="wsub">${esc([r.client, r.projectId?projectName(r.projectId):'', r.tagNo?'Tag '+r.tagNo:''].filter(Boolean).join(' · ')||'—')}</div>`},
@@ -7834,11 +7882,11 @@ REG.scaff.customSubmit={
     const dist=scaffDistance(from, r.location), km=dist?dist.km:'', kmSrc=dist?dist.src:'';
     if(q('downOutcome')==='Cancelled'){
       const reason=q('reason'); if(!reason){ toast('Enter the reason the trip was cancelled'); return; }
-      const c={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), date, stage:q('stage'), reason, cancelledBy:q('cancelledBy'), crew, from, vehicle:veh, km:q('stage')==='Before leaving'?'':km, kmSrc:q('stage')==='Before leaving'?'':kmSrc};
+      const c={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), date, stage:q('stage'), reason, cancelledBy:q('cancelledBy'), crew, from, vehicle:veh, driver:q('downDriver'), supervisor:q('downSupervisor'), km:q('stage')==='Before leaving'?'':km, kmSrc:q('stage')==='Before leaving'?'':kmSrc};
       if(await regUpdate('scaff', r.id, {downCancels:(r.downCancels||[]).concat([c])}, true)){ toast('Cancelled rig-down trip saved — the scaffold is still standing'); return true; }
       return false;
     }
-    const upd={rigDownDate:date, rigDownCrew:crew, downFrom:from, downVehicle:veh, downKm:km, downKmSrc:kmSrc, downRequestedBy:q('downRequestedBy'), downWorkOrder:q('downWorkOrder')};
+    const upd={rigDownDate:date, rigDownCrew:crew, downFrom:from, downVehicle:veh, downKm:km, downKmSrc:kmSrc, downRequestedBy:q('downRequestedBy'), downWorkOrder:q('downWorkOrder'), downDriver:q('downDriver'), downSupervisor:q('downSupervisor')};
     if(await regUpdate('scaff', r.id, upd, true)){ toast(`Rig-down saved — stood ${Math.max(0, daysBetween(r.rigUpDate||date, date))} days`); return true; }
     return false;
   },
@@ -7846,21 +7894,27 @@ REG.scaff.customSubmit={
 
 
 /* =====================================================================
-   Batch 63: SCAFFOLDING SITE LINKS — a simple phone page (site.html) for chargehands.
-   • One link (or QR) per project: site.html?t=<token>. The page is not signed in.
-   • It can read only its own siteLinks/<token> document (project name, Scaffolding crew names,
-     standing scaffolds at that project, places, vehicles) and can only ADD a pending entry to siteSubmissions.
-   • Entries wait in "Pending from site" on Scaffolding Jobs. Approve opens the normal rig-up form (or the
-     scaffold's Rig down tab) already filled in — check it and press Save. Reject keeps it out of the tracker.
+   Batch 63/64: SCAFFOLDING SITE LINK — one MASTER link (and QR) for the whole Scaffolding Division.
+   • site.html?t=<token> — a simple phone form "Scaffolding Rig Up and Rig Down Form". Not signed in.
+   • It reads only its own siteLinks/<token> document (client list, Scaffolding crew names, drivers, scaffold
+     inspectors, standing scaffolds, wells, locations, vehicles) and can only ADD a pending entry to siteSubmissions.
+   • Rig Up → New start / Modification / Cancellation / Inspection.  Rig Down → Completed / Cancelled.
+   • Two signatures on every entry (client's supervisor + scaffolder): finger pad or photo upload.
+   • Entries wait in "Entries from site" on Scaffolding Jobs. New start / Cancellation open the + Rig-up form
+     pre-filled; Rig Down opens the scaffold's Rig down tab pre-filled; Modification / Inspection are approved on the card.
+     On approval the signatures are saved to scaffSignatures (shown on the job PDF, never in Excel).
    ===================================================================== */
 let siteLinks=[], siteSubs=[], unsubSiteLinks=null, unsubSiteSubs=null;
-let sitePanelOpen=false, siteSubApproving=null, siteQrOpen=null, siteSyncTimer=null, scaffDataLoaded=false;
+let sitePanelOpen=false, siteSubApproving=null, siteQrOpen=null, siteSyncTimer=null, scaffDataLoaded=false, siteClientEdit=false;
+const SITE_TYPES={rigup:{new:'New start', modification:'Modification', cancellation:'Cancellation', inspection:'Inspection'}, rigdown:{completed:'Completed', cancelled:'Cancelled'}};
 function siteNewToken(){
   const abc='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789', a=new Uint8Array(24);
   (window.crypto||window.msCrypto).getRandomValues(a); return [...a].map(x=>abc[x % abc.length]).join('');
 }
 function siteLinkUrl(token){ return location.origin + location.pathname.replace(/[^/]*$/, '') + 'site.html?t=' + encodeURIComponent(token); }
 function siteSubCount(){ return siteSubs.filter(s=>s.status==='pending').length; }
+function siteSubType(s){ const d=(s&&s.data)||{}; if(d.type) return d.type; if(s.kind==='rigdown') return d.outcome==='Cancelled'?'cancelled':'completed'; return d.outcome==='Cancelled'?'cancellation':'new'; }
+function siteTypeLabel(s){ const t=siteSubType(s); return (s.kind==='rigdown'?'Rig Down · ':'Rig Up · ')+((SITE_TYPES[s.kind]||{})[t]||t); }
 function startSiteLinkData(){
   stopSiteLinkData();
   if(!canEdit()) return;
@@ -7876,16 +7930,21 @@ function stopSiteLinkData(){
   if(unsubSiteSubs){ try{ unsubSiteSubs(); }catch(e){} unsubSiteSubs=null; }
   siteLinks=[]; siteSubs=[]; siteSubApproving=null; scaffDataLoaded=false;
 }
-// keep each active link's lists (crew names, standing scaffolds, places, vehicles) up to date — written only when something changed
+// what the phone form needs — names only, no personal records; written only when something changed
+function siteScaffCrew(){ return activeWorkers().filter(w=>(w.status||'active')!=='inactive' && workerDivKey(w)==='Scaffolding').map(w=>({id:w.id, name:w.fullName||'—'})).sort((a,b)=>a.name.localeCompare(b.name)); }
+function siteInspectors(){
+  const card=activeWorkers().filter(w=>(w.status||'active')!=='inactive' && scaffIsInspectorCard(w)).map(w=>({id:w.id, name:w.fullName||'—'})).sort((a,b)=>a.name.localeCompare(b.name));
+  return card.length ? card : siteScaffCrew();
+}
 function siteLinkPayload(link){
-  const crew=activeWorkers().filter(w=>(w.status||'active')!=='inactive' && workerDivKey(w)==='Scaffolding')
-    .map(w=>({id:w.id, name:w.fullName||'—'})).sort((a,b)=>a.name.localeCompare(b.name));
-  const standing=regActive('scaff').filter(r=>scaffStanding(r) && r.projectId===link.projectId)
-    .sort((a,b)=>String(b.rigUpDate||'').localeCompare(String(a.rigUpDate||'')))
-    .map(r=>({id:r.id, location:r.location||'', tagNo:r.tagNo||'', jobNo:r.jobNo||'', rigUpDate:r.rigUpDate||'', volume:r.volume||''}));
-  const site=activeSites().find(s=>s.id===link.projectId);
-  return {projectName:link.projectId?projectName(link.projectId):'', clientName:(site&&site.clientName)||'', crew, standing,
-    places:scaffPlaceOptions().slice(0,200), vehicles:scaffVehicleOptions().slice(0,200), volumes:SCAFF_VOLUMES, stages:SCAFF_CANCEL_STAGES};
+  const standing=regActive('scaff').filter(r=>scaffStanding(r) && (link.master || r.projectId===link.projectId))
+    .sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')) || String(b.rigUpDate||'').localeCompare(String(a.rigUpDate||'')))
+    .map(r=>({id:r.id, client:r.client||'', wellNo:r.wellNo||'', location:r.location||'', tagNo:r.tagNo||'', jobNo:r.jobNo||'', rigUpDate:r.rigUpDate||'', volume:r.volume||''}));
+  const site=activeSites().find(s=>s.id===link.projectId), dc=docControl('scaffJob');
+  return {projectName:link.projectId?projectName(link.projectId):'', clientName:(site&&site.clientName)||'', clients:scaffClientList(),
+    crew:siteScaffCrew(), drivers:scaffDrivers().map(w=>({id:w.id, name:w.fullName||'—'})), inspectors:siteInspectors(), standing,
+    wells:scaffWellOptions().slice(0,300), locations:scaffLocations().slice(0,300), places:scaffPlaceOptions().slice(0,200), vehicles:scaffVehicleOptions().slice(0,200),
+    volumes:SCAFF_VOLUMES, stages:SCAFF_CANCEL_STAGES, inspTypes:SCAFF_INSP_TYPES, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}};
 }
 function siteHash(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36); }
 function siteLinksSyncSoon(){ clearTimeout(siteSyncTimer); siteSyncTimer=setTimeout(siteLinksSync, 1500); }
@@ -7898,13 +7957,14 @@ async function siteLinksSync(){
     catch(e){ console.warn('site link sync', e); }
   }
 }
+function siteDefaultProject(){ const all=scaffProjects(); return (all.find(s=>/\bPDO\b/i.test(s.siteName||'') || /\bPDO\b/i.test(s.clientName||''))||all[0]||{}).id||''; }
 async function siteLinkCreate(projectId){
   if(!canEdit()) return;
-  if(!projectId){ toast('Choose the project for the link'); return; }
-  const token=siteNewToken(), u=auth.currentUser, link={projectId, active:true, division:'Scaffolding', createdAt:new Date().toISOString(), createdBy:(u&&u.email)||''};
+  if(!projectId){ toast('Choose the project the entries go under'); return; }
+  const token=siteNewToken(), u=auth.currentUser, link={projectId, master:true, active:true, division:'Scaffolding', createdAt:new Date().toISOString(), createdBy:(u&&u.email)||''};
   const p=siteLinkPayload(link);
   siteQrOpen=token;
-  try{ await db.collection('siteLinks').doc(token).set({...link, ...p, sig:siteHash(JSON.stringify(p)), syncedAt:new Date().toISOString()}); toast('Site link created — share it or print the QR code'); renderSitePanel(); }
+  try{ await db.collection('siteLinks').doc(token).set({...link, ...p, sig:siteHash(JSON.stringify(p)), syncedAt:new Date().toISOString()}); toast('Master link created — share it or print the QR code'); renderSitePanel(); }
   catch(e){ console.error(e); siteQrOpen=null; toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not create the link'); }
 }
 async function siteLinkSetActive(token, on){
@@ -7915,97 +7975,145 @@ async function siteLinkDelete(token){
   try{ await db.collection('siteLinks').doc(token).delete(); toast('Link deleted'); if(siteQrOpen===token) siteQrOpen=null; }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not delete'); }
 }
+async function siteSaveClients(list){
+  const clean=[...new Set(list.map(x=>String(x||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  if(await saveSettings('scaffSite', {clients:clean})){ settingsDocs.scaffSite={...(settingsDocs.scaffSite||{}), clients:clean}; renderSitePanel(); siteLinksSyncSoon(); return true; }
+  return false;
+}
 async function siteSubSetStatus(id, status, extra){
   const u=auth.currentUser;
   try{ await db.collection('siteSubmissions').doc(id).update({status, reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString(), ...(extra||{})}); return true; }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not update the site entry'); return false; }
 }
+// the two signatures travel with the entry; on approval they are stored once in scaffSignatures (linked to the job)
+async function siteSaveSignature(s, jobId, event, refId){
+  const d=(s&&s.data)||{}; if(!d.sigSup && !d.sigScaf) return '';
+  const u=auth.currentUser;
+  try{ const ref=await db.collection('scaffSignatures').add({jobId, event, refId:refId||'', date:d.date||'', submissionId:s.id||'', sentBy:s.by||'',
+      supervisor:{name:d.sigSupName||'', img:d.sigSup||''}, scaffolder:{name:d.sigScafName||'', img:d.sigScaf||''}, createdAt:new Date().toISOString(), createdBy:(u&&u.email)||''});
+    return ref.id; }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Signatures could not be saved'); return ''; }
+}
 function siteCrewNames(ids){ return (ids||[]).map(id=>{ const w=workers.find(x=>x.id===id); return w?(w.fullName||'—'):''; }).filter(Boolean); }
 function siteSubWhen(s){ const t=s.submittedAt; const d=t && typeof t.toDate==='function' ? t.toDate() : (t ? new Date(t) : null); return d && !isNaN(d) ? d.toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : ''; }
+function siteSubJob(s){ const d=s.data||{}; return d.jobId ? regActive('scaff').find(r=>r.id===d.jobId) : null; }
 function siteSubSummary(s){
-  const d=s.data||{}, job=s.kind==='rigdown' ? regActive('scaff').find(r=>r.id===d.jobId) : null;
-  const cancelled=d.outcome==='Cancelled';
-  const head = s.kind==='rigdown'
-    ? `<span class="badge ${cancelled?'warn':'ok'}">${cancelled?'Rig-down cancelled':'Rig-down'}</span> ${esc(job?job.location:(d.jobLabel||'scaffold'))}${job&&job.tagNo?' · tag '+esc(job.tagNo):''}`
-    : `<span class="badge ${cancelled?'warn':'ok'}">${cancelled?'Rig-up cancelled':'Rig-up'}</span> ${esc(d.location||'—')}${d.volume?' · '+esc(d.volume):''}${d.lifts?' · '+esc(String(d.lifts))+' lifts':''}${d.tagNo?' · tag '+esc(d.tagNo):''}`;
-  const crew=siteCrewNames(d.crew), ch=siteCrewNames([d.chargehand])[0];
-  const bits=[d.date?'Date '+d.date:'', ch?'Chargehand '+ch:'', crew.length?`Crew ${crew.length}: ${crew.slice(0,4).join(', ')}${crew.length>4?' …':''}`:'', d.vehicle?'Vehicle '+d.vehicle:'', cancelled&&d.reason?'Reason: '+d.reason:'', d.notes?'Notes: '+d.notes:''].filter(Boolean);
-  return {head, bits};
+  const d=s.data||{}, t=siteSubType(s), job=siteSubJob(s), cancelled=t==='cancellation'||t==='cancelled';
+  const where = job ? [job.client, job.wellNo?'Well '+job.wellNo:'', job.location, job.tagNo?'tag '+job.tagNo:''].filter(Boolean).join(' · ')
+    : [d.client, d.wellNo?'Well '+d.wellNo:'', d.location, d.volume, d.tagNo?'tag '+d.tagNo:''].filter(Boolean).join(' · ');
+  const head=`<span class="badge ${cancelled?'warn':(t==='inspection'?(String(d.tag||'').startsWith('Red')?'danger':'ok'):'ok')}">${esc(siteTypeLabel(s))}</span> ${esc(where||d.jobLabel||'—')}`;
+  const crew=siteCrewNames(d.crew), insp=siteCrewNames([d.inspector])[0];
+  const bits=[d.date?'Date '+d.date:'', crew.length?`Scaffolders: ${crew.join(', ')}`:'', (d.driver||d.driverName)?'Driver '+(d.driver?(siteCrewNames([d.driver])[0]||scaffDriverName(d.driver)):d.driverName):'', d.vehicle?'Unit '+d.vehicle:'',
+    d.requestedBy?'Requested by '+d.requestedBy+(d.requesterPhone?' ('+d.requesterPhone+')':''):'', insp?`Inspector ${insp} · ${d.inspType||''} · ${d.tag||''}`:'',
+    cancelled&&d.reason?'Reason: '+d.reason:'', d.notes?'Comments: '+d.notes:''].filter(Boolean);
+  return {head, bits, job, t};
+}
+function siteSigThumbs(d){
+  const one=(img, name, role)=>`<div class="site-sig"><div class="site-sig-img">${img?`<img src="${esc(img)}" alt="Signature of ${esc(name||role)}">`:'<span class="wsub">no signature</span>'}</div><div class="wsub">${esc(role)}: <strong>${esc(name||'—')}</strong></div></div>`;
+  return `<div class="site-sigs">${one(d.sigSup, d.sigSupName, "Client's supervisor")}${one(d.sigScaf, d.sigScafName, 'Scaffolder')}</div>`;
 }
 function renderSitePanel(){
   const btn=document.getElementById('scaffSiteBtn');
-  if(btn){ const n=siteSubCount(); btn.innerHTML=`${ic('qr')} Site links${n?` <span class="badge warn site-count">${n} pending</span>`:''}`; btn.hidden=!canEdit(); }
+  if(btn){ const n=siteSubCount(); btn.innerHTML=`${ic('qr')} Site form${n?` <span class="badge warn site-count">${n} pending</span>`:''}`; btn.hidden=!canEdit(); }
   let box=document.getElementById('scaffSiteBox');
   if(!box){ const top=document.getElementById('scaffTop'); if(!top) return; top.insertAdjacentHTML('beforebegin', '<div id="scaffSiteBox"></div>'); box=document.getElementById('scaffSiteBox'); }
   const n=siteSubCount();
   if(!canEdit()){ box.innerHTML=''; return; }
   if(!sitePanelOpen){
-    box.innerHTML = n ? `<div class="site-strip"><span>${ic('qr')} <strong>${n}</strong> scaffold ${n===1?'entry':'entries'} from site waiting for approval</span><button type="button" class="btn btn-sm btn-primary" data-site-open="1">Review</button></div>` : '';
+    box.innerHTML = n ? `<div class="site-strip"><span>${ic('qr')} <strong>${n}</strong> ${n===1?'entry':'entries'} from the site form waiting for approval</span><button type="button" class="btn btn-sm btn-primary" data-site-open="1">Review</button></div>` : '';
     return;
   }
-  const projOpts=scaffProjects().slice().sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))).map(s=>`<option value="${esc(s.id)}">${esc(s.siteName||'—')}${s.division?' · '+esc(s.division):''}</option>`).join('');
-  const links=siteLinks.slice().sort((a,b)=>(b.active?1:0)-(a.active?1:0) || String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-  const linkRows=links.length ? links.map(l=>`<div class="site-link-row${l.active?'':' off'}">
-      <div><strong>${esc(l.projectId?projectName(l.projectId):'—')}</strong> ${l.active?'<span class="badge ok">Active</span>':'<span class="badge muted">Switched off</span>'}
-        <div class="wsub">Created ${esc(String(l.createdAt||'').slice(0,10))} · ${(l.standing||[]).length} standing · ${(l.crew||[]).length} crew names on the link</div></div>
+  const master=siteLinks.filter(l=>l.master).sort((a,b)=>(b.active?1:0)-(a.active?1:0) || String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  const activeMaster=master.find(l=>l.active);
+  const others=siteLinks.filter(l=>!l.master);
+  const linkRow=l=>`<div class="site-link-row${l.active?'':' off'}">
+      <div><strong>${l.master?'Master link — Scaffolding Division':esc(l.projectId?projectName(l.projectId):'—')}</strong> ${l.active?'<span class="badge ok">Active</span>':'<span class="badge muted">Switched off</span>'}
+        <div class="wsub">Entries go under <strong>${esc(l.projectId?projectName(l.projectId):'—')}</strong> · created ${esc(String(l.createdAt||'').slice(0,10))} · ${(l.standing||[]).length} standing · ${(l.crew||[]).length} scaffolders · ${(l.clients||[]).length} clients</div></div>
       <div class="site-link-acts">
         ${l.active?`<button type="button" class="btn btn-sm" data-site-copy="${esc(l.id)}">${ic('clipboard')} Copy link</button><button type="button" class="btn btn-sm" data-site-qr="${esc(l.id)}">QR code</button><button type="button" class="btn btn-sm" data-site-off="${esc(l.id)}" data-armed="0">Switch off</button>`
           :`<button type="button" class="btn btn-sm" data-site-on="${esc(l.id)}">Switch on</button><button type="button" class="btn btn-sm btn-danger" data-site-del="${esc(l.id)}" data-armed="0">Delete</button>`}
       </div>
-      ${siteQrOpen===l.id && l.active?`<div class="site-qr"><div class="site-qr-img" data-site-qrbox="${esc(l.id)}"></div><div><div class="wsub">Scan to open the site form for <strong>${esc(l.projectId?projectName(l.projectId):'')}</strong>.</div><div class="mono site-url">${esc(siteLinkUrl(l.id))}</div><button type="button" class="btn btn-sm" data-site-qrdl="${esc(l.id)}">${ic('download')} Download QR (PNG)</button></div></div>`:''}
-    </div>`).join('') : '<p class="wsub" style="margin:0;">No site links yet — create one for each project below.</p>';
-  const subs=siteSubs.filter(s=>s.status==='pending').sort((a,b)=>String(siteSubWhen(a)).localeCompare(String(siteSubWhen(b))));
-  const subRows=subs.length ? subs.map(s=>{ const sm=siteSubSummary(s), busy=siteSubApproving && siteSubApproving.id===s.id;
+      ${siteQrOpen===l.id && l.active?`<div class="site-qr"><div class="site-qr-img" data-site-qrbox="${esc(l.id)}"></div><div><div class="wsub">One QR for every crew — scan to open the <strong>Scaffolding Rig Up and Rig Down Form</strong>.</div><div class="mono site-url">${esc(siteLinkUrl(l.id))}</div><button type="button" class="btn btn-sm" data-site-qrdl="${esc(l.id)}">${ic('download')} Download QR (PNG)</button></div></div>`:''}
+    </div>`;
+  const projOpts=scaffProjects().slice().sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))).map(s=>`<option value="${esc(s.id)}" ${s.id===siteDefaultProject()?'selected':''}>${esc(s.siteName||'—')}</option>`).join('');
+  const masterHtml = (master.length ? master.map(linkRow).join('') : '')
+    + (activeMaster ? '' : `<div class="site-new"><label>Entries go under project<select id="siteNewProj">${projOpts||'<option value="">No project yet — add one in Project Details</option>'}</select></label><button type="button" class="btn btn-sm btn-primary" data-site-create="1">+ Create master link</button></div>`);
+  const clients=scaffClientList();
+  const clientHtml=`<div class="site-clients">${clients.map((c,i)=>`<span class="site-chip">${esc(c)}${siteClientEdit?` <button type="button" class="site-chip-x" data-site-client-del="${i}" aria-label="Remove ${esc(c)}">×</button>`:''}</span>`).join('')||'<span class="wsub">No clients yet.</span>'}</div>
+    ${siteClientEdit?`<div class="site-new"><label>Add client<input id="siteClientNew" maxlength="60" placeholder="e.g. Halliburton"></label><button type="button" class="btn btn-sm btn-primary" data-site-client-add="1">Add</button><button type="button" class="btn btn-sm" data-site-client-done="1">Done</button></div>`
+      :`<button type="button" class="btn btn-sm" data-site-client-edit="1" style="margin-top:8px;">Edit client list</button>`}`;
+  const subs=siteSubs.filter(s=>s.status==='pending').sort((a,b)=>String(a.submittedAt&&a.submittedAt.toDate?a.submittedAt.toDate().toISOString():a.submittedAt||'').localeCompare(String(b.submittedAt&&b.submittedAt.toDate?b.submittedAt.toDate().toISOString():b.submittedAt||'')));
+  const subRows=subs.length ? subs.map(s=>{ const sm=siteSubSummary(s), d=s.data||{}, busy=siteSubApproving && siteSubApproving.id===s.id, direct=sm.t==='modification'||sm.t==='inspection';
+      const warn=[]; if((sm.t==='modification'||sm.t==='inspection'||s.kind==='rigdown') && !sm.job) warn.push('The scaffold is not in the loaded list — it may already be rigged down. Reject if it is a repeat.');
+      if(sm.t==='inspection' && sm.job) warn.push(...scaffInspectorIssues(d.inspector, d.date, sm.job));
       return `<div class="record-card site-sub${busy?' busy':''}"><div class="record-card-top"><div class="record-card-title">${sm.head}</div>
-        <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-site-approve="${esc(s.id)}">${busy?'Reviewing…':'Review &amp; approve'}</button><button type="button" class="btn btn-sm" data-site-reject="${esc(s.id)}" data-armed="0">Reject</button></div></div>
-        <div class="wsub">${esc(s.projectId?projectName(s.projectId):'')} · sent by <strong>${esc(s.by||'—')}</strong> · ${esc(siteSubWhen(s))}</div>
-        ${sm.bits.length?`<div class="site-sub-bits">${sm.bits.map(b=>`<span>${esc(b)}</span>`).join('')}</div>`:''}</div>`; }).join('')
-    : '<p class="wsub" style="margin:0;">Nothing waiting — new entries from site appear here.</p>';
+        <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-site-approve="${esc(s.id)}" ${direct?'data-armed="0"':''}>${busy?'Reviewing…':(direct?'Approve':'Review &amp; approve')}</button><button type="button" class="btn btn-sm" data-site-reject="${esc(s.id)}" data-armed="0">Reject</button></div></div>
+        <div class="wsub">Sent by <strong>${esc(s.by||'—')}</strong> · ${esc(siteSubWhen(s))}</div>
+        ${sm.bits.length?`<div class="site-sub-bits">${sm.bits.map(b=>`<span>${esc(b)}</span>`).join('')}</div>`:''}
+        ${warn.length?`<div class="site-warn">${warn.map(w=>`<div>${ic('alert')} ${esc(w)}</div>`).join('')}</div>`:''}
+        ${siteSigThumbs(d)}</div>`; }).join('')
+    : '<p class="wsub" style="margin:0;">Nothing waiting — new entries from the site form appear here.</p>';
   box.innerHTML=`<div class="panel site-panel">
-    <div class="site-panel-head"><h3>${ic('qr')} Site links &amp; entries from site</h3><button type="button" class="btn btn-sm" data-site-close="1">Close</button></div>
+    <div class="site-panel-head"><h3>${ic('qr')} Site form — Scaffolding Rig Up and Rig Down</h3><button type="button" class="btn btn-sm" data-site-close="1">Close</button></div>
     <div class="subhead">Waiting for approval (${subs.length})</div>${subRows}
-    <div class="subhead">Site links</div><div class="site-links">${linkRows}</div>
-    <div class="site-new"><label>New link for project<select id="siteNewProj"><option value="">Choose project…</option>${projOpts}</select></label><button type="button" class="btn btn-sm btn-primary" data-site-create="1">+ Create site link</button></div>
-    <p class="wsub" style="margin:10px 0 0;">The link opens a simple phone form (rig-up / rig-down) for that project. It shows only the project name, Scaffolding crew names and the scaffolds standing at that project, and can only <strong>send</strong> entries — they wait here until you approve them. Switch a link off if it is shared by mistake.</p>
+    <div class="subhead">Master link (one for all crews)</div><div class="site-links">${masterHtml}</div>
+    <div class="subhead">Clients on the form</div>${clientHtml}
+    ${others.length?`<div class="subhead">Older project links</div><div class="site-links">${others.map(linkRow).join('')}</div>`:''}
+    <p class="wsub" style="margin:10px 0 0;">The form shows only client names, scaffolder / driver / inspector names, standing scaffolds, wells, locations and vehicle numbers. It can only <strong>send</strong> entries — they wait here until approved. Switch the link off if it is shared by mistake, then create a new one.</p>
   </div>`;
   if(siteQrOpen){ const q=box.querySelector(`[data-site-qrbox="${CSS.escape(siteQrOpen)}"]`); if(q) qrCanvas(siteLinkUrl(siteQrOpen), 220).then(cv=>{ q.innerHTML=''; q.appendChild(cv); }).catch(()=>{ q.textContent='QR library could not load — use Copy link.'; }); }
 }
 function siteSetVal(root, sel, v){ const el=root.querySelector(sel); if(!el || v===undefined || v===null) return; el.value=String(v); }
 function siteTickCrew(root, attr, ids){ const set=new Set(ids||[]); root.querySelectorAll(`[${attr}]`).forEach(cb=>{ if(cb.type==='checkbox') cb.checked=set.has(cb.value); }); }
+async function siteApproveDirect(s){
+  const d=s.data||{}, t=siteSubType(s), job=siteSubJob(s);
+  if(!job){ toast('That scaffold is not in the loaded list — reject this entry if it is a repeat'); return; }
+  if(t==='modification'){
+    const m={id:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), date:d.date||localToday(), crew:d.crew||[], driver:d.driver||'', vehicle:d.vehicle||'', requestedBy:d.requestedBy||'', requesterPhone:d.requesterPhone||'', supervisor:d.sigSupName||'', notes:[d.notes, !d.driver && d.driverName ? 'Driver: '+d.driverName : ''].filter(Boolean).join(' · '), fromSite:true, sentBy:s.by||''};
+    const sig=await siteSaveSignature(s, job.id, 'modification', m.id); if(sig) m.sigId=sig;
+    if(!await regUpdate('scaff', job.id, {modifications:(job.modifications||[]).concat([m])}, true)) return;
+  } else {
+    const x={id:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), date:d.date||localToday(), time:'', type:d.inspType||'7-day inspection', inspector:d.inspector||'', tag:d.tag||'Green — safe to use', matters:d.notes||'', action:'', reportedTo:d.sigSupName||'', fromSite:true, sentBy:s.by||''};
+    const sig=await siteSaveSignature(s, job.id, 'inspection', x.id); if(sig) x.sigId=sig;
+    const list=(job.inspections||[]).concat([x]);
+    if(!await regUpdate('scaff', job.id, {inspections:list, ...scaffInspComputed(list)}, true)) return;
+  }
+  if(await siteSubSetStatus(s.id, 'approved', {jobId:job.id})) toast(`${t==='modification'?'Modification':'Inspection'} approved — added to ${job.jobNo||'the scaffold'}`);
+}
 function siteApprove(id){
   const s=siteSubs.find(x=>x.id===id); if(!s || !canEdit()) return;
-  const d=s.data||{};
+  const d=s.data||{}, t=siteSubType(s);
+  if(t==='modification' || t==='inspection'){ siteApproveDirect(s); return; }
   const nav=document.querySelector('.sidenav-btn[data-section="scaff"]'); if(nav && !nav.classList.contains('active')) nav.click();
   if(s.kind==='rigdown'){
-    const job=regActive('scaff').find(r=>r.id===d.jobId);
+    const job=siteSubJob(s);
     if(!job){ toast('That scaffold is not in the loaded list — open it from the list, or reject this entry'); return; }
-    if(!scaffStanding(job) && d.outcome!=='Cancelled'){ toast(`${job.location||'This scaffold'} is already rigged down — reject this entry if it is a repeat`); return; }
-    siteSubApproving={id, kind:'rigdown', jobId:job.id};
+    if(!scaffStanding(job) && t!=='cancelled'){ toast(`${job.location||'This scaffold'} is already rigged down — reject this entry if it is a repeat`); return; }
+    siteSubApproving={id, kind:'rigdown', jobId:job.id, type:t};
     openRegDrawer('scaff', job.id, 'down');
     const f=document.querySelector('#regDrawerBody form[data-reg-custom="down"]'); if(!f){ siteSubApproving=null; return; }
-    siteSetVal(f, '[data-sd="downOutcome"]', d.outcome==='Cancelled'?'Cancelled':'Completed');
+    siteSetVal(f, '[data-sd="downOutcome"]', t==='cancelled'?'Cancelled':'Completed');
     siteSetVal(f, '[data-sd="rigDownDate"]', d.date);
-    siteSetVal(f, '[data-sd="stage"]', d.stage); siteSetVal(f, '[data-sd="reason"]', d.reason); siteSetVal(f, '[data-sd="cancelledBy"]', d.cancelledBy);
+    siteSetVal(f, '[data-sd="stage"]', d.stage); siteSetVal(f, '[data-sd="reason"]', d.reason); siteSetVal(f, '[data-sd="cancelledBy"]', d.cancelledBy||d.sigSupName);
     siteSetVal(f, '[data-sd="downRequestedBy"]', d.requestedBy); siteSetVal(f, '[data-sd="downWorkOrder"]', d.workOrder);
     siteSetVal(f, '[data-sd="downFrom"]', d.from); siteSetVal(f, '[data-sd="downVehicle"]', d.vehicle);
+    siteSetVal(f, '[data-sd="downDriver"]', d.driver); siteSetVal(f, '[data-sd="downSupervisor"]', d.sigSupName);
     siteTickCrew(f, 'data-sd="rigDownCrew"', d.crew);
     applyShowWhen(f); updateScaffKm(f); updateCrewCheck(f);
-    f.insertAdjacentHTML('afterbegin', `<div class="site-review-note">${ic('qr')} Entry from site by <strong>${esc(s.by||'—')}</strong> — check it and press <strong>Save</strong> to approve.${d.notes?` Notes: ${esc(d.notes)}`:''}</div>`);
+    f.insertAdjacentHTML('afterbegin', `<div class="site-review-note">${ic('qr')} Entry from the site form by <strong>${esc(s.by||'—')}</strong> — check it and press <strong>Save</strong> to approve. The two signatures are saved with it.${d.notes?` Comments: ${esc(d.notes)}`:''}</div>`);
   } else {
-    siteSubApproving={id, kind:'rigup'};
+    siteSubApproving={id, kind:'rigup', type:t};
     openRegAdd('scaff');
     const f=document.querySelector('form[data-reg-addform="scaff"]'); if(!f){ siteSubApproving=null; return; }
-    const site=activeSites().find(x=>x.id===s.projectId);
     siteSetVal(f, '[data-rf="rigUpDate"]', d.date); siteSetVal(f, '[data-rf="projectId"]', s.projectId);
-    siteSetVal(f, '[data-rf="client"]', d.client || (site&&site.clientName) || '');
-    for(const [k, v] of [['location',d.location],['volume',d.volume],['lifts',d.lifts],['tagNo',d.tagNo],['requestedBy',d.requestedBy],['requesterPhone',d.requesterPhone],['workOrder',d.workOrder],['upFrom',d.from],['upVehicle',d.vehicle],['chargehand',d.chargehand]]) siteSetVal(f, `[data-rf="${k}"]`, v);
-    siteSetVal(f, '[data-rf="upOutcome"]', d.outcome==='Cancelled'?'Cancelled':'Completed');
-    siteSetVal(f, '[data-rf="upCancelStage"]', d.stage); siteSetVal(f, '[data-rf="upCancelReason"]', d.reason); siteSetVal(f, '[data-rf="upCancelledBy"]', d.cancelledBy);
-    siteSetVal(f, '[data-rf="notes"]', [d.notes, `From site link — sent by ${s.by||'—'}`].filter(Boolean).join('\n'));
+    for(const [k, v] of [['client',d.client],['location',d.location],['wellNo',d.wellNo],['volume',d.volume],['lifts',d.lifts],['tagNo',d.tagNo],['requestedBy',d.requestedBy],['requesterPhone',d.requesterPhone],['workOrder',d.workOrder],['clientSupervisor',d.sigSupName],['upFrom',d.from],['upVehicle',d.vehicle],['upDriver',d.driver],['chargehand',d.chargehand]]) siteSetVal(f, `[data-rf="${k}"]`, v);
+    siteSetVal(f, '[data-rf="upOutcome"]', t==='cancellation'?'Cancelled':'Completed');
+    siteSetVal(f, '[data-rf="upCancelStage"]', d.stage); siteSetVal(f, '[data-rf="upCancelReason"]', d.reason); siteSetVal(f, '[data-rf="upCancelledBy"]', d.cancelledBy||d.sigSupName);
+    siteSetVal(f, '[data-rf="notes"]', [d.notes, !d.driver && d.driverName ? 'Driver: '+d.driverName : '', `From the site form — sent by ${s.by||'—'}`].filter(Boolean).join('\n'));
     siteTickCrew(f, 'data-rf="rigUpCrew"', d.crew);
     applyShowWhen(f); updateScaffKm(f); updateCrewCheck(f);
     const old=document.getElementById('siteReviewNote'); if(old) old.remove();
-    f.insertAdjacentHTML('beforebegin', `<div class="site-review-note" id="siteReviewNote">${ic('qr')} Reviewing an entry from site by <strong>${esc(s.by||'—')}</strong> (${esc(siteSubWhen(s))}). Check the details, then press <strong>Save &amp; open</strong> to approve it.</div>`);
+    f.insertAdjacentHTML('beforebegin', `<div class="site-review-note" id="siteReviewNote">${ic('qr')} Reviewing <strong>${esc(siteTypeLabel(s))}</strong> from the site form by <strong>${esc(s.by||'—')}</strong> (${esc(siteSubWhen(s))}). Check the details, then press <strong>Save &amp; open</strong> to approve it — the two signatures are saved with the job.</div>`);
     const panel=document.getElementById('scaffAddPanel'); if(panel) panel.scrollIntoView({behavior:'smooth', block:'start'});
   }
   renderSitePanel();
@@ -8013,32 +8121,116 @@ function siteApprove(id){
 async function siteAfterSave(kind, jobId){
   if(!siteSubApproving || siteSubApproving.kind!==kind) return;
   if(kind==='rigdown' && siteSubApproving.jobId!==jobId) return;
-  const id=siteSubApproving.id; siteSubApproving=null;
+  const ap=siteSubApproving; siteSubApproving=null;
   const note=document.getElementById('siteReviewNote'); if(note) note.remove();
-  if(await siteSubSetStatus(id, 'approved', {jobId:jobId||''})) toast('Site entry approved');
+  const s=siteSubs.find(x=>x.id===ap.id);
+  if(s){ const ev = kind==='rigup' ? 'rigup' : (ap.type==='cancelled' ? 'downCancel' : 'rigdown'); await siteSaveSignature(s, jobId, ev, ''); }
+  if(await siteSubSetStatus(ap.id, 'approved', {jobId:jobId||''})) toast('Site entry approved');
   renderSitePanel();
 }
 function siteCancelReview(){ if(siteSubApproving){ siteSubApproving=null; const note=document.getElementById('siteReviewNote'); if(note) note.remove(); renderSitePanel(); } }
 document.addEventListener('click', async e=>{
-  const t=e.target.closest('[data-site-open],[data-site-close],[data-site-create],[data-site-copy],[data-site-qr],[data-site-qrdl],[data-site-off],[data-site-on],[data-site-del],[data-site-approve],[data-site-reject]');
+  const t=e.target.closest('[data-site-open],[data-site-close],[data-site-create],[data-site-copy],[data-site-qr],[data-site-qrdl],[data-site-off],[data-site-on],[data-site-del],[data-site-approve],[data-site-reject],[data-site-client-edit],[data-site-client-done],[data-site-client-add],[data-site-client-del]');
   if(!t) return;
   const armed=()=>{ if(t.dataset.armed!=='1'){ t.dataset.armed='1'; const was=t.textContent; t.textContent='Tap again to confirm'; setTimeout(()=>{ if(t.isConnected){ t.dataset.armed='0'; t.textContent=was; } }, 3500); return false; } return true; };
   if(t.dataset.siteOpen){ sitePanelOpen=true; renderSitePanel(); return; }
-  if(t.dataset.siteClose){ sitePanelOpen=false; siteQrOpen=null; renderSitePanel(); return; }
+  if(t.dataset.siteClose){ sitePanelOpen=false; siteQrOpen=null; siteClientEdit=false; renderSitePanel(); return; }
   if(t.dataset.siteCreate){ const sel=document.getElementById('siteNewProj'); await siteLinkCreate(sel?sel.value:''); return; }
   if(t.dataset.siteCopy){ const url=siteLinkUrl(t.dataset.siteCopy); try{ await navigator.clipboard.writeText(url); toast('Link copied — paste it in WhatsApp or email'); }catch(err){ prompt('Copy this link:', url); } return; }
   if(t.dataset.siteQr){ siteQrOpen = siteQrOpen===t.dataset.siteQr ? null : t.dataset.siteQr; renderSitePanel(); return; }
-  if(t.dataset.siteQrdl){ const tok=t.dataset.siteQrdl, l=siteLinks.find(x=>x.id===tok); try{ const cv=await qrCanvas(siteLinkUrl(tok), 600); const a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=`Site_link_QR_${String(l&&l.projectId?projectName(l.projectId):'project').replace(/[^\w]+/g,'_')}.png`; a.click(); }catch(err){ toast('QR library could not load'); } return; }
+  if(t.dataset.siteQrdl){ const tok=t.dataset.siteQrdl; try{ const cv=await qrCanvas(siteLinkUrl(tok), 600); const a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download='Burhan_Scaffolding_Site_Form_QR.png'; a.click(); }catch(err){ toast('QR library could not load'); } return; }
   if(t.dataset.siteOff){ if(!armed()) return; await siteLinkSetActive(t.dataset.siteOff, false); return; }
   if(t.dataset.siteOn){ await siteLinkSetActive(t.dataset.siteOn, true); siteLinksSyncSoon(); return; }
   if(t.dataset.siteDel){ if(!armed()) return; await siteLinkDelete(t.dataset.siteDel); return; }
-  if(t.dataset.siteApprove){ siteApprove(t.dataset.siteApprove); return; }
+  if(t.dataset.siteClientEdit){ siteClientEdit=true; renderSitePanel(); const i=document.getElementById('siteClientNew'); if(i) i.focus(); return; }
+  if(t.dataset.siteClientDone){ siteClientEdit=false; renderSitePanel(); return; }
+  if(t.dataset.siteClientAdd){ const i=document.getElementById('siteClientNew'), v=i?i.value.trim():''; if(!v){ toast('Type the client name'); return; }
+    if(scaffClientList().some(c=>c.toLowerCase()===v.toLowerCase())){ toast(`${v} is already in the list`); return; }
+    await siteSaveClients(scaffClientList().concat([v])); const n=document.getElementById('siteClientNew'); if(n) n.focus(); return; }
+  if(t.dataset.siteClientDel!==undefined){ const list=scaffClientList(); list.splice(Number(t.dataset.siteClientDel),1); await siteSaveClients(list); return; }
+  if(t.dataset.siteApprove){ if(t.dataset.armed!==undefined && !armed()) return; siteApprove(t.dataset.siteApprove); return; }
   if(t.dataset.siteReject){ if(!armed()) return; if(siteSubApproving && siteSubApproving.id===t.dataset.siteReject) siteCancelReview(); if(await siteSubSetStatus(t.dataset.siteReject, 'rejected')) toast('Site entry rejected — it stays out of the tracker'); return; }
 });
+document.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target && e.target.id==='siteClientNew'){ e.preventDefault(); const b=document.querySelector('[data-site-client-add]'); if(b) b.click(); } });
 document.addEventListener('click', e=>{
-  if(e.target.closest('#scaffSiteBtn')){ sitePanelOpen=!sitePanelOpen; if(!sitePanelOpen) siteQrOpen=null; renderSitePanel(); return; }
+  if(e.target.closest('#scaffSiteBtn')){ sitePanelOpen=!sitePanelOpen; if(!sitePanelOpen){ siteQrOpen=null; siteClientEdit=false; } renderSitePanel(); return; }
   if(e.target.closest('[data-reg-addcancel="scaff"]') && siteSubApproving && siteSubApproving.kind==='rigup') siteCancelReview();
 });
+
+/* ---- job sheet PDF: Scaffolding Rig Up / Rig Down Form — Burhan frame, both signatures ---- */
+async function scaffSignaturesFor(jobId){
+  try{ const snap=await db.collection('scaffSignatures').where('jobId','==',jobId).get(); return (snap.docs||[]).map(d=>({id:d.id, ...(d.data()||{})})); }
+  catch(e){ console.warn('signatures', e); return []; }
+}
+async function scaffJobPdf(r){
+  try{
+    preloadPdfLogo();
+    const sigs=await scaffSignaturesFor(r.id);
+    const sigOf=(event, refId)=>sigs.filter(x=>x.event===event && (!refId || x.refId===refId)).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')))[0]||null;
+    const doc=pdfDoc({unit:'pt', format:'a4', docKey:'scaffJob', docTitle:'Scaffolding Rig Up and Rig Down Form', docSub:[r.jobNo, r.client, r.wellNo?'Well '+r.wellNo:''].filter(Boolean).join(' · '), docRef:r.jobNo||''});
+    const M=34, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, FS=8.8, LH=10.6, INK=[20,22,28], GREY=[226,229,234], LBL=[246,247,249];
+    let y=34;
+    const newPage=()=>{ doc.addPage(); y=34; }, ensure=h=>{ if(y+h>H-28) newPage(); };
+    const blank=v=>v===undefined||v===null||v===''||(Array.isArray(v)&&!v.length);
+    const linesOf=cl=>{ doc.setFont('helvetica', cl.bold?'bold':'normal'); doc.setFontSize(cl.size||FS); return doc.splitTextToSize(String(blank(cl.t)?'—':cl.t), Math.max(10, cl.w-8)); };
+    const row=cells=>{ const pc=cells.map(cl=>({...cl, lines:linesOf(cl)})); const h=Math.max(17, ...pc.map(cl=>cl.lines.length*LH+6)); ensure(h); let x=M;
+      for(const cl of pc){ if(cl.fill){ doc.setFillColor(...cl.fill); doc.rect(x, y, cl.w, h, 'F'); } doc.setDrawColor(110,116,126); doc.setLineWidth(0.5); doc.rect(x, y, cl.w, h);
+        doc.setFont('helvetica', cl.bold?'bold':'normal'); doc.setFontSize(cl.size||FS); doc.setTextColor(...(cl.color||INK)); cl.lines.forEach((l,n)=>doc.text(l, x+4, y+11+n*LH)); x+=cl.w; }
+      y+=h; doc.setTextColor(...INK); };
+    const bar=(t, need)=>{ ensure(need||60); y+=8; row([{t, w:CW, bold:true, fill:GREY, size:9.8}]); };
+    const K=118, hw=(CW-2*K)/2;
+    const kv=(k, v, k2, v2)=>{ if(k2===undefined) row([{t:k, w:K, bold:true, fill:LBL},{t:v, w:CW-K}]); else row([{t:k, w:K, bold:true, fill:LBL},{t:v, w:hw},{t:k2, w:K, bold:true, fill:LBL},{t:v2, w:hw}]); };
+    const sigBlock=(sig, date, fallbackSup)=>{
+      const bw=(CW-10)/2, bh=86; ensure(bh+22); y+=6;
+      [[sig&&sig.supervisor, "Client's supervisor", fallbackSup],[sig&&sig.scaffolder, 'Scaffolder', '']].forEach(([s, role, fb], i)=>{
+        const x=M+i*(bw+10); doc.setDrawColor(110,116,126); doc.setLineWidth(0.5); doc.rect(x, y, bw, bh);
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,96,106); doc.text(role.toUpperCase()+' — SIGNATURE', x+6, y+11);
+        if(s && s.img){ try{ const fmt=/^data:image\/png/i.test(s.img)?'PNG':'JPEG', bxw=bw-16, bxh=bh-40; let iw=bxw, ih=bxh;
+            try{ const pr=doc.getImageProperties(s.img); const k=Math.min(bxw/pr.width, bxh/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){}
+            doc.addImage(s.img, fmt, x+8+(bxw-iw)/2, y+16+(bxh-ih)/2, iw, ih); }catch(e){} }
+        else { doc.setDrawColor(170,174,182); doc.line(x+12, y+bh-28, x+bw-12, y+bh-28); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text('Sign here', x+12, y+bh-31); }
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...INK);
+        doc.text(`Name: ${(s&&s.name)||fb||'______________________'}`, x+6, y+bh-14); doc.text(`Date: ${date||'__________'}`, x+bw-6, y+bh-14, {align:'right'});
+      });
+      y+=bh+4;
+    };
+    const crewTxt=ids=>scaffCrewNames(ids).join(', ');
+    // ---- job ----
+    kv('JOB NO.', r.jobNo, 'CLIENT', r.client);
+    kv('PROJECT', r.projectId?projectName(r.projectId):'—', 'WELL NO.', r.wellNo);
+    kv('LOCATION', r.location, 'SCAFFOLD TAG NO.', r.tagNo);
+    kv('VOLUME', r.volume, 'LIFTS / FLOORS', r.lifts===''||r.lifts==null?'—':String(r.lifts));
+    kv('REQUESTED BY', [r.requestedBy, r.requesterPhone].filter(Boolean).join(' · '), 'WORK ORDER NO.', r.workOrder);
+    // ---- rig up ----
+    bar(scaffUpDone(r)?'1.  RIG UP — New start':'1.  RIG UP — Cancelled', 170);
+    kv('DATE', r.rigUpDate, 'OUTCOME', scaffUpDone(r)?'Completed':['Cancelled', r.upCancelStage, r.upCancelReason].filter(Boolean).join(' · '));
+    kv('SCAFFOLDERS', crewTxt(r.rigUpCrew), 'CHARGEHAND', r.chargehand?scaffCrewNames([r.chargehand])[0]:'—');
+    kv('DRIVER', r.upDriver?scaffDriverName(r.upDriver):'—', 'UNIT NO. / VEHICLE', r.upVehicle);
+    if(r.notes) kv('COMMENTS', r.notes);
+    sigBlock(sigOf('rigup'), r.rigUpDate, r.clientSupervisor);
+    // ---- modifications ----
+    const mods=(r.modifications||[]).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+    if(mods.length){ bar('2.  MODIFICATIONS', 170); mods.forEach((m,i)=>{ kv(`MODIFICATION ${i+1}`, m.date, 'SCAFFOLDERS', crewTxt(m.crew)); kv('DRIVER', m.driver?scaffDriverName(m.driver):'—', 'UNIT NO. / VEHICLE', m.vehicle); if(m.notes) kv('WHAT WAS CHANGED', m.notes); sigBlock(sigOf('modification', m.id), m.date, m.supervisor); }); }
+    // ---- inspections ----
+    const insp=scaffInspSorted(r.inspections||[]).slice().reverse();
+    if(insp.length){ bar(`${mods.length?3:2}.  SCAFFOLD INSPECTIONS (SP-1257 §5.12)`, 60);
+      row(['Date','Inspection','Inspector','Tag','Matters / action'].map((t,i)=>({t, w:[66,108,120,70,CW-364][i], bold:true, fill:[236,238,242]})));
+      insp.forEach(x=>{ const w=workers.find(q=>q.id===x.inspector); row([{t:x.date, w:66},{t:x.type, w:108},{t:w?w.fullName:(x.inspectorName||'—'), w:120},{t:String(x.tag||'').startsWith('Red')?'RED':'GREEN', w:70, bold:true, color:String(x.tag||'').startsWith('Red')?[180,20,30]:[30,120,70]},{t:[x.matters, x.action].filter(Boolean).join(' — ')||'—', w:CW-364}]); });
+      insp.filter(x=>x.sigId).forEach(x=>{ const sg=sigs.find(q=>q.id===x.sigId); if(sg){ ensure(110); y+=4; doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.text(`Inspection ${x.date} — signatures`, M, y+8); y+=10; sigBlock(sg, x.date, x.reportedTo); } }); }
+    // ---- rig down ----
+    const n=(mods.length?1:0)+(insp.length?1:0)+2;
+    bar(`${n}.  RIG DOWN`, 170);
+    if(r.rigDownDate){ kv('DATE', r.rigDownDate, 'DAYS STANDING', String(scaffDays(r)??'—'));
+      kv('SCAFFOLDERS', crewTxt(r.rigDownCrew), 'REQUESTED BY', r.downRequestedBy);
+      kv('DRIVER', r.downDriver?scaffDriverName(r.downDriver):'—', 'UNIT NO. / VEHICLE', r.downVehicle);
+      sigBlock(sigOf('rigdown'), r.rigDownDate, r.downSupervisor); }
+    else { kv('STATUS', scaffUpDone(r)?`Standing — ${scaffDays(r)??'—'} days so far`:'Rig-up was cancelled — nothing to rig down'); if(scaffUpDone(r)) sigBlock(null, '', ''); }
+    (r.downCancels||[]).forEach((c,i)=>{ kv(`CANCELLED RIG-DOWN ${i+1}`, [c.date, c.stage, c.reason].filter(Boolean).join(' · '), 'CREW', crewTxt(c.crew)); const sg=sigs.filter(x=>x.event==='downCancel' && x.date===c.date)[0]; if(sg) sigBlock(sg, c.date, c.supervisor); });
+    ensure(24); y+=14; doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(90,96,106);
+    doc.text(`Printed ${isoToDmy(localToday())} from the Burhan HSE Portal. Signatures captured on the site form are shown above; empty boxes can be signed by hand.`, M, y);
+    doc.save(`Burhan_Scaffold_${String(r.jobNo||'job').replace(/[^\w-]+/g,'_')}${r.wellNo?'_'+String(r.wellNo).replace(/[^\w-]+/g,'_'):''}.pdf`);
+  }catch(e){ console.error(e); toast('Could not make the PDF'); }
+}
 
 /* =====================================================================
    Batch 53: LIFT PLANS — SP-2273 "Lift Planning and Execution" (PDO, Version 4, Feb 2024)

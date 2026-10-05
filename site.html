@@ -5,135 +5,136 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0b2140">
-<title>Burhan — Scaffolding Site Entry</title>
+<title>Scaffolding Rig Up and Rig Down Form — Burhan</title>
 <link rel="icon" href="icon-192.png">
 <style>
-:root{--navy:#0b2140; --navy2:#13325c; --red:#b3121a; --red-bg:#fdecec; --ink:#16202e; --muted:#5d6878; --line:#d9dee6; --bg:#f3f5f8; --card:#fff; --ok:#1e7a4c; --ok-bg:#e3f4ea; --warn:#9a6a00; --warn-bg:#fff6de; --focus:#1f6fd1;}
+:root{--navy:#0b2140; --navy2:#13325c; --red:#b3121a; --red-bg:#fdecec; --ink:#16202e; --muted:#5d6878; --line:#cfd6e0; --bg:#f3f5f8; --card:#fff; --ok:#1e7a4c; --ok-bg:#e3f4ea; --warn:#9a6a00; --warn-bg:#fff6de; --focus:#1f6fd1;}
 *{box-sizing:border-box;}
-html,body{margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; -webkit-text-size-adjust:100%;}
-header{background:linear-gradient(135deg,var(--navy),var(--navy2)); color:#fff; padding:14px 16px 16px; display:flex; gap:12px; align-items:center;}
-header img{width:46px; height:46px; object-fit:contain; background:#fff; border-radius:10px; padding:4px; flex:none;}
-header .t1{font-weight:800; font-size:17px; letter-spacing:.01em;} header .t2{font-size:13px; opacity:.85;}
-main{max-width:620px; margin:0 auto; padding:14px 16px 40px;}
+html,body{margin:0; background:var(--bg); color:var(--ink); font:17px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; -webkit-text-size-adjust:100%;}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2)); color:#fff; padding:14px 16px; display:flex; gap:12px; align-items:center; position:sticky; top:0; z-index:5; box-shadow:0 2px 8px rgba(0,0,0,.2);}
+header img{width:50px; height:50px; object-fit:contain; background:#fff; border-radius:10px; padding:4px; flex:none;}
+header .t1{font-weight:800; font-size:17px; line-height:1.2;} header .t2{font-size:12.5px; opacity:.85; margin-top:2px;}
+main{max-width:620px; margin:0 auto; padding:14px 14px 40px;}
 .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
-.proj{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
-.proj .k{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700;}
-.proj .v{font-size:18px; font-weight:800;}
-.choose{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-.big{appearance:none; border:2px solid var(--line); background:#fff; border-radius:14px; padding:18px 10px; font:inherit; font-weight:800; font-size:18px; color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px;}
-.big small{font-weight:500; font-size:12.5px; color:var(--muted);}
-.big.on{border-color:var(--red); background:var(--red-bg); color:var(--red);}
-.big svg{width:30px; height:30px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
-h2{font-size:17px; margin:0 0 12px;}
-label{display:block; font-weight:650; font-size:14px; margin:0 0 12px;}
-label .opt{font-weight:400; color:var(--muted);}
-input,select,textarea{display:block; width:100%; margin-top:5px; padding:12px; font:inherit; font-size:16px; color:var(--ink); background:#fff; border:1.5px solid var(--line); border-radius:10px;}
-textarea{min-height:76px; resize:vertical;}
-input:focus,select:focus,textarea:focus,.big:focus-visible,button:focus-visible{outline:3px solid color-mix(in srgb,var(--focus) 35%,transparent); border-color:var(--focus);}
+.step{display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; margin:0 0 10px;}
+.step .n{width:28px; height:28px; border-radius:50%; background:var(--navy); color:#fff; display:grid; place-items:center; font-size:14px; flex:none;}
+label{display:block; font-weight:700; font-size:15px; margin:0 0 14px;}
+label .opt{font-weight:400; color:var(--muted); font-size:13.5px;}
+label .req{color:var(--red);}
+input,select,textarea{display:block; width:100%; margin-top:6px; padding:13px 12px; font:inherit; font-size:17px; color:var(--ink); background:#fff; border:2px solid var(--line); border-radius:12px; min-height:52px;}
+select{appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%); background-position:calc(100% - 22px) 23px,calc(100% - 16px) 23px; background-size:6px 6px,6px 6px; background-repeat:no-repeat; padding-right:40px;}
+textarea{min-height:84px; resize:vertical;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid color-mix(in srgb,var(--focus) 35%,transparent); border-color:var(--focus);}
+.bad{border-color:var(--red) !important; background:var(--red-bg);}
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-.seg{display:flex; gap:8px; margin-top:6px;} .seg button{flex:1; padding:11px 6px; border:1.5px solid var(--line); border-radius:10px; background:#fff; font:inherit; font-weight:700; color:var(--ink);}
-.seg button.on{border-color:var(--red); background:var(--red-bg); color:var(--red);}
-.crewbox{border:1.5px solid var(--line); border-radius:10px; margin-top:6px; overflow:hidden;}
-.crewbox input[type=search]{border:0; border-bottom:1px solid var(--line); border-radius:0; margin:0;}
-.crewlist{max-height:280px; overflow:auto;}
-.crewlist label{display:flex; align-items:center; gap:10px; margin:0; padding:11px 12px; border-bottom:1px solid #eef1f5; font-weight:500;}
-.crewlist input{width:22px; height:22px; margin:0; flex:none; accent-color:var(--red);}
-.crewcount{font-size:13px; color:var(--muted); font-weight:600; margin-top:6px;}
-.scaf{display:flex; gap:10px; align-items:flex-start; padding:12px; border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; font-weight:500; background:#fff;}
-.scaf input{width:22px; height:22px; margin:2px 0 0; flex:none; accent-color:var(--red);}
-.scaf b{display:block;} .scaf span{font-size:13px; color:var(--muted);}
-.btn{display:block; width:100%; padding:15px; border:0; border-radius:12px; font:inherit; font-size:17px; font-weight:800; background:var(--red); color:#fff; cursor:pointer;}
-.btn:disabled{opacity:.6;} .btn.ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line);}
-.err{background:var(--red-bg); color:var(--red); border:1px solid #f3b9bc; padding:11px 12px; border-radius:10px; font-size:14px; font-weight:600; margin-bottom:12px;}
-.note{font-size:13px; color:var(--muted);}
-.done{text-align:center; padding:26px 16px;} .done .tick{width:64px; height:64px; border-radius:50%; background:var(--ok-bg); color:var(--ok); display:grid; place-items:center; margin:0 auto 12px; font-size:34px; font-weight:900;}
-.done h2{font-size:21px;} .wait{background:var(--warn-bg); color:var(--warn); border-radius:10px; padding:10px 12px; font-size:14px; font-weight:600; margin-top:12px;}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+.chip{display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; background:var(--ok-bg); color:var(--ok); font-weight:700; font-size:15px;}
+.chip button{border:0; background:transparent; color:var(--red); font-size:20px; line-height:1; padding:0 2px; cursor:pointer;}
+.info{background:#eef4fb; border:1px solid #c9daf0; border-radius:12px; padding:12px; font-size:15px; margin:-4px 0 14px;}
+.info b{display:block;}
+.sigbox{border:2px dashed var(--line); border-radius:12px; background:#fff; position:relative; touch-action:none; margin-top:6px;}
+.sigbox canvas{display:block; width:100%; height:170px; border-radius:10px;}
+.sigbox .hint{position:absolute; inset:0; display:grid; place-items:center; color:#a0a8b4; font-size:15px; pointer-events:none;}
+.sigbtns{display:flex; gap:8px; margin-top:8px;} .sigbtns button{flex:1; padding:11px; border:2px solid var(--line); border-radius:10px; background:#fff; font:inherit; font-size:15px; font-weight:700; color:var(--ink);}
+.btn{display:block; width:100%; padding:16px; border:0; border-radius:14px; font:inherit; font-size:18px; font-weight:800; background:var(--red); color:#fff; cursor:pointer;}
+.btn:disabled{opacity:.6;} .btn.ghost{background:#fff; color:var(--ink); border:2px solid var(--line);} .btn.navy{background:var(--navy);}
+.err{background:var(--red-bg); color:var(--red); border:1px solid #f3b9bc; padding:12px; border-radius:12px; font-size:15px; font-weight:700; margin-bottom:12px;}
+.note{font-size:14px; color:var(--muted);}
+.done{text-align:center; padding:26px 16px;} .done .tick{width:70px; height:70px; border-radius:50%; background:var(--ok-bg); color:var(--ok); display:grid; place-items:center; margin:0 auto 12px; font-size:38px; font-weight:900;}
+.done h2{font-size:22px; margin:0 0 8px;} .wait{background:var(--warn-bg); color:var(--warn); border-radius:10px; padding:10px 12px; font-size:14px; font-weight:600; margin-top:12px;}
 .hidden{display:none !important;}
 .center{text-align:center; padding:40px 16px; color:var(--muted);}
-footer{text-align:center; font-size:12px; color:var(--muted); padding:0 16px 24px;}
+footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 24px;}
 </style>
 </head>
 <body>
-<header><img src="logo.png" alt="Burhan Oil &amp; Trade Services"><div><div class="t1">Scaffolding Site Entry</div><div class="t2">Burhan Oil &amp; Trade Services · Think Safe, Work Safe, Home Safe</div></div></header>
+<header><img src="logo.png" alt="Burhan Oil &amp; Trade Services"><div><div class="t1">Scaffolding Rig Up and Rig Down Form</div><div class="t2">Burhan Oil &amp; Trade Services · Think Safe, Work Safe, Home Safe</div></div></header>
 <main>
   <div id="loading" class="center">Opening…</div>
-  <div id="bad" class="card hidden"><h2>This link is not active</h2><p class="note" id="badMsg">Ask the HSE department for a new site link or QR code.</p></div>
+  <div id="bad" class="card hidden"><h2 style="margin-top:0;">This link is not active</h2><p class="note" id="badMsg">Ask the HSE department or the scaffolding office for the new link or QR code.</p></div>
 
-  <div id="app" class="hidden">
-    <div class="card proj"><div><div class="k">Project</div><div class="v" id="projName">—</div><div class="note" id="projClient"></div></div></div>
+  <form id="form" class="hidden" novalidate autocomplete="off">
+    <div id="formErr" class="err hidden" role="alert"></div>
 
-    <div id="step1">
-      <div class="choose" role="group" aria-label="What are you entering?">
-        <button type="button" class="big" data-kind="rigup"><svg viewBox="0 0 24 24"><path d="M4 20V4M20 20V4M4 8h16M4 14h16M4 8l16 6"/></svg>Rig-up<small>Scaffold put up</small></button>
-        <button type="button" class="big" data-kind="rigdown"><svg viewBox="0 0 24 24"><path d="M12 4v13M6 11l6 6 6-6M4 20h16"/></svg>Rig-down<small>Scaffold taken down</small></button>
-      </div>
-      <p class="note" style="margin-top:12px;">Your entry goes to the HSE department for approval before it is added to the tracker.</p>
+    <div class="card">
+      <div class="step"><span class="n">1</span>Client and job</div>
+      <label>Client name <span class="req">*</span><select name="client"></select></label>
+      <label id="clientOtherBox" class="hidden">Type the client name <span class="req">*</span><input name="clientOther" maxlength="60"></label>
+      <label>Job <span class="req">*</span><select name="kind"><option value="">Choose…</option><option value="rigup">Rig Up</option><option value="rigdown">Rig Down</option></select></label>
+      <label id="typeBox" class="hidden"><span id="typeLabel">Type</span> <span class="req">*</span><select name="type"></select></label>
     </div>
 
-    <form id="form" class="card hidden" novalidate autocomplete="off">
-      <h2 id="formTitle">Rig-up</h2>
-      <div id="formErr" class="err hidden" role="alert"></div>
+    <div id="partScaffold" class="card hidden">
+      <div class="step"><span class="n">2</span><span id="scafTitle">Which scaffold?</span></div>
+      <label>Standing scaffold <span class="req">*</span><select name="jobId"></select></label>
+      <div id="scafInfo" class="info hidden"></div>
+      <p id="scafNone" class="note hidden">No standing scaffold is listed for this client. Choose "Show all" or tell the office.</p>
+    </div>
 
-      <div data-for="rigdown">
-        <label>Which scaffold came down? *</label>
-        <div id="standingList"></div>
+    <div id="partDetails" class="card hidden">
+      <div class="step"><span class="n" id="detN">2</span>Job details</div>
+      <label>Date <span class="req">*</span><input type="date" name="date"></label>
+      <div id="wellLocBox">
+        <label>Well no. <span class="req">*</span><select name="wellNo"></select></label>
+        <label id="wellOtherBox" class="hidden">Type the well no. <span class="req">*</span><input name="wellOther" maxlength="40"></label>
+        <label>Location <span class="opt">(optional)</span><select name="location"></select></label>
+        <label id="locOtherBox" class="hidden">Type the location<input name="locOther" maxlength="100"></label>
       </div>
-
-      <div class="row2">
-        <label>Date *<input type="date" name="date" required></label>
-        <label data-for="rigup">Tag no. <span class="opt">(optional)</span><input name="tagNo" maxlength="40" inputmode="text"></label>
-      </div>
-
-      <div data-for="rigup">
-        <label>Location / well head *<input name="location" maxlength="120" list="dlPlaces" placeholder="e.g. Well head NM-123"></label>
+      <div id="newBox">
         <div class="row2">
-          <label>Volume *<select name="volume"><option value="">Select…</option></select></label>
-          <label>Lifts / floors<input name="lifts" type="number" min="0" max="60" inputmode="numeric"></label>
+          <label>Volume <span class="req">*</span><select name="volume"></select></label>
+          <label>Tag no. <span class="opt">(optional)</span><input name="tagNo" maxlength="40"></label>
         </div>
+        <label>Lifts / floors <span class="opt">(optional)</span><input name="lifts" type="number" min="0" max="60" inputmode="numeric"></label>
       </div>
-
-      <label>Outcome
-        <div class="seg" id="outcomeSeg"><button type="button" class="on" data-out="Completed">Completed</button><button type="button" data-out="Cancelled">Cancelled</button></div>
-      </label>
-      <div id="cancelBox" class="hidden">
-        <label>When cancelled<select name="stage"></select></label>
-        <label>Reason *<input name="reason" maxlength="200" placeholder="e.g. Permit not ready, client stopped work"></label>
-        <label>Cancelled by <span class="opt">(optional)</span><input name="cancelledBy" maxlength="80"></label>
+      <div id="inspBox">
+        <label>Inspection type <span class="req">*</span><select name="inspType"></select></label>
+        <label>Scaffold inspector <span class="req">*</span><select name="inspector"></select></label>
+        <label>Tag result <span class="req">*</span><select name="tag"><option value="">Choose…</option><option>Green — safe to use</option><option>Red — do not use</option></select></label>
       </div>
-
-      <div class="row2">
-        <label>Requested by <span class="opt">(optional)</span><input name="requestedBy" maxlength="80"></label>
-        <label>Work order no. <span class="opt">(optional)</span><input name="workOrder" maxlength="60"></label>
+      <div id="cancelBox">
+        <label>When was it cancelled? <span class="req">*</span><select name="stage"></select></label>
+        <label>Reason <span class="req">*</span><input name="reason" maxlength="200" placeholder="e.g. Permit not ready"></label>
       </div>
-      <label data-for="rigup">Requester phone <span class="opt">(optional)</span><input name="requesterPhone" type="tel" maxlength="30" inputmode="tel" placeholder="+968 …"></label>
-      <div class="row2">
-        <label>Started from <span class="opt">(optional)</span><input name="from" maxlength="80" list="dlPlaces" placeholder="e.g. Camp / Yard"></label>
-        <label>Vehicle <span class="opt">(optional)</span><input name="vehicle" maxlength="30" list="dlVehicles"></label>
-      </div>
-
-      <label data-for="rigup">Chargehand *<select name="chargehand"><option value="">Select…</option></select></label>
-      <label>Crew</label>
-      <div class="crewbox"><input type="search" id="crewSearch" placeholder="Search name…" aria-label="Search crew"><div class="crewlist" id="crewList"></div></div>
-      <div class="crewcount" id="crewCount">0 selected</div>
-
-      <label style="margin-top:12px;">Notes <span class="opt">(optional)</span><textarea name="notes" maxlength="500"></textarea></label>
-      <label>Your name *<input name="by" maxlength="80" autocomplete="name"></label>
-
-      <button type="submit" class="btn" id="sendBtn">Send for approval</button>
-      <button type="button" class="btn ghost" id="backBtn" style="margin-top:10px;">Back</button>
-    </form>
-
-    <div id="done" class="card done hidden">
-      <div class="tick" aria-hidden="true">✓</div>
-      <h2>Sent for approval</h2>
-      <p class="note" id="doneMsg">The HSE department will check it and add it to the tracker.</p>
-      <div id="waitMsg" class="wait hidden">No signal right now — keep this page open. It will send automatically when the phone is back online.</div>
-      <button type="button" class="btn" id="againBtn" style="margin-top:16px;">Send another entry</button>
+      <label>Scaffolder name(s) <span class="req">*</span><select name="addCrew"></select></label>
+      <div class="chips" id="crewChips"></div>
+      <div style="height:14px"></div>
+      <label>Driver name <span class="opt">(optional)</span><select name="driver"></select></label>
+      <label id="driverOtherBox" class="hidden">Type the driver name<input name="driverOther" maxlength="60"></label>
+      <label>Unit no. (vehicle) <span class="opt">(optional)</span><select name="vehicle"></select></label>
+      <label id="vehOtherBox" class="hidden">Type the unit no.<input name="vehOther" maxlength="30"></label>
+      <label>Requested by <span class="opt">(optional)</span><input name="requestedBy" maxlength="80" placeholder="Name"></label>
+      <label>Their phone number <span class="opt">(optional)</span><input name="requesterPhone" type="tel" maxlength="30" inputmode="tel" placeholder="+968 …"></label>
+      <label>Comments <span class="opt">(optional)</span><textarea name="notes" maxlength="500" placeholder="Anything to note"></textarea></label>
     </div>
+
+    <div id="partSign" class="card hidden">
+      <div class="step"><span class="n" id="sigN">3</span>Signatures</div>
+      <label>Client's supervisor name <span class="req">*</span><input name="supName" maxlength="80"></label>
+      <div class="note">Supervisor signs here with a finger</div>
+      <div class="sigbox" id="sigSupBox"><canvas id="sigSup" width="600" height="212"></canvas><div class="hint">Sign here</div></div>
+      <div class="sigbtns"><button type="button" data-clear="sigSup">Clear</button><button type="button" data-upload="sigSup">Upload photo</button></div>
+      <div style="height:18px"></div>
+      <label>Scaffolder name <span class="req">*</span><select name="scafName"></select></label>
+      <div class="note">Scaffolder signs here with a finger</div>
+      <div class="sigbox" id="sigScafBox"><canvas id="sigScaf" width="600" height="212"></canvas><div class="hint">Sign here</div></div>
+      <div class="sigbtns"><button type="button" data-clear="sigScaf">Clear</button><button type="button" data-upload="sigScaf">Upload photo</button></div>
+      <input type="file" id="sigFile" accept="image/*" class="hidden">
+    </div>
+
+    <button type="submit" class="btn hidden" id="sendBtn">Send for approval</button>
+  </form>
+
+  <div id="done" class="card done hidden">
+    <div class="tick" aria-hidden="true">✓</div>
+    <h2>Sent for approval</h2>
+    <p class="note" id="doneMsg">The scaffolding office will check it and add it to the tracker.</p>
+    <div id="waitMsg" class="wait hidden">No signal right now — keep this page open. It sends automatically when the phone is back online.</div>
+    <button type="button" class="btn navy" id="pdfBtn" style="margin-top:16px;">Download PDF copy</button>
+    <button type="button" class="btn ghost" id="againBtn" style="margin-top:10px;">Fill a new form</button>
   </div>
-  <datalist id="dlPlaces"></datalist><datalist id="dlVehicles"></datalist>
 </main>
-<footer>Entries are checked by the HSE department before they are added.</footer>
+<footer>Every entry is checked and approved before it is added to the tracker.</footer>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
@@ -147,96 +148,238 @@ footer{text-align:center; font-size:12px; color:var(--muted); padding:0 16px 24p
     messagingSenderId: "123036825493",
     appId: "1:123036825493:web:41cc96578f1d55807ba89c"
   };
+  const JSPDF_URL='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+  const OTHER='__other', ALL='__all';
+  const TYPES={rigup:[['new','New start'],['modification','Modification'],['cancellation','Cancellation'],['inspection','Inspection']], rigdown:[['completed','Completed'],['cancelled','Cancelled']]};
   const $=id=>document.getElementById(id);
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const today=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
-  const store={ get(k){ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} } };
+  const dmy=s=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||''); return m?`${m[3]}-${m[2]}-${m[1]}`:(s||''); };
   const show=(id,on)=>$(id).classList.toggle('hidden',!on);
-  function fail(msg){ show('loading',false); show('app',false); show('bad',true); if(msg) $('badMsg').textContent=msg; }
+  function fail(msg){ show('loading',false); show('form',false); show('bad',true); if(msg) $('badMsg').textContent=msg; }
+  const F=()=>$('form'), val=n=>String((F()[n]&&F()[n].value)||'').trim();
+  const opts=(list, first, other)=>`<option value="">${esc(first||'Choose…')}</option>`+list.map(o=>typeof o==='string'?`<option>${esc(o)}</option>`:`<option value="${esc(o.v)}">${esc(o.t)}</option>`).join('')+(other?`<option value="${OTHER}">${esc(other)}</option>`:'');
 
   const token=new URLSearchParams(location.search).get('t')||'';
-  if(!/^[A-Za-z0-9]{16,40}$/.test(token)){ fail('This link is incomplete. Scan the QR code again, or ask the HSE department for the site link.'); return; }
+  if(!/^[A-Za-z0-9]{16,40}$/.test(token)){ fail('This link is incomplete. Scan the QR code again, or ask the office for the link.'); return; }
   let db;
   try{ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); }catch(e){ fail('The page could not start. Check the internet connection and open the link again.'); return; }
 
-  let link=null, kind='rigup', outcome='Completed', crewSel=new Set();
+  let link=null, crewSel=[], lastSent=null;
   db.collection('siteLinks').doc(token).get().then(snap=>{
     if(!snap.exists){ fail(); return; }
-    link=snap.data()||{};
-    if(link.active===false){ fail(); return; }
+    link=snap.data()||{}; if(link.active===false){ fail(); return; }
     setup();
-  }).catch(err=>{ console.warn(err); fail(err && err.code==='permission-denied' ? 'This link has been switched off. Ask the HSE department for a new site link or QR code.' : 'Could not open the link. Check the internet connection and try again.'); });
+  }).catch(err=>{ console.warn(err); fail(err && err.code==='permission-denied' ? 'This link has been switched off. Ask the office for the new link or QR code.' : 'Could not open the link. Check the internet connection and try again.'); });
 
+  const nameOf=(list,id)=>((list||[]).find(x=>x.id===id)||{}).name||'';
   function setup(){
-    $('projName').textContent=link.projectName||'—';
-    $('projClient').textContent=link.clientName?('Client: '+link.clientName):'';
-    const f=$('form');
-    f.volume.insertAdjacentHTML('beforeend',(link.volumes||[]).map(v=>`<option>${esc(v)}</option>`).join(''));
-    f.stage.innerHTML=(link.stages||['Before leaving','On the road','At site']).map(v=>`<option>${esc(v)}</option>`).join('');
-    f.chargehand.insertAdjacentHTML('beforeend',(link.crew||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join(''));
-    $('dlPlaces').innerHTML=(link.places||[]).map(v=>`<option value="${esc(v)}">`).join('');
-    $('dlVehicles').innerHTML=(link.vehicles||[]).map(v=>`<option value="${esc(v)}">`).join('');
-    renderCrew();
-    show('loading',false); show('app',true);
+    const f=F();
+    const clients=(link.clients&&link.clients.length)?link.clients:(link.clientName?[link.clientName]:[]);
+    f.client.innerHTML=opts(clients, 'Choose client…', 'Other — type the name');
+    f.wellNo.innerHTML=opts(link.wells||[], 'Choose well…', 'Other — type the well no.');
+    f.location.innerHTML=opts(link.locations||[], 'Choose location…', 'Other — type the location');
+    f.volume.innerHTML=opts(link.volumes||['0–26 m³','27–52 m³','53–78 m³']);
+    f.inspType.innerHTML=opts(link.inspTypes||['Handover (before first use)','7-day inspection','After alteration','After bad weather / incident']);
+    f.inspector.innerHTML=opts((link.inspectors||[]).map(x=>({v:x.id,t:x.name})), 'Choose inspector…');
+    f.stage.innerHTML=opts(link.stages||['Before leaving','On the road','At site']);
+    f.driver.innerHTML=opts((link.drivers||[]).map(x=>({v:x.id,t:x.name})), 'Choose driver…', 'Other — type the name');
+    f.vehicle.innerHTML=opts(link.vehicles||[], 'Choose unit…', 'Other — type the unit no.');
+    renderCrew(); resetPads();
+    f.date.value=today(); f.date.max=today();
+    show('loading',false); show('form',true); refresh();
   }
   function renderCrew(){
-    const q=$('crewSearch').value.trim().toLowerCase(), list=(link.crew||[]).filter(c=>!q || String(c.name).toLowerCase().includes(q));
-    $('crewList').innerHTML=list.length?list.map(c=>`<label><input type="checkbox" value="${esc(c.id)}" ${crewSel.has(c.id)?'checked':''}>${esc(c.name)}</label>`).join(''):'<div class="note" style="padding:12px;">No names found.</div>';
-    $('crewCount').textContent=crewSel.size+' selected';
+    const f=F(), crew=link.crew||[];
+    f.addCrew.innerHTML=`<option value="">${crewSel.length?'Add another scaffolder…':'Choose scaffolder…'}</option>`+crew.filter(c=>!crewSel.includes(c.id)).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    $('crewChips').innerHTML=crewSel.map(id=>`<span class="chip">${esc(nameOf(crew,id))}<button type="button" data-unpick="${esc(id)}" aria-label="Remove">×</button></span>`).join('');
+    const cur=f.scafName.value;
+    f.scafName.innerHTML=`<option value="">Choose…</option>`+(crewSel.length?crewSel:crew.map(c=>c.id)).map(id=>`<option value="${esc(id)}">${esc(nameOf(crew,id))}</option>`).join('');
+    if(cur && [...f.scafName.options].some(o=>o.value===cur)) f.scafName.value=cur; else if(crewSel.length===1) f.scafName.value=crewSel[0];
   }
-  $('crewSearch').addEventListener('input', renderCrew);
-  $('crewList').addEventListener('change', e=>{ const cb=e.target; if(cb.type!=='checkbox') return; if(cb.checked) crewSel.add(cb.value); else crewSel.delete(cb.value); $('crewCount').textContent=crewSel.size+' selected'; });
-  $('form').chargehand.addEventListener('change', e=>{ if(e.target.value){ crewSel.add(e.target.value); renderCrew(); } });
+  F().addCrew.addEventListener('change', e=>{ if(e.target.value){ crewSel.push(e.target.value); renderCrew(); } });
+  $('crewChips').addEventListener('click', e=>{ const b=e.target.closest('[data-unpick]'); if(!b) return; crewSel=crewSel.filter(x=>x!==b.dataset.unpick); renderCrew(); });
 
-  function openForm(k){
-    kind=k; const f=$('form'); f.reset(); crewSel=new Set(); outcome='Completed';
-    document.querySelectorAll('[data-for]').forEach(el=>el.classList.toggle('hidden', el.dataset.for!==k));
-    document.querySelectorAll('.big').forEach(b=>b.classList.toggle('on', b.dataset.kind===k));
-    $('formTitle').textContent = k==='rigup' ? 'Rig-up — scaffold put up' : 'Rig-down — scaffold taken down';
-    f.date.value=today(); f.date.max=today(); f.by.value=store.get('siteEntryName');
-    setOutcome('Completed'); $('crewSearch').value=''; renderCrew(); show('formErr',false);
-    if(k==='rigdown'){
-      const st=link.standing||[];
-      $('standingList').innerHTML = st.length ? st.map(s=>`<label class="scaf"><input type="radio" name="jobId" value="${esc(s.id)}"><div><b>${esc(s.location||'Scaffold')}</b><span>${[s.tagNo?'Tag '+esc(s.tagNo):'', s.volume?esc(s.volume):'', s.rigUpDate?'Up since '+esc(s.rigUpDate):'', s.jobNo?esc(s.jobNo):''].filter(Boolean).join(' · ')}</span></div></label>`).join('')
-        : '<div class="err" style="background:#fff6de;color:#9a6a00;border-color:#efd9a0;">No standing scaffolds are listed for this project. Tell the HSE department.</div>';
-    }
-    show('step1',false); show('done',false); show('form',true); window.scrollTo(0,0);
+  function standingFor(){
+    const c=(val('client')===OTHER?val('clientOther'):val('client')).toLowerCase(), all=link.standing||[];
+    const mine=all.filter(s=>c && String(s.client||'').toLowerCase()===c);
+    return {mine, all};
   }
-  document.querySelectorAll('.big').forEach(b=>b.addEventListener('click',()=>openForm(b.dataset.kind)));
-  function setOutcome(v){ outcome=v; document.querySelectorAll('#outcomeSeg button').forEach(b=>b.classList.toggle('on', b.dataset.out===v)); show('cancelBox', v==='Cancelled'); }
-  $('outcomeSeg').addEventListener('click', e=>{ const b=e.target.closest('[data-out]'); if(b) setOutcome(b.dataset.out); });
-  $('backBtn').addEventListener('click', ()=>{ show('form',false); show('step1',true); document.querySelectorAll('.big').forEach(b=>b.classList.remove('on')); window.scrollTo(0,0); });
-  $('againBtn').addEventListener('click', ()=>{ show('done',false); show('step1',true); window.scrollTo(0,0); });
+  function fillScaffolds(){
+    const f=F(), {mine, all}=standingFor(), showAll=f.jobId.value===ALL || f.jobId.dataset.all==='1';
+    const list=showAll?all:mine, label=s=>[s.wellNo?'Well '+s.wellNo:'', s.location, s.tagNo?'Tag '+s.tagNo:'', s.rigUpDate?'up '+dmy(s.rigUpDate):''].filter(Boolean).join(' · ')||s.jobNo||'Scaffold';
+    const cur=f.jobId.value;
+    f.jobId.innerHTML=`<option value="">${list.length?'Choose scaffold…':'None for this client'}</option>`+list.map(s=>`<option value="${esc(s.id)}">${esc((showAll&&s.client?s.client+' — ':'')+label(s))}</option>`).join('')+(showAll||all.length===mine.length?'':`<option value="${ALL}">Show all standing scaffolds…</option>`);
+    if(cur && cur!==ALL && [...f.jobId.options].some(o=>o.value===cur)) f.jobId.value=cur;
+    show('scafNone', !list.length);
+    scafInfo();
+  }
+  function scafInfo(){ const s=(link.standing||[]).find(x=>x.id===F().jobId.value); show('scafInfo', !!s);
+    if(s) $('scafInfo').innerHTML=`<b>${esc(s.client||'')}${s.wellNo?' · Well '+esc(s.wellNo):''}</b>${esc([s.location, s.volume, s.tagNo?'Tag '+s.tagNo:'', s.rigUpDate?'Up since '+dmy(s.rigUpDate):'', s.jobNo].filter(Boolean).join(' · '))}`; }
+  function refresh(){
+    const f=F(), kind=f.kind.value, type=f.type.value, client=f.client.value;
+    show('clientOtherBox', client===OTHER);
+    show('typeBox', !!kind);
+    if(kind && f.type.dataset.kind!==kind){ f.type.dataset.kind=kind; f.type.innerHTML=opts((TYPES[kind]||[]).map(([v,t])=>({v,t})), 'Choose…'); $('typeLabel').textContent=kind==='rigup'?'Rig Up type':'Rig Down result'; }
+    const ready=!!(client && kind && f.type.value);
+    const needScaf = ready && (kind==='rigdown' || type==='modification' || type==='inspection');
+    show('partScaffold', needScaf); if(needScaf) fillScaffolds();
+    $('scafTitle').textContent = kind==='rigdown' ? 'Which scaffold came down?' : (type==='inspection' ? 'Which scaffold was inspected?' : 'Which scaffold was modified?');
+    show('partDetails', ready); show('partSign', ready); show('sendBtn', ready);
+    $('detN').textContent=needScaf?'3':'2'; $('sigN').textContent=needScaf?'4':'3';
+    show('wellLocBox', ready && !needScaf);
+    show('newBox', ready && kind==='rigup' && type==='new');
+    show('inspBox', ready && type==='inspection');
+    show('cancelBox', ready && (type==='cancellation' || type==='cancelled'));
+    show('wellOtherBox', f.wellNo.value===OTHER); show('locOtherBox', f.location.value===OTHER);
+    show('driverOtherBox', f.driver.value===OTHER); show('vehOtherBox', f.vehicle.value===OTHER);
+  }
+  F().addEventListener('change', e=>{ if(e.target.name==='jobId' && e.target.value===ALL){ e.target.dataset.all='1'; e.target.value=''; fillScaffolds(); return; } if(e.target.name==='client'){ F().jobId.dataset.all=''; } if(e.target.name==='jobId'){ scafInfo(); } refresh(); e.target.classList.remove('bad'); });
+  F().addEventListener('input', e=>e.target.classList.remove('bad'));
 
-  $('form').addEventListener('submit', e=>{
+  // ---- signature pads: finger / mouse, or a photo of a signature on paper ----
+  const pads={};
+  function makePad(id){
+    const cv=$(id), g=cv.getContext('2d'), box=cv.parentElement, p={cv, g, ink:false, photo:false};
+    const clear=()=>{ g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); p.ink=false; p.photo=false; box.querySelector('.hint').classList.remove('hidden'); box.classList.remove('bad'); };
+    p.clear=clear; clear();
+    let drawing=false, last=null;
+    const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
+    cv.addEventListener('pointerdown', e=>{ e.preventDefault(); if(p.photo) clear(); drawing=true; last=pos(e); try{ cv.setPointerCapture(e.pointerId); }catch(x){} g.beginPath(); g.arc(last.x,last.y,1.6,0,7); g.fillStyle='#0b1a33'; g.fill(); });
+    cv.addEventListener('pointermove', e=>{ if(!drawing) return; e.preventDefault(); const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.lineJoin='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; if(!p.ink){ p.ink=true; box.querySelector('.hint').classList.add('hidden'); box.classList.remove('bad'); } });
+    const end=()=>{ drawing=false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
+    pads[id]=p;
+  }
+  function resetPads(){ ['sigSup','sigScaf'].forEach(id=>{ if(!pads[id]) makePad(id); else pads[id].clear(); }); }
+  function padImage(id){
+    const p=pads[id]; if(!p || !p.ink) return '';
+    const out=document.createElement('canvas'); out.width=480; out.height=170; const g=out.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,out.width,out.height); g.drawImage(p.cv,0,0,out.width,out.height);
+    return p.photo ? out.toDataURL('image/jpeg',0.8) : out.toDataURL('image/png');
+  }
+  let uploadFor=null;
+  document.addEventListener('click', e=>{
+    const c=e.target.closest('[data-clear]'); if(c){ pads[c.dataset.clear].clear(); return; }
+    const u=e.target.closest('[data-upload]'); if(u){ uploadFor=u.dataset.upload; $('sigFile').value=''; $('sigFile').click(); }
+  });
+  $('sigFile').addEventListener('change', ()=>{
+    const file=$('sigFile').files[0], p=pads[uploadFor]; if(!file || !p) return;
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{ p.clear(); const k=Math.min(p.cv.width/img.width, p.cv.height/img.height), w=img.width*k, h=img.height*k; p.g.drawImage(img,(p.cv.width-w)/2,(p.cv.height-h)/2,w,h); p.ink=true; p.photo=true; p.cv.parentElement.querySelector('.hint').classList.add('hidden'); p.cv.parentElement.classList.remove('bad'); URL.revokeObjectURL(url); };
+    img.onerror=()=>{ alert('That photo could not be opened. Try again or sign with a finger.'); URL.revokeObjectURL(url); };
+    img.src=url;
+  });
+
+  // ---- send ----
+  // If the page jumps while the tap is on Send (keyboard closing, a field losing focus), the click can land elsewhere — still send.
+  let sendArmed=0;
+  $('sendBtn').addEventListener('pointerdown', ()=>{ sendArmed=Date.now(); });
+  document.addEventListener('pointerup', e=>{ if(sendArmed && Date.now()-sendArmed<1200 && !(e.target.closest && e.target.closest('#sendBtn'))){ sendArmed=0; if(!$('sendBtn').disabled) F().requestSubmit(); } }, true);
+  F().addEventListener('submit', ()=>{ sendArmed=0; }, true);
+  F().addEventListener('submit', e=>{
     e.preventDefault();
-    const f=$('form'), v=n=>String((f[n]&&f[n].value)||'').trim();
-    const errs=[];
-    if(!v('date')) errs.push('Pick the date.'); else if(v('date')>today()) errs.push('The date cannot be in the future.');
-    let job=null;
-    if(kind==='rigdown'){ const r=f.querySelector('input[name="jobId"]:checked'); if(!r) errs.push('Choose which scaffold came down.'); else job=(link.standing||[]).find(s=>s.id===r.value)||null; }
-    else { if(!v('location')) errs.push('Enter the location / well head.'); if(!v('volume')) errs.push('Choose the volume.'); if(!v('chargehand')) errs.push('Choose the chargehand.'); }
-    if(outcome==='Cancelled' && !v('reason')) errs.push('Enter the reason it was cancelled.');
-    if(!v('by')) errs.push('Enter your name.');
-    if(errs.length){ $('formErr').innerHTML=errs.map(esc).join('<br>'); show('formErr',true); $('formErr').scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    const f=F(), kind=val('kind'), type=val('type'), needScaf=(kind==='rigdown'||type==='modification'||type==='inspection');
+    const errs=[], mark=n=>{ const el=f[n]||$(n); if(el) el.classList.add('bad'); };
+    const client=val('client')===OTHER?val('clientOther'):val('client');
+    if(!client){ errs.push('Choose the client.'); mark(val('client')===OTHER?'clientOther':'client'); }
+    if(!kind){ errs.push('Choose the job (Rig Up / Rig Down).'); mark('kind'); }
+    if(!type){ errs.push('Choose the type.'); mark('type'); }
+    let job=null; if(needScaf){ job=(link.standing||[]).find(s=>s.id===val('jobId'))||null; if(!job){ errs.push('Choose the scaffold.'); mark('jobId'); } }
+    if(!val('date')){ errs.push('Pick the date.'); mark('date'); } else if(val('date')>today()){ errs.push('The date cannot be in the future.'); mark('date'); }
+    const well=val('wellNo')===OTHER?val('wellOther'):val('wellNo'), loc=val('location')===OTHER?val('locOther'):val('location');
+    if(!needScaf && !well){ errs.push('Choose or type the well no.'); mark(val('wellNo')===OTHER?'wellOther':'wellNo'); }
+    if(kind==='rigup' && type==='new' && !val('volume')){ errs.push('Choose the volume.'); mark('volume'); }
+    if(type==='inspection'){ if(!val('inspType')){ errs.push('Choose the inspection type.'); mark('inspType'); } if(!val('inspector')){ errs.push('Choose the scaffold inspector.'); mark('inspector'); } if(!val('tag')){ errs.push('Choose the tag result.'); mark('tag'); } }
+    if((type==='cancellation'||type==='cancelled') && !val('stage')){ errs.push('Choose when it was cancelled.'); mark('stage'); }
+    if((type==='cancellation'||type==='cancelled') && !val('reason')){ errs.push('Write the reason it was cancelled.'); mark('reason'); }
+    if(!crewSel.length){ errs.push('Add at least one scaffolder.'); mark('addCrew'); }
+    if(!val('supName')){ errs.push("Write the client's supervisor name."); mark('supName'); }
+    if(!pads.sigSup.ink){ errs.push("The client's supervisor must sign."); $('sigSupBox').classList.add('bad'); }
+    if(!val('scafName')){ errs.push('Choose the scaffolder who signs.'); mark('scafName'); }
+    if(!pads.sigScaf.ink){ errs.push('The scaffolder must sign.'); $('sigScafBox').classList.add('bad'); }
+    if(errs.length){ $('formErr').innerHTML='Please check:<br>'+errs.map(esc).join('<br>'); show('formErr',true); window.scrollTo({top:0, behavior:'smooth'}); return; }
     show('formErr',false);
-    const data={date:v('date'), outcome, requestedBy:v('requestedBy'), workOrder:v('workOrder'), from:v('from'), vehicle:v('vehicle'), crew:[...crewSel].slice(0,60), notes:v('notes')};
-    if(outcome==='Cancelled'){ data.stage=v('stage'); data.reason=v('reason'); data.cancelledBy=v('cancelledBy'); }
-    if(kind==='rigup'){ Object.assign(data, {location:v('location'), volume:v('volume'), lifts:v('lifts'), tagNo:v('tagNo'), requesterPhone:v('requesterPhone'), chargehand:v('chargehand')}); }
-    else { data.jobId=job.id; data.jobLabel=[job.location, job.tagNo?'tag '+job.tagNo:''].filter(Boolean).join(' · '); }
-    store.set('siteEntryName', v('by'));
+    const drv=val('driver'), veh=val('vehicle')===OTHER?val('vehOther'):val('vehicle'), crewNames=crewSel.map(id=>nameOf(link.crew,id));
+    const data={type, client, date:val('date'), crew:crewSel.slice(0,40), driver:drv===OTHER?'':drv, driverName:drv===OTHER?val('driverOther'):nameOf(link.drivers,drv), vehicle:veh,
+      requestedBy:val('requestedBy'), requesterPhone:val('requesterPhone'), notes:val('notes'),
+      sigSupName:val('supName'), sigSup:padImage('sigSup'), sigScafName:nameOf(link.crew,val('scafName')), sigScaf:padImage('sigScaf')};
+    if(needScaf){ data.jobId=job.id; data.jobLabel=[job.client, job.wellNo?'Well '+job.wellNo:'', job.location, job.tagNo?'tag '+job.tagNo:''].filter(Boolean).join(' · '); data.wellNo=job.wellNo||''; data.location=job.location||''; }
+    else { data.wellNo=well; data.location=loc; }
+    if(kind==='rigup' && type==='new'){ data.volume=val('volume'); data.tagNo=val('tagNo'); data.lifts=val('lifts'); }
+    if(type==='inspection'){ data.inspType=val('inspType'); data.inspector=val('inspector'); data.tag=val('tag'); }
+    if(type==='cancellation'||type==='cancelled'){ data.stage=val('stage'); data.reason=val('reason'); }
+    const by=data.sigScafName||'Site form';
+    lastSent={kind, data, by, crewNames, inspectorName:nameOf(link.inspectors, data.inspector), sentAt:new Date()};
     const btn=$('sendBtn'); btn.disabled=true; btn.textContent='Sending…';
-    const waitT=setTimeout(()=>{ show('waitMsg',true); }, 8000);
-    const sent=db.collection('siteSubmissions').add({token, projectId:link.projectId||'', kind, status:'pending', data, by:v('by'), submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
-    // show the confirmation at once; the entry stays queued on the phone until it reaches the server
-    $('doneMsg').textContent = (kind==='rigup' ? 'Rig-up' : 'Rig-down') + (outcome==='Cancelled'?' (cancelled)':'') + ` for ${link.projectName||'this project'} — the HSE department will check it and add it to the tracker.`;
+    const waitT=setTimeout(()=>show('waitMsg',true), 8000);
+    const sent=db.collection('siteSubmissions').add({token, projectId:link.projectId||'', kind, status:'pending', data, by, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    const tl=(TYPES[kind].find(x=>x[0]===type)||[])[1]||type;
+    $('doneMsg').textContent=`${kind==='rigup'?'Rig Up':'Rig Down'} — ${tl} for ${client}${data.wellNo?' · Well '+data.wellNo:''}. The scaffolding office will check it and add it to the tracker.`;
     show('waitMsg',false); show('form',false); show('done',true); window.scrollTo(0,0);
     sent.then(()=>{ clearTimeout(waitT); show('waitMsg',false); })
       .catch(err=>{ clearTimeout(waitT); console.warn(err); show('done',false); show('form',true);
-        $('formErr').textContent = err && err.code==='permission-denied' ? 'Not sent — this link has been switched off. Ask the HSE department for a new link.' : 'Not sent — please try again.';
-        show('formErr',true); })
+        $('formErr').textContent = err && err.code==='permission-denied' ? 'Not sent — the link may be switched off, or the system is being updated. Tell the office.' : 'Not sent — please try again.';
+        show('formErr',true); window.scrollTo(0,0); })
       .finally(()=>{ btn.disabled=false; btn.textContent='Send for approval'; });
   });
+  $('againBtn').addEventListener('click', ()=>{
+    const f=F(), keep={client:f.client.value, clientOther:f.clientOther.value};
+    f.reset(); f.client.value=keep.client; f.clientOther.value=keep.clientOther; f.type.dataset.kind=''; f.jobId.dataset.all='';
+    crewSel=[]; renderCrew(); resetPads(); f.date.value=today();
+    document.querySelectorAll('.bad').forEach(x=>x.classList.remove('bad')); show('formErr',false);
+    show('done',false); show('form',true); refresh(); window.scrollTo(0,0);
+  });
+
+  // ---- PDF copy (Burhan frame, both signatures) — before approval ----
+  function loadScript(u){ return new Promise((res,rej)=>{ if(window.jspdf) return res(); const s=document.createElement('script'); s.src=u; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+  function logoData(){ return fetch('logo.png').then(r=>r.ok?r.blob():null).then(b=>b?new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(b); }):null).catch(()=>null); }
+  $('pdfBtn').addEventListener('click', async ()=>{
+    if(!lastSent) return; const b=$('pdfBtn'); b.disabled=true; b.textContent='Making PDF…';
+    try{ await loadScript(JSPDF_URL); const logo=await logoData(); makePdf(logo); }
+    catch(e){ console.warn(e); alert('The PDF could not be made — check the internet connection and try again.'); }
+    finally{ b.disabled=false; b.textContent='Download PDF copy'; }
+  });
+  function makePdf(logo){
+    const L=lastSent, d=L.data, doc=new window.jspdf.jsPDF({unit:'pt', format:'a4'}), W=595.28, H=841.89, m=16, head=56, foot=22;
+    const tl=(TYPES[L.kind].find(x=>x[0]===d.type)||[])[1]||d.type, dc=link.docCtl||{};
+    doc.setLineWidth(0.9); doc.setDrawColor(40,48,60); doc.rect(m, m, W-2*m, H-2*m);
+    doc.setLineWidth(0.6); doc.line(m, m+head, W-m, m+head); doc.line(m+78, m, m+78, m+head); doc.line(W-m-168, m, W-m-168, m+head);
+    if(logo){ try{ const lh=head-12, lw=lh*600/562; doc.addImage(logo, 'PNG', m+(78-lw)/2, m+6, lw, lh); }catch(e){} }
+    const mx=(m+78+W-m-168)/2;
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(200,16,46); doc.text('BURHAN OIL & TRADE SERVICES', mx, m+17, {align:'center'});
+    doc.setFontSize(11.5); doc.setTextColor(20,30,48); doc.text('SCAFFOLDING RIG UP AND RIG DOWN FORM', mx, m+34, {align:'center', maxWidth:W-2*m-78-168-12});
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,96,106); doc.text(`${L.kind==='rigup'?'Rig Up':'Rig Down'} — ${tl}`, mx, m+47, {align:'center'});
+    const bx=W-m-168, rows=[['Doc. No.', dc.no||'—'],['Revision', dc.rev||'—'],['Issue date', dmy(dc.date)||'—'],['Page','1 of 1']], rh=head/4;
+    rows.forEach(([k,v],i)=>{ const ry=m+i*rh; if(i) doc.line(bx, ry, W-m, ry); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(90,96,106); doc.text(k, bx+6, ry+rh/2+2.6); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(20,20,20); doc.text(String(v), bx+60, ry+rh/2+2.8); });
+    doc.line(bx+56, m, bx+56, m+head);
+    const fy=H-m-foot; doc.line(m, fy, W-m, fy); doc.setFontSize(7.5); doc.setTextColor(90,96,106); doc.text('Burhan Oil & Trade Services · Scaffolding Division', m+8, fy+13.6); doc.setFont('helvetica','bold'); doc.text('UNCONTROLLED WHEN PRINTED', W-m-8, fy+13.6, {align:'right'});
+    // body
+    const M=34, CW=W-2*M, K=118, hw=(CW-2*K)/2; let y=m+head+18;
+    doc.setFillColor(255,246,222); doc.rect(M, y, CW, 20, 'F'); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(154,106,0);
+    doc.text(`SENT FOR APPROVAL ${L.sentAt.toLocaleString('en-GB')} — this copy is not yet approved by the scaffolding office`, M+6, y+13.5, {maxWidth:CW-12}); y+=28;
+    const safe=t=>String(t==null?'':t).replace(/³/g,'3').replace(/²/g,'2').replace(/[^\x00-\xFF—–·’‘“”…]/g,'');
+    const cell=(t,x,w,h,bold,fill)=>{ t=safe(t); if(fill){ doc.setFillColor(...fill); doc.rect(x,y,w,h,'F'); } doc.setDrawColor(110,116,126); doc.setLineWidth(0.5); doc.rect(x,y,w,h); doc.setFont('helvetica', bold?'bold':'normal'); doc.setFontSize(8.8); doc.setTextColor(20,22,28); doc.splitTextToSize(String(t||'—'), w-8).forEach((l,i)=>doc.text(l, x+4, y+11+i*10.6)); };
+    const kv=(k,v,k2,v2)=>{ v=safe(v); v2=safe(v2); const lines=Math.max(1, ...(k2===undefined?[doc.splitTextToSize(String(v||'—'), CW-K-8).length]:[doc.splitTextToSize(String(v||'—'), hw-8).length, doc.splitTextToSize(String(v2||'—'), hw-8).length])), h=Math.max(17, lines*10.6+6);
+      if(k2===undefined){ cell(k,M,K,h,true,[246,247,249]); cell(v,M+K,CW-K,h); } else { cell(k,M,K,h,true,[246,247,249]); cell(v,M+K,hw,h); cell(k2,M+K+hw,K,h,true,[246,247,249]); cell(v2,M+2*K+hw,hw,h); } y+=h; };
+    kv('JOB', `${L.kind==='rigup'?'Rig Up':'Rig Down'} — ${tl}`, 'DATE', dmy(d.date));
+    kv('CLIENT', d.client, 'WELL NO.', d.wellNo);
+    kv('LOCATION', d.location, 'PROJECT', link.projectName||'');
+    if(d.jobLabel) kv('SCAFFOLD', d.jobLabel);
+    if(d.volume || d.tagNo) kv('VOLUME', d.volume, 'TAG NO.', d.tagNo);
+    if(d.lifts) kv('LIFTS / FLOORS', d.lifts);
+    if(d.type==='inspection') kv('INSPECTION', `${d.inspType||''} · ${L.inspectorName||''}`, 'TAG RESULT', d.tag);
+    if(d.reason) kv('CANCELLED', [d.stage, d.reason].filter(Boolean).join(' · '));
+    kv('SCAFFOLDERS', L.crewNames.join(', '));
+    kv('DRIVER', d.driverName, 'UNIT NO.', d.vehicle);
+    kv('REQUESTED BY', d.requestedBy, 'PHONE', d.requesterPhone);
+    if(d.notes) kv('COMMENTS', d.notes);
+    y+=12; const bw=(CW-10)/2, bh=96;
+    [[d.sigSup, d.sigSupName, "CLIENT'S SUPERVISOR"],[d.sigScaf, d.sigScafName, 'SCAFFOLDER']].forEach(([img,name,role],i)=>{ const x=M+i*(bw+10); doc.setDrawColor(110,116,126); doc.rect(x, y, bw, bh);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,96,106); doc.text(role+' — SIGNATURE', x+6, y+11);
+      if(img){ try{ const bxw=bw-16, bxh=bh-42; let iw=bxw, ih=bxh; try{ const pr=doc.getImageProperties(img); const k=Math.min(bxw/pr.width, bxh/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){}
+        doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+8+(bxw-iw)/2, y+16+(bxh-ih)/2, iw, ih); }catch(e){} }
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(20,22,28); doc.text(`Name: ${name||''}`, x+6, y+bh-12); doc.text(`Date: ${dmy(d.date)}`, x+bw-6, y+bh-12, {align:'right'}); });
+    doc.save(`Burhan_${L.kind==='rigup'?'RigUp':'RigDown'}_${String(d.client||'').replace(/[^\w-]+/g,'_')}_${String(d.wellNo||'').replace(/[^\w-]+/g,'_')}_${d.date}.pdf`);
+  }
 })();
 </script>
 </body>
