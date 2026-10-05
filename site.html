@@ -42,6 +42,9 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 .note{font-size:14px; color:var(--muted);}
 .done{text-align:center; padding:26px 16px;} .done .tick{width:70px; height:70px; border-radius:50%; background:var(--ok-bg); color:var(--ok); display:grid; place-items:center; margin:0 auto 12px; font-size:38px; font-weight:900;}
 .done h2{font-size:22px; margin:0 0 8px;} .wait{background:var(--warn-bg); color:var(--warn); border-radius:10px; padding:10px 12px; font-size:14px; font-weight:600; margin-top:12px;}
+.seg{display:flex; gap:8px; margin-top:6px;} .seg button{flex:1; min-height:52px; border:2px solid var(--line); border-radius:12px; background:#fff; font:inherit; font-size:17px; font-weight:800; color:var(--ink);}
+.seg button.on[data-done="Completed"]{border-color:var(--ok); background:var(--ok-bg); color:var(--ok);} .seg button.on[data-done="Cancelled"]{border-color:var(--red); background:var(--red-bg); color:var(--red);}
+.pend{color:var(--warn); font-weight:700;}
 .hidden{display:none !important;}
 .center{text-align:center; padding:40px 16px; color:var(--muted);}
 footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 24px;}
@@ -60,43 +63,47 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       <div class="step"><span class="n">1</span>Client and job</div>
       <label>Client name <span class="req">*</span><select name="client"></select></label>
       <label id="clientOtherBox" class="hidden">Type the client name <span class="req">*</span><input name="clientOther" maxlength="60"></label>
-      <label>Job <span class="req">*</span><select name="kind"><option value="">Choose…</option><option value="rigup">Rig Up</option><option value="rigdown">Rig Down</option></select></label>
-      <label id="typeBox" class="hidden"><span id="typeLabel">Type</span> <span class="req">*</span><select name="type"></select></label>
+      <label>Job <span class="req">*</span><select name="job"><option value="">Choose…</option><option value="rigup">Rig Up</option><option value="rigdown">Rig Down</option><option value="modification">Modification</option><option value="inspection">Inspection</option></select></label>
+      <div id="doneBox" class="hidden"><label style="margin-bottom:6px;">Job done?</label>
+        <div class="seg" role="group" aria-label="Job done?"><button type="button" data-done="Completed" class="on">✔ Completed</button><button type="button" data-done="Cancelled">✖ Cancelled</button></div>
+        <div style="height:14px"></div></div>
     </div>
 
     <div id="partScaffold" class="card hidden">
       <div class="step"><span class="n">2</span><span id="scafTitle">Which scaffold?</span></div>
-      <label>Standing scaffold <span class="req">*</span><select name="jobId"></select></label>
+      <label>Rigged-up scaffold <span class="req">*</span><select name="jobId"></select></label>
       <div id="scafInfo" class="info hidden"></div>
-      <p id="scafNone" class="note hidden">No standing scaffold is listed for this client. Choose "Show all" or tell the office.</p>
+      <p id="scafNone" class="note hidden">No rigged-up scaffold is listed. Tell the scaffolding office.</p>
     </div>
 
     <div id="partDetails" class="card hidden">
       <div class="step"><span class="n" id="detN">2</span>Job details</div>
       <label>Date <span class="req">*</span><input type="date" name="date"></label>
-      <div id="wellLocBox">
-        <label>Well no. <span class="req">*</span><select name="wellNo"></select></label>
-        <label id="wellOtherBox" class="hidden">Type the well no. <span class="req">*</span><input name="wellOther" maxlength="40"></label>
-        <label>Location <span class="opt">(optional)</span><select name="location"></select></label>
-        <label id="locOtherBox" class="hidden">Type the location<input name="locOther" maxlength="100"></label>
+      <div id="siteBox">
+        <label>Well no. / Location <span class="req">*</span><select name="site"></select></label>
+        <label id="siteOtherBox" class="hidden">Type the well no. / location <span class="req">*</span><input name="siteOther" maxlength="100"></label>
       </div>
       <div id="newBox">
         <div class="row2">
           <label>Volume <span class="req">*</span><select name="volume"></select></label>
           <label>Tag no. <span class="opt">(optional)</span><input name="tagNo" maxlength="40"></label>
         </div>
-        <label>Lifts / floors <span class="opt">(optional)</span><input name="lifts" type="number" min="0" max="60" inputmode="numeric"></label>
+        <label>No. of floors <span class="opt">(optional)</span><input name="lifts" type="number" min="0" max="60" inputmode="numeric"></label>
+      </div>
+      <div id="modBox">
+        <label>What changed? <span class="req">*</span><select name="change"><option value="">Choose…</option><option>Floors increased</option><option>Floors reduced</option><option>Other change</option></select></label>
+        <label>No. of floors now <span class="opt" id="floorsOpt">(optional)</span><input name="floorsNow" type="number" min="0" max="60" inputmode="numeric"></label>
       </div>
       <div id="inspBox">
         <label>Inspection type <span class="req">*</span><select name="inspType"></select></label>
         <label>Scaffold inspector <span class="req">*</span><select name="inspector"></select></label>
-        <label>Tag result <span class="req">*</span><select name="tag"><option value="">Choose…</option><option>Green — safe to use</option><option>Red — do not use</option></select></label>
+        <label id="tagBox">Tag result <span class="req">*</span><select name="tag"><option value="">Choose…</option><option>Green — safe to use</option><option>Red — do not use</option></select></label>
       </div>
       <div id="cancelBox">
         <label>When was it cancelled? <span class="req">*</span><select name="stage"></select></label>
         <label>Reason <span class="req">*</span><input name="reason" maxlength="200" placeholder="e.g. Permit not ready"></label>
       </div>
-      <label>Scaffolder name(s) <span class="req">*</span><select name="addCrew"></select></label>
+      <label id="crewLbl">Scaffolder name(s) <span class="req" id="crewReq">*</span><span class="opt hidden" id="crewOpt">(optional)</span><select name="addCrew"></select></label>
       <div class="chips" id="crewChips"></div>
       <div style="height:14px"></div>
       <label>Driver name <span class="opt">(optional)</span><select name="driver"></select></label>
@@ -115,8 +122,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       <div class="sigbox" id="sigSupBox"><canvas id="sigSup" width="600" height="212"></canvas><div class="hint">Sign here</div></div>
       <div class="sigbtns"><button type="button" data-clear="sigSup">Clear</button><button type="button" data-upload="sigSup">Upload photo</button></div>
       <div style="height:18px"></div>
-      <label>Scaffolder name <span class="req">*</span><select name="scafName"></select></label>
-      <div class="note">Scaffolder signs here with a finger</div>
+      <label id="scafNameBox"><span id="sig2Lbl">Scaffolder name</span> <span class="req">*</span><select name="scafName"></select></label>
+      <div class="info hidden" id="inspSigner"></div>
+      <div class="note" id="sig2Note">Scaffolder signs here with a finger</div>
       <div class="sigbox" id="sigScafBox"><canvas id="sigScaf" width="600" height="212"></canvas><div class="hint">Sign here</div></div>
       <div class="sigbtns"><button type="button" data-clear="sigScaf">Clear</button><button type="button" data-upload="sigScaf">Upload photo</button></div>
       <input type="file" id="sigFile" accept="image/*" class="hidden">
@@ -127,14 +135,14 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
 
   <div id="done" class="card done hidden">
     <div class="tick" aria-hidden="true">✓</div>
-    <h2>Sent for approval</h2>
+    <h2>Sent</h2>
     <p class="note" id="doneMsg">The scaffolding office will check it and add it to the tracker.</p>
     <div id="waitMsg" class="wait hidden">No signal right now — keep this page open. It sends automatically when the phone is back online.</div>
     <button type="button" class="btn navy" id="pdfBtn" style="margin-top:16px;">Download PDF copy</button>
     <button type="button" class="btn ghost" id="againBtn" style="margin-top:10px;">Fill a new form</button>
   </div>
 </main>
-<footer>Every entry is checked and approved before it is added to the tracker.</footer>
+<footer>Burhan Oil &amp; Trade Services · Scaffolding Division</footer>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
@@ -149,8 +157,11 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     appId: "1:123036825493:web:41cc96578f1d55807ba89c"
   };
   const JSPDF_URL='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-  const OTHER='__other', ALL='__all';
-  const TYPES={rigup:[['new','New start'],['modification','Modification'],['cancellation','Cancellation'],['inspection','Inspection']], rigdown:[['completed','Completed'],['cancelled','Cancelled']]};
+  const OTHER='__other';
+  const JOBS={rigup:'Rig Up', rigdown:'Rig Down', modification:'Modification', inspection:'Inspection'};
+  // what the tracker stores (kind + type) for each job and outcome
+  const KIND={rigup:'rigup', rigdown:'rigdown', modification:'rigup', inspection:'rigup'};
+  const TYPE={rigup:['new','cancellation'], rigdown:['completed','cancelled'], modification:['modification','modCancelled'], inspection:['inspection','inspCancelled']};
   const $=id=>document.getElementById(id);
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const today=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
@@ -165,28 +176,35 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   let db;
   try{ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); }catch(e){ fail('The page could not start. Check the internet connection and open the link again.'); return; }
 
-  let link=null, crewSel=[], lastSent=null;
-  db.collection('siteLinks').doc(token).get().then(snap=>{
-    if(!snap.exists){ fail(); return; }
-    link=snap.data()||{}; if(link.active===false){ fail(); return; }
-    setup();
-  }).catch(err=>{ console.warn(err); fail(err && err.code==='permission-denied' ? 'This link has been switched off. Ask the office for the new link or QR code.' : 'Could not open the link. Check the internet connection and try again.'); });
+  let link=null, crewSel=[], lastSent=null, done='Completed';
+  function loadLink(first){
+    return db.collection('siteLinks').doc(token).get().then(snap=>{
+      if(!snap.exists){ if(first) fail(); return; }
+      const l=snap.data()||{}; if(l.active===false){ if(first) fail(); return; }
+      link=l; if(first) setup(); else refreshLists();
+    }).catch(err=>{ console.warn(err); if(first) fail(err && err.code==='permission-denied' ? 'This link has been switched off. Ask the office for the new link or QR code.' : 'Could not open the link. Check the internet connection and try again.'); });
+  }
+  loadLink(true);
 
   const nameOf=(list,id)=>((list||[]).find(x=>x.id===id)||{}).name||'';
-  function setup(){
+  function siteList(){ return (link.sites&&link.sites.length) ? link.sites : [...new Set([...(link.locations||[]), ...(link.wells||[])])].sort((a,b)=>a.localeCompare(b)); }
+  function keepSel(sel, html){ const cur=sel.value; sel.innerHTML=html; if(cur && [...sel.options].some(o=>o.value===cur)) sel.value=cur; }
+  function refreshLists(){
     const f=F();
     const clients=(link.clients&&link.clients.length)?link.clients:(link.clientName?[link.clientName]:[]);
-    f.client.innerHTML=opts(clients, 'Choose client…', 'Other — type the name');
-    f.wellNo.innerHTML=opts(link.wells||[], 'Choose well…', 'Other — type the well no.');
-    f.location.innerHTML=opts(link.locations||[], 'Choose location…', 'Other — type the location');
-    f.volume.innerHTML=opts(link.volumes||['0–26 m³','27–52 m³','53–78 m³']);
-    f.inspType.innerHTML=opts(link.inspTypes||['Handover (before first use)','7-day inspection','After alteration','After bad weather / incident']);
-    f.inspector.innerHTML=opts((link.inspectors||[]).map(x=>({v:x.id,t:x.name})), 'Choose inspector…');
-    f.stage.innerHTML=opts(link.stages||['Before leaving','On the road','At site']);
-    f.driver.innerHTML=opts((link.drivers||[]).map(x=>({v:x.id,t:x.name})), 'Choose driver…', 'Other — type the name');
-    f.vehicle.innerHTML=opts(link.vehicles||[], 'Choose unit…', 'Other — type the unit no.');
-    renderCrew(); resetPads();
-    f.date.value=today(); f.date.max=today();
+    keepSel(f.client, opts(clients, 'Choose client…', 'Other — type the name'));
+    keepSel(f.site, opts(siteList(), 'Choose well no. / location…', 'Other — type it'));
+    keepSel(f.volume, opts(link.volumes||['0–26 m³','27–52 m³','53–78 m³']));
+    keepSel(f.inspType, opts(link.inspTypes||['Handover (before first use)','7-day inspection','After alteration','After bad weather / incident']));
+    keepSel(f.inspector, opts((link.inspectors||[]).map(x=>({v:x.id,t:x.name})), 'Choose inspector…'));
+    keepSel(f.stage, opts(link.stages||['Before leaving','On the road','At site']));
+    keepSel(f.driver, opts((link.drivers||[]).map(x=>({v:x.id,t:x.name})), 'Choose driver…', 'Other — type the name'));
+    keepSel(f.vehicle, opts(link.vehicles||[], 'Choose unit…', 'Other — type the unit no.'));
+    renderCrew(); refresh();
+  }
+  function setup(){
+    refreshLists(); resetPads();
+    F().date.value=today(); F().date.max=today();
     show('loading',false); show('form',true); refresh();
   }
   function renderCrew(){
@@ -200,41 +218,49 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   F().addCrew.addEventListener('change', e=>{ if(e.target.value){ crewSel.push(e.target.value); renderCrew(); } });
   $('crewChips').addEventListener('click', e=>{ const b=e.target.closest('[data-unpick]'); if(!b) return; crewSel=crewSel.filter(x=>x!==b.dataset.unpick); renderCrew(); });
 
-  function standingFor(){
-    const c=(val('client')===OTHER?val('clientOther'):val('client')).toLowerCase(), all=link.standing||[];
-    const mine=all.filter(s=>c && String(s.client||'').toLowerCase()===c);
-    return {mine, all};
-  }
+  // every rigged-up scaffold (and rig-ups still waiting for approval), grouped by client — the chosen client first
+  function allStanding(){ return [...(link.standing||[]), ...(link.pendingUps||[])]; }
+  function scafLabel(s){ return [s.wellNo?'Well '+s.wellNo:'', s.location, s.tagNo?'Tag '+s.tagNo:'', s.rigUpDate?'up '+dmy(s.rigUpDate):''].filter(Boolean).join(' · ')+(s.pending?' — awaiting approval':''); }
   function fillScaffolds(){
-    const f=F(), {mine, all}=standingFor(), showAll=f.jobId.value===ALL || f.jobId.dataset.all==='1';
-    const list=showAll?all:mine, label=s=>[s.wellNo?'Well '+s.wellNo:'', s.location, s.tagNo?'Tag '+s.tagNo:'', s.rigUpDate?'up '+dmy(s.rigUpDate):''].filter(Boolean).join(' · ')||s.jobNo||'Scaffold';
+    const f=F(), all=allStanding(), c=(val('client')===OTHER?val('clientOther'):val('client')).toLowerCase();
+    const groups={}; all.forEach(s=>{ const k=s.client||'No client'; (groups[k]=groups[k]||[]).push(s); });
+    const names=Object.keys(groups).sort((a,b)=>(b.toLowerCase()===c)-(a.toLowerCase()===c) || a.localeCompare(b));
     const cur=f.jobId.value;
-    f.jobId.innerHTML=`<option value="">${list.length?'Choose scaffold…':'None for this client'}</option>`+list.map(s=>`<option value="${esc(s.id)}">${esc((showAll&&s.client?s.client+' — ':'')+label(s))}</option>`).join('')+(showAll||all.length===mine.length?'':`<option value="${ALL}">Show all standing scaffolds…</option>`);
-    if(cur && cur!==ALL && [...f.jobId.options].some(o=>o.value===cur)) f.jobId.value=cur;
-    show('scafNone', !list.length);
-    scafInfo();
+    f.jobId.innerHTML=`<option value="">${all.length?'Choose scaffold…':'None rigged up'}</option>`+names.map(n=>`<optgroup label="${esc(n)}">${groups[n].map(s=>`<option value="${esc(s.id)}">${esc(scafLabel(s))}</option>`).join('')}</optgroup>`).join('');
+    if(cur && [...f.jobId.options].some(o=>o.value===cur)) f.jobId.value=cur;
+    show('scafNone', !all.length); scafInfo();
   }
-  function scafInfo(){ const s=(link.standing||[]).find(x=>x.id===F().jobId.value); show('scafInfo', !!s);
-    if(s) $('scafInfo').innerHTML=`<b>${esc(s.client||'')}${s.wellNo?' · Well '+esc(s.wellNo):''}</b>${esc([s.location, s.volume, s.tagNo?'Tag '+s.tagNo:'', s.rigUpDate?'Up since '+dmy(s.rigUpDate):'', s.jobNo].filter(Boolean).join(' · '))}`; }
+  function scafInfo(){ const s=allStanding().find(x=>x.id===F().jobId.value); show('scafInfo', !!s);
+    if(s) $('scafInfo').innerHTML=`<b>${esc(s.client||'')}${s.wellNo?' · Well '+esc(s.wellNo):''}</b>${esc([s.location, s.volume, s.tagNo?'Tag '+s.tagNo:'', s.lifts!==undefined&&s.lifts!==''?s.lifts+' floors':'', s.rigUpDate?'Up since '+dmy(s.rigUpDate):''].filter(Boolean).join(' · '))}${s.pending?'<br><span class="pend">Rig-up awaiting approval</span>':''}`; }
+  function setDone(v){ done=v; document.querySelectorAll('[data-done]').forEach(b=>b.classList.toggle('on', b.dataset.done===v)); refresh(); }
+  document.addEventListener('click', e=>{ const b=e.target.closest('[data-done]'); if(b) setDone(b.dataset.done); });
   function refresh(){
-    const f=F(), kind=f.kind.value, type=f.type.value, client=f.client.value;
+    const f=F(), job=f.job.value, client=f.client.value, cancelled=done==='Cancelled';
     show('clientOtherBox', client===OTHER);
-    show('typeBox', !!kind);
-    if(kind && f.type.dataset.kind!==kind){ f.type.dataset.kind=kind; f.type.innerHTML=opts((TYPES[kind]||[]).map(([v,t])=>({v,t})), 'Choose…'); $('typeLabel').textContent=kind==='rigup'?'Rig Up type':'Rig Down result'; }
-    const ready=!!(client && kind && f.type.value);
-    const needScaf = ready && (kind==='rigdown' || type==='modification' || type==='inspection');
+    show('doneBox', !!job);
+    const ready=!!(client && job);
+    const needScaf = ready && job!=='rigup';
     show('partScaffold', needScaf); if(needScaf) fillScaffolds();
-    $('scafTitle').textContent = kind==='rigdown' ? 'Which scaffold came down?' : (type==='inspection' ? 'Which scaffold was inspected?' : 'Which scaffold was modified?');
+    $('scafTitle').textContent = job==='rigdown' ? 'Which scaffold is being rigged down?' : (job==='inspection' ? 'Which scaffold is being inspected?' : 'Which scaffold is being modified?');
     show('partDetails', ready); show('partSign', ready); show('sendBtn', ready);
     $('detN').textContent=needScaf?'3':'2'; $('sigN').textContent=needScaf?'4':'3';
-    show('wellLocBox', ready && !needScaf);
-    show('newBox', ready && kind==='rigup' && type==='new');
-    show('inspBox', ready && type==='inspection');
-    show('cancelBox', ready && (type==='cancellation' || type==='cancelled'));
-    show('wellOtherBox', f.wellNo.value===OTHER); show('locOtherBox', f.location.value===OTHER);
+    show('siteBox', ready && job==='rigup'); show('siteOtherBox', f.site.value===OTHER);
+    show('newBox', ready && job==='rigup' && !cancelled);
+    show('modBox', ready && job==='modification' && !cancelled);
+    $('floorsOpt').textContent = /increased|reduced/i.test(f.change.value) ? '*' : '(optional)'; $('floorsOpt').className = /increased|reduced/i.test(f.change.value) ? 'req' : 'opt';
+    show('inspBox', ready && job==='inspection'); show('tagBox', !cancelled);
+    show('cancelBox', ready && cancelled);
+    const insp=job==='inspection';
+    $('crewReq').classList.toggle('hidden', insp); $('crewOpt').classList.toggle('hidden', !insp);
+    show('scafNameBox', !insp); show('inspSigner', insp);
+    $('sig2Note').textContent = insp ? 'Scaffold inspector signs here with a finger' : 'Scaffolder signs here with a finger';
+    if(insp){ const n=nameOf(link.inspectors, f.inspector.value); $('inspSigner').innerHTML = n ? `<b>Scaffold inspector</b>${esc(n)}` : '<b>Scaffold inspector</b>Choose the inspector above'; }
     show('driverOtherBox', f.driver.value===OTHER); show('vehOtherBox', f.vehicle.value===OTHER);
   }
-  F().addEventListener('change', e=>{ if(e.target.name==='jobId' && e.target.value===ALL){ e.target.dataset.all='1'; e.target.value=''; fillScaffolds(); return; } if(e.target.name==='client'){ F().jobId.dataset.all=''; } if(e.target.name==='jobId'){ scafInfo(); } refresh(); e.target.classList.remove('bad'); });
+  F().addEventListener('change', e=>{
+    if(e.target.name==='jobId'){ const s=allStanding().find(x=>x.id===e.target.value); if(s && s.client){ const f=F(); if([...f.client.options].some(o=>o.value===s.client)) f.client.value=s.client; else { f.client.value=OTHER; f.clientOther.value=s.client; } } scafInfo(); }
+    if(e.target.name==='job'){ setDone('Completed'); show('formErr',false); }
+    refresh(); e.target.classList.remove('bad'); });
   F().addEventListener('input', e=>e.target.classList.remove('bad'));
 
   // ---- signature pads: finger / mouse, or a photo of a signature on paper ----
@@ -277,45 +303,45 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   F().addEventListener('submit', ()=>{ sendArmed=0; }, true);
   F().addEventListener('submit', e=>{
     e.preventDefault();
-    const f=F(), kind=val('kind'), type=val('type'), needScaf=(kind==='rigdown'||type==='modification'||type==='inspection');
+    const f=F(), job=val('job'), cancelled=done==='Cancelled', insp=job==='inspection';
     const errs=[], mark=n=>{ const el=f[n]||$(n); if(el) el.classList.add('bad'); };
     const client=val('client')===OTHER?val('clientOther'):val('client');
     if(!client){ errs.push('Choose the client.'); mark(val('client')===OTHER?'clientOther':'client'); }
-    if(!kind){ errs.push('Choose the job (Rig Up / Rig Down).'); mark('kind'); }
-    if(!type){ errs.push('Choose the type.'); mark('type'); }
-    let job=null; if(needScaf){ job=(link.standing||[]).find(s=>s.id===val('jobId'))||null; if(!job){ errs.push('Choose the scaffold.'); mark('jobId'); } }
+    if(!job){ errs.push('Choose the job.'); mark('job'); }
+    let scaf=null; if(job && job!=='rigup'){ scaf=allStanding().find(s=>s.id===val('jobId'))||null; if(!scaf){ errs.push('Choose the scaffold.'); mark('jobId'); } }
     if(!val('date')){ errs.push('Pick the date.'); mark('date'); } else if(val('date')>today()){ errs.push('The date cannot be in the future.'); mark('date'); }
-    const well=val('wellNo')===OTHER?val('wellOther'):val('wellNo'), loc=val('location')===OTHER?val('locOther'):val('location');
-    if(!needScaf && !well){ errs.push('Choose or type the well no.'); mark(val('wellNo')===OTHER?'wellOther':'wellNo'); }
-    if(kind==='rigup' && type==='new' && !val('volume')){ errs.push('Choose the volume.'); mark('volume'); }
-    if(type==='inspection'){ if(!val('inspType')){ errs.push('Choose the inspection type.'); mark('inspType'); } if(!val('inspector')){ errs.push('Choose the scaffold inspector.'); mark('inspector'); } if(!val('tag')){ errs.push('Choose the tag result.'); mark('tag'); } }
-    if((type==='cancellation'||type==='cancelled') && !val('stage')){ errs.push('Choose when it was cancelled.'); mark('stage'); }
-    if((type==='cancellation'||type==='cancelled') && !val('reason')){ errs.push('Write the reason it was cancelled.'); mark('reason'); }
-    if(!crewSel.length){ errs.push('Add at least one scaffolder.'); mark('addCrew'); }
+    const site=val('site')===OTHER?val('siteOther'):val('site');
+    if(job==='rigup' && !site){ errs.push('Choose or type the well no. / location.'); mark(val('site')===OTHER?'siteOther':'site'); }
+    if(job==='rigup' && !cancelled && !val('volume')){ errs.push('Choose the volume.'); mark('volume'); }
+    if(job==='modification' && !cancelled){ if(!val('change')){ errs.push('Choose what changed.'); mark('change'); } else if(/increased|reduced/i.test(val('change')) && val('floorsNow')===''){ errs.push('Write the number of floors now.'); mark('floorsNow'); } }
+    if(insp){ if(!val('inspType')){ errs.push('Choose the inspection type.'); mark('inspType'); } if(!val('inspector')){ errs.push('Choose the scaffold inspector.'); mark('inspector'); } if(!cancelled && !val('tag')){ errs.push('Choose the tag result.'); mark('tag'); } }
+    if(cancelled){ if(!val('stage')){ errs.push('Choose when it was cancelled.'); mark('stage'); } if(!val('reason')){ errs.push('Write the reason it was cancelled.'); mark('reason'); } }
+    if(!insp && !crewSel.length){ errs.push('Add at least one scaffolder.'); mark('addCrew'); }
     if(!val('supName')){ errs.push("Write the client's supervisor name."); mark('supName'); }
     if(!pads.sigSup.ink){ errs.push("The client's supervisor must sign."); $('sigSupBox').classList.add('bad'); }
-    if(!val('scafName')){ errs.push('Choose the scaffolder who signs.'); mark('scafName'); }
-    if(!pads.sigScaf.ink){ errs.push('The scaffolder must sign.'); $('sigScafBox').classList.add('bad'); }
+    if(!insp && !val('scafName')){ errs.push('Choose the scaffolder who signs.'); mark('scafName'); }
+    if(!pads.sigScaf.ink){ errs.push(insp?'The scaffold inspector must sign.':'The scaffolder must sign.'); $('sigScafBox').classList.add('bad'); }
     if(errs.length){ $('formErr').innerHTML='Please check:<br>'+errs.map(esc).join('<br>'); show('formErr',true); window.scrollTo({top:0, behavior:'smooth'}); return; }
     show('formErr',false);
+    const kind=KIND[job], type=TYPE[job][cancelled?1:0];
     const drv=val('driver'), veh=val('vehicle')===OTHER?val('vehOther'):val('vehicle'), crewNames=crewSel.map(id=>nameOf(link.crew,id));
-    const data={type, client, date:val('date'), crew:crewSel.slice(0,40), driver:drv===OTHER?'':drv, driverName:drv===OTHER?val('driverOther'):nameOf(link.drivers,drv), vehicle:veh,
+    const data={job, type, outcome:done, client, date:val('date'), crew:crewSel.slice(0,40), driver:drv===OTHER?'':drv, driverName:drv===OTHER?val('driverOther'):nameOf(link.drivers,drv), vehicle:veh,
       requestedBy:val('requestedBy'), requesterPhone:val('requesterPhone'), notes:val('notes'),
-      sigSupName:val('supName'), sigSup:padImage('sigSup'), sigScafName:nameOf(link.crew,val('scafName')), sigScaf:padImage('sigScaf')};
-    if(needScaf){ data.jobId=job.id; data.jobLabel=[job.client, job.wellNo?'Well '+job.wellNo:'', job.location, job.tagNo?'tag '+job.tagNo:''].filter(Boolean).join(' · '); data.wellNo=job.wellNo||''; data.location=job.location||''; }
-    else { data.wellNo=well; data.location=loc; }
-    if(kind==='rigup' && type==='new'){ data.volume=val('volume'); data.tagNo=val('tagNo'); data.lifts=val('lifts'); }
-    if(type==='inspection'){ data.inspType=val('inspType'); data.inspector=val('inspector'); data.tag=val('tag'); }
-    if(type==='cancellation'||type==='cancelled'){ data.stage=val('stage'); data.reason=val('reason'); }
-    const by=data.sigScafName||'Site form';
-    lastSent={kind, data, by, crewNames, inspectorName:nameOf(link.inspectors, data.inspector), sentAt:new Date()};
+      sigSupName:val('supName'), sigSup:padImage('sigSup'), sigScafName:insp?nameOf(link.inspectors,val('inspector')):nameOf(link.crew,val('scafName')), sigScaf:padImage('sigScaf'), sigRole2:insp?'inspector':'scaffolder'};
+    if(scaf){ data.jobId=scaf.id; data.jobLabel=[scaf.client, scaf.wellNo?'Well '+scaf.wellNo:'', scaf.location, scaf.tagNo?'tag '+scaf.tagNo:''].filter(Boolean).join(' · '); data.wellNo=scaf.wellNo||''; data.location=scaf.location||''; }
+    else { data.location=site; data.wellNo=''; }
+    if(job==='rigup' && !cancelled){ data.volume=val('volume'); data.tagNo=val('tagNo'); data.lifts=val('lifts'); }
+    if(job==='modification' && !cancelled){ data.change=val('change'); data.floorsNow=val('floorsNow'); }
+    if(insp){ data.inspType=val('inspType'); data.inspector=val('inspector'); if(!cancelled) data.tag=val('tag'); }
+    if(cancelled){ data.stage=val('stage'); data.reason=val('reason'); }
+    const by=(insp?nameOf(link.crew,crewSel[0])||data.sigScafName:data.sigScafName)||'Site form';
+    lastSent={job, data, crewNames, inspectorName:nameOf(link.inspectors, data.inspector), sentAt:new Date()};
     const btn=$('sendBtn'); btn.disabled=true; btn.textContent='Sending…';
     const waitT=setTimeout(()=>show('waitMsg',true), 8000);
     const sent=db.collection('siteSubmissions').add({token, projectId:link.projectId||'', kind, status:'pending', data, by, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
-    const tl=(TYPES[kind].find(x=>x[0]===type)||[])[1]||type;
-    $('doneMsg').textContent=`${kind==='rigup'?'Rig Up':'Rig Down'} — ${tl} for ${client}${data.wellNo?' · Well '+data.wellNo:''}. The scaffolding office will check it and add it to the tracker.`;
+    $('doneMsg').textContent=`${JOBS[job]}${cancelled?' (cancelled)':''} — ${client}${data.location?' · '+data.location:''}. The scaffolding office will check it and add it to the tracker.`;
     show('waitMsg',false); show('form',false); show('done',true); window.scrollTo(0,0);
-    sent.then(()=>{ clearTimeout(waitT); show('waitMsg',false); })
+    sent.then(()=>{ clearTimeout(waitT); show('waitMsg',false); setTimeout(()=>loadLink(false), 2500); })
       .catch(err=>{ clearTimeout(waitT); console.warn(err); show('done',false); show('form',true);
         $('formErr').textContent = err && err.code==='permission-denied' ? 'Not sent — the link may be switched off, or the system is being updated. Tell the office.' : 'Not sent — please try again.';
         show('formErr',true); window.scrollTo(0,0); })
@@ -323,13 +349,14 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   });
   $('againBtn').addEventListener('click', ()=>{
     const f=F(), keep={client:f.client.value, clientOther:f.clientOther.value};
-    f.reset(); f.client.value=keep.client; f.clientOther.value=keep.clientOther; f.type.dataset.kind=''; f.jobId.dataset.all='';
-    crewSel=[]; renderCrew(); resetPads(); f.date.value=today();
+    f.reset(); f.client.value=keep.client; f.clientOther.value=keep.clientOther;
+    crewSel=[]; resetPads(); f.date.value=today(); done='Completed';
     document.querySelectorAll('.bad').forEach(x=>x.classList.remove('bad')); show('formErr',false);
-    show('done',false); show('form',true); refresh(); window.scrollTo(0,0);
+    show('done',false); show('form',true); renderCrew(); setDone('Completed'); window.scrollTo(0,0);
+    loadLink(false);   // fresh list of rigged-up scaffolds
   });
 
-  // ---- PDF copy (Burhan frame, both signatures) — before approval ----
+  // ---- PDF copy (Burhan frame, both signatures) ----
   function loadScript(u){ return new Promise((res,rej)=>{ if(window.jspdf) return res(); const s=document.createElement('script'); s.src=u; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
   function logoData(){ return fetch('logo.png').then(r=>r.ok?r.blob():null).then(b=>b?new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(b); }):null).catch(()=>null); }
   $('pdfBtn').addEventListener('click', async ()=>{
@@ -340,45 +367,43 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   });
   function makePdf(logo){
     const L=lastSent, d=L.data, doc=new window.jspdf.jsPDF({unit:'pt', format:'a4'}), W=595.28, H=841.89, m=16, head=56, foot=22;
-    const tl=(TYPES[L.kind].find(x=>x[0]===d.type)||[])[1]||d.type, dc=link.docCtl||{};
+    const jobTxt=`${JOBS[L.job]}${d.outcome==='Cancelled'?' — Cancelled':''}`, dc=link.docCtl||{};
+    const safe=t=>String(t==null?'':t).replace(/³/g,'3').replace(/²/g,'2').replace(/[^\x00-\xFF—–·’‘“”…]/g,'');
     doc.setLineWidth(0.9); doc.setDrawColor(40,48,60); doc.rect(m, m, W-2*m, H-2*m);
     doc.setLineWidth(0.6); doc.line(m, m+head, W-m, m+head); doc.line(m+78, m, m+78, m+head); doc.line(W-m-168, m, W-m-168, m+head);
     if(logo){ try{ const lh=head-12, lw=lh*600/562; doc.addImage(logo, 'PNG', m+(78-lw)/2, m+6, lw, lh); }catch(e){} }
     const mx=(m+78+W-m-168)/2;
     doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(200,16,46); doc.text('BURHAN OIL & TRADE SERVICES', mx, m+17, {align:'center'});
     doc.setFontSize(11.5); doc.setTextColor(20,30,48); doc.text('SCAFFOLDING RIG UP AND RIG DOWN FORM', mx, m+34, {align:'center', maxWidth:W-2*m-78-168-12});
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,96,106); doc.text(`${L.kind==='rigup'?'Rig Up':'Rig Down'} — ${tl}`, mx, m+47, {align:'center'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,96,106); doc.text(safe(jobTxt), mx, m+47, {align:'center'});
     const bx=W-m-168, rows=[['Doc. No.', dc.no||'—'],['Revision', dc.rev||'—'],['Issue date', dmy(dc.date)||'—'],['Page','1 of 1']], rh=head/4;
     rows.forEach(([k,v],i)=>{ const ry=m+i*rh; if(i) doc.line(bx, ry, W-m, ry); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(90,96,106); doc.text(k, bx+6, ry+rh/2+2.6); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(20,20,20); doc.text(String(v), bx+60, ry+rh/2+2.8); });
     doc.line(bx+56, m, bx+56, m+head);
     const fy=H-m-foot; doc.line(m, fy, W-m, fy); doc.setFontSize(7.5); doc.setTextColor(90,96,106); doc.text('Burhan Oil & Trade Services · Scaffolding Division', m+8, fy+13.6); doc.setFont('helvetica','bold'); doc.text('UNCONTROLLED WHEN PRINTED', W-m-8, fy+13.6, {align:'right'});
-    // body
-    const M=34, CW=W-2*M, K=118, hw=(CW-2*K)/2; let y=m+head+18;
-    doc.setFillColor(255,246,222); doc.rect(M, y, CW, 20, 'F'); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(154,106,0);
-    doc.text(`SENT FOR APPROVAL ${L.sentAt.toLocaleString('en-GB')} — this copy is not yet approved by the scaffolding office`, M+6, y+13.5, {maxWidth:CW-12}); y+=28;
-    const safe=t=>String(t==null?'':t).replace(/³/g,'3').replace(/²/g,'2').replace(/[^\x00-\xFF—–·’‘“”…]/g,'');
+    const M=34, CW=W-2*M, K=118, hw=(CW-2*K)/2; let y=m+head+22;
     const cell=(t,x,w,h,bold,fill)=>{ t=safe(t); if(fill){ doc.setFillColor(...fill); doc.rect(x,y,w,h,'F'); } doc.setDrawColor(110,116,126); doc.setLineWidth(0.5); doc.rect(x,y,w,h); doc.setFont('helvetica', bold?'bold':'normal'); doc.setFontSize(8.8); doc.setTextColor(20,22,28); doc.splitTextToSize(String(t||'—'), w-8).forEach((l,i)=>doc.text(l, x+4, y+11+i*10.6)); };
     const kv=(k,v,k2,v2)=>{ v=safe(v); v2=safe(v2); const lines=Math.max(1, ...(k2===undefined?[doc.splitTextToSize(String(v||'—'), CW-K-8).length]:[doc.splitTextToSize(String(v||'—'), hw-8).length, doc.splitTextToSize(String(v2||'—'), hw-8).length])), h=Math.max(17, lines*10.6+6);
       if(k2===undefined){ cell(k,M,K,h,true,[246,247,249]); cell(v,M+K,CW-K,h); } else { cell(k,M,K,h,true,[246,247,249]); cell(v,M+K,hw,h); cell(k2,M+K+hw,K,h,true,[246,247,249]); cell(v2,M+2*K+hw,hw,h); } y+=h; };
-    kv('JOB', `${L.kind==='rigup'?'Rig Up':'Rig Down'} — ${tl}`, 'DATE', dmy(d.date));
-    kv('CLIENT', d.client, 'WELL NO.', d.wellNo);
-    kv('LOCATION', d.location, 'PROJECT', link.projectName||'');
-    if(d.jobLabel) kv('SCAFFOLD', d.jobLabel);
+    kv('JOB', jobTxt, 'DATE', dmy(d.date));
+    kv('CLIENT', d.client, 'PROJECT', link.projectName||'');
+    kv('WELL NO. / LOCATION', [d.wellNo?'Well '+d.wellNo:'', d.location].filter(Boolean).join(' · '));
     if(d.volume || d.tagNo) kv('VOLUME', d.volume, 'TAG NO.', d.tagNo);
-    if(d.lifts) kv('LIFTS / FLOORS', d.lifts);
-    if(d.type==='inspection') kv('INSPECTION', `${d.inspType||''} · ${L.inspectorName||''}`, 'TAG RESULT', d.tag);
+    if(d.lifts) kv('NO. OF FLOORS', d.lifts);
+    if(d.change) kv('WHAT CHANGED', d.change, 'FLOORS NOW', d.floorsNow);
+    if(d.inspType) kv('INSPECTION', `${d.inspType} · ${L.inspectorName||''}`, 'TAG RESULT', d.tag||'—');
     if(d.reason) kv('CANCELLED', [d.stage, d.reason].filter(Boolean).join(' · '));
     kv('SCAFFOLDERS', L.crewNames.join(', '));
     kv('DRIVER', d.driverName, 'UNIT NO.', d.vehicle);
     kv('REQUESTED BY', d.requestedBy, 'PHONE', d.requesterPhone);
     if(d.notes) kv('COMMENTS', d.notes);
     y+=12; const bw=(CW-10)/2, bh=96;
-    [[d.sigSup, d.sigSupName, "CLIENT'S SUPERVISOR"],[d.sigScaf, d.sigScafName, 'SCAFFOLDER']].forEach(([img,name,role],i)=>{ const x=M+i*(bw+10); doc.setDrawColor(110,116,126); doc.rect(x, y, bw, bh);
+    [[d.sigSup, d.sigSupName, "CLIENT'S SUPERVISOR"],[d.sigScaf, d.sigScafName, d.sigRole2==='inspector'?'SCAFFOLD INSPECTOR':'SCAFFOLDER']].forEach(([img,name,role],i)=>{ const x=M+i*(bw+10); doc.setDrawColor(110,116,126); doc.rect(x, y, bw, bh);
       doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,96,106); doc.text(role+' — SIGNATURE', x+6, y+11);
       if(img){ try{ const bxw=bw-16, bxh=bh-42; let iw=bxw, ih=bxh; try{ const pr=doc.getImageProperties(img); const k=Math.min(bxw/pr.width, bxh/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){}
         doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+8+(bxw-iw)/2, y+16+(bxh-ih)/2, iw, ih); }catch(e){} }
-      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(20,22,28); doc.text(`Name: ${name||''}`, x+6, y+bh-12); doc.text(`Date: ${dmy(d.date)}`, x+bw-6, y+bh-12, {align:'right'}); });
-    doc.save(`Burhan_${L.kind==='rigup'?'RigUp':'RigDown'}_${String(d.client||'').replace(/[^\w-]+/g,'_')}_${String(d.wellNo||'').replace(/[^\w-]+/g,'_')}_${d.date}.pdf`);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(20,22,28); doc.text(safe(`Name: ${name||''}`), x+6, y+bh-12); doc.text(`Date: ${dmy(d.date)}`, x+bw-6, y+bh-12, {align:'right'}); });
+    const fn=s=>String(s||'').replace(/[^\w-]+/g,'_');
+    doc.save(`Burhan_${fn(JOBS[L.job])}_${fn(d.client)}_${fn(d.wellNo||d.location)}_${d.date}.pdf`);
   }
 })();
 </script>
