@@ -2845,7 +2845,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b75';
+const APP_BUILD='b76';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -7903,7 +7903,7 @@ function renderPpe(live){
   if(live && (ppeUi.edit || ppeUi.exemptOpen)) return;   // don't wipe the item form while someone is typing in it
   if(live && ppeUi.issueOpen && document.activeElement && pane.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
   if(live && document.activeElement && document.activeElement.closest && document.activeElement.closest('#ppeReqPanel') && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;   // Batch 73: typing in a request card
-  const prArmed=[...pane.querySelectorAll('#ppeReqPanel [data-armed="1"]')].map(el=>{ const at=[...el.attributes].find(x=>x.name.startsWith('data-pr-')); return at?[at.name, at.value, el.textContent]:null; }).filter(Boolean);
+  const prArmed=[...pane.querySelectorAll('[data-armed="1"]')].map(el=>{ const at=[...el.attributes].find(x=>x.name.startsWith('data-pr-')); return at?[at.name, at.value, el.textContent]:null; }).filter(Boolean);
   const prVals={}; pane.querySelectorAll('[data-pr-size],[data-pr-qty],[data-pr-note]').forEach(el=>{ prVals[el.dataset.prSize?'s'+el.dataset.prSize:el.dataset.prQty?'q'+el.dataset.prQty:'n'+el.dataset.prNote]=el.value; });
   if(ppeUi.fresh) ppeUi.fresh=false; else ppeReadIssueInputs();
   const keepScroll=window.scrollY;
@@ -8079,10 +8079,11 @@ function ppeExemptFormHtml(){
     <div class="form-actions" style="margin-top:6px;"><button type="button" class="btn btn-sm" id="ppeExemptCancel">Cancel</button><button type="submit" class="btn btn-primary btn-sm">Save</button></div></form>`;
 }
 // Batch 59: every PPE issue session (same day, issued by, type, project) can print its signature sheet again later
+function ppeSessKey(r){ return r.batchId || [r.date, String(r.issuedBy||'').trim().toLowerCase(), r.condition||'', r.projectId||''].join('|'); }
 function ppeIssueSessions(fromD, toD){
   const g=new Map();
   for(const w of activeWorkers()) for(const r of (w.ppeIssued||[])){ if(!r.date || r.date<fromD || r.date>toD) continue;
-    const pid=r.projectId||'', key=r.batchId || [r.date, String(r.issuedBy||'').trim().toLowerCase(), r.condition||'', pid].join('|');
+    const pid=r.projectId||'', key=ppeSessKey(r);
     let s=g.get(key); if(!s){ s={key, date:r.date, issuedBy:r.issuedBy||'', condition:r.condition||'', project:pid||'all', ws:new Map(), n:0}; g.set(key,s); }
     let x=s.ws.get(w.id); if(!x){ x={name:w.fullName||'—', civilId:w.civilId||'', designation:w.designation||'', items:[]}; s.ws.set(w.id,x); }
     if(r.sigId && !x.sigId){ x.sigId=r.sigId; x.signed=r.receivedDate||''; }
@@ -8092,7 +8093,7 @@ function ppeIssueSessions(fromD, toD){
 function ppeSessionsHtml(fromD, toD, word){
   const ss=ppeIssueSessions(fromD, toD), show=ppeUi.sessAll?ss:ss.slice(0,12);
   return `<div class="panel"><div class="subhead" style="margin-top:0;">PPE issues — print the signature sheet again (${ss.length} ${esc(word)})</div>
-    ${ss.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Project</th><th>Issued by</th><th class="num">Workers</th><th class="num">Items</th><th></th></tr></thead><tbody>${show.map(s=>`<tr><td class="mono">${esc(s.date)}</td><td>${esc(s.condition||'—')}</td><td>${esc(s.project!=='all'?projectName(s.project):'—')}</td><td>${esc(s.issuedBy||'—')}</td><td class="num">${s.workers.length}</td><td class="num">${s.n}</td><td><button type="button" class="btn btn-sm" data-ppe-sheet="${esc(s.key)}">${ic('printer')} Signature sheet</button></td></tr>`).join('')}</tbody></table></div>${ss.length>show.length?`<button type="button" class="att-link" id="ppeSessAll">Show all ${ss.length}</button>`:''}`:`<p class="wsub">No PPE issued ${esc(word)}.</p>`}</div>`;
+    ${ss.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Project</th><th>Issued by</th><th class="num">Workers</th><th class="num">Items</th><th></th></tr></thead><tbody>${show.map(s=>`<tr><td class="mono">${esc(s.date)}</td><td>${esc(s.condition||'—')}</td><td>${esc(s.project!=='all'?projectName(s.project):'—')}</td><td>${esc(s.issuedBy||'—')}</td><td class="num">${s.workers.length}</td><td class="num">${s.n}</td><td><button type="button" class="btn btn-sm" data-ppe-sheet="${esc(s.key)}">${ic('printer')} Signature sheet</button>${canEdit()?` <button type="button" class="btn btn-sm btn-ghost" data-pr-sessdel="${esc(s.key)}" data-armed="0" title="Delete this issue and its PPE records (e.g. test entries)">Delete</button>`:''}</td></tr>`).join('')}</tbody></table></div>${ss.length>show.length?`<button type="button" class="att-link" id="ppeSessAll">Show all ${ss.length}</button>`:''}`:`<p class="wsub">No PPE issued ${esc(word)}.</p>`}</div>`;
 }
 async function ppeSigImg(id){
   if(!id) return ''; let s=ppeSigCache.get(id);
@@ -8371,6 +8372,47 @@ async function ppeDeliverPaper(id){
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
 
+/* ---- Batch 76: delete (test) entries — editors only ---- */
+async function ppeSigCleanup(ids){
+  for(const sid of ids){ if(!sid) continue;
+    if(workers.some(w=>(w.ppeIssued||[]).some(x=>x.sigId===sid))) continue;   // still proof for another record
+    try{ await db.collection('ppeSignatures').doc(sid).delete(); ppeSigCache.delete(sid); }catch(e){ console.warn('PPE signature delete', e); } }
+}
+async function ppeRemoveRecords(match){
+  const sigs=new Set(); let n=0;
+  for(const w of workers){ const cur=w.ppeIssued||[], gone=cur.filter(x=>match(x)); if(!gone.length) continue;
+    const keep=cur.filter(x=>!match(x)); gone.forEach(x=>{ if(x.sigId) sigs.add(x.sigId); });
+    await db.collection('workers').doc(w.id).update(stamp({ppeIssued:keep})); w.ppeIssued=keep; n+=gone.length; }
+  return {n, sigs};
+}
+async function ppeDeleteRequest(id, quiet){
+  if(!canEdit()) return false;
+  const r=[...ppeReqs, ...ppeReqsDone].find(x=>x.id===id)||{};
+  try{
+    const {n, sigs}=await ppeRemoveRecords(x=>x.reqId===id || x.batchId==='ppereq_'+id);
+    if(r.sigId) sigs.add(r.sigId); for(const g of Object.values(r.got||{})) if(g&&g.sigId) sigs.add(g.sigId);
+    const rc=[...ppeReqs, ...ppeReqsDone].filter(x=>x.kind==='receipt' && ((x.data||{}).refs||[]).some(f=>f.t==='req' && f.id===id));
+    for(const x of rc){ if(x.sigId) sigs.add(x.sigId); try{ await db.collection('ppeRequests').doc(x.id).delete(); }catch(e){ console.warn(e); } }
+    await db.collection('ppeRequests').doc(id).delete();
+    await ppeSigCleanup(sigs);
+    if(!quiet) toast(`Request deleted${n?` — ${n} PPE record${n===1?'':'s'} removed`:''}`);
+    return true;
+  }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not delete'); return false; }
+}
+async function ppeDeleteSession(key){
+  if(!canEdit()) return;
+  if(String(key).startsWith('ppereq_')){ await ppeDeleteRequest(key.slice(7)); return; }
+  try{ const {n, sigs}=await ppeRemoveRecords(x=>ppeSessKey(x)===key); await ppeSigCleanup(sigs); toast(`${n} PPE record${n===1?'':'s'} deleted`); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not delete'); }
+}
+async function ppeDeleteAllRequests(){
+  if(!canEdit()) return; const seen=new Set(), ids=[];
+  for(const r of [...ppeReqs, ...ppeReqsDone]) if(r.kind==='request' && !seen.has(r.id)){ seen.add(r.id); ids.push(r.id); }
+  let ok=0; for(const id of ids) if(await ppeDeleteRequest(id, true)) ok++;
+  for(const r of [...ppeReqs, ...ppeReqsDone].filter(x=>x.kind==='receipt')){ try{ await db.collection('ppeRequests').doc(r.id).delete(); }catch(e){} }
+  toast(`${ok} request${ok===1?'':'s'} deleted with their PPE records and signatures`);
+}
+
 /* ---- panel at the top of Workforce → PPE ---- */
 function ppeLastIssue(w, item){ const r=(w&&w.ppeIssued||[]).filter(x=>x.item===item && x.date).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0]; return r?r.date:''; }
 function ppeReqCardHtml(r, mode){
@@ -8393,6 +8435,7 @@ function ppeReqCardHtml(r, mode){
   if(mode==='md' && md){ note=`<input class="ppe-rq-note" data-pr-note="${esc(r.id)}" maxlength="300" placeholder="Comment (needed if not approved)">`;
     acts=`<button type="button" class="btn btn-sm btn-primary" data-pr-ok="${esc(r.id)}">${group?'Approve (ticked people left out)':'Approve'}</button><button type="button" class="btn btn-sm" data-pr-no="${esc(r.id)}" data-armed="0">Not approve${group?' all':''}</button>`; }
   if(mode==='approved' && ed) acts=`<button type="button" class="btn btn-sm" data-pr-paper="${esc(r.id)}" data-armed="0" title="Use when the worker signed a paper form instead of the link">Delivered (paper signature)</button>`;
+  if(ed) acts+=`<button type="button" class="btn btn-sm btn-ghost" data-pr-del="${esc(r.id)}" data-armed="0" title="Delete this request, the PPE records made from it and its signatures (e.g. test entries)">Delete</button>`;
   return `<div class="record-card ppe-rq${ppeReqUi.busy===r.id?' busy':''}"><div class="record-card-top"><div class="record-card-title">${w?`<button type="button" class="att-link" data-ppe-worker="${esc(w.id)}">${esc(name)}</button>`:esc(name)}${group?` <span class="badge muted">for ${lines.length} ${lines.length===1?'person':'people'}</span>`:''} <span class="badge ${badge}">${esc(st)}</span></div><div class="record-card-actions">${acts}</div></div>
     <div class="wsub">Sent ${esc(ppeWhenTxt(r))} · reason <strong>${esc(d.reason||'—')}</strong> · needed by ${esc(isoToDmy(d.neededBy||'')||'—')}${!group&&w&&w.designation?' · '+esc(w.designation):''}${w&&w.projectId?' · '+esc(projectName(w.projectId)):''}</div>
     ${d.note?`<div class="wsub">Worker's comment: ${esc(d.note)}</div>`:''}
@@ -8414,7 +8457,7 @@ function ppeReqPanelHtml(){
   const sec=(title, list, mode, empty)=>`<div class="subhead">${title} (${list.length})</div>${list.length?list.map(r=>ppeReqCardHtml(r, mode)).join(''):`<p class="wsub" style="margin:0 0 6px;">${empty}</p>`}`;
   const shownDone=ppeReqUi.done?done:done.slice(0,6);
   return `<div class="panel ppe-req" id="ppeReqPanel">
-    <div class="section-head"><h3>${ic('qr')} PPE requests from workers</h3>${ed||md?`<button type="button" class="btn btn-sm" data-pr-xlsx="1">${ic('download')} Excel</button>`:''}</div>
+    <div class="section-head"><h3>${ic('qr')} PPE requests from workers</h3><span style="display:flex; gap:8px; flex-wrap:wrap;">${ed||md?`<button type="button" class="btn btn-sm" data-pr-xlsx="1">${ic('download')} Excel</button>`:''}${ed&&(nNew.length+nMd.length+nAp.length+done.length)?`<button type="button" class="btn btn-sm btn-ghost" data-pr-delall="1" data-armed="0" title="For clearing test entries: deletes every request shown here, the PPE records made from them and their signatures">Delete all ${nNew.length+nMd.length+nAp.length+done.length} requests</button>`:''}</span></div>
     <p class="wsub" style="margin:-4px 0 8px;">Worker requests on the link → <strong>HSE review</strong> → <strong>MD approval</strong> → e-mail to HSE → worker collects and signs <strong>I received PPE</strong> → saved in the worker's PPE issued records.</p>
     ${linkHtml}
     <div class="ppe-rq-counts"><span><b>${nNew.length}</b> HSE review</span><span><b>${nMd.length}</b> MD approval</span><span><b>${nAp.length}</b> to collect</span><span><b>${conf.length}</b> crew issues to confirm</span><span><b>${done.filter(r=>r.status==='delivered').length}</b> delivered (30 days)</span></div>
@@ -8442,6 +8485,9 @@ async function ppeReqClick(b){
   if(D.prXlsx){ await ppeReqXlsx(); return; }
   if(D.prAll){ ppeReqUi.done=true; renderPpe(); return; }
   if(D.prRcpt){ await ppeReceiptPdf(D.prRcpt); return; }
+  if(D.prDelall){ if(!arm('Tap again — deletes ALL requests, their PPE records and signatures')) return; b.disabled=true; try{ await ppeDeleteAllRequests(); } finally{ b.dataset.armed='0'; renderPpe(); } return; }
+  if(D.prDel){ if(!arm('Tap again — delete request + its PPE records')) return; ppeReqUi.busy=D.prDel; b.disabled=true; try{ await ppeDeleteRequest(D.prDel); } finally{ ppeReqUi.busy=''; b.dataset.armed='0'; renderPpe(); } return; }
+  if(D.prSessdel){ if(!arm('Tap again to delete')) return; b.disabled=true; try{ await ppeDeleteSession(D.prSessdel); } finally{ b.dataset.armed='0'; renderPpe(); } return; }
   const id=D.prMd||D.prRej||D.prOk||D.prNo||D.prPaper; if(!id) return;
   if((D.prRej||D.prNo||D.prPaper) && !arm(D.prPaper?'Tap again — delivered':'Tap again to confirm')) return;
   ppeReqUi.busy=id; b.disabled=true;
