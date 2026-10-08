@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b2140">
+<title>PPE Request &amp; Receipt — Burhan</title>
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--navy:#0b2140; --navy2:#13325c; --red:#b3121a; --red-bg:#fdecec; --ink:#16202e; --muted:#5d6878; --line:#cfd6e0; --bg:#f3f5f8; --card:#fff; --ok:#1e7a4c; --ok-bg:#e3f4ea; --warn:#9a6a00; --warn-bg:#fff6de; --focus:#1f6fd1; --blue-bg:#eaf2fd;}
+*{box-sizing:border-box;}
+html,body{margin:0; background:var(--bg); color:var(--ink); font:17px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari","Noto Sans Arabic",Arial,sans-serif; -webkit-text-size-adjust:100%;}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2)); color:#fff; padding:12px 16px; display:flex; gap:12px; align-items:center; position:sticky; top:0; z-index:5; box-shadow:0 2px 8px rgba(0,0,0,.2);}
+header img{width:46px; height:46px; object-fit:contain; background:#fff; border-radius:10px; padding:4px; flex:none;}
+header .t1{font-weight:800; font-size:17px; line-height:1.2;} header .t2{font-size:12px; opacity:.85; margin-top:2px;}
+main{max-width:640px; margin:0 auto; padding:14px 14px 40px;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px;}
+.tr{display:block; font-weight:500; font-size:12.5px; color:var(--muted); line-height:1.35;} .tr .ar{direction:rtl; unicode-bidi:isolate;}
+h2{margin:0 0 10px; font-size:19px;}
+label{display:block; font-weight:700; font-size:15px; margin:0 0 14px;}
+input,select,textarea{display:block; width:100%; margin-top:6px; padding:12px; font:inherit; font-size:17px; color:var(--ink); background:#fff; border:2px solid var(--line); border-radius:12px; min-height:50px;}
+textarea{min-height:70px;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid color-mix(in srgb,var(--focus) 35%,transparent); border-color:var(--focus);}
+.bad{border-color:var(--red) !important; background:var(--red-bg);}
+.btn{display:block; width:100%; padding:15px; border:0; border-radius:14px; font:inherit; font-size:18px; font-weight:800; background:var(--red); color:#fff; cursor:pointer; text-align:center;}
+.btn .tr{color:rgba(255,255,255,.85);}
+.btn:disabled{opacity:.6;} .btn.ghost{background:#fff; color:var(--ink); border:2px solid var(--line);} .btn.ghost .tr{color:var(--muted);} .btn.navy{background:var(--navy);} .btn.green{background:var(--ok);}
+.big2{display:grid; grid-template-columns:1fr 1fr; gap:12px;} .big2 .btn{min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;}
+.big2 svg{width:44px; height:44px;}
+.hello{display:flex; align-items:center; gap:10px; justify-content:space-between;} .hello b{font-size:19px;}
+.link{background:none; border:0; color:var(--focus); font:inherit; font-size:15px; font-weight:700; padding:6px; cursor:pointer;}
+.tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.tile{position:relative; border:2px solid var(--line); border-radius:14px; background:#fff; padding:10px 6px 8px; text-align:center; cursor:pointer; font:inherit; color:var(--ink);}
+.tile .pic{width:64px; height:64px; margin:0 auto 4px; display:grid; place-items:center; color:var(--navy);} .tile .pic svg{width:58px; height:58px;} .tile .pic img{width:64px; height:64px; object-fit:cover; border-radius:10px;}
+.tile .nm{font-weight:800; font-size:14px; line-height:1.2;} .tile .tr{font-size:11.5px;}
+.tile.on{border-color:var(--ok); background:var(--ok-bg); box-shadow:0 0 0 2px var(--ok);} .tile.on::after{content:"✓"; position:absolute; top:6px; right:8px; width:24px; height:24px; border-radius:50%; background:var(--ok); color:#fff; font-weight:900; display:grid; place-items:center; font-size:14px;}
+.tiles.small{grid-template-columns:repeat(4,1fr);} .tiles.small .pic{width:46px; height:46px;} .tiles.small .pic svg{width:42px; height:42px;} .tiles.small .nm{font-size:12.5px;}
+.sel{border:2px solid var(--ok); background:#fbfffc; border-radius:14px; padding:12px; margin-bottom:10px;}
+.sel-h{display:flex; align-items:center; gap:10px; font-weight:800;} .sel-h svg{width:34px; height:34px; color:var(--navy);} .sel-h img{width:38px; height:38px; border-radius:8px; object-fit:cover;}
+.sel-h button{margin-left:auto;}
+.szs{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;} .szs button{min-width:48px; padding:10px 8px; border:2px solid var(--line); border-radius:10px; background:#fff; font:inherit; font-weight:800; font-size:15px;} .szs button.on{border-color:var(--navy); background:var(--navy); color:#fff;}
+.qty{display:flex; align-items:center; gap:8px;} .qty button{width:46px; height:46px; border-radius:12px; border:2px solid var(--line); background:#fff; font-size:24px; font-weight:800;} .qty b{min-width:34px; text-align:center; font-size:20px;}
+.reasons{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 14px;} .reasons button{padding:12px 8px; border:2px solid var(--line); border-radius:12px; background:#fff; font:inherit; font-weight:800; font-size:15px;} .reasons button.on{border-color:var(--red); background:var(--red-bg); color:var(--red);}
+.st{padding:10px 0; border-top:1px solid var(--line);} .st:first-child{border-top:0;} .st-h{display:flex; justify-content:space-between; gap:8px; align-items:baseline;} .st-h b{font-size:16px;} .st .badge{margin-top:4px;}
+.badge{display:inline-block; padding:3px 9px; border-radius:999px; font-size:13px; font-weight:800;} .b-new,.b-md{background:var(--warn-bg); color:var(--warn);} .b-approved,.b-confirm{background:var(--blue-bg); color:#1d4f91;} .b-delivered{background:var(--ok-bg); color:var(--ok);} .b-rejected{background:var(--red-bg); color:var(--red);}
+.rc{display:flex; gap:12px; align-items:center; border:2px solid var(--line); border-radius:12px; padding:12px; margin-bottom:8px; cursor:pointer;} .rc input{width:26px; height:26px; min-height:0; margin:0; flex:none;} .rc.on{border-color:var(--ok); background:var(--ok-bg);}
+.sigbox{border:2px dashed var(--line); border-radius:12px; background:#fff; position:relative; touch-action:none; margin-top:6px;}
+.sigbox canvas{display:block; width:100%; height:170px; border-radius:10px;}
+.sigbox .hint{position:absolute; inset:0; display:grid; place-items:center; color:#a0a8b4; font-size:15px; pointer-events:none; text-align:center;}
+.err{background:var(--red-bg); color:var(--red); border:1px solid #f3b9bc; padding:12px; border-radius:12px; font-size:15px; font-weight:700; margin-bottom:12px;}
+.note{font-size:14px; color:var(--muted);}
+.done{text-align:center;} .done .tick{width:70px; height:70px; border-radius:50%; background:var(--ok-bg); color:var(--ok); display:grid; place-items:center; margin:0 auto 12px; font-size:38px; font-weight:900;}
+.hidden{display:none !important;}
+.center{text-align:center; padding:40px 16px; color:var(--muted);}
+footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 24px;}
+@media (max-width:380px){ .tiles{grid-template-columns:repeat(2,1fr);} .tiles.small{grid-template-columns:repeat(3,1fr);} }
+</style>
+</head>
+<body>
+<header><img src="logo.png" alt="Burhan Oil &amp; Trade Services"><div><div class="t1">PPE Request &amp; Receipt</div><div class="t2">Burhan Oil &amp; Trade Services · Think Safe, Work Safe, Home Safe</div></div></header>
+<main id="app"><div class="center">Opening…</div></main>
+<footer>Burhan Oil &amp; Trade Services · HSE Department</footer>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhQDmL7V0IyMnFZmrLNCo1hJqW5rPZt5Q",
+    authDomain: "workforce-hse.firebaseapp.com",
+    projectId: "workforce-hse",
+    storageBucket: "workforce-hse.firebasestorage.app",
+    messagingSenderId: "123036825493",
+    appId: "1:123036825493:web:41cc96578f1d55807ba89c"
+  };
+  const $=s=>document.querySelector(s), app=$('#app');
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const today=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  const plusDays=(n)=>{ const d=new Date(); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  const dmy=s=>{ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||''); return m?`${m[3]}-${m[2]}-${m[1]}`:(s||''); };
+  // English · Hindi · Arabic
+  const T={
+    name:['Your name','आपका नाम','اسمك'], pick:['Choose your name','अपना नाम चुनें','اختر اسمك'], search:['Search name','नाम खोजें','ابحث عن الاسم'],
+    cid:['Last 4 digits of your Civil ID','सिविल आईडी के आखिरी 4 अंक','آخر 4 أرقام من البطاقة المدنية'], cont:['Continue','आगे बढ़ें','متابعة'],
+    hello:['Hello','नमस्ते','مرحباً'], notme:['Not you?','आप नहीं?','لست أنت؟'],
+    req:['Request PPE','पीपीई मांगें','طلب معدات الوقاية'], rec:['I received PPE','मुझे पीपीई मिल गया','استلمت المعدات'],
+    mine:['My PPE requests','मेरे पीपीई अनुरोध','طلباتي'], none:['No requests yet.','अभी कोई अनुरोध नहीं।','لا توجد طلبات بعد.'],
+    choose:['Tap the PPE you need','जो पीपीई चाहिए उस पर टैप करें','اضغط على المعدات التي تحتاجها'], more:['More PPE','और पीपीई','معدات أخرى'],
+    size:['Size','साइज़','المقاس'], qty:['Quantity','मात्रा','الكمية'], remove:['Remove','हटाएँ','إزالة'],
+    need:['Needed by','कब तक चाहिए','مطلوب بتاريخ'], why:['Reason','कारण','السبب'], note:['Comment (optional)','टिप्पणी (वैकल्पिक)','ملاحظة (اختياري)'],
+    New:['New','नया','جديد'], Lost:['Lost','खो गया','مفقود'], Damaged:['Damaged','खराब हो गया','تالف'], 'Worn out':['Worn out','घिस गया','مستهلك'],
+    send:['Send request','अनुरोध भेजें','إرسال الطلب'], back:['Back','वापस','رجوع'],
+    sent:['Request sent','अनुरोध भेज दिया','تم إرسال الطلب'], sent2:['HSE will check it. The MD approves it. Then collect it from the store and press “I received PPE”.','एचएसई जाँच करेगा, एमडी मंज़ूरी देंगे। फिर स्टोर से लें और “मुझे पीपीई मिल गया” दबाएँ।','سيراجعه قسم السلامة ويوافق عليه المدير العام، ثم استلمه من المخزن واضغط «استلمت المعدات».'],
+    recH:['Tick what you received','जो मिला उस पर टिक करें','حدد ما استلمته'], nothing:['Nothing waiting for you to receive.','अभी लेने के लिए कुछ नहीं है।','لا يوجد شيء بانتظار الاستلام.'],
+    sign:['Sign here with your finger','यहाँ उंगली से हस्ताक्षर करें','وقّع هنا بإصبعك'], clear:['Clear','मिटाएँ','مسح'],
+    confirm:['Confirm I received','पुष्टि करें कि मुझे मिला','تأكيد الاستلام'], thanks:['Thank you — receipt saved','धन्यवाद — प्राप्ति दर्ज हो गई','شكراً — تم حفظ الاستلام'],
+    st_new:['Waiting for HSE review','एचएसई जाँच बाकी','بانتظار مراجعة السلامة'], st_md:['Waiting for MD approval','एमडी की मंज़ूरी बाकी','بانتظار موافقة المدير العام'],
+    st_approved:['Approved — collect from store','मंज़ूर — स्टोर से लें','تمت الموافقة — استلم من المخزن'], st_delivered:['Delivered','मिल गया','تم التسليم'], st_rejected:['Not approved','मंज़ूर नहीं','غير موافق عليه'],
+    st_confirm:['Issued to you — please confirm','आपको दिया गया — पुष्टि करें','صُرفت لك — يرجى التأكيد'], st_sent:['Sent — waiting','भेजा गया — प्रतीक्षा','أُرسل — قيد الانتظار'],
+  };
+  const tr=(k)=>{ const t=T[k]||[k,'','']; return `${esc(t[0])}<span class="tr">${esc(t[1])}${t[2]?` · <span class="ar" dir="rtl">${esc(t[2])}</span>`:''}</span>`; };
+  const ITEM_T={helmet:['हेलमेट','خوذة'], impact:['इम्पैक्ट दस्ताने','قفازات مقاومة للصدمات'], leather:['चमड़े के दस्ताने','قفازات جلدية'], coverall:['कवरऑल','أفرول'], shoes:['सेफ्टी जूते','حذاء السلامة'], glasses:['सेफ्टी चश्मा','نظارة السلامة'], goggles:['गॉगल्स','نظارة واقية'], ear:['कान की सुरक्षा','واقي الأذن'], mask:['मास्क','كمامة'], vest:['रिफ्लेक्टिव जैकेट','سترة عاكسة'], harness:['हार्नेस','حزام الأمان'], shield:['फेस शील्ड','واقي الوجه'], gloves:['दस्ताने','قفازات'], other:['अन्य','أخرى']};
+  // simple drawn icons (stroke = currentColor)
+  const ICON={
+    helmet:'<path d="M10 42h44M14 42c0-14 8-24 18-24s18 10 18 24"/><path d="M28 18v-4h8v4M32 18v10"/><path d="M8 42h48v5H8z"/>',
+    impact:'<path d="M20 56V30l-6-8c-2-3 2-6 5-3l5 6V10c0-3 5-3 5 0v14-17c0-3 5-3 5 0v17-15c0-3 5-3 5 0v15-11c0-3 5-3 5 0v26c0 8-4 14-10 16H24"/><path d="M27 20h6M37 22h6M27 28h16" stroke-width="4"/>',
+    leather:'<path d="M20 56V30l-6-8c-2-3 2-6 5-3l5 6V10c0-3 5-3 5 0v14-17c0-3 5-3 5 0v17-15c0-3 5-3 5 0v15-11c0-3 5-3 5 0v26c0 8-4 14-10 16H24"/><path d="M20 48h26"/>',
+    gloves:'<path d="M20 56V30l-6-8c-2-3 2-6 5-3l5 6V10c0-3 5-3 5 0v14-17c0-3 5-3 5 0v17-15c0-3 5-3 5 0v15-11c0-3 5-3 5 0v26c0 8-4 14-10 16H24"/>',
+    coverall:'<path d="M24 6h16l4 4 10 6-4 12-6-3v33H36L32 34l-4 24H20V25l-6 3-4-12 10-6z"/><path d="M32 8v26M22 40h6M36 40h6"/>',
+    shoes:'<path d="M14 12h14v24l16 6c6 2 10 6 10 10v4H8V44c0-4 2-6 6-8z"/><path d="M8 50h46M14 22h14M14 30h14"/>',
+    glasses:'<path d="M6 28h52M8 28c0 8 3 12 10 12s10-4 10-12M36 28c0 8 3 12 10 12s10-4 10-12M28 30c2-3 6-3 8 0"/>',
+    goggles:'<path d="M6 30h6M52 30h6"/><rect x="12" y="20" width="40" height="20" rx="9"/><path d="M28 36c2-4 6-4 8 0"/>',
+    ear:'<path d="M14 40V28a18 18 0 0 1 36 0v12"/><rect x="8" y="36" width="12" height="16" rx="5"/><rect x="44" y="36" width="12" height="16" rx="5"/>',
+    mask:'<path d="M14 26c6-6 30-6 36 0l-4 18c-4 6-24 6-28 0z"/><path d="M6 22l10 6M58 22l-10 6"/><circle cx="32" cy="38" r="5"/>',
+    vest:'<path d="M22 6l-12 8v42h18V36l4-6 4 6v20h18V14L42 6l-6 10h-8z"/><path d="M10 40h18M36 40h18M10 48h18M36 48h18"/>',
+    harness:'<circle cx="32" cy="9" r="5"/><path d="M22 18h20l-3 18H25z"/><path d="M24 20l16 16M40 20L24 36"/><path d="M25 36l-3 22M39 36l3 22M28 44h8"/>',
+    shield:'<path d="M14 14c10-6 26-6 36 0v26c-4 10-14 16-18 18-4-2-14-8-18-18z"/><path d="M10 14h44"/>',
+    other:'<rect x="12" y="16" width="40" height="34" rx="6"/><path d="M24 16v-6h16v6M12 28h40"/>',
+  };
+  const svg=k=>`<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]||ICON.other}</svg>`;
+  const pic=it=>it.img ? `<img src="${esc(it.img)}" alt="">` : svg(it.ic);
+  const itTr=it=>{ const t=ITEM_T[it.ic]; return t?`<span class="tr">${esc(t[0])} · <span class="ar" dir="rtl">${esc(t[1])}</span></span>`:''; };
+
+  const token=new URLSearchParams(location.search).get('t')||'';
+  const bad=msg=>{ app.innerHTML=`<div class="card"><h2>This link is not active</h2><p class="note">${esc(msg||'Ask the HSE department for the new PPE link or QR code.')}</p></div>`; };
+  if(!/^[A-Za-z0-9]{16,40}$/.test(token)){ bad('This link is incomplete. Scan the QR code again.'); return; }
+  let db; try{ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); }catch(e){ bad('The page could not start. Check the internet and open the link again.'); return; }
+
+  let link=null, me=null, view='who', cart=[], reason='', sentLocal=[], recSel=new Set(), pad=null;
+  try{ sentLocal=JSON.parse(sessionStorage.getItem('ppeSent_'+token)||'[]'); }catch(e){}
+  function load(){ return db.collection('ppeLinks').doc(token).get().then(s=>{ if(!s.exists || (s.data()||{}).active===false){ bad(); return false; } link=s.data(); return true; }).catch(e=>{ console.warn(e); bad(e&&e.code==='permission-denied'?'This link has been switched off.':'Could not open the link — check the internet and try again.'); return false; }); }
+  load().then(ok=>{ if(!ok) return; let last=''; try{ last=localStorage.getItem('ppeWho_'+token)||''; }catch(e){} render(last); });
+
+  async function sha(s){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16); }
+  const board=()=>{ const b=((link.board||{})[me.id]||[]).slice(); const ids=new Set(b.map(x=>x.id)); for(const s of sentLocal) if(s.w===me.id && !ids.has(s.id) && !b.some(x=>x.k==='req' && x.t===s.t && x.st!=='delivered')) b.unshift({id:s.id, k:'req', st:'sent', d:s.d, t:s.t}); return b; };
+
+  function render(lastId){
+    if(view==='who'){
+      const ws=(link.workers||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));
+      app.innerHTML=`<div class="card"><h2>${tr('pick')}</h2>
+        <label>${tr('search')}<input id="q" placeholder="e.g. Ravi" autocomplete="off"></label>
+        <label>${tr('name')}<select id="wsel"><option value="">—</option>${ws.map(w=>`<option value="${esc(w.id)}" ${w.id===lastId?'selected':''}>${esc(w.name)}</option>`).join('')}</select></label>
+        <label id="cidBox">${tr('cid')}<input id="cid" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off" placeholder="••••"></label>
+        <div id="err" class="err hidden"></div>
+        <button class="btn navy" id="go">${tr('cont')}</button></div>`;
+      const sel=$('#wsel'), q=$('#q');
+      const syncCid=()=>{ const w=(link.workers||[]).find(x=>x.id===sel.value); $('#cidBox').classList.toggle('hidden', !!w && !w.h); };
+      q.addEventListener('input', ()=>{ const s=q.value.trim().toLowerCase(); [...sel.options].forEach(o=>{ if(o.value) o.hidden=!!s && !o.textContent.toLowerCase().includes(s); }); const vis=[...sel.options].filter(o=>o.value && !o.hidden); if(vis.length===1){ sel.value=vis[0].value; syncCid(); } });
+      sel.addEventListener('change', syncCid); syncCid();
+      $('#go').addEventListener('click', async ()=>{
+        const w=(link.workers||[]).find(x=>x.id===sel.value), err=$('#err');
+        if(!w){ err.textContent='Choose your name.'; err.classList.remove('hidden'); sel.classList.add('bad'); return; }
+        if(w.h){ const d=$('#cid').value.replace(/\D/g,''); if(d.length!==4 || await sha(token+':'+d)!==w.h){ err.textContent='The Civil ID digits do not match. Try again, or ask HSE.'; err.classList.remove('hidden'); $('#cid').classList.add('bad'); return; } }
+        me=w; try{ localStorage.setItem('ppeWho_'+token, w.id); }catch(e){} view='home'; render(); window.scrollTo(0,0);
+      });
+      return;
+    }
+    if(view==='home'){
+      const b=board();
+      app.innerHTML=`<div class="card"><div class="hello"><div>${tr('hello')}<b>${esc(me.name)}</b></div><button class="link" id="out">${tr('notme')}</button></div></div>
+        <div class="big2" style="margin-bottom:14px;"><button class="btn" id="toReq">${svg('helmet')}${tr('req')}</button><button class="btn green" id="toRec">${svg('impact')}${tr('rec')}${b.filter(x=>x.st==='approved'||x.st==='confirm').length?` <span class="badge" style="background:#fff;color:var(--ok)">${b.filter(x=>x.st==='approved'||x.st==='confirm').length}</span>`:''}</button></div>
+        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span></div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
+      $('#out').onclick=()=>{ me=null; view='who'; render(); };
+      $('#toReq').onclick=()=>{ cart=[]; reason=''; view='req'; render(); window.scrollTo(0,0); };
+      $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
+      return;
+    }
+    if(view==='req'){
+      const items=link.items||[], main=items.filter(i=>i.m), rest=items.filter(i=>!i.m), inCart=n=>cart.some(c=>c.item===n);
+      const tile=(it,small)=>`<button type="button" class="tile ${inCart(it.n)?'on':''}" data-it="${esc(it.n)}"><div class="pic">${pic(it)}</div><div class="nm">${esc(it.n)}</div>${small?'':itTr(it)}</button>`;
+      app.innerHTML=`<div class="card"><h2>${tr('choose')}</h2><div class="tiles">${main.map(i=>tile(i)).join('')}</div>
+          ${rest.length?`<div style="margin:14px 0 6px; font-weight:800;">${tr('more')}</div><div class="tiles small">${rest.map(i=>tile(i,true)).join('')}</div>`:''}</div>
+        ${cart.length?`<div class="card">${cart.map((c,i)=>{ const it=items.find(x=>x.n===c.item)||{n:c.item, ic:'other', sz:[]}; return `<div class="sel"><div class="sel-h">${pic(it)}<span>${esc(c.item)}</span><button class="link" data-rm="${i}">${T.remove[0]}</button></div>
+            ${(it.sz||[]).length?`<div class="note" style="margin-top:8px;">${tr('size')}</div><div class="szs">${it.sz.map(s=>`<button type="button" class="${c.size===s?'on':''}" data-sz="${i}" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>`:''}
+            <div class="note">${tr('qty')}</div><div class="qty"><button type="button" data-q="${i}" data-d="-1">−</button><b>${c.qty}</b><button type="button" data-q="${i}" data-d="1">+</button></div></div>`; }).join('')}
+          <label>${tr('need')}<input type="date" id="need" value="${esc(cart.need||plusDays(3))}" min="${today()}"></label>
+          <div style="font-weight:700; font-size:15px;">${tr('why')}</div><div class="reasons">${['New','Lost','Damaged','Worn out'].map(r=>`<button type="button" class="${reason===r?'on':''}" data-r="${esc(r)}">${tr(r)}</button>`).join('')}</div>
+          <label>${tr('note')}<textarea id="note" maxlength="300"></textarea></label>
+          <div id="err" class="err hidden"></div>
+          <button class="btn" id="send">${tr('send')}</button></div>`:''}
+        <button class="btn ghost" id="back">${tr('back')}</button>`;
+      app.querySelectorAll('[data-it]').forEach(b=>b.onclick=()=>{ const n=b.dataset.it, i=cart.findIndex(c=>c.item===n); keepNeed(); if(i>=0) cart.splice(i,1); else { const it=items.find(x=>x.n===n)||{}; cart.push({item:n, size:(it.sz||[]).length?'':'-', qty:1}); } render(); });
+      app.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ keepNeed(); cart.splice(+b.dataset.rm,1); render(); });
+      app.querySelectorAll('[data-sz]').forEach(b=>b.onclick=()=>{ keepNeed(); cart[+b.dataset.sz].size=b.dataset.v; render(); });
+      app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ keepNeed(); const c=cart[+b.dataset.q]; c.qty=Math.max(1, Math.min(20, c.qty+Number(b.dataset.d))); render(); });
+      app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ keepNeed(); reason=b.dataset.r; render(); });
+      $('#back').onclick=()=>{ view='home'; render(); };
+      const sendB=$('#send'); if(sendB) sendB.onclick=sendReq;
+      return;
+    }
+    if(view==='rec'){
+      const wait=board().filter(x=>x.st==='approved'||x.st==='confirm');
+      app.innerHTML=`<div class="card"><h2>${tr('recH')}</h2>${wait.length?wait.map(x=>`<label class="rc ${recSel.has(x.k+':'+x.id)?'on':''}"><input type="checkbox" data-rc="${esc(x.k+':'+x.id)}" ${recSel.has(x.k+':'+x.id)?'checked':''}><span><b>${esc(x.t||'')}</b><span class="tr">${esc(dmy(x.d))} · ${x.st==='confirm'?esc(T.st_confirm[0]):esc(T.st_approved[0])}</span></span></label>`).join('')+`
+          <div style="font-weight:700; margin-top:10px;">${tr('sign')}</div><div class="sigbox"><canvas id="pad" width="600" height="212"></canvas><div class="hint" id="hint">✍</div></div>
+          <div style="display:flex; gap:8px; margin:8px 0 14px;"><button type="button" class="btn ghost" id="clr" style="padding:10px;">${tr('clear')}</button></div>
+          <div id="err" class="err hidden"></div><button class="btn green" id="conf">${tr('confirm')}</button>`:`<p class="note">${tr('nothing')}</p>`}</div>
+        <button class="btn ghost" id="back">${tr('back')}</button>`;
+      app.querySelectorAll('[data-rc]').forEach(c=>c.onchange=()=>{ if(c.checked) recSel.add(c.dataset.rc); else recSel.delete(c.dataset.rc); c.closest('.rc').classList.toggle('on', c.checked); });
+      $('#back').onclick=()=>{ view='home'; render(); };
+      if(wait.length){ pad=makePad($('#pad')); $('#clr').onclick=()=>pad.clear(); $('#conf').onclick=sendRec; }
+      return;
+    }
+    if(view==='sent' || view==='thanks'){
+      app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr(view==='sent'?'sent':'thanks')}</h2>${view==='sent'?`<p class="note">${tr('sent2')}</p>`:''}<button class="btn navy" id="home">${tr('back')}</button></div>`;
+      $('#home').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
+    }
+  }
+  function keepNeed(){ const n=$('#need'); if(n) cart.need=n.value; }
+  function err(m){ const e=$('#err'); if(e){ e.textContent=m; e.classList.remove('hidden'); } }
+  async function sendReq(){
+    keepNeed();
+    if(!cart.length) return err('Tap at least one PPE item.');
+    const noSize=cart.find(c=>!c.size); if(noSize) return err('Choose the size for '+noSize.item+'.');
+    if(!reason) return err('Choose the reason.');
+    const need=cart.need||plusDays(3);
+    const items=cart.map(c=>({item:c.item, size:c.size==='-'?'':c.size, qty:c.qty}));
+    const data={name:me.name, items, neededBy:need, reason, note:String(($('#note')||{}).value||'').trim().slice(0,300)};
+    const b=$('#send'); b.disabled=true;
+    try{
+      const ref=await db.collection('ppeRequests').add({token, kind:'request', workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      sentLocal.push({id:ref.id, w:me.id, d:today(), t:items.map(i=>i.item+(i.size?' '+i.size:'')+(i.qty>1?' ×'+i.qty:'')).join(', ')}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
+      cart=[]; reason=''; view='sent'; render(); window.scrollTo(0,0);
+    }catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Tell HSE.':'Not sent — check the internet and try again.'); }
+  }
+  async function sendRec(){
+    if(!recSel.size) return err('Tick at least one item you received.');
+    if(!pad || !pad.ink) return err('Please sign with your finger.');
+    const refs=[...recSel].map(s=>{ const [k,id]=s.split(':'); return {t:k, id}; });
+    const b=$('#conf'); b.disabled=true;
+    try{
+      await db.collection('ppeRequests').add({token, kind:'receipt', workerId:me.id, status:'new', open:true, data:{name:me.name, refs, sig:pad.image(), date:today()}, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      if(link.board && link.board[me.id]) link.board[me.id]=link.board[me.id].map(x=>recSel.has(x.k+':'+x.id)?{...x, st:'delivered'}:x);
+      view='thanks'; render(); window.scrollTo(0,0);
+    }catch(e){ console.warn(e); b.disabled=false; err('Not saved — check the internet and try again.'); }
+  }
+  function makePad(cv){
+    const g=cv.getContext('2d'), p={ink:false};
+    const clear=()=>{ g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); p.ink=false; const h=$('#hint'); if(h) h.classList.remove('hidden'); };
+    p.clear=clear; clear(); let on=false, last=null;
+    const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
+    cv.addEventListener('pointerdown', e=>{ e.preventDefault(); on=true; const er=$('#err'); if(er) er.classList.add('hidden'); last=pos(e); try{ cv.setPointerCapture(e.pointerId); }catch(x){} });
+    cv.addEventListener('pointermove', e=>{ if(!on) return; e.preventDefault(); const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; if(!p.ink){ p.ink=true; const h=$('#hint'); if(h) h.classList.add('hidden'); } });
+    const end=()=>{ on=false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
+    p.image=()=>{ const o=document.createElement('canvas'); o.width=480; o.height=170; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,480,170); c.drawImage(cv,0,0,480,170); return o.toDataURL('image/png'); };
+    return p;
+  }
+})();
+</script>
+</body>
+</html>
