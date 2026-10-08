@@ -239,6 +239,12 @@ button.att-link.att-remove{color:var(--danger);}
 .sig-canvas{width:100%; max-width:420px; height:140px; display:block; background:#ffffff; border:1px dashed var(--line); border-radius:8px; touch-action:none; cursor:crosshair;}
 
 /* ---- record cards ---- */
+.ml-veh{align-items:center;} .ml-veh select,.ml-veh input{width:auto; min-width:0; padding:4px 8px; font-size:12.5px;}
+.ml-chip{display:inline-flex; align-items:center; gap:4px; padding:3px 4px 3px 10px; border-radius:999px; border:1px solid var(--line); font-size:12.5px; font-family:var(--mono, monospace);} .ml-chip-x{border:0; background:transparent; color:var(--danger, #e5484d); cursor:pointer; font-size:15px; line-height:1; padding:0 4px;}
+.veh-req{margin:10px 0 14px; border:1px solid var(--line); border-radius:12px; padding:8px 12px;} .veh-req summary{cursor:pointer; padding:4px 0;} .veh-req-table td,.veh-req-table th{text-align:center; padding:6px 8px;} .veh-req-table td:first-child,.veh-req-table th:first-child{text-align:left;}
+.veh-req-chips{display:flex; flex-wrap:wrap; gap:6px;}
+.veh-age{display:flex; gap:10px; align-items:flex-start; margin:10px 0 4px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;}
+input.auto-filled{outline:2px solid var(--ok, #46a758); transition:outline-color .8s;}
 .site-clients{display:flex; flex-wrap:wrap; gap:6px;} .site-chip{display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface-2); font-size:13px; font-weight:600;}
 .site-chip-x{border:0; background:transparent; color:var(--danger); font-size:16px; line-height:1; cursor:pointer; padding:0 2px;}
 .site-sigs{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;} .site-sig{flex:1 1 160px; max-width:260px;} .site-sig-img{height:70px; border:1px solid var(--line); border-radius:8px; background:#fff; display:grid; place-items:center; overflow:hidden;} .site-sig-img img{max-width:100%; max-height:100%;}
@@ -1222,12 +1228,14 @@ details.icam-grp .cause-list{margin:6px 0;}
         </div>
         <div class="topbar-actions">
           <button class="btn btn-sm import-btn" id="importVehiclesBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Import Excel</button>
+          <button class="btn btn-sm" id="exportFleetBtn" type="button" title="Fleet inventory for PDO (SP-2000) — every vehicle with age, safety systems and document expiries"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Export Excel</button>
           <button class="btn btn-sm" id="vehicleTrashBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Deleted vehicles (0)</button>
           <button class="btn btn-primary" id="addVehicleBtn">+ Add vehicle</button>
         </div>
       </div>
 
       <div class="monitor-bar" id="monitorBar"></div>
+      <div id="vehReqBar"></div>
 
       <div class="tiles tiles-4" id="vehicleTiles"></div>
 
@@ -2476,11 +2484,16 @@ const VEHICLE_TABS = [
 const SERVICE_TYPES=['General service','Preventive maintenance (PM)','Battery check / service','Battery replacement','Tyre change','Tyre service / repair','Breakdown','Repair','Other'];
 const PM_RESET_TYPES=['General service','Preventive maintenance (PM)'];
 const SVC_BATTERY=['Battery check / service','Battery replacement'], SVC_TYRE=['Tyre change','Tyre service / repair'];
+// Batch 66 (SP-2000): documents a vehicle can carry. Those in VEH_DOC_AUTO_YEAR get their expiry filled in
+// automatically 1 year after the done date (same date next year) — it can still be changed by hand.
+const VEH_DOC_TYPES=['Mulkiya','Vehicle Registration','Insurance','RAS Sticker','IVMS','DFMS','Speed Limiter Certificate','MPI Certificate','Third Party Certificate','MOT','Other'];
+const VEH_DOC_AUTO_YEAR=['RAS Sticker','IVMS','DFMS','Speed Limiter Certificate','MPI Certificate'];
 const VEHICLE_RECORD_TYPES = {
   documents:{
     title:'Vehicle documents', addLabel:'+ Add document', hasExpiry:true, hasAttachment:true, attachLabel:'document scan',
     fields:[
-      {key:'type', label:'Document type', type:'select', options:['Mulkiya','Vehicle Registration','MOT','Insurance','IVMS','DFMS','RAS Sticker','Other'], required:true},
+      {key:'type', label:'Document type', type:'select', options:VEH_DOC_TYPES, required:true},
+      {key:'speedSetting', label:'Speed limiter setting', type:'select', options:['Single speed','Multiple speed'], showWhen:['Speed Limiter Certificate']},
       {key:'date', label:'Done date', type:'date'},
       {key:'expiry', label:'Expiry date', type:'date', required:true},
       {key:'notes', label:'Notes', type:'textarea'},
@@ -2740,7 +2753,7 @@ function startSettingsData(){
       appTargets=map.targets||{};
       appAssurance=map.assurance||{};
       customChecklists=(map.checklists&&map.checklists.items)||[];
-      renderMonitorBar(); renderVehicleTable(); if(activeVehicleId) renderVehicleDrawer();
+      renderMonitorBar(); renderVehReqBar(); renderVehicleTable(); if(activeVehicleId) renderVehicleDrawer();
       renderMatrix(); renderReportAll(); renderAssuranceAll();
       if(regState.scaff && document.getElementById('scaffSection') && !document.getElementById('scaffSection').hidden) renderRegAll('scaff');
       renderTiles();   // Batch 40: training bars on the Workforce dashboard depend on the roles / training groups
@@ -2757,7 +2770,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b65';
+const APP_BUILD='b66';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -2810,19 +2823,23 @@ function safeUrl(u){
 }
 // Batch 20: several company IVMS / DFMS portals, each for chosen vehicle types (e.g. Cranes → one provider, Cars → another).
 // settings/app.monitorLinks = [{name, kind:'IVMS'|'DFMS', url, types:[vehicle types]}]  — no types ticked = all vehicles.
-const VEHICLE_TYPES = ['Car / SUV','Pickup','Bus','Truck','Trailer','Crane','Forklift','Other'];
+const VEHICLE_TYPES = ['Car / SUV','Pickup','Bus','Truck','Prime Mover','HIAB Truck','Green Water Tanker','Trailer','Flatbed Trailer','Low Bed Trailer','Crane','Forklift','Boom Lift','Other'];
 function vehicleTypeOptionsHtml(sel){ return `<option value="">Not set</option>`+VEHICLE_TYPES.map(t=>`<option value="${esc(t)}" ${t===sel?'selected':''}>${esc(t)}</option>`).join('') + (sel && !VEHICLE_TYPES.includes(sel) ? `<option value="${esc(sel)}" selected>${esc(sel)}</option>` : ''); }
 function vehicleDivisionOptionsHtml(sel){ return `<option value="">Not set</option>`+divisionOptionsHtml(sel||''); }
 function monitorLinkList(){
-  if(Array.isArray(appSettings.monitorLinks)) return appSettings.monitorLinks.filter(l=>l && safeUrl(l.url)).map(l=>({name:String(l.name||'').trim()||(l.kind||'IVMS')+' portal', kind:l.kind==='DFMS'?'DFMS':'IVMS', url:safeUrl(l.url), types:(l.types||[]).filter(Boolean)}));
+  if(Array.isArray(appSettings.monitorLinks)) return appSettings.monitorLinks.filter(l=>l && safeUrl(l.url)).map(l=>({name:String(l.name||'').trim()||(l.kind||'IVMS')+' portal', kind:l.kind==='DFMS'?'DFMS':'IVMS', url:safeUrl(l.url), types:(l.types||[]).filter(Boolean), vehicles:(l.vehicles||[]).filter(Boolean)}));
   const out=[], iv=safeUrl(appSettings.ivmsPortalUrl), df=safeUrl(appSettings.dfmsPortalUrl);   // older single-link setup
-  if(iv) out.push({name:'IVMS portal'+(appSettings.ivmsProvider?' · '+appSettings.ivmsProvider:''), kind:'IVMS', url:iv, types:[]});
-  if(df) out.push({name:'DFMS portal'+(appSettings.dfmsProvider?' · '+appSettings.dfmsProvider:''), kind:'DFMS', url:df, types:[]});
+  if(iv) out.push({name:'IVMS portal'+(appSettings.ivmsProvider?' · '+appSettings.ivmsProvider:''), kind:'IVMS', url:iv, types:[], vehicles:[]});
+  if(df) out.push({name:'DFMS portal'+(appSettings.dfmsProvider?' · '+appSettings.dfmsProvider:''), kind:'DFMS', url:df, types:[], vehicles:[]});
   return out;
 }
+// Batch 66: a link can be ticked to exact vehicles (e.g. one "UD Trucks" IVMS login covering 6 trucks).
+// Order: the vehicle's own link → a link it is ticked on → a link for its type → the "all other vehicles" link
+// (the last one is skipped for types that do not need IVMS / DFMS, e.g. trailers — SP-2000 5.1).
 function portalFor(v, kind){
   const list=monitorLinkList().filter(l=>l.kind===kind), t=v && v.vehicleType;
-  return (t && list.find(l=>l.types.includes(t))) || list.find(l=>!l.types.length) || null;
+  return (v && list.find(l=>l.vehicles.includes(v.id))) || (t && list.find(l=>l.types.includes(t)))
+    || (vehNeedsMonitor(v, kind) ? list.find(l=>!l.types.length && !l.vehicles.length) : null) || null;
 }
 function vehicleMonitorLinks(v){
   const pi=portalFor(v,'IVMS'), pd=portalFor(v,'DFMS');
@@ -2839,16 +2856,18 @@ function readMonitorRows(){
     kind:(el.querySelector(`[data-ml-kind="${i}"]`)||{}).value || r.kind,
     url:(el.querySelector(`[data-ml-url="${i}"]`)||{}).value ?? r.url,
     types:el.querySelector(`[data-ml-type="${i}"]`) ? [...el.querySelectorAll(`[data-ml-type="${i}"]:checked`)].map(x=>x.value) : r.types,
+    vehicles:(r.vehicles||[]).slice(),
+    vq:(el.querySelector(`[data-ml-vq="${i}"]`)||{}).value ?? (r.vq||''),
   }));
 }
 function renderMonitorBar(){
   const el=document.getElementById('monitorBar'); if(!el) return;
   if(!auth.currentUser){ el.innerHTML=''; return; }
   if(monitorEditOpen && canEdit()){
-    if(!monitorEditRows){ monitorEditRows=monitorLinkList().map(l=>({...l, types:l.types.slice()})); if(!monitorEditRows.length) monitorEditRows=[{name:'', kind:'IVMS', url:'', types:[]}]; }
+    if(!monitorEditRows){ monitorEditRows=monitorLinkList().map(l=>({...l, types:l.types.slice(), vehicles:l.vehicles.slice()})); if(!monitorEditRows.length) monitorEditRows=[{name:'', kind:'IVMS', url:'', types:[], vehicles:[]}]; }
     el.innerHTML = `<form id="monitorForm">
       <div class="subhead" style="margin-top:0;">Company IVMS &amp; DFMS portals</div>
-      <p class="wsub" style="margin:-4px 0 8px;">Add one line per portal. Tick the vehicle types that use it (e.g. Crane, Trailer) — leave all unticked for “all other vehicles”. Each vehicle then shows its own portal. A vehicle can still have its own direct link (open the vehicle → Profile).</p>
+      <p class="wsub" style="margin:-4px 0 8px;">Add one line per portal. Tick the vehicle types that use it, <b>or pick the exact vehicles</b> it covers (e.g. one UD Trucks login for 6 trucks) — leave both empty for “all other vehicles”. A ticked vehicle always beats a type. A vehicle can still have its own direct link (open the vehicle → Profile).</p>
       ${monitorEditRows.map((r,i)=>`<div class="ml-row">
         <div class="ml-main">
           <label>Name<input data-ml-name="${i}" value="${esc(r.name||'')}" placeholder="e.g. Crane IVMS — provider name"></label>
@@ -2856,7 +2875,8 @@ function renderMonitorBar(){
           <label>Link<input data-ml-url="${i}" value="${esc(r.url||'')}" placeholder="https://… (provider's login page)"></label>
           <button type="button" class="icon-btn danger" data-ml-remove="${i}" aria-label="Remove portal" title="Remove">${ic('close')}</button>
         </div>
-        <div class="req-divs"><span class="wsub">For:</span>${VEHICLE_TYPES.map(t=>`<label class="chk"><input type="checkbox" data-ml-type="${i}" value="${esc(t)}" ${(r.types||[]).includes(t)?'checked':''}>${esc(t)}</label>`).join('')}</div>
+        <div class="req-divs"><span class="wsub">For types:</span>${VEHICLE_TYPES.map(t=>`<label class="chk"><input type="checkbox" data-ml-type="${i}" value="${esc(t)}" ${(r.types||[]).includes(t)?'checked':''}>${esc(t)}</label>`).join('')}</div>
+        ${monitorVehiclePickHtml(r, i)}
       </div>`).join('')}
       <div style="margin-top:10px;"><button type="button" class="btn btn-sm" id="monitorAddRow">+ Add portal</button></div>
       <div class="form-actions"><button type="button" class="btn btn-sm" id="monitorCancel">Cancel</button><button type="submit" class="btn btn-primary btn-sm">Save links</button></div>
@@ -2866,7 +2886,9 @@ function renderMonitorBar(){
   const list=monitorLinkList();
   const warn = settingsLoadError==='rules' ? `<span class="badge warn" title="${esc(RULES_UPDATE_MSG)}">Firebase rules update needed</span>` : '';
   el.innerHTML = `<span class="monitor-bar-label">Vehicle monitoring</span>
-    ${list.length ? list.map(l=>`<a class="btn btn-sm" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" title="${esc(l.kind+' · '+(l.types.length?'for '+l.types.join(', '):'all vehicles'))}">${esc(l.name)}${l.types.length?` <span class="wsub">(${esc(l.types.join(', '))})</span>`:''} ${ic('external')}</a>`).join('') : '<span class="badge muted">No IVMS / DFMS links set</span>'}
+    ${list.length ? list.map(l=>{ const scope=[l.types.length?l.types.join(', '):'', l.vehicles.length?`${l.vehicles.length} vehicle${l.vehicles.length===1?'':'s'}`:''].filter(Boolean).join(' + ');
+      const who=l.vehicles.map(id=>(vehicles.find(x=>x.id===id)||{}).vehicleNumber).filter(Boolean).join(', ');
+      return `<a class="btn btn-sm" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" title="${esc(l.kind+' · '+(scope?'for '+scope:'all vehicles')+(who?' — '+who:''))}">${esc(l.name)}${scope?` <span class="wsub">(${esc(scope)})</span>`:''} ${ic('external')}</a>`; }).join('') : '<span class="badge muted">No IVMS / DFMS links set</span>'}
     ${warn}
     ${canEdit() ? `<button type="button" class="btn btn-sm btn-ghost" id="monitorEditBtn">${ic('gear')} ${list.length?'Edit links':'Set links'}</button>` : ''}`;
 }
@@ -2874,7 +2896,8 @@ function vehicleMonitorCell(v){
   const l=vehicleMonitorLinks(v);
   const iv = l.ivms ? `<a class="link-chip" href="${esc(l.ivms)}" target="_blank" rel="noopener noreferrer" title="${esc((v.ivmsUnitId?'IVMS unit '+v.ivmsUnitId+' · ':'')+'Opens '+l.ivmsName)}">IVMS ${ic('external')}</a>` : '';
   const df = l.dfms ? `<a class="link-chip" href="${esc(l.dfms)}" target="_blank" rel="noopener noreferrer" title="${esc((v.dfmsUnitId?'DFMS device '+v.dfmsUnitId+' · ':'')+'Opens '+l.dfmsName)}">DFMS ${ic('external')}</a>` : '';
-  return (iv||df) ? iv+df : '<span class="wsub">—</span>';
+  if(iv||df) return iv+df;
+  return (v.vehicleType && !vehNeedsMonitor(v,'IVMS') && !vehNeedsMonitor(v,'DFMS')) ? `<span class="badge muted" title="IVMS / DFMS not needed for ${esc(v.vehicleType)} (SP-2000 5.1)">Not required</span>` : '<span class="wsub">—</span>';
 }
 function vehicleMonitorBlock(v){
   const l=vehicleMonitorLinks(v);
@@ -2882,10 +2905,180 @@ function vehicleMonitorBlock(v){
   return `<div class="monitor-links">
     ${l.ivms ? `<a class="btn btn-sm" href="${esc(l.ivms)}" target="_blank" rel="noopener noreferrer" title="${esc(l.ivmsName)}">${ic('external')} Open IVMS</a>` : ''}
     ${l.dfms ? `<a class="btn btn-sm" href="${esc(l.dfms)}" target="_blank" rel="noopener noreferrer" title="${esc(l.dfmsName)}">${ic('external')} Open DFMS</a>` : ''}
-    ${(!l.ivms && !l.dfms) ? `<span class="wsub">No IVMS / DFMS link for this vehicle${v.vehicleType?` (${esc(v.vehicleType)})`:''} — set its vehicle type below so the right company portal opens, or add a direct link.</span>` : `<span class="wsub">${esc([l.ivms?'IVMS: '+l.ivmsName:'', l.dfms?'DFMS: '+l.dfmsName:''].filter(Boolean).join(' · '))}</span>`}
+    ${(!l.ivms && !l.dfms) ? (v.vehicleType && !vehNeedsMonitor(v,'IVMS') && !vehNeedsMonitor(v,'DFMS') ? `<span class="wsub">IVMS / DFMS not required for ${esc(v.vehicleType)} (SP-2000 5.1 — trailers, forklifts and boom lifts are exempt).</span>` : `<span class="wsub">No IVMS / DFMS link for this vehicle${v.vehicleType?` (${esc(v.vehicleType)})`:''} — set its vehicle type below so the right company portal opens, or add a direct link.</span>`) : `<span class="wsub">${esc([l.ivms?'IVMS: '+l.ivmsName:'', l.dfms?'DFMS: '+l.dfmsName:''].filter(Boolean).join(' · '))}</span>`}
     ${ids ? `<span class="wsub">${ids}</span>` : ''}
   </div>`;
 }
+
+/* ---------------- Batch 66: SP-2000 — required documents, auto expiry, inventory, age / km limits ---------------- */
+// What each vehicle type must carry (editable on the Fleet page → Required documents; saved in settings/app.vehReqDocs).
+const VEH_REQ_COLS=[['Mulkiya','Mulkiya'],['Insurance','Insurance'],['RAS Sticker','RAS'],['IVMS','IVMS'],['DFMS','DFMS'],['Speed Limiter Certificate','Speed limiter'],['MPI Certificate','MPI'],['Third Party Certificate','Third party']];
+const VEH_REQ_ROAD=['Mulkiya','Insurance','RAS Sticker','IVMS','DFMS','Speed Limiter Certificate'];
+const VEH_REQ_TRAILER=['Mulkiya','RAS Sticker','MPI Certificate'];   // SP-2000 4.6.7: kingpin NDT every year; 5.1: no IVMS
+const VEH_REQ_DEFAULT={'Car / SUV':VEH_REQ_ROAD, 'Pickup':VEH_REQ_ROAD, 'Bus':VEH_REQ_ROAD, 'Truck':VEH_REQ_ROAD, 'Prime Mover':VEH_REQ_ROAD, 'Green Water Tanker':VEH_REQ_ROAD,
+  'HIAB Truck':[...VEH_REQ_ROAD,'Third Party Certificate'], 'Crane':[...VEH_REQ_ROAD,'Third Party Certificate'],
+  'Trailer':VEH_REQ_TRAILER, 'Flatbed Trailer':VEH_REQ_TRAILER, 'Low Bed Trailer':VEH_REQ_TRAILER,
+  'Forklift':['Third Party Certificate'], 'Boom Lift':['Third Party Certificate'], 'Other':[]};
+function vehReqDocs(type){
+  if(!type) return [];
+  const m=appSettings && appSettings.vehReqDocs;
+  if(m && Array.isArray(m[type])) return m[type].slice();
+  return (VEH_REQ_DEFAULT[type]||[]).slice();
+}
+// Does this vehicle need IVMS / DFMS? (not for trailers, forklifts, boom lifts — SP-2000 5.1)
+function vehNeedsMonitor(v, kind){
+  const t=v && v.vehicleType; if(!t) return true;
+  const known=VEHICLE_TYPES.includes(t) || (appSettings && appSettings.vehReqDocs && Array.isArray(appSettings.vehReqDocs[t]));
+  return known ? vehReqDocs(t).includes(kind) : true;
+}
+function vehDocMatches(req, recType){ const n=renewNorm(recType); return req==='Mulkiya' ? (n==='mulkiya' || n==='vehicle registration') : n===renewNorm(req); }
+function vehReqDocStatus(v){
+  const cur=currentRecs(v.documents||[], 'documents');
+  return vehReqDocs(v.vehicleType).map(req=>{
+    const hits=cur.filter(r=>vehDocMatches(req, r.type)).sort((a,b)=>String(b.expiry||'9999').localeCompare(String(a.expiry||'9999')));
+    const r=hits[0]; if(!r) return {req, status:'missing'};
+    return {req, rec:r, status:r.expiry ? statusFor(r.expiry) : 'valid'};
+  });
+}
+function vehMissingDocs(v){ return v && v.vehicleType ? vehReqDocStatus(v).filter(x=>x.status==='missing').map(x=>x.req) : []; }
+function vehReqDocsBoxHtml(v){
+  const auto=`<p class="wsub" style="margin:8px 0 0;">${ic('clock')} For <b>${VEH_DOC_AUTO_YEAR.join(', ')}</b> the expiry date fills in automatically — 1 year after the done date. You can still change it.</p>`;
+  if(!v.vehicleType) return `<div class="panel req-box" style="margin-bottom:14px;"><div class="subhead" style="margin-top:0;">Required documents</div><p class="wsub" style="margin:0;">Set the <b>vehicle type</b> on the Profile tab to see which documents this vehicle must carry.</p>${auto}</div>`;
+  const list=vehReqDocStatus(v);
+  const chip=x=>{ const cls=x.status==='missing'||x.status==='expired'?'danger':x.status==='expiring'?'warn':'ok', mark=x.status==='missing'?'✗':x.status==='expired'?'!':'✓';
+    const tail=x.status==='missing'?'missing':x.rec&&x.rec.expiry?(x.status==='expired'?'expired '+x.rec.expiry:'to '+x.rec.expiry):'on record';
+    return `<span class="badge ${cls}" title="${esc(x.req)}">${mark} ${esc(x.req==='Mulkiya'?'Mulkiya (registration)':x.req)} — ${esc(tail)}</span>`; };
+  const miss=list.filter(x=>x.status==='missing').length;
+  return `<div class="panel req-box veh-req-box" style="margin-bottom:14px;"><div class="subhead" style="margin-top:0;">Required for ${esc(v.vehicleType)} <span class="wsub" style="display:inline;font-weight:400;">— SP-2000${miss?` · <b>${miss} missing</b>`:' · all on record'}</span></div>
+    ${list.length?`<div class="veh-req-chips">${list.map(chip).join('')}</div>`:'<p class="wsub" style="margin:0;">No documents are set as required for this type.</p>'}${auto}</div>`;
+}
+
+// SP-2000 4.2.7.2 — maximum age or mileage, whichever comes first
+const PDO_AGE_CATS={
+  saloon:{label:'Light vehicle — saloon', years:8, km:'light'},
+  suv:{label:'Light vehicle — SUV / pickup', years:6, km:'light', note:'can be extended 2 years if used only for short trips within 30 km of base'},
+  t39:{label:'Truck 3 T – 9 T', years:8, km:500000},
+  lbus:{label:'Light bus', years:6, km:300000},
+  hbus:{label:'Heavy bus', years:10, km:500000},
+  heavy:{label:'Heavy vehicle / prime mover', years:12, km:500000, note:'can be extended 3 years if not driven more than 100 km from base'},
+  trailer:{label:'Trailer / semi-trailer', years:15, km:null},
+  na:{label:'Not applicable — specialised oilfield vehicle / mobile equipment', years:null, km:null},
+};
+const VEH_AGE_DEFAULT={'Car / SUV':'suv','Pickup':'suv','Bus':'hbus','Truck':'t39','Prime Mover':'heavy','HIAB Truck':'heavy','Green Water Tanker':'heavy',
+  'Trailer':'trailer','Flatbed Trailer':'trailer','Low Bed Trailer':'trailer','Crane':'na','Forklift':'na','Boom Lift':'na','Other':'na'};
+function vehicleAgeCheck(v){
+  const cat=(v && (v.pdoAgeCat || VEH_AGE_DEFAULT[v.vehicleType])) || '';
+  const odo=vehicleServiceStats(v).odo, out={cat, odo, status:'unknown', limitText:'', statusText:'', reasons:[]};
+  if(!cat || !PDO_AGE_CATS[cat]){ out.statusText='Set the vehicle type or limit category'; return out; }
+  const c=PDO_AGE_CATS[cat]; out.label=c.label;
+  if(cat==='na'){ out.status='na'; out.limitText='Not applicable'; out.statusText='No PDO age / km limit'; return out; }
+  const kmLim = c.km==='light' ? (v.fuelType==='Petrol'?160000:200000) : c.km;
+  const reg = v.firstRegDate || (/^\d{4}$/.test(String(v.yearMade||'')) ? v.yearMade+'-01-01' : '');
+  const limitDate = reg && c.years ? addYears(reg, c.years) : '';
+  out.limitText = `${c.label}: ${c.years} years${kmLim?' or '+fmtKm(kmLim)+(c.km==='light'?(v.fuelType==='Petrol'?' (petrol)':' (diesel)'):''):''}, whichever first`;
+  out.limitDate=limitDate; out.kmLim=kmLim; out.note=c.note||'';
+  out.age = reg ? Math.max(0, daysBetween(reg, localToday())/365.25) : null;
+  const t=localToday();
+  if(limitDate && limitDate<=t) out.reasons.push(`age limit reached ${limitDate}`);
+  if(kmLim && odo!==null && odo>=kmLim) out.reasons.push(`${fmtKm(odo)} driven`);
+  if(out.reasons.length){ out.status='over'; out.statusText='Over the PDO limit — '+out.reasons.join(' and '); return out; }
+  const dLeft=limitDate?daysUntil(limitDate):null, kmLeft=(kmLim && odo!==null)?kmLim-odo:null;
+  if((dLeft!==null && dLeft<=180) || (kmLeft!==null && kmLeft<=20000)){ out.status='soon'; out.statusText='Close to the PDO limit — '+[dLeft!==null?`age limit on ${limitDate}`:'', kmLeft!==null?`${fmtKm(kmLeft)} left`:''].filter(Boolean).join(' · '); return out; }
+  if(!reg && odo===null){ out.statusText='Enter the year of manufacture or first registration date'; return out; }
+  out.status='ok'; out.statusText='Within the limit'+(limitDate?` — until ${limitDate}`:'')+(kmLeft!==null?` · ${fmtKm(kmLeft)} left`:'');
+  return out;
+}
+const VEH_SAFETY_SYSTEMS=['ABS','EBS','ESC','Rollover prevention (RPS)','DFMS','Speed limiter','IVMS'];
+function vehInventoryHtml(v){
+  const a=vehicleAgeCheck(v), auto=VEH_AGE_DEFAULT[v.vehicleType];
+  const has=new Set(v.safetySystems||[]);
+  const badge = a.status==='over'?'danger':a.status==='soon'?'warn':a.status==='ok'?'ok':'muted';
+  return `<div class="subhead">PDO vehicle inventory <span class="wsub" style="display:inline;font-weight:400;">— SP-2000 4.2.7</span></div>
+    <div class="form-grid">
+      <label>Year of manufacture<input data-vinv="yearMade" inputmode="numeric" maxlength="4" value="${esc(v.yearMade||'')}" placeholder="e.g. 2019"></label>
+      <label>First registration date<input type="date" data-vinv="firstRegDate" value="${esc(v.firstRegDate||'')}"></label>
+      <label>Fuel<select data-vinv="fuelType">${['','Diesel','Petrol','Other'].map(f=>`<option value="${f}" ${f===(v.fuelType||'')?'selected':''}>${f||'Not set'}</option>`).join('')}</select></label>
+      <label class="span-all">PDO age / km limit<select data-vinv="pdoAgeCat"><option value="">${auto?`Automatic — ${esc(PDO_AGE_CATS[auto].label)}`:'Automatic (set the vehicle type)'}</option>${Object.entries(PDO_AGE_CATS).map(([k,c])=>`<option value="${k}" ${v.pdoAgeCat===k?'selected':''}>${esc(c.label)}${c.years?` — ${c.years} yrs`:''}</option>`).join('')}</select></label>
+      <div class="span-all"><span class="wsub">Safety systems fitted</span><div class="req-divs" style="margin-top:4px;">${VEH_SAFETY_SYSTEMS.map(x=>`<label class="chk"><input type="checkbox" data-vsafe value="${esc(x)}" ${has.has(x)?'checked':''}>${esc(x)}</label>`).join('')}</div></div>
+    </div>
+    <div class="veh-age ${badge}"><span class="badge ${badge}">${esc(a.status==='over'?'Over limit':a.status==='soon'?'Close to limit':a.status==='ok'?'Within limit':a.status==='na'?'Not applicable':'Not enough data')}</span>
+      <span>${esc(a.limitText||a.statusText)}${a.limitText?`<br><span class="wsub">${esc(a.statusText)}${a.age!==null&&a.age!==undefined?` · age ${a.age.toFixed(1)} years`:''}${a.odo!==null?` · odometer ${fmtKm(a.odo)} (Service tab)`:' · odometer: enter it on the Service tab'}</span>`:''}${a.note?`<br><span class="wsub">PDO allows: ${esc(a.note)}. Vehicles already in a contract may stay until it ends.</span>`:''}</span></div>`;
+}
+function monitorVehiclePickHtml(r, i){
+  const chosen=(r.vehicles||[]).map(id=>vehicles.find(x=>x.id===id)).filter(Boolean);
+  const avail=activeVehicles().filter(v=>!(r.vehicles||[]).includes(v.id)).sort((a,b)=>String(a.model||'').localeCompare(String(b.model||'')) || String(a.vehicleNumber||'').localeCompare(String(b.vehicleNumber||'')));
+  return `<div class="req-divs ml-veh"><span class="wsub">For vehicles:</span>
+    ${chosen.map(v=>`<span class="ml-chip">${esc(v.vehicleNumber||'—')}${v.model?` <span class="wsub">${esc(v.model)}</span>`:''}<button type="button" class="ml-chip-x" data-ml-vdel="${i}:${esc(v.id)}" aria-label="Remove ${esc(v.vehicleNumber||'')}">×</button></span>`).join('')}
+    <select data-ml-vadd="${i}" aria-label="Add a vehicle"><option value="">+ Add a vehicle…</option>${avail.map(v=>`<option value="${esc(v.id)}">${esc(v.vehicleNumber||'—')}${v.model?' — '+esc(v.model):''}${v.vehicleType?' ('+esc(v.vehicleType)+')':''}</option>`).join('')}</select>
+    <input data-ml-vq="${i}" value="${esc(r.vq||'')}" placeholder="model contains… e.g. UD" aria-label="Add all vehicles whose model or number contains" style="max-width:170px;">
+    <button type="button" class="btn btn-sm" data-ml-vqadd="${i}">Add all matching</button>
+  </div>`;
+}
+
+// Fleet page → "Required documents by vehicle type" (editors tick, everyone can see)
+let vehReqOpen=false, vehReqEdit=null, vehReqBase;
+function vehReqTypes(){ return [...new Set([...VEHICLE_TYPES, ...activeVehicles().map(v=>v.vehicleType).filter(Boolean)])]; }
+function vehReqCurrentMap(){ const m={}; for(const t of vehReqTypes()) m[t]=vehReqDocs(t); return m; }
+function renderVehReqBar(){
+  const el=document.getElementById('vehReqBar'); if(!el) return;
+  if(!auth.currentUser){ el.innerHTML=''; return; }
+  const map=vehReqEdit || vehReqCurrentMap(), ed=canEdit(), types=vehReqTypes();
+  const count=t=>activeVehicles().filter(v=>v.vehicleType===t).length;
+  el.innerHTML=`<details class="veh-req" ${vehReqOpen?'open':''}><summary><b>Required documents by vehicle type</b> <span class="wsub">— SP-2000 · what each type must carry${vehReqEdit?' · <b>unsaved changes</b>':''}</span></summary>
+    <div class="table-wrap"><table class="veh-req-table"><thead><tr><th>Vehicle type</th>${VEH_REQ_COLS.map(([,h])=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${types.map(t=>`<tr><td>${esc(t)} <span class="wsub">(${count(t)})</span></td>${VEH_REQ_COLS.map(([d])=>`<td><input type="checkbox" data-vr="${esc(t)}" value="${esc(d)}" ${(map[t]||[]).includes(d)?'checked':''} ${ed?'':'disabled'} aria-label="${esc(t)} needs ${esc(d)}"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="wsub" style="margin:6px 0 0;">A missing required document shows on the vehicle and in the Documents column. Types without IVMS / DFMS ticked show “Not required” for monitoring (SP-2000 5.1). Speed limiters are calibrated every year (4.2.7.3); trailer kingpins get an MPI / NDT test every year (4.6.7).</p>
+    ${ed?`<div class="form-actions"><button type="button" class="btn btn-sm" id="vehReqReset">Reset to SP-2000 defaults</button><button type="button" class="btn btn-sm" id="vehReqCancel" ${vehReqEdit?'':'disabled'}>Cancel</button><button type="button" class="btn btn-primary btn-sm" id="vehReqSave" ${vehReqEdit?'':'disabled'}>Save</button></div>`:''}
+  </details>`;
+}
+document.addEventListener('toggle', e=>{ if(e.target.matches && e.target.matches('#vehReqBar details')) vehReqOpen=e.target.open; }, true);
+document.addEventListener('change', e=>{
+  const cb=e.target.closest && e.target.closest('#vehReqBar [data-vr]'); if(!cb || !canEdit()) return;
+  if(!vehReqEdit){ vehReqEdit=vehReqCurrentMap(); vehReqBase=settingsStamp('app'); }
+  const t=cb.dataset.vr, set=new Set(vehReqEdit[t]||[]); if(cb.checked) set.add(cb.value); else set.delete(cb.value);
+  vehReqEdit[t]=VEH_REQ_COLS.map(([d])=>d).filter(d=>set.has(d));
+  renderVehReqBar();
+});
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#vehReqSave,#vehReqCancel,#vehReqReset'); if(!b || !canEdit()) return;
+  if(b.id==='vehReqCancel'){ vehReqEdit=null; renderVehReqBar(); return; }
+  if(b.id==='vehReqReset'){ if(!vehReqEdit) vehReqBase=settingsStamp('app'); vehReqEdit={}; for(const t of vehReqTypes()) vehReqEdit[t]=(VEH_REQ_DEFAULT[t]||[]).slice(); renderVehReqBar(); toast('SP-2000 defaults ticked — press Save to keep them'); return; }
+  if(b.id==='vehReqSave' && vehReqEdit){ if(await saveSettings('app', {vehReqDocs:vehReqEdit}, vehReqBase)){ vehReqEdit=null; vehReqBase=undefined; renderVehReqBar(); renderVehicleTable(); if(activeVehicleId) renderVehicleDrawer(); renderSiteAll(); } }
+});
+
+// Vehicle documents: expiry = same date next year for IVMS, DFMS, RAS sticker, speed limiter, MPI
+document.addEventListener('focusin', e=>{ const d=e.target.closest && e.target.closest('#vehicleDrawerBody #recordForm [data-field="date"]'); if(d) d.dataset.prev=d.value; });
+document.addEventListener('change', e=>{
+  const f=e.target.closest && e.target.closest('#vehicleDrawerBody #recordForm'); if(!f || activeVehicleTab!=='documents') return;
+  if(!e.target.matches('[data-field="date"],[data-field="type"]')) return;
+  const type=(f.querySelector('[data-field="type"]')||{}).value, dEl=f.querySelector('[data-field="date"]'), x=f.querySelector('[data-field="expiry"]');
+  if(!dEl || !x || !VEH_DOC_AUTO_YEAR.includes(type) || !dEl.value) return;
+  const next=addYears(dEl.value, 1), prevAuto=dEl.dataset.prev ? addYears(dEl.dataset.prev, 1) : '';
+  if(!x.value || x.value===x.dataset.auto || x.value===prevAuto){ x.value=next; x.dataset.auto=next; x.classList.add('auto-filled'); setTimeout(()=>x.classList.remove('auto-filled'), 1200); }
+  dEl.dataset.prev=dEl.value;
+});
+
+// Fleet → Export Excel: the vehicle inventory PDO asks contractors to keep (SP-2000 4.2.7.2) + every document
+async function exportFleet(){
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection and try again'); return; }
+  const list=activeVehicles().slice().sort((a,b)=>String(a.vehicleNumber||'').localeCompare(String(b.vehicleNumber||'')));
+  const reqCols=VEH_REQ_COLS.map(([d])=>d);
+  const rows=[['Vehicle number','Model','Vehicle type','Division','Ownership','Project','Year of manufacture','First registration','Age (years)','Fuel','Odometer (km)','PDO age / km limit','Limit status',...VEH_SAFETY_SYSTEMS,'IVMS unit','DFMS device',...reqCols.map(d=>d+' expiry'),'Required documents missing','Issues']];
+  for(const v of list){
+    const a=vehicleAgeCheck(v), st=vehReqDocStatus(v), has=new Set(v.safetySystems||[]), cur=currentRecs(v.documents||[], 'documents');
+    const expOf=d=>{ const r=cur.filter(x=>vehDocMatches(d, x.type)).sort((p,q)=>String(q.expiry||'').localeCompare(String(p.expiry||'')))[0]; return r ? (r.expiry||'no expiry') : ''; };
+    rows.push([v.vehicleNumber||'', v.model||'', v.vehicleType||'', v.division?divLabel(v.division):'', v.ownership||'Own', v.projectId?locLabel(v.projectId):'', v.yearMade||'', v.firstRegDate||'', a.age!=null?Number(a.age.toFixed(1)):'', v.fuelType||'', a.odo!==null?Math.round(a.odo):'', a.limitText||'', a.statusText||'',
+      ...VEH_SAFETY_SYSTEMS.map(x=>has.has(x)?'Yes':''), v.ivmsUnitId||'', v.dfmsUnitId||'', ...reqCols.map(expOf), st.filter(x=>x.status==='missing').map(x=>x.req).join(', '), vehicleIssues(v).join('; ')]);
+  }
+  const docs=[['Vehicle number','Model','Vehicle type','Document','Speed limiter setting','Done date','Expiry','Status','Notes']];
+  for(const v of list) for(const r of (v.documents||[]).slice().sort((p,q)=>String(p.type||'').localeCompare(String(q.type||'')) || String(q.date||'').localeCompare(String(p.date||''))))
+    docs.push([v.vehicleNumber||'', v.model||'', v.vehicleType||'', r.type||'', r.speedSetting||'', r.date||'', r.expiry||'', isRenewed(v.documents, 'documents', r)?'Renewed':(r.expiry?statusFor(r.expiry):'No expiry'), r.notes||'']);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Fleet inventory');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(docs), 'Documents');
+  XLSX.writeFile(wb, `Burhan_Fleet_Inventory_${localToday()}.xlsx`);
+}
+document.addEventListener('click', e=>{ if(e.target.closest && e.target.closest('#exportFleetBtn')) exportFleet(); });
 
 /* ---------------- training matrix (Workforce) ---------------- */
 let workforceView='register';
@@ -9927,6 +10120,7 @@ function renderTable(){
 /* ---------------- vehicle rendering ---------------- */
 function renderVehicleAll(){
   renderPlantTabs();
+  renderVehReqBar();
   renderVehicleTiles();
   renderVehicleTable();
   const trashCount=deletedVehicles().length;
@@ -9993,10 +10187,10 @@ function renderVehicleTable(){
     const doc=vehicleAggFor(v,'documents'), ppe=vehicleAggFor(v,'ppe');
     return `<tr data-id="${v.id}">
       <td class="mono">${esc(v.vehicleNumber)}</td>
-      <td>${esc(v.model||'—')}${v.vehicleType?`<div class="wsub">${esc(v.vehicleType)}</div>`:''}</td>
+      <td>${esc(v.model||'—')}${v.vehicleType?`<div class="wsub">${esc(v.vehicleType)}</div>`:''}${vehicleAgeCheck(v).status==='over'?' <span class="badge warn" title="SP-2000 4.2.7.2">Over PDO age / km limit</span>':''}</td>
       <td>${v.division?esc(divLabel(v.division)):'<span class="wsub">Not set</span>'}</td>
       <td>${(v.ownership||'Own')==='Rental'?'<span class="badge warn">Rental</span>':'<span class="badge ok">Own</span>'}</td>
-      <td>${badgeHtml(doc.status)}</td>
+      <td>${badgeHtml(doc.status)}${(m=>m.length?`<div><span class="badge warn" title="Required for ${esc(v.vehicleType||'')}: ${esc(m.join(', '))}">${m.length} missing</span></div>`:'')(vehMissingDocs(v))}</td>
       <td>${badgeHtml(ppe.status)}</td>
       <td>${svcStatusBadge(v)}</td>
       <td>${vehicleMonitorCell(v)}</td>
@@ -10240,6 +10434,8 @@ function workerIssues(w){
 function vehicleIssues(v){
   const out=[];
   if(vehicleAggFor(v,'documents').status==='expired') out.push('Document expired');
+  { const miss=vehMissingDocs(v); if(miss.length) out.push('Missing: '+miss.join(', ')); }
+  if(vehicleAgeCheck(v).status==='over') out.push('Over PDO age / km limit');
   if(vehicleAggFor(v,'ppe').status==='expired') out.push('Safety kit expired');
   if(vehicleServiceStats(v).status==='overdue') out.push('Service overdue');
   return out;
@@ -10409,7 +10605,7 @@ function renderVehicleDrawerBody(){
   const cfg=VEHICLE_RECORD_TYPES[activeVehicleTab];
   const savedActiveTab=activeTab, savedEditing=editingRecordId, savedAddOpen=addFormOpen;
   activeTab=activeVehicleTab; editingRecordId=editingVehicleRecordId; addFormOpen=vehicleAddFormOpen;
-  body.innerHTML=(activeVehicleTab==='services' ? vehicleServiceSummaryHtml(v) : '') + recordTabHtml(v, activeVehicleTab, cfg);
+  body.innerHTML=(activeVehicleTab==='services' ? vehicleServiceSummaryHtml(v) : activeVehicleTab==='documents' ? vehReqDocsBoxHtml(v) : '') + recordTabHtml(v, activeVehicleTab, cfg);
   activeTab=savedActiveTab; editingRecordId=savedEditing; addFormOpen=savedAddOpen;
 }
 
@@ -10502,6 +10698,7 @@ function vehicleProfileTabHtml(v){
       <label>DFMS link for this vehicle<input data-vfield="dfmsLink" value="${esc(v.dfmsLink||'')}" placeholder="optional — direct link"></label>
     </div>
     <p class="wsub" style="margin:6px 0 0;">Leave the links empty to use the company IVMS / DFMS portal for this vehicle type (set on the Fleet page).</p>
+    ${vehInventoryHtml(v)}
     <div class="subhead">Onboard equipment counts</div>
     <div class="form-grid">${countsHtml}</div>
     <div class="form-actions" style="margin-top:16px;"><button type="submit" class="btn btn-primary">Save changes</button></div>
@@ -12545,6 +12742,13 @@ async function buildVehiclePdf(v){
 
   h2('Vehicle details');
   kv('Vehicle number', v.vehicleNumber); kv('Model', v.model); kv('Ownership', v.ownership||'Own'); kv('Vehicle type', v.vehicleType); kv('Division', v.division?divLabel(v.division):'');
+  { const a=vehicleAgeCheck(v), miss=vehMissingDocs(v);
+    h2('PDO vehicle inventory (SP-2000)');
+    kv('Year of manufacture', v.yearMade); kv('First registration', v.firstRegDate); kv('Fuel', v.fuelType);
+    kv('Odometer', a.odo!==null ? fmtKm(a.odo) : '');
+    kv('PDO age / km limit', a.cat ? a.limitText+(a.status!=='na'&&a.status!=='unknown' ? '  -  '+a.statusText : '') : '');
+    kv('Safety systems fitted', (v.safetySystems||[]).join(', '));
+    kv('Required documents', !v.vehicleType ? 'Vehicle type not set' : (miss.length ? 'Missing: '+miss.join(', ') : 'All on record')); }
 
   h2('Onboard equipment counts');
   for(const f of VEHICLE_COUNT_FIELDS){ kv(f.label, v[f.key]!=null? v[f.key] : '0'); }
@@ -12726,7 +12930,7 @@ const IMPORT_TYPES = {
     {key:'vehicleNumber', h:'Vehicle number', req:true, help:'Plate number (used to spot duplicates)', ex:'RSA 12345'},
     {key:'model', h:'Model', ex:'Toyota Hilux 2022'},
     {key:'ownership', h:'Ownership', help:'Own or Rental (blank = Own)', ex:'Own'},
-    {key:'vehicleType', h:'Vehicle type', help:'Optional: Car / SUV, Pickup, Bus, Truck, Trailer, Crane, Forklift, Other', ex:'Pickup'},
+    {key:'vehicleType', h:'Vehicle type', help:'Optional: '+VEHICLE_TYPES.join(', '), ex:'Pickup'},
     {key:'division', h:'Division', help:'Optional: Civil, Scaffolding, Logistics & Rental, Office Staff', ex:'Logistics & Rental'},
   ]},
   equipment:{label:'Plant & Equipment items', noun:'item', coll:'equipment', file:'Burhan_HSE_Equipment_template.xlsx', cols:[
@@ -13452,6 +13656,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
       e.target.querySelectorAll('[data-vfield]').forEach(el=>{
         data[el.dataset.vfield] = el.type==='number' ? (parseInt(el.value,10)||0) : el.value;
       });
+      e.target.querySelectorAll('[data-vinv]').forEach(el=>{ data[el.dataset.vinv]=String(el.value||'').trim(); });
+      if(e.target.querySelector('[data-vsafe]')) data.safetySystems=[...e.target.querySelectorAll('[data-vsafe]:checked')].map(x=>x.value);
+      if(data.yearMade && !/^(19|20)\d\d$/.test(data.yearMade)){ toast('Year of manufacture should be 4 digits, e.g. 2019'); return; }
       for(const k of ['ivmsLink','dfmsLink']){
         if(data[k] && !safeUrl(data[k])){ toast(`The ${k==='ivmsLink'?'IVMS':'DFMS'} link doesn't look like a web address — check it and save again`); return; }
         data[k]=safeUrl(data[k]);
@@ -14259,9 +14466,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const b=e.target.closest('button'); if(!b) return;
     if(b.id==='monitorEditBtn'){ monitorEditOpen=true; monitorEditRows=null; monitorBase=settingsStamp('app'); renderMonitorBar(); return; }
     if(b.id==='monitorCancel'){ monitorEditOpen=false; monitorEditRows=null; renderMonitorBar(); return; }
-    if(b.id==='monitorAddRow'){ readMonitorRows(); monitorEditRows.push({name:'', kind:'IVMS', url:'', types:[]}); renderMonitorBar(); const last=document.querySelector(`[data-ml-name="${monitorEditRows.length-1}"]`); if(last) last.focus(); return; }
+    const vd=b.closest('[data-ml-vdel]');
+    if(vd){ readMonitorRows(); const [i,id]=vd.dataset.mlVdel.split(':'); const r=monitorEditRows[+i]; if(r) r.vehicles=(r.vehicles||[]).filter(x=>x!==id); renderMonitorBar(); return; }
+    const vq=b.closest('[data-ml-vqadd]');
+    if(vq){ readMonitorRows(); const r=monitorEditRows[+vq.dataset.mlVqadd]; if(!r) return; const q=String(r.vq||'').trim().toLowerCase();
+      if(!q){ toast('Type part of the model or vehicle number first, e.g. UD'); return; }
+      const add=activeVehicles().filter(v=>((v.model||'')+' '+(v.vehicleNumber||'')).toLowerCase().includes(q) && !(r.vehicles||[]).includes(v.id)).map(v=>v.id);
+      r.vehicles=(r.vehicles||[]).concat(add); if(add.length) r.vq='';
+      toast(add.length ? `Added ${add.length} vehicle${add.length===1?'':'s'} — press Save links to keep` : `No other vehicle's model or number contains “${q}”`); renderMonitorBar(); return; }
+    if(b.id==='monitorAddRow'){ readMonitorRows(); monitorEditRows.push({name:'', kind:'IVMS', url:'', types:[], vehicles:[]}); renderMonitorBar(); const last=document.querySelector(`[data-ml-name="${monitorEditRows.length-1}"]`); if(last) last.focus(); return; }
     const rm=b.closest('[data-ml-remove]');
     if(rm){ readMonitorRows(); monitorEditRows.splice(Number(rm.dataset.mlRemove),1); renderMonitorBar(); }
+  });
+  document.getElementById('monitorBar').addEventListener('change', e=>{
+    const sel=e.target.closest('[data-ml-vadd]'); if(!sel || !sel.value) return;
+    readMonitorRows(); const r=monitorEditRows[+sel.dataset.mlVadd]; if(r && !(r.vehicles||[]).includes(sel.value)) r.vehicles=(r.vehicles||[]).concat([sel.value]); renderMonitorBar();
+  });
+  document.getElementById('monitorBar').addEventListener('keydown', e=>{
+    const q=e.target.closest('[data-ml-vq]'); if(!q || e.key!=='Enter') return;
+    e.preventDefault(); const b=document.querySelector(`[data-ml-vqadd="${q.dataset.mlVq}"]`); if(b) b.click();
   });
   document.getElementById('monitorBar').addEventListener('submit', async e=>{
     if(e.target.id!=='monitorForm') return;
@@ -14272,7 +14495,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const url=String(r.url||'').trim(), name=String(r.name||'').trim();
       if(!url && !name) continue;
       if(!safeUrl(url)){ toast(`The link for “${name||r.kind}” doesn't look like a web address — check it and save again`); return; }
-      out.push({name:name||r.kind+' portal', kind:r.kind==='DFMS'?'DFMS':'IVMS', url:safeUrl(url), types:r.types||[]});
+      out.push({name:name||r.kind+' portal', kind:r.kind==='DFMS'?'DFMS':'IVMS', url:safeUrl(url), types:r.types||[], vehicles:(r.vehicles||[]).filter(id=>vehicles.some(v=>v.id===id && !v.deleted))});
     }
     if(await saveSettings('app', {monitorLinks:out}, monitorBase)){ monitorEditOpen=false; monitorEditRows=null; renderMonitorBar(); renderVehicleTable(); if(activeVehicleId) renderVehicleDrawer(); }
   });
