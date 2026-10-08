@@ -242,6 +242,15 @@ button.att-link.att-remove{color:var(--danger);}
 .ml-veh{align-items:center;} .ml-veh select,.ml-veh input{width:auto; min-width:0; padding:4px 8px; font-size:12.5px;}
 .ml-chip{display:inline-flex; align-items:center; gap:4px; padding:3px 4px 3px 10px; border-radius:999px; border:1px solid var(--line); font-size:12.5px; font-family:var(--mono, monospace);} .ml-chip-x{border:0; background:transparent; color:var(--danger, #e5484d); cursor:pointer; font-size:15px; line-height:1; padding:0 4px;}
 .veh-req{margin:10px 0 14px; border:1px solid var(--line); border-radius:12px; padding:8px 12px;} .veh-req summary{cursor:pointer; padding:4px 0;} .veh-req-table td,.veh-req-table th{text-align:center; padding:6px 8px;} .veh-req-table td:first-child,.veh-req-table th:first-child{text-align:left;}
+.vi-status{display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; border:1px solid var(--line); margin:0 0 12px; font-size:13.5px;} .vi-status.ok{border-color:rgba(70,167,88,.5);} .vi-status.warn{border-color:rgba(255,178,36,.55);} .vi-status.danger{border-color:rgba(229,72,77,.7); background:rgba(229,72,77,.08);}
+.vi-form{border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:14px;}
+.vi-item{display:grid; grid-template-columns:1fr auto; gap:6px 10px; align-items:center; padding:7px 0; border-bottom:1px solid var(--line);} .vi-item.is-def{background:rgba(229,72,77,.06);}
+.vi-q{font-size:13px;} .vi-opts{display:flex; gap:4px;} .vi-opt{display:inline-flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:8px; padding:4px 8px; font-size:12.5px; cursor:pointer; margin:0;} .vi-opt input{margin:0; width:auto;}
+.vi-opt.vi-ok:has(input:checked){border-color:#46a758; background:rgba(70,167,88,.15);} .vi-opt.vi-def:has(input:checked){border-color:#e5484d; background:rgba(229,72,77,.15);} .vi-opt.vi-na:has(input:checked){background:rgba(127,127,127,.18);}
+.vi-note{grid-column:1/-1;}
+.vi-sigbox{position:relative; border:2px dashed var(--line); border-radius:10px; background:#fff; touch-action:none; max-width:600px;} .vi-sigbox canvas{display:block; width:100%; height:160px; border-radius:8px;} .vi-sighint{position:absolute; inset:0; display:grid; place-items:center; color:#8a929e; font-size:13px; pointer-events:none;}
+@media (max-width:560px){ .vi-item{grid-template-columns:1fr;} }
+.mh-modes{display:flex; flex-direction:column; gap:6px; margin-bottom:8px;} .mh-modes .chk{align-items:flex-start;}
 .veh-req-chips{display:flex; flex-wrap:wrap; gap:6px;}
 .veh-age{display:flex; gap:10px; align-items:flex-start; margin:10px 0 4px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;}
 input.auto-filled{outline:2px solid var(--ok, #46a758); transition:outline-color .8s;}
@@ -1271,11 +1280,11 @@ details.icam-grp .cause-list{margin:6px 0;}
         <table>
           <thead>
             <tr>
-              <th>Vehicle number</th><th>Model / type</th><th>Division</th><th>Ownership</th><th>Documents</th><th>PPE</th><th>Service</th><th>IVMS / DFMS</th>
+              <th>Vehicle number</th><th>Model / type</th><th>Division</th><th>Ownership</th><th>Documents</th><th>Inspection</th><th>PPE</th><th>Service</th><th>IVMS / DFMS</th>
             </tr>
           </thead>
           <tbody id="vehicleRows">
-            <tr><td colspan="8" class="empty-state">Sign in to load vehicle data…</td></tr>
+            <tr><td colspan="9" class="empty-state">Sign in to load vehicle data…</td></tr>
           </tbody>
         </table>
       </div>
@@ -2091,7 +2100,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2478,6 +2487,7 @@ let pendingWorkerOpen = new URLSearchParams(location.search).get('worker');
 const VEHICLE_TABS = [
   {key:'profile', label:'Profile'},
   {key:'documents', label:'Documents'},
+  {key:'inspections', label:'Inspections'},
   {key:'services', label:'Service & maintenance'},
   {key:'ppe', label:'PPE & safety kit'},
 ];
@@ -2770,7 +2780,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b66';
+const APP_BUILD='b68';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3063,12 +3073,12 @@ async function exportFleet(){
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection and try again'); return; }
   const list=activeVehicles().slice().sort((a,b)=>String(a.vehicleNumber||'').localeCompare(String(b.vehicleNumber||'')));
   const reqCols=VEH_REQ_COLS.map(([d])=>d);
-  const rows=[['Vehicle number','Model','Vehicle type','Division','Ownership','Project','Year of manufacture','First registration','Age (years)','Fuel','Odometer (km)','PDO age / km limit','Limit status',...VEH_SAFETY_SYSTEMS,'IVMS unit','DFMS device',...reqCols.map(d=>d+' expiry'),'Required documents missing','Issues']];
+  const rows=[['Vehicle number','Model','Vehicle type','Division','Ownership','Project','Year of manufacture','First registration','Age (years)','Fuel','Odometer (km)','PDO age / km limit','Limit status',...VEH_SAFETY_SYSTEMS,'IVMS unit','DFMS device',...reqCols.map(d=>d+' expiry'),'Required documents missing','Inspected this month','Last inspection','Last result','Do not use','Issues']];
   for(const v of list){
     const a=vehicleAgeCheck(v), st=vehReqDocStatus(v), has=new Set(v.safetySystems||[]), cur=currentRecs(v.documents||[], 'documents');
     const expOf=d=>{ const r=cur.filter(x=>vehDocMatches(d, x.type)).sort((p,q)=>String(q.expiry||'').localeCompare(String(p.expiry||'')))[0]; return r ? (r.expiry||'no expiry') : ''; };
     rows.push([v.vehicleNumber||'', v.model||'', v.vehicleType||'', v.division?divLabel(v.division):'', v.ownership||'Own', v.projectId?locLabel(v.projectId):'', v.yearMade||'', v.firstRegDate||'', a.age!=null?Number(a.age.toFixed(1)):'', v.fuelType||'', a.odo!==null?Math.round(a.odo):'', a.limitText||'', a.statusText||'',
-      ...VEH_SAFETY_SYSTEMS.map(x=>has.has(x)?'Yes':''), v.ivmsUnitId||'', v.dfmsUnitId||'', ...reqCols.map(expOf), st.filter(x=>x.status==='missing').map(x=>x.req).join(', '), vehicleIssues(v).join('; ')]);
+      ...VEH_SAFETY_SYSTEMS.map(x=>has.has(x)?'Yes':''), v.ivmsUnitId||'', v.dfmsUnitId||'', ...reqCols.map(expOf), st.filter(x=>x.status==='missing').map(x=>x.req).join(', '), ...(li=>[vehInspThisMonth(v)?'Yes':'No', li?li.date:'', li?(VI_RESULT[li.result].short||'Pass'):'', vehDoNotUse(v)?'YES':''])(viSorted(v)[0]), vehicleIssues(v).join('; ')]);
   }
   const docs=[['Vehicle number','Model','Vehicle type','Document','Speed limiter setting','Done date','Expiry','Status','Notes']];
   for(const v of list) for(const r of (v.documents||[]).slice().sort((p,q)=>String(p.type||'').localeCompare(String(q.type||'')) || String(q.date||'').localeCompare(String(p.date||''))))
@@ -3079,6 +3089,400 @@ async function exportFleet(){
   XLSX.writeFile(wb, `Burhan_Fleet_Inventory_${localToday()}.xlsx`);
 }
 document.addEventListener('click', e=>{ if(e.target.closest && e.target.closest('#exportFleetBtn')) exportFleet(); });
+
+/* ---------------- Batch 67: vehicle inspections (SP-2000 Annex B-8 daily check + Annex C-8 spot check) ----------------
+   vehicle.inspections = [{id, date, inspector, driver, odometer, projectId, items:[{k, r:'ok'|'def'|'na', note}],
+     other, otherClass:''|'A'|'B', result:'pass'|'B'|'A', actionOwner, targetDate, rectifiedDate, rectifiedBy, attachment:{url,path…} (inspector signature)}]
+   Class A = vehicle must not be used until fixed · Class B = fix on return to the workshop (SP-2000 Annex B-8 §5). */
+const VI_SECTIONS={
+  base:{title:'Vehicle — daily POWER check', items:[
+    ['seatbelt','Seat belts fitted and working — all seats','A'],
+    ['tyres','Tyres incl. spare — tread min. 1.6 mm, no cuts / bulges, pressure within ±10 psi','A'],
+    ['brakes','Service brake and parking brake working','A'],
+    ['load','Load secured and restrained (SP-2001)','A'],
+    ['rollcage','Roll-over cage fitted where required','A'],
+    ['limiter','Speed limiter and IVMS working','B'],
+    ['lights','Head, brake, indicator and reverse lights working','B'],
+    ['mirrors','Windscreen and mirrors — no cracks blocking the view','B'],
+    ['wipers','Wipers, washer and horn working','B'],
+    ['leaks','No fuel, oil, coolant or brake fluid leaks — levels OK','B'],
+    ['ac','Air conditioning and radio working','B'],
+    ['seats','Seats in good repair','B'],
+    ['emerg','Fire extinguisher, first aid kit, warning triangle, jack','B'],
+    ['fuel','Fuel type marked on the filler cap','B'],
+    ['papers','Valid RAS sticker, Mulkiya and insurance in the vehicle','B'],
+    ['body','Body — no damage, clean cabin, no loose items','B'],
+  ]},
+  heavy:{title:'Heavy vehicle', items:[
+    ['air','Air brakes — pressure builds, low-air warning works, no leaks','A'],
+    ['underrun','Rear and side under-run protection','B'],
+    ['hirear','High-intensity rear lights working','B'],
+    ['markings','PSI, max load and speed setting painted on the vehicle','B'],
+    ['wheelnuts','Wheel nuts tight, indicators in place','B'],
+  ]},
+  trailer:{title:'Trailer', items:[
+    ['ttyres','Tyres — tread, cuts, pressure','A'],
+    ['tbrakes','Trailer brakes and brake lock working','A'],
+    ['kingpin','Kingpin and coupling secure (MPI / NDT valid)','A'],
+    ['tload','Load anchor points, headboard and stanchions sound — load secured','A'],
+    ['hoses','Brake hoses and palm couplings (red / yellow) OK','B'],
+    ['tlights','7-pin socket, lights, reflectors and high-intensity rear lights','B'],
+    ['landing','Landing gear and handle working','B'],
+    ['tunderrun','Rear and side under-run protection','B'],
+  ]},
+  tanker:{title:'Water tanker', items:[
+    ['colour','Tank colour code correct (brackish = green, potable = blue)','B'],
+    ['manhole','Manholes closed, valance in place','B'],
+    ['valves','Discharge valves at the side, no leaks','B'],
+    ['thoses','Hoses stowed securely — not hiding the rear lights','B'],
+    ['pto','PTO pump / brake interlock working','A'],
+    ['health','Health / water certificate in the vehicle','B'],
+  ]},
+  crane:{title:'Crane / HIAB', items:[
+    ['tpc','Third-party certificate valid and in the cab','B'],
+    ['chart','Load chart displayed','B'],
+    ['hook','Hook and safety latch OK','A'],
+    ['rope','Wire rope / hydraulic hoses — no damage or leaks','A'],
+    ['outrig','Outriggers and pads in good condition','A'],
+    ['lmi','Limit switches / LMI working','A'],
+    ['stow','Crane stowed and locked for travel','B'],
+  ]},
+  forklift:{title:'Forklift', items:[
+    ['ftpc','Third-party certificate valid','B'],
+    ['fop','Operator holds a valid licence / competency','B'],
+    ['fbrakes','Brakes and steering working','A'],
+    ['fwheels','Tyres and wheels OK','A'],
+    ['forks','Forks, chains and mast — no damage, no cracks','A'],
+    ['fbelt','Seat belt working','A'],
+    ['falarm','Horn, lights and reversing alarm working','B'],
+    ['fhyd','No hydraulic leaks','B'],
+    ['fplate','Capacity plate readable','B'],
+    ['fext','Fire extinguisher','B'],
+  ]},
+  boom:{title:'Boom lift', items:[
+    ['btpc','Third-party certificate valid','B'],
+    ['bop','Operator trained and holds a valid card','B'],
+    ['bguard','Platform guard rails, gate and harness anchor points','A'],
+    ['bstop','Emergency stop and emergency lowering working','A'],
+    ['bctrl','Ground and platform controls working','A'],
+    ['bwheels','Tyres / wheels and brakes OK','A'],
+    ['bhyd','No hydraulic leaks, boom structure undamaged','A'],
+    ['balarm','Tilt alarm, horn and travel alarm working','B'],
+    ['bplate','Capacity plate readable','B'],
+  ]},
+};
+const VI_SETS={'Car / SUV':['base'],'Pickup':['base'],'Bus':['base'],'Truck':['base','heavy'],'Prime Mover':['base','heavy'],
+  'Green Water Tanker':['base','heavy','tanker'],'HIAB Truck':['base','heavy','crane'],'Crane':['base','heavy','crane'],
+  'Trailer':['trailer'],'Flatbed Trailer':['trailer'],'Low Bed Trailer':['trailer'],'Forklift':['forklift'],'Boom Lift':['boom'],'Other':['base']};
+const VI_RESULT={pass:{t:'Pass', cls:'ok'}, B:{t:'Class B — fix on return to the workshop', short:'Class B', cls:'warn'}, A:{t:'Class A — DO NOT USE until fixed', short:'Class A', cls:'danger'}};
+function viSections(v){ return (VI_SETS[v && v.vehicleType]||['base']).map(k=>({key:k, ...VI_SECTIONS[k]})); }
+function viItemMap(){ const m={}; for(const s of Object.values(VI_SECTIONS)) for(const [k,t,c] of s.items) m[k]={t,c}; return m; }
+function viResultOf(items, otherClass){
+  const m=viItemMap(); let r='pass';
+  for(const it of items||[]) if(it.r==='def'){ const c=(m[it.k]||{}).c||'B'; if(c==='A') return 'A'; r='B'; }
+  if(otherClass==='A') return 'A'; if(otherClass==='B') r='B';
+  return r;
+}
+function viDefects(insp){ const m=viItemMap(); const out=(insp.items||[]).filter(x=>x.r==='def').map(x=>({cls:(m[x.k]||{}).c||'B', text:(m[x.k]||{}).t||x.k, note:x.note||''})); if(insp.other) out.push({cls:insp.otherClass||'B', text:insp.other, note:''}); return out; }
+function viSorted(v){ return (v.inspections||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')) || String(b.id||'').localeCompare(String(a.id||''))); }
+// a defect is closed when marked rectified, or when a later inspection passes
+function viClose(v, insp){
+  if(insp.result==='pass') return {closed:true, date:insp.date};
+  if(insp.rectifiedDate) return {closed:true, date:insp.rectifiedDate, by:insp.rectifiedBy||''};
+  const after=x=>String(x.date||'')>String(insp.date||'') || (String(x.date||'')===String(insp.date||'') && String(x.createdAt||'')>String(insp.createdAt||''));
+  const first=(v.inspections||[]).filter(x=>x.id!==insp.id && x.result==='pass' && after(x)).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')))[0];
+  return first ? {closed:true, date:first.date, by:'re-inspection passed'} : {closed:false};
+}
+function vehDoNotUse(v){ return (v.inspections||[]).some(x=>x.result==='A' && !viClose(v,x).closed); }
+function vehInspThisMonth(v, ym){ ym=ym||localToday().slice(0,7); return viSorted(v).find(x=>String(x.date||'').startsWith(ym))||null; }
+function vehInspBadge(v){
+  if(vehDoNotUse(v)) return `<span class="badge danger" title="Class A defect not yet fixed">Do not use</span>`;
+  const x=vehInspThisMonth(v);
+  if(x) return `<span class="badge ${VI_RESULT[x.result].cls}" title="${esc(VI_RESULT[x.result].t)}">✓ ${esc(isoToDmy(x.date))}${x.result!=='pass'?' · '+VI_RESULT[x.result].short:''}</span>`;
+  return `<span class="badge warn" title="No inspection recorded in ${esc(monthLabelOf(localToday().slice(0,7)))}">Due this month</span>`;
+}
+function monthLabelOf(ym){ const [y,m]=ym.split('-').map(Number); return new Date(Date.UTC(y,m-1,1)).toLocaleString('en-GB',{month:'long', year:'numeric', timeZone:'UTC'}); }
+function viLogId(vid, iid){ return `vinsp_${vid}_${iid}`; }
+async function viSyncReport(v, insp){
+  const pid=insp.projectId||v.projectId||'', site=pid ? activeSites().find(s=>s.id===pid) : null;
+  try{ await db.collection('hseLogs').doc(viLogId(v.id, insp.id)).set(stamp({category:'vehicleInspection', date:insp.date||'', division:v.division||(site&&site.division)||'Rental', projectId:insp.projectId||v.projectId||'',
+    vehicleNumber:v.vehicleNumber||'', result:insp.result==='pass'?'Pass':insp.result==='A'?'Fail':'Needs attention', source:'vehicleInspection', sourceVehicleId:v.id, sourceRecId:insp.id})); }
+  catch(e){ console.error('vehicle inspection sync', e); toast('Inspection saved, but the Monthly Report could not be updated — '+(e.code||'error')); }
+}
+async function viRemoveReport(vid, iid){ try{ await db.collection('hseLogs').doc(viLogId(vid, iid)).delete(); }catch(e){} }
+
+let viFormOpen=false, viSig=null;
+function vehInspTabHtml(v){
+  const list=viSorted(v), cur=vehInspThisMonth(v), dnu=vehDoNotUse(v), ym=localToday().slice(0,7);
+  const status = dnu ? `<div class="vi-status danger">${ic('stop')} <b>DO NOT USE</b> — a Class A defect is not fixed yet. Mark it rectified, or record a re-inspection that passes.</div>`
+    : cur ? `<div class="vi-status ${VI_RESULT[cur.result].cls}">${ic('checkcircle')} Inspected this month — ${esc(cur.date)} · <b>${esc(VI_RESULT[cur.result].t)}</b></div>`
+    : `<div class="vi-status warn">${ic('clock')} <b>Inspection due</b> — nothing recorded in ${esc(monthLabelOf(ym))}. Vehicles are inspected once a month.</div>`;
+  const ed=canEdit();
+  const cards=list.length ? list.map(x=>{ const r=VI_RESULT[x.result]||VI_RESULT.pass, d=viDefects(x), cl=viClose(v,x);
+    return `<div class="record-card vi-card"><div class="record-card-top"><div class="record-card-title">${esc(x.date||'—')} <span class="badge ${r.cls}">${esc(r.short||r.t)}</span>${x.result!=='pass'?` <span class="badge ${cl.closed?'ok':'muted'}">${cl.closed?'Rectified '+esc(cl.date||''):'Action open'}</span>`:''}</div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm" data-vi-pdf="${esc(x.id)}">${ic('download')} PDF</button>${ed?`<button type="button" class="icon-btn danger" data-vi-del="${esc(x.id)}" data-armed="0" aria-label="Delete inspection">${ic('trash')}</button>`:''}</div></div>
+      <div class="record-fields">
+        <div class="rf"><span class="rf-k">Inspector</span><span class="rf-v">${esc(x.inspector||'—')}</span></div>
+        ${x.driver?`<div class="rf"><span class="rf-k">Driver / operator</span><span class="rf-v">${esc(x.driver)}</span></div>`:''}
+        ${x.projectId?`<div class="rf"><span class="rf-k">Project</span><span class="rf-v">${esc(projectName(x.projectId))}</span></div>`:''}
+        ${x.odometer?`<div class="rf"><span class="rf-k">Odometer</span><span class="rf-v">${esc(fmtKm(svcNum(x.odometer)))}</span></div>`:''}
+        <div class="rf"><span class="rf-k">Checked</span><span class="rf-v">${(x.items||[]).filter(i=>i.r==='ok').length} OK · ${(x.items||[]).filter(i=>i.r==='def').length} defect${(x.items||[]).filter(i=>i.r==='def').length===1?'':'s'} · ${(x.items||[]).filter(i=>i.r==='na').length} N/A</span></div>
+        ${d.length?`<div class="rf"><span class="rf-k">Defects</span><span class="rf-v">${d.map(z=>`<div><span class="badge ${z.cls==='A'?'danger':'warn'}">${z.cls}</span> ${esc(z.text)}${z.note?' — '+esc(z.note):''}</div>`).join('')}</span></div>`:''}
+        ${x.result!=='pass'?`<div class="rf"><span class="rf-k">Action</span><span class="rf-v">${esc(x.actionOwner||'owner not set')} · target ${esc(x.targetDate||'—')}${cl.closed&&cl.by?' · '+esc(cl.by):''}</span></div>`:''}
+      </div>
+      ${ed && x.result!=='pass' && !cl.closed ? `<div class="form-actions" style="margin-top:6px;"><button type="button" class="btn btn-sm" data-vi-fix="${esc(x.id)}" data-armed="0">Mark defects rectified</button></div>`:''}
+    </div>`; }).join('') : '<p class="wsub">No inspections recorded yet.</p>';
+  return `${status}
+    <div class="section-head"><h3>Vehicle inspections (${list.length})</h3>${ed?`<button type="button" class="btn btn-sm" id="viToggle">${viFormOpen?'Cancel':'+ New inspection'}</button>`:''}</div>
+    ${ed && viFormOpen ? viFormHtml(v) : ''}
+    <div>${cards}</div>`;
+}
+function viFormHtml(v){
+  const people=[...new Set(activeWorkers().map(w=>w.fullName).filter(Boolean))].sort();
+  const secs=viSections(v);
+  return `<form id="viForm" class="vi-form">
+    <div class="form-grid">
+      <label>Date *<input type="date" data-vi="date" required value="${localToday()}" max="${localToday()}"></label>
+      <label>Inspector *<input data-vi="inspector" required list="viPeople" placeholder="Name"></label>
+      <label>Driver / operator<input data-vi="driver" list="viPeople" placeholder="Name"></label>
+      <label>Odometer (km)<input type="number" min="0" step="any" data-vi="odometer" placeholder="optional"></label>
+      <label class="span-all">Project<select data-vi="projectId"><option value="">Not on a project</option>${activeSites().filter(s=>projectStatus(s)!=='Completed').map(s=>`<option value="${esc(s.id)}" ${s.id===v.projectId?'selected':''}>${esc(s.siteName||'—')}</option>`).join('')}</select></label>
+    </div>
+    <datalist id="viPeople">${people.map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist>
+    <p class="wsub" style="margin:8px 0 4px;">Checklist for <b>${esc(v.vehicleType||'vehicle type not set — general list')}</b> · SP-2000 Annex B-8 / C-8. <span class="badge danger">A</span> = do not use if defective · <span class="badge warn">B</span> = fix on return to the workshop.</p>
+    <div class="form-actions" style="justify-content:flex-start; margin:0 0 6px;"><button type="button" class="btn btn-sm" id="viAllOk">Mark all OK</button></div>
+    ${secs.map(s=>`<div class="vi-sec"><div class="subhead">${esc(s.title)}</div>${s.items.map(([k,t,c])=>`<div class="vi-item" data-vi-item="${k}">
+        <div class="vi-q"><span class="badge ${c==='A'?'danger':'warn'}">${c}</span> ${esc(t)}</div>
+        <div class="vi-opts" role="radiogroup" aria-label="${esc(t)}">${[['ok','OK'],['def','Defect'],['na','N/A']].map(([val,lab])=>`<label class="vi-opt vi-${val}"><input type="radio" name="vi_${k}" value="${val}">${lab}</label>`).join('')}</div>
+        <input class="vi-note" data-vi-note="${k}" placeholder="What is wrong?" hidden>
+      </div>`).join('')}</div>`).join('')}
+    <div class="form-grid" style="margin-top:10px;">
+      <label class="span-all">Other defects found<input data-vi="other" placeholder="optional"></label>
+      <label>Class of other defects<select data-vi="otherClass"><option value="">—</option><option value="B">B — fix on return</option><option value="A">A — do not use</option></select></label>
+    </div>
+    <div id="viResult" class="vi-status muted">Answer every line to see the result.</div>
+    <div class="form-grid" id="viActionBox" hidden>
+      <label>Action owner *<input data-vi="actionOwner" list="viPeople" placeholder="Who fixes it"></label>
+      <label>Target date *<input type="date" data-vi="targetDate"></label>
+    </div>
+    <div class="subhead">Inspector signature *</div>
+    <div class="vi-sigbox"><canvas id="viSigPad" width="600" height="190" aria-label="Inspector signature pad"></canvas><div class="vi-sighint" id="viSigHint">Sign here with a finger or the mouse</div></div>
+    <div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm" id="viSigClear">Clear</button><button type="button" class="btn btn-sm" id="viSigUpload">Upload photo of signature</button><input type="file" id="viSigFile" accept="image/*" hidden></div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">Save inspection</button></div>
+  </form>`;
+}
+function viReadForm(f){
+  const g=k=>String((f.querySelector(`[data-vi="${k}"]`)||{}).value||'').trim();
+  const items=[...f.querySelectorAll('[data-vi-item]')].map(el=>{ const k=el.dataset.viItem, r=(el.querySelector('input[type=radio]:checked')||{}).value||''; const o={k, r}; const n=String((el.querySelector('[data-vi-note]')||{}).value||'').trim(); if(r==='def' && n) o.note=n; return o; });
+  return {date:g('date'), inspector:g('inspector'), driver:g('driver'), odometer:g('odometer'), projectId:g('projectId'), other:g('other'), otherClass:g('other')?g('otherClass'):'', actionOwner:g('actionOwner'), targetDate:g('targetDate'), items};
+}
+function viRefreshForm(f){
+  const d=viReadForm(f), missing=d.items.filter(i=>!i.r).length, res=viResultOf(d.items, d.otherClass);
+  f.querySelectorAll('[data-vi-item]').forEach(el=>{ const r=(el.querySelector('input[type=radio]:checked')||{}).value; el.classList.toggle('is-def', r==='def'); const n=el.querySelector('[data-vi-note]'); if(n) n.hidden=r!=='def'; });
+  const box=f.querySelector('#viResult'), ab=f.querySelector('#viActionBox');
+  if(missing){ box.className='vi-status muted'; box.textContent=`${missing} line${missing===1?'':'s'} still to answer.`; }
+  else { const r=VI_RESULT[res]; box.className='vi-status '+r.cls; box.innerHTML=`Result: <b>${esc(r.t)}</b>`; }
+  ab.hidden = res==='pass';
+  const td=f.querySelector('[data-vi="targetDate"]'); if(td && !td.value && res!=='pass') td.value = res==='A' ? (d.date||localToday()) : dateAddDays(d.date||localToday(), 7);
+}
+function dateAddDays(iso, n){ const t=new Date(iso+'T00:00:00Z'); if(isNaN(t)) return ''; t.setUTCDate(t.getUTCDate()+n); return t.toISOString().slice(0,10); }
+function viWirePad(){
+  const cv=document.getElementById('viSigPad'); if(!cv || cv.dataset.wired) return; cv.dataset.wired='1';
+  const ctx=cv.getContext('2d'); const blank=()=>{ ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cv.width,cv.height); }; blank();
+  ctx.strokeStyle='#0b1a33'; ctx.lineWidth=2.6; ctx.lineJoin='round'; ctx.lineCap='round';
+  viSig={drawn:false, photo:false};
+  let on=false; const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
+  cv.addEventListener('pointerdown', e=>{ e.preventDefault(); if(viSig.photo){ blank(); viSig.photo=false; } on=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); try{ cv.setPointerCapture(e.pointerId); }catch(x){} const f=cv.closest('form'); if(f) f.dataset.dirty='1'; });
+  cv.addEventListener('pointermove', e=>{ if(!on) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); if(!viSig.drawn){ viSig.drawn=true; document.getElementById('viSigHint').hidden=true; } });
+  const end=()=>{ on=false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
+  viSig.clear=()=>{ blank(); viSig.drawn=false; viSig.photo=false; const h=document.getElementById('viSigHint'); if(h) h.hidden=false; };
+  viSig.photoFrom=file=>{ const img=new Image(), url=URL.createObjectURL(file); img.onload=()=>{ blank(); const k=Math.min(cv.width/img.width, cv.height/img.height), w=img.width*k, h=img.height*k; ctx.drawImage(img,(cv.width-w)/2,(cv.height-h)/2,w,h); viSig.drawn=true; viSig.photo=true; document.getElementById('viSigHint').hidden=true; URL.revokeObjectURL(url); }; img.onerror=()=>{ toast('That photo could not be opened'); URL.revokeObjectURL(url); }; img.src=url; };
+}
+document.addEventListener('click', async e=>{
+  const t=e.target.closest && e.target.closest('#viToggle,#viAllOk,#viSigClear,#viSigUpload,[data-vi-del],[data-vi-fix],[data-vi-pdf]'); if(!t) return;
+  const v=currentVehicle(); if(!v) return;
+  const armed=()=>{ if(t.dataset.armed!=='1'){ t.dataset.armed='1'; const was=t.innerHTML; t.textContent='Tap again to confirm'; setTimeout(()=>{ if(t.isConnected){ t.dataset.armed='0'; t.innerHTML=was; } }, 3500); return false; } return true; };
+  if(t.id==='viToggle'){ viFormOpen=!viFormOpen; clearDirtyForms(); renderVehicleDrawerBody(); if(viFormOpen) viWirePad(); return; }
+  if(t.id==='viAllOk'){ const f=t.closest('form'); f.querySelectorAll('[data-vi-item]').forEach(el=>{ if(!el.querySelector('input:checked')) el.querySelector('input[value="ok"]').checked=true; }); f.dataset.dirty='1'; viRefreshForm(f); return; }
+  if(t.id==='viSigClear'){ if(viSig && viSig.clear) viSig.clear(); return; }
+  if(t.id==='viSigUpload'){ const fi=document.getElementById('viSigFile'); fi.value=''; fi.click(); return; }
+  if(t.dataset.viPdf){ const x=(v.inspections||[]).find(i=>i.id===t.dataset.viPdf); if(x) vehInspPdf(v, x); return; }
+  if(!canEdit()) return;
+  if(t.dataset.viDel){ if(!armed()) return; const x=(v.inspections||[]).find(i=>i.id===t.dataset.viDel); if(!x) return;
+    if(await updateVehicle(v.id, {inspections:(v.inspections||[]).filter(i=>i.id!==x.id)})){ viRemoveReport(v.id, x.id); if(x.attachment && x.attachment.path) deleteStorageFile(x.attachment.path); } return; }
+  if(t.dataset.viFix){ if(!armed()) return; const u=auth.currentUser;
+    await updateVehicle(v.id, {inspections:(v.inspections||[]).map(i=>i.id===t.dataset.viFix ? {...i, rectifiedDate:localToday(), rectifiedBy:(u&&u.email)||''} : i)}); return; }
+});
+document.addEventListener('change', e=>{
+  if(e.target.id==='viSigFile'){ const f=e.target.files[0]; if(f && viSig && viSig.photoFrom){ viSig.photoFrom(f); const fm=document.getElementById('viForm'); if(fm) fm.dataset.dirty='1'; } return; }
+  const f=e.target.closest && e.target.closest('#viForm'); if(f) viRefreshForm(f);
+});
+document.addEventListener('input', e=>{ const f=e.target.closest && e.target.closest('#viForm'); if(f && e.target.matches('[data-vi="other"]')) viRefreshForm(f); });
+document.addEventListener('submit', async e=>{
+  if(e.target.id!=='viForm') return; e.preventDefault();
+  const v=currentVehicle(); if(!v || !canEdit()) return;
+  const f=e.target, d=viReadForm(f);
+  const miss=d.items.filter(i=>!i.r).length;
+  if(!d.date || !d.inspector){ toast('Enter the date and the inspector'); return; }
+  if(d.date>localToday()){ toast('The inspection date cannot be in the future'); return; }
+  if(miss){ toast(`${miss} checklist line${miss===1?'':'s'} not answered — choose OK, Defect or N/A`); const el=[...f.querySelectorAll('[data-vi-item]')].find(x=>!x.querySelector('input:checked')); if(el) el.scrollIntoView({block:'center'}); return; }
+  if(d.other && !d.otherClass){ toast('Choose the class (A or B) of the other defects'); return; }
+  const result=viResultOf(d.items, d.otherClass);
+  if(result!=='pass' && (!d.actionOwner || !d.targetDate)){ toast('Defects found — enter the action owner and target date'); return; }
+  if(!viSig || !viSig.drawn){ toast('The inspector must sign'); return; }
+  const cv=document.getElementById('viSigPad');
+  const out=document.createElement('canvas'); out.width=480; out.height=152; const g=out.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,480,152); g.drawImage(cv,0,0,480,152);
+  const blob=await new Promise(r=>out.toBlob(r,'image/png')); if(!blob){ toast('Could not read the signature'); return; }
+  let att=null; try{ att=await uploadToStorage(new File([blob], 'inspection_signature.png', {type:'image/png'})); }catch(err){ console.error(err); toast((err&&err.userMsg)||'Signature could not be uploaded — check the connection'); return; }
+  const insp={id:'vi'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), date:d.date, inspector:d.inspector, driver:d.driver, odometer:d.odometer, projectId:d.projectId, items:d.items,
+    other:d.other, otherClass:d.otherClass, result, actionOwner:result==='pass'?'':d.actionOwner, targetDate:result==='pass'?'':d.targetDate, attachment:att, createdAt:new Date().toISOString(), createdBy:(auth.currentUser&&auth.currentUser.email)||''};
+  const upd={inspections:(v.inspections||[]).concat([insp])};
+  const odo=svcNum(d.odometer), cur=vehicleServiceStats(v).odo; if(odo!==null && (cur===null || odo>cur)){ upd.odometer=String(odo); upd.odometerDate=d.date; }
+  if(!(await updateVehicle(v.id, upd))){ if(att && att.path) deleteStorageFile(att.path); return; }
+  await viSyncReport(v, insp);
+  viFormOpen=false; viSig=null; delete f.dataset.dirty; renderVehicleDrawerBody();
+  toast(result==='A' ? 'Saved — Class A: the vehicle is marked DO NOT USE and an action is open' : result==='B' ? 'Saved — Class B defects: an action is open in the Action tracker' : 'Inspection saved — Pass');
+});
+
+async function vehInspPdf(v, x){
+  try{
+    preloadPdfLogo();
+    const sig = x.attachment && x.attachment.url ? await fetchImageDataUrl(x.attachment.url) : null;
+    const doc=pdfDoc({unit:'pt', format:'a4', docKey:'vehInsp', docTitle:'Vehicle Inspection Checklist', docSub:[v.vehicleNumber, v.model, x.date].filter(Boolean).join(' · '), docRef:v.vehicleNumber||''});
+    const M=34, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, FS=8.6, LH=10.4, INK=[20,22,28], GREY=[226,229,234], LBL=[246,247,249];
+    let y=34; const ensure=h=>{ if(y+h>H-28){ doc.addPage(); y=34; } };
+    const lines=cl=>{ doc.setFont('helvetica', cl.bold?'bold':'normal'); doc.setFontSize(cl.size||FS); return doc.splitTextToSize(String(cl.t===undefined||cl.t===null||cl.t===''?'—':cl.t), Math.max(10, cl.w-8)); };
+    const row=cells=>{ const pc=cells.map(c=>({...c, l:lines(c)})); const h=Math.max(16, ...pc.map(c=>c.l.length*LH+6)); ensure(h); let xx=M;
+      for(const c of pc){ if(c.fill){ doc.setFillColor(...c.fill); doc.rect(xx,y,c.w,h,'F'); } doc.setDrawColor(110,116,126); doc.setLineWidth(0.5); doc.rect(xx,y,c.w,h); doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); doc.setTextColor(...(c.color||INK)); c.l.forEach((t,n)=>doc.text(t, xx+4, y+11+n*LH)); xx+=c.w; }
+      y+=h; doc.setTextColor(...INK); };
+    const K=110, hw=(CW-2*K)/2, kv=(k,val,k2,v2)=>k2===undefined?row([{t:k,w:K,bold:true,fill:LBL},{t:val,w:CW-K}]):row([{t:k,w:K,bold:true,fill:LBL},{t:val,w:hw},{t:k2,w:K,bold:true,fill:LBL},{t:v2,w:hw}]);
+    const r=VI_RESULT[x.result]||VI_RESULT.pass, cl=viClose(v,x);
+    kv('VEHICLE NO.', v.vehicleNumber, 'TYPE', v.vehicleType);
+    kv('MODEL', v.model, 'DATE', isoToDmy(x.date));
+    kv('PROJECT', x.projectId?projectName(x.projectId):'—', 'ODOMETER', x.odometer?fmtKm(svcNum(x.odometer)):'—');
+    kv('INSPECTOR', x.inspector, 'DRIVER / OPERATOR', x.driver);
+    row([{t:'RESULT', w:K, bold:true, fill:LBL},{t:r.t, w:CW-K, bold:true, color:x.result==='A'?[200,16,46]:x.result==='B'?[176,110,0]:[22,128,61]}]);
+    const m=viItemMap(), got=Object.fromEntries((x.items||[]).map(i=>[i.k,i]));
+    const secs=(VI_SETS[v.vehicleType]||['base']).map(k=>VI_SECTIONS[k]);
+    for(const s of secs){
+      ensure(40); y+=8; row([{t:s.title.toUpperCase(), w:CW-150, bold:true, fill:GREY},{t:'CLASS', w:40, bold:true, fill:GREY},{t:'RESULT', w:110, bold:true, fill:GREY}]);
+      for(const [k,t,c] of s.items){ const it=got[k]||{}; const res=it.r==='ok'?'OK':it.r==='def'?'DEFECT':it.r==='na'?'N/A':'—';
+        row([{t:t+(it.r==='def'&&it.note?'  — '+it.note:''), w:CW-150},{t:c, w:40},{t:res, w:110, bold:it.r==='def', color:it.r==='def'?(c==='A'?[200,16,46]:[176,110,0]):INK}]); }
+    }
+    // items answered on an older checklist that are no longer in this type's list
+    const shown=new Set(secs.flatMap(s=>s.items.map(i=>i[0]))), extra=(x.items||[]).filter(i=>!shown.has(i.k));
+    for(const it of extra) row([{t:(m[it.k]||{}).t||it.k, w:CW-150},{t:(m[it.k]||{}).c||'', w:40},{t:it.r==='def'?'DEFECT':it.r==='na'?'N/A':'OK', w:110}]);
+    if(x.other){ y+=6; kv('OTHER DEFECTS', `${x.other} (Class ${x.otherClass||'B'})`); }
+    if(x.result!=='pass'){ y+=6; kv('ACTION OWNER', x.actionOwner, 'TARGET DATE', x.targetDate); kv('STATUS', cl.closed?`Rectified ${cl.date||''}${cl.by?' — '+cl.by:''}`:(x.result==='A'?'OPEN — vehicle must not be used':'OPEN — fix on return to the workshop')); }
+    ensure(110); y+=10; const bw=(CW-10)/2, bh=86;
+    [['INSPECTOR — SIGNATURE', x.inspector, sig],['DRIVER / OPERATOR — SIGNATURE', x.driver, null]].forEach(([role,name,img],i)=>{ const xx=M+i*(bw+10);
+      doc.setDrawColor(110,116,126); doc.rect(xx,y,bw,bh); doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,96,106); doc.text(role, xx+6, y+11);
+      if(img){ try{ const fmt=/^data:image\/png/i.test(img)?'PNG':'JPEG', bxw=bw-16, bxh=bh-40; let iw=bxw, ih=bxh; try{ const pr=doc.getImageProperties(img); const k=Math.min(bxw/pr.width, bxh/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(img, fmt, xx+8+(bxw-iw)/2, y+16+(bxh-ih)/2, iw, ih); }catch(e){} }
+      else { doc.setDrawColor(170,174,182); doc.line(xx+12, y+bh-28, xx+bw-12, y+bh-28); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text('Sign here', xx+12, y+bh-31); }
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...INK); doc.text(`Name: ${name||'______________________'}`, xx+6, y+bh-12); doc.text(`Date: ${isoToDmy(x.date)}`, xx+bw-6, y+bh-12, {align:'right'}); });
+    y+=bh+10; doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(110,116,126);
+    doc.text('Class A = vehicle must not be used until the defect is fixed · Class B = fix on return to the workshop (PDO SP-2000 Annex B-8).', M, y);
+    doc.save(`Burhan_Vehicle_Inspection_${String(v.vehicleNumber||'vehicle').replace(/[^\w-]+/g,'_')}_${x.date}.pdf`);
+  }catch(e){ console.error(e); toast('Could not make the PDF'); }
+}
+
+/* ---------------- Batch 68: automatic project man-hours ----------------
+   Project setting mhMode 'auto' → every working day: people assigned to the project that day × hours per day.
+   Who was on the project when comes from each worker's project history (moves and temporary transfers count by date;
+   the day someone moves counts for the new project). Working days: mhDaysPerWeek 7 / 6 (Friday off) / 5 (Friday + Saturday off).
+   From mhFrom (or the project start) the automatic figure replaces manual man-hour entries of that project; earlier months stay manual.
+   The figures are calculated live — nothing extra is stored in the Monthly Report. */
+const MH_DAYS_OFF={7:[], 6:[5], 5:[5,6]};
+const MH_DAY_LABEL={7:'7 days a week', 6:'6 days (Fri off)', 5:'5 days (Fri + Sat off)'};
+function mhAuto(s){ return !!(s && s.mhMode==='auto' && !s.deleted); }
+function mhFromOf(s){ return (s && (s.mhFrom || s.startDate)) || ''; }
+function mhWorkerSpans(pid){
+  const out=[];
+  for(const w of activeWorkers()){
+    let hs=projHistory(w).filter(h=>h.projectId===pid);
+    if(!hs.length && w.projectId===pid) hs=[{from:String(w.projectAssignedAt||'').slice(0,10), to:''}];
+    const stop=(w.status||'active')==='inactive' ? String(w.contractEnded||String(w.updatedAt||'').slice(0,10)||'').slice(0,10) : '';
+    for(const h of hs){ let to=h.to||''; if(!to && stop) to=stop; out.push({wid:w.id, from:String(h.from||'').slice(0,10), to:String(to).slice(0,10)}); }
+  }
+  return out;
+}
+function mhAutoMonths(s, opt){
+  opt=opt||{}; const cfg={...s, ...(opt.cfg||{})};
+  const from=mhFromOf(cfg); if(!/^\d{4}-\d{2}-\d{2}$/.test(from)) return {};
+  const end=[opt.upto||localToday(), cfg.actualEnd||'9999-12-31'].sort()[0];
+  const spans=mhWorkerSpans(s.id), off=MH_DAYS_OFF[cfg.mhDaysPerWeek||7]||[], hpd=Number(cfg.mhHoursPerDay)||10, out={};
+  let guard=0;
+  for(let d=from; d<=end && guard<6000; d=dateAddDays(d,1), guard++){
+    const ym=d.slice(0,7), o=out[ym]||(out[ym]={hours:0, days:0, workerDays:0});
+    if(off.includes(new Date(d+'T00:00:00Z').getUTCDay())) continue;
+    let n=0; for(const sp of spans) if((!sp.from || sp.from<=d) && (!sp.to || d<sp.to)) n++;
+    o.days++; o.workerDays+=n; o.hours+=n*hpd;
+  }
+  return out;
+}
+let mhCache=null;
+function mhAutoData(){
+  const k=[workers, siteEquipmentList, localToday()];
+  if(mhCache && mhCache.k.every((x,i)=>x===k[i])) return mhCache;
+  const entries=[], replaced=new Map();
+  for(const s of siteEquipmentList.filter(mhAuto)){
+    const fm=mhFromOf(s).slice(0,7); if(!fm) continue; replaced.set(s.id, fm);
+    for(const [ym,o] of Object.entries(mhAutoMonths(s))) if(o.hours>0) entries.push({id:`auto_mh_${s.id}_${ym}`, category:'manHours', date:ym, hours:o.hours, division:s.division||'Civil', projectId:s.id,
+      source:'autoManHours', autoDays:o.days, autoWorkerDays:o.workerDays, autoHpd:Number(s.mhHoursPerDay)||10});
+  }
+  mhCache={k, entries, replaced}; return mhCache;
+}
+function mhReplacedManual(s){ const fm=mhFromOf(s).slice(0,7); return reportEntries.filter(e=>e.category==='manHours' && e.projectId===s.id && fm && entryMonth(e)>=fm); }
+function mhPreviewHtml(s, cfg){
+  const months=mhAutoMonths(s, {cfg}), keys=Object.keys(months).sort().slice(-4).reverse();
+  if(!mhFromOf({...s, ...cfg})) return '<p class="wsub" style="margin:6px 0 0;">Set the date to count from (or the project start date) to see the figures.</p>';
+  if(!keys.length) return '<p class="wsub" style="margin:6px 0 0;">Nothing to count yet.</p>';
+  return `<div class="table-wrap" style="box-shadow:none; margin-top:8px;"><table class="stats-table"><thead><tr><th>Month</th><th>Working days</th><th>People / day (avg)</th><th>Worker-days</th><th>Man-hours</th></tr></thead><tbody>
+    ${keys.map(k=>{ const o=months[k]; return `<tr><td>${esc(periodLabel(k))}${k===localToday().slice(0,7)?' <span class="wsub">(so far)</span>':''}</td><td class="stat-val">${o.days}</td><td class="stat-val">${o.days?(o.workerDays/o.days).toFixed(1):'0'}</td><td class="stat-val">${o.workerDays.toLocaleString()}</td><td class="stat-val"><b>${o.hours.toLocaleString()}</b></td></tr>`; }).join('')}
+  </tbody></table></div>`;
+}
+function mhBoxHtml(s){
+  const ed=canEdit(), auto=s.mhMode==='auto', team=workersAtSite(s.id).length;
+  const rep=auto ? mhReplacedManual(s) : [];
+  return `<form id="mhForm" class="panel req-box" style="margin:14px 0;">
+    <div class="subhead" style="margin-top:0;">Man-hours for this project</div>
+    <div class="mh-modes">
+      <label class="chk"><input type="radio" name="mhMode" value="" ${auto?'':'checked'} ${ed?'':'disabled'}> <b>Manual</b> — I enter the monthly figure in the Monthly Report</label>
+      <label class="chk"><input type="radio" name="mhMode" value="auto" ${auto?'checked':''} ${ed?'':'disabled'}> <b>Automatic</b> — people assigned to this project each working day × hours per day</label>
+    </div>
+    <div id="mhAutoBox" ${auto?'':'hidden'}>
+      <div class="form-grid">
+        <label>Hours per day<input type="number" min="1" max="24" step="0.5" data-mh="mhHoursPerDay" value="${esc(s.mhHoursPerDay||10)}" ${ed?'':'disabled'}></label>
+        <label>Working days<select data-mh="mhDaysPerWeek" ${ed?'':'disabled'}>${[7,6,5].map(n=>`<option value="${n}" ${Number(s.mhDaysPerWeek||7)===n?'selected':''}>${esc(MH_DAY_LABEL[n])}</option>`).join('')}</select></label>
+        <label>Count from<input type="date" data-mh="mhFrom" value="${esc(s.mhFrom||'')}" placeholder="${esc(s.startDate||'')}" ${ed?'':'disabled'}><span class="wsub">${s.startDate?`empty = project start (${esc(s.startDate)})`:'needed — the project has no start date'}</span></label>
+      </div>
+      <p class="wsub" style="margin:6px 0 0;">Uses the project team and each worker's move history (Workforce → Project). ${team} ${team===1?'person is':'people are'} on this project today. Leave, sick days and overtime are not known to the tracker — switch back to Manual for a month if you need the exact payroll figure.</p>
+      <div id="mhPreview">${mhPreviewHtml(s, {})}</div>
+      ${rep.length?`<p class="wsub" style="margin:6px 0 0;">${ic('alert')} ${rep.length} manual man-hour entr${rep.length===1?'y':'ies'} from ${esc(periodLabel(mhFromOf(s).slice(0,7)))} on ${rep.length===1?'is':'are'} replaced by the automatic figure (kept, not deleted — switching back to Manual uses ${rep.length===1?'it':'them'} again).</p>`:''}
+    </div>
+    ${ed?`<div class="form-actions" style="margin-top:10px;"><button type="submit" class="btn btn-primary btn-sm">Save man-hours setting</button></div>`:''}
+  </form>`;
+}
+function mhFormCfg(f){
+  const g=k=>(f.querySelector(`[data-mh="${k}"]`)||{}).value||'';
+  return {mhMode:(f.querySelector('input[name="mhMode"]:checked')||{}).value||'', mhHoursPerDay:Number(g('mhHoursPerDay'))||10, mhDaysPerWeek:Number(g('mhDaysPerWeek'))||7, mhFrom:g('mhFrom')};
+}
+document.addEventListener('change', e=>{
+  const f=e.target.closest && e.target.closest('#mhForm'); if(!f) return;
+  const s=currentSite(); if(!s) return; const c=mhFormCfg(f);
+  f.querySelector('#mhAutoBox').hidden = c.mhMode!=='auto';
+  if(c.mhMode==='auto') f.querySelector('#mhPreview').innerHTML=mhPreviewHtml(s, c);
+});
+document.addEventListener('submit', async e=>{
+  if(e.target.id!=='mhForm') return; e.preventDefault();
+  const s=currentSite(); if(!s || !canEdit()) return; const c=mhFormCfg(e.target);
+  if(c.mhMode==='auto'){
+    if(!c.mhFrom && !s.startDate){ toast('Enter the date to count from — the project has no start date'); return; }
+    if(!(c.mhHoursPerDay>0 && c.mhHoursPerDay<=24)){ toast('Hours per day must be between 1 and 24'); return; }
+  }
+  delete e.target.dataset.dirty;
+  if(await updateSite(s.id, c)) toast(c.mhMode==='auto' ? 'Man-hours now counted automatically for this project' : 'Man-hours back to manual for this project');
+});
 
 /* ---------------- training matrix (Workforce) ---------------- */
 let workforceView='register';
@@ -3784,6 +4188,7 @@ const IMS_BHN_EXTRA=[
   ['F0812-03','Waste Disposal Log','Register / log','P0812-03','',''],
   ['F0540-03','Safety Star Certificate','Form','P0540-01','star','Made by the tracker — Safety Star of the Month'],
   ['F0713-06','Vehicle HSE Record','Form','P0713-01','vehicle','Made by the tracker — Plant & Equipment → vehicle PDF'],
+  ['F0713-07','Vehicle Inspection Checklist','Form','P0713-01','vehInsp','Made by the tracker — Plant & Equipment → vehicle → Inspections (SP-2000)'],
   ['F0723-07','Employee HSE Record','Form','P0723-01','workerProfile','Made by the tracker — Workforce → worker profile PDF'],
   ['F0740-02','Toolbox Talk Record','Form','P0740-01','',''],
   ['F0740-03','Safety Alert','Form','P0740-01','alert','Made by the tracker — Safety Alerts → Alert PDF'],
@@ -3792,7 +4197,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -6291,7 +6696,7 @@ function extraKpiActuals(year, m, upto){
 
 /* =============================== ACTION TRACKER =============================== */
 let actFilters={src:'all', status:'open', owner:'all', q:''};
-const ACT_SOURCES=[{key:'incident',label:'Incidents'},{key:'audit',label:'Audit findings'},{key:'project',label:'Project actions'},{key:'complaint',label:'Client complaints'},{key:'meeting',label:'Meetings'},{key:'legal',label:'Legal gaps'},{key:'alert',label:'Safety alerts'},{key:'objective',label:'Objectives'},{key:'obs',label:'Observations'},{key:'insp',label:'Inspections'},{key:'hira',label:'Risk register'},{key:'moc',label:'Change (MOC)'},{key:'heat',label:'Heat stress'}];
+const ACT_SOURCES=[{key:'incident',label:'Incidents'},{key:'audit',label:'Audit findings'},{key:'project',label:'Project actions'},{key:'complaint',label:'Client complaints'},{key:'meeting',label:'Meetings'},{key:'legal',label:'Legal gaps'},{key:'alert',label:'Safety alerts'},{key:'objective',label:'Objectives'},{key:'obs',label:'Observations'},{key:'insp',label:'Inspections'},{key:'hira',label:'Risk register'},{key:'moc',label:'Change (MOC)'},{key:'heat',label:'Heat stress'},{key:'vehicle',label:'Vehicle inspections'}];
 function collectAllActions(){
   const out=[];
   for(const i of activeIncidents()) for(const a of (i.capa||[])) out.push({src:'incident', projectId:i.projectId||'', ref:i.incNo||'Incident', where:i.projectId?projectName(i.projectId):(i.location||''), text:a.action, owner:a.owner, targetDate:a.targetDate, status:a.status||'Open', closedDate:a.closedDate, open:()=>{ document.querySelector('.sidenav-btn[data-section="incidents"]').click(); openIncDrawer(i.id,'actions'); }});
@@ -6300,6 +6705,9 @@ function collectAllActions(){
     for(const a of (s.actions||[])) out.push({src:'project', projectId:s.id, ref:s.siteName||'Project', where:a.source||'', text:a.action, owner:a.owner, targetDate:a.targetDate, status:a.status||'Open', closedDate:a.closedDate, open:()=>{ document.querySelector('.sidenav-btn[data-section="site"]').click(); openSiteDrawer(s.id); activeSiteTab='actions'; renderSiteDrawer(); }});
     for(const c of (s.complaints||[])) out.push({src:'complaint', projectId:s.id, ref:s.siteName||'Project', where:c.raisedBy||'', text:c.correctiveAction||c.issue, owner:c.actionOwner, targetDate:c.targetDate, status:c.status||'Open', closedDate:c.closedDate, tag:c.category, open:()=>{ document.querySelector('.sidenav-btn[data-section="site"]').click(); openSiteDrawer(s.id); activeSiteTab='complaints'; renderSiteDrawer(); }});
   }
+  for(const v of activeVehicles()) for(const x of (v.inspections||[])) if(x.result==='A' || x.result==='B'){ const cl=viClose(v,x), d=viDefects(x);
+    out.push({src:'vehicle', projectId:x.projectId||v.projectId||'', ref:v.vehicleNumber||'Vehicle', where:`Inspection ${x.date} · Class ${x.result}${x.result==='A'?' — do not use':''}`, text:d.map(z=>z.text+(z.note?' ('+z.note+')':'')).join('; ')||'Rectify defects', owner:x.actionOwner, targetDate:x.targetDate, status:cl.closed?'Closed':'Open', closedDate:cl.closed?cl.date:'', tag:'Class '+x.result,
+      open:()=>{ document.querySelector('.sidenav-btn[data-section="vehicles"]').click(); openVehicleDrawer(v.id); activeVehicleTab='inspections'; renderVehicleDrawer(); }}); }
   const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat'};
   if(REG.obs) for(const r of regActive('obs')) if(r.obsType!=='Positive' && (r.owner||r.targetDate)) out.push({src:'obs', projectId:r.projectId||'', ref:r.obsNo||'Observation', where:[r.category, r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), text:r.description, owner:r.owner, targetDate:r.targetDate, status:r.status||'Open', closedDate:r.closedDate, tag:r.obsType, open:()=>openRegDrawer('obs', r.id)});
   for(const [k,src] of Object.entries(regSrc)){ const cfg=REG[k]; if(!cfg) continue;
@@ -9551,7 +9959,11 @@ function reportProjectMatch(e, project){
 // periodKey is 'YYYY-MM' for a month or 'YYYY' for a whole year
 // Entries of a project in Deleted projects are left out everywhere (they come back when the project is restored)
 function deletedProjectIds(){ return new Set(siteEquipmentList.filter(s=>s.deleted).map(s=>s.id)); }
-function liveReportEntries(){ const del=deletedProjectIds(); return del.size ? reportEntries.filter(e=>!(e.projectId && del.has(e.projectId))) : reportEntries; }
+function liveReportEntries(){
+  const del=deletedProjectIds(); let base=del.size ? reportEntries.filter(e=>!(e.projectId && del.has(e.projectId))) : reportEntries;
+  const mh=mhAutoData(); if(!mh.replaced.size) return base;   // Batch 68: automatic man-hours replace manual ones from their start month
+  return base.filter(e=>!(e.category==='manHours' && e.projectId && mh.replaced.has(e.projectId) && entryMonth(e)>=mh.replaced.get(e.projectId))).concat(mh.entries);
+}
 function reportEntriesFor(division, periodKey, project){
   return liveReportEntries().filter(e=> (division==='all' || e.division===division) && entryMonth(e).startsWith(periodKey) && reportProjectMatch(e, project));
 }
@@ -10128,6 +10540,7 @@ function renderVehicleAll(){
   if(activeVehicleId) renderVehicleDrawer();
   if(!document.getElementById('vehicleTrashDrawer').hidden) renderVehicleTrashBody();
   renderSiteAll();   // project Vehicles tabs & counts use vehicle data
+  if(typeof renderActionTracker==='function') renderActionTracker();   // Batch 67: vehicle inspection actions
   renderReportAll(); // Command Centre compliance
 }
 
@@ -10180,9 +10593,9 @@ function renderVehicleTable(){
   { const sel=document.getElementById('vehicleDivisionFilter'); if(sel){ const av=activeVehicles();
     sel.innerHTML=`<option value="all">All divisions (${av.length})</option>`+DIVISIONS.map(d=>`<option value="${esc(d)}">${esc(divLabel(d))} (${av.filter(v=>v.division===d).length})</option>`).join('')+`<option value="__none">Division not set (${av.filter(v=>!v.division).length})</option>`;
     sel.value=(vehicleFilters.division==='__none'||DIVISIONS.includes(vehicleFilters.division))?vehicleFilters.division:'all'; vehicleFilters.division=sel.value; } }
-  if(activeVehicles().length===0){ tbody.innerHTML='<tr><td colspan="8" class="empty-state">No vehicles yet — click “Add vehicle” to get started.</td></tr>'; return; }
+  if(activeVehicles().length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">No vehicles yet — click “Add vehicle” to get started.</td></tr>'; return; }
   const list=vehicles.filter(vehicleMatches);
-  if(list.length===0){ tbody.innerHTML='<tr><td colspan="8" class="empty-state">No vehicles match your filters.</td></tr>'; return; }
+  if(list.length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">No vehicles match your filters.</td></tr>'; return; }
   tbody.innerHTML=list.map(v=>{
     const doc=vehicleAggFor(v,'documents'), ppe=vehicleAggFor(v,'ppe');
     return `<tr data-id="${v.id}">
@@ -10191,6 +10604,7 @@ function renderVehicleTable(){
       <td>${v.division?esc(divLabel(v.division)):'<span class="wsub">Not set</span>'}</td>
       <td>${(v.ownership||'Own')==='Rental'?'<span class="badge warn">Rental</span>':'<span class="badge ok">Own</span>'}</td>
       <td>${badgeHtml(doc.status)}${(m=>m.length?`<div><span class="badge warn" title="Required for ${esc(v.vehicleType||'')}: ${esc(m.join(', '))}">${m.length} missing</span></div>`:'')(vehMissingDocs(v))}</td>
+      <td>${vehInspBadge(v)}</td>
       <td>${badgeHtml(ppe.status)}</td>
       <td>${svcStatusBadge(v)}</td>
       <td>${vehicleMonitorCell(v)}</td>
@@ -10436,6 +10850,7 @@ function vehicleIssues(v){
   if(vehicleAggFor(v,'documents').status==='expired') out.push('Document expired');
   { const miss=vehMissingDocs(v); if(miss.length) out.push('Missing: '+miss.join(', ')); }
   if(vehicleAgeCheck(v).status==='over') out.push('Over PDO age / km limit');
+  if(vehDoNotUse(v)) out.push('Do not use — Class A defect');
   if(vehicleAggFor(v,'ppe').status==='expired') out.push('Safety kit expired');
   if(vehicleServiceStats(v).status==='overdue') out.push('Service overdue');
   return out;
@@ -10578,7 +10993,7 @@ function raiseDrawer(overlayId, drawerId){
 }
 function openVehicleDrawer(id){
   raiseDrawer('vehicleDrawerOverlay','vehicleDrawer');
-  activeVehicleId=id; activeVehicleTab='profile'; editingVehicleRecordId=null; vehicleAddFormOpen=false;
+  activeVehicleId=id; activeVehicleTab='profile'; editingVehicleRecordId=null; vehicleAddFormOpen=false; viFormOpen=false;
   document.getElementById('vehicleDrawerOverlay').hidden=false;
   document.getElementById('vehicleDrawer').hidden=false;
   renderVehicleDrawer();
@@ -10602,6 +11017,7 @@ function renderVehicleDrawerBody(){
   if(formDirtyIn('vehicleDrawerBody')) return;
   const body=document.getElementById('vehicleDrawerBody');
   if(activeVehicleTab==='profile'){ body.innerHTML=vehicleProfileTabHtml(v); return; }
+  if(activeVehicleTab==='inspections'){ body.innerHTML=vehInspTabHtml(v); if(viFormOpen) viWirePad(); return; }
   const cfg=VEHICLE_RECORD_TYPES[activeVehicleTab];
   const savedActiveTab=activeTab, savedEditing=editingRecordId, savedAddOpen=addFormOpen;
   activeTab=activeVehicleTab; editingRecordId=editingVehicleRecordId; addFormOpen=vehicleAddFormOpen;
@@ -10977,7 +11393,7 @@ function siteProfileTabHtml(s){
 
 // Project-level HSE figures — everything logged in the Monthly Report with this project picked
 function projectHseFigures(siteId){
-  const all=reportEntries.filter(e=>e.projectId===siteId);
+  const all=liveReportEntries().filter(e=>e.projectId===siteId);
   const total=computeReportMetrics(all);
   const perMillion = n => total.manHours ? (n*1000000/total.manHours) : null;
   const ltiDates=all.filter(e=>e.category==='lti' && e.date).map(e=>e.date.slice(0,10)).sort();
@@ -11033,6 +11449,7 @@ function siteStatsTabHtml(s){
     </div>
   </div>
   <p class="wsub" style="margin:0 0 12px;">Everything logged in the Monthly Report with this project selected. Log once — it counts here, in its division, and in the company total.</p>
+  ${mhBoxHtml(s)}
   <div class="stat-cards">
     <div class="stat-card"><div class="stat-card-num ${f.lastLti && f.daysSinceLti<30?'warn':'ok'}">${esc(ltiText)}</div><div class="stat-card-label">${ltiSub}</div></div>
     <div class="stat-card" title="Lost Time Injury Frequency = LTIs × 1,000,000 ÷ man-hours"><div class="stat-card-num">${fmtRate(f.ltif)}</div><div class="stat-card-label">LTIF — per million man-hours</div></div>
@@ -11102,13 +11519,15 @@ function siteTeamTabHtml(s){
 
 function siteVehiclesTabHtml(s){
   const vans=vehiclesAtSite(s.id).slice().sort((a,b)=>(a.vehicleNumber||'').localeCompare(b.vehicleNumber||''));
-  const head = `<div class="section-head"><h3>Vehicles on this project (${vans.length})</h3>${sitePickerOpen==='vehicles' ? '' : '<button type="button" class="btn btn-sm" id="sitePickerOpenVehicles">+ Assign vehicles</button>'}</div>`;
+  const done=vans.filter(v=>vehInspThisMonth(v)).length, dnu=vans.filter(vehDoNotUse).length;
+  const head = `<div class="section-head"><h3>Vehicles on this project (${vans.length})</h3>${sitePickerOpen==='vehicles' ? '' : '<button type="button" class="btn btn-sm" id="sitePickerOpenVehicles">+ Assign vehicles</button>'}</div>
+    ${vans.length?`<div class="vi-status ${dnu?'danger':done===vans.length?'ok':'warn'}" style="margin-bottom:10px;">${ic('clipcheck')} Inspected in ${esc(monthLabelOf(localToday().slice(0,7)))}: <b>${done} of ${vans.length}</b>${done<vans.length?` · ${vans.length-done} due`:''}${dnu?` · <b>${dnu} DO NOT USE</b>`:''}</div>`:''}`;
   const picker = sitePickerOpen==='vehicles' ? sitePickerHtml('vehicles', s) : '';
   const list = vans.length ? vans.map(v=>{
     const issues=vehicleIssues(v);
     return `<div class="equip-line" data-open-vehicle="${v.id}">
       <div class="equip-line-main"><div class="equip-line-title mono">${esc(v.vehicleNumber||'—')}</div><div class="wsub">${esc(v.model||'—')} · ${esc(v.ownership||'Own')}</div></div>
-      <div class="equip-line-badges">${issues.length ? issues.map(i=>`<span class="badge danger">${esc(i)}</span>`).join('') : '<span class="badge ok">All valid</span>'}
+      <div class="equip-line-badges">${vehInspBadge(v)}${issues.filter(i=>!/^Do not use/.test(i)).length ? issues.filter(i=>!/^Do not use/.test(i)).map(i=>`<span class="badge danger">${esc(i)}</span>`).join('') : '<span class="badge ok">All valid</span>'}
         <button type="button" class="icon-btn danger" data-unassign-vehicle="${v.id}" title="Remove from this project" aria-label="Remove from project">${ic('close')}</button></div>
     </div>`;
   }).join('') : '<p class="wsub">No vehicles assigned yet.</p>';
@@ -11917,7 +12336,12 @@ function renderReportTable(entries){
     const fromIncident = e.source==='incident' && e.sourceIncidentId && activeIncidents().some(x=>x.id===e.sourceIncidentId);
     const fromAudit = e.source==='audit' && e.sourceAuditId && activeAudits().some(x=>x.id===e.sourceAuditId);
     const fromObs = e.source==='observation' && e.sourceObsId && regState.obs && regActive('obs').some(x=>x.id===e.sourceObsId);
-    const actions = fromObs
+    const fromAutoMh = e.source==='autoManHours', fromVeh = e.source==='vehicleInspection' && e.sourceVehicleId && activeVehicles().some(x=>x.id===e.sourceVehicleId);
+    const actions = fromAutoMh
+      ? `<button type="button" class="btn btn-sm" data-ropen-mh="${esc(e.projectId)}" title="Counted automatically from the project team — change it in the project's HSE statistics">Open project</button>`
+      : fromVeh
+      ? `<button type="button" class="btn btn-sm" data-ropen-veh="${esc(e.sourceVehicleId)}" title="Recorded in the vehicle's Inspections tab — open it there">Open vehicle</button>`
+      : fromObs
       ? `<button type="button" class="btn btn-sm" data-ropen-obs="${esc(e.sourceObsId)}" title="Recorded in HSE Observations — edit it there">Open observation</button>`
       : fromAudit
       ? `<button type="button" class="btn btn-sm" data-ropen-aud="${esc(e.sourceAuditId)}" title="Recorded in the Audits register — edit it there">Open audit</button>`
@@ -11932,7 +12356,7 @@ function renderReportTable(entries){
       <td>${esc(e.division?divLabel(e.division):'—')}</td>
       <td>${e.projectId ? esc(projectName(e.projectId)) : '<span class="wsub">—</span>'}</td>
       <td>${esc(cfg?cfg.label:e.category)}</td>
-      <td>${esc(reportEntrySummary(e))}${fromProject?'<div class="wsub">from the project\'s Toolbox talks register</div>':''}${fromIncident?'<div class="wsub">from the Incident Register</div>':''}</td>
+      <td>${esc(reportEntrySummary(e))}${fromAutoMh?`<div class="wsub">counted automatically — ${Number(e.autoWorkerDays||0).toLocaleString()} worker-days × ${esc(e.autoHpd||10)} h</div>`:''}${fromVeh?'<div class="wsub">from the vehicle\'s Inspections tab</div>':''}${fromProject?'<div class="wsub">from the project\'s Toolbox talks register</div>':''}${fromIncident?'<div class="wsub">from the Incident Register</div>':''}</td>
       <td style="text-align:right; white-space:nowrap;">${actions}</td>
     </tr>`;
   }).join('');
@@ -12748,7 +13172,8 @@ async function buildVehiclePdf(v){
     kv('Odometer', a.odo!==null ? fmtKm(a.odo) : '');
     kv('PDO age / km limit', a.cat ? a.limitText+(a.status!=='na'&&a.status!=='unknown' ? '  -  '+a.statusText : '') : '');
     kv('Safety systems fitted', (v.safetySystems||[]).join(', '));
-    kv('Required documents', !v.vehicleType ? 'Vehicle type not set' : (miss.length ? 'Missing: '+miss.join(', ') : 'All on record')); }
+    kv('Required documents', !v.vehicleType ? 'Vehicle type not set' : (miss.length ? 'Missing: '+miss.join(', ') : 'All on record'));
+    const li=viSorted(v)[0]; kv('Last inspection', li ? `${li.date} — ${VI_RESULT[li.result].t}${vehDoNotUse(v)?' (DO NOT USE)':''}` : 'None recorded'); }
 
   h2('Onboard equipment counts');
   for(const f of VEHICLE_COUNT_FIELDS){ kv(f.label, v[f.key]!=null? v[f.key] : '0'); }
@@ -12858,7 +13283,7 @@ async function buildSitePdf(s){
   const team=workersAtSite(s.id).slice().sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||''));
   lineList(`Team (${team.length})`, team, w=>{ const iss=workerIssues(w); return `${w.fullName||'—'}  ·  ${[w.designation,w.trade].filter(Boolean).join(' / ')||'—'}  ·  Civil ID ${w.civilId||'—'}  ·  ${iss.length?'ATTENTION: '+iss.join(', '):'documents valid'}`; });
   const vans=vehiclesAtSite(s.id);
-  lineList(`Vehicles (${vans.length})`, vans, v=>{ const iss=vehicleIssues(v); return `${v.vehicleNumber||'—'}  ·  ${v.model||'—'}  ·  ${v.ownership||'Own'}  ·  ${iss.length?'ATTENTION: '+iss.join(', '):'documents valid'}`; });
+  lineList(`Vehicles (${vans.length})`, vans, v=>{ const iss=vehicleIssues(v), vi=vehInspThisMonth(v); return `${v.vehicleNumber||'—'}  ·  ${v.model||'—'}  ·  ${v.ownership||'Own'}  ·  ${vi?'inspected '+vi.date+' ('+(VI_RESULT[vi.result].short||'Pass')+')':'inspection due this month'}  ·  ${iss.length?'ATTENTION: '+iss.join(', '):'documents valid'}`; });
   section('HSE documents','hseDocs',SITE_RECORD_TYPES.hseDocs);
   section('Toolbox talks','toolboxTalks',SITE_RECORD_TYPES.toolboxTalks);
   section('Permits to work','permits',SITE_RECORD_TYPES.permits);
@@ -13615,7 +14040,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('downloadVehiclePdfBtn').addEventListener('click', downloadVehicleProfile);
   document.getElementById('vehicleDrawerTabs').addEventListener('click', e=>{
     const b=e.target.closest('[data-vtab]'); if(!b) return;
-    activeVehicleTab=b.dataset.vtab; editingVehicleRecordId=null; vehicleAddFormOpen=false; renderVehicleDrawer();
+    activeVehicleTab=b.dataset.vtab; editingVehicleRecordId=null; vehicleAddFormOpen=false; viFormOpen=false; renderVehicleDrawer();
   });
 
   /* ---------------- vehicle: trash ---------------- */
@@ -13638,7 +14063,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
       try{
         const v=vehicles.find(x=>x.id===purgeBtn.dataset.vpurge);
-        if(v) await deleteAllAttachments(v, VEHICLE_RECORD_TYPES, []);
+        if(v) await deleteAllAttachments(v, {...VEHICLE_RECORD_TYPES, inspections:{}}, []);
         await db.collection('vehicles').doc(purgeBtn.dataset.vpurge).delete();
         toast('Vehicle and its files permanently removed');
       }
@@ -14243,6 +14668,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       if(data.attendeeIds.length && !(Number(data.count)>=data.attendeeIds.length)) data.count=data.attendeeIds.length;
     }
     if(!REPORT_CATEGORIES[data.category] || !REPORT_CATEGORIES[data.category].drive) delete data.driverId;
+    if(data.category==='manHours' && data.projectId){ const ps=activeSites().find(x=>x.id===data.projectId); if(mhAuto(ps) && String(data.date||'')>=mhFromOf(ps).slice(0,7)) toast(`${ps.siteName||'This project'} counts man-hours automatically — this entry is kept but not counted. Switch the project to Manual to use it.`); }
     if(data.category==='lsr' && data.penalty!=='Yes'){ data.penaltyAmount=null; data.penaltyRef=''; data.penaltyDate=''; data.penaltyStatus=''; }
     try{
       const fileInp=e.target.querySelector('[data-rfile]');
@@ -14274,6 +14700,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(openAud){ document.querySelector('.sidenav-btn[data-section="audits"]').click(); openAudDrawer(openAud.dataset.ropenAud); return; }
     const openInc=e.target.closest('[data-ropen-inc]');
     if(openInc){ openIncDrawer(openInc.dataset.ropenInc); return; }
+    const openMh=e.target.closest('[data-ropen-mh]');
+    if(openMh){ openSiteDrawer(openMh.dataset.ropenMh); activeSiteTab='hseStats'; renderSiteDrawer(); return; }
+    const openVeh=e.target.closest('[data-ropen-veh]');
+    if(openVeh){ document.querySelector('.sidenav-btn[data-section="vehicles"]').click(); openVehicleDrawer(openVeh.dataset.ropenVeh); activeVehicleTab='inspections'; renderVehicleDrawer(); return; }
     const openSite=e.target.closest('[data-ropen-site]');
     if(openSite){ openSiteDrawer(openSite.dataset.ropenSite); activeSiteTab='toolboxTalks'; renderSiteDrawer(); return; }
     const editBtn=e.target.closest('[data-redit]');
