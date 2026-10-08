@@ -2780,7 +2780,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b68';
+const APP_BUILD='b69';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3605,8 +3605,8 @@ const PDO_COURSES=[
   {lvl:'Level 2', code:'PTWS-R', name:'Permit to Work Signatories Recertification', years:3, base:['PTW-S']},
   {lvl:'Level 2', code:'HSE LFS', name:'HSE Leadership for Front Line Supervisors', years:4, alias:/front ?line supervis|hse leadership/},
   {lvl:'Level 2', code:'HSE LFS-R', name:'HSE Leadership for Front Line Supervisors Refresher', years:4, base:['HSE LFS']},
-  {lvl:'Level 2', code:'CHM', name:'Chemical Handling Management', years:null, alias:/chemical handling/},
-  {lvl:'Level 2', code:'NORMM', name:'Naturally Occurring Radioactive Material Management', years:4, alias:/\bnorm\b|radioactive/},
+  {lvl:'Level 2', code:'CHM', name:'Chemical Handling Management', years:null, alias:/chemical handling(?!\s*awareness)/},
+  {lvl:'Level 2', code:'NORMM', name:'Naturally Occurring Radioactive Material Management', years:4, alias:/(\bnorm\b|radioactive)(?!.*awareness)/},
   {lvl:'Level 2', code:'NORMM-R', name:'NORM Management Reassessment', years:4, base:['NORMM']},
   {lvl:'Level 3', code:'IOSH-MS', name:'IOSH Managing Safely', years:null, alias:/iosh.*manag/},
   {lvl:'Level 3', code:'NEBOSH IGC', name:'NEBOSH International General Certificate', years:null, alias:/nebosh.*(igc|general)/},
@@ -3644,10 +3644,19 @@ const PDO_COURSES=[
   {lvl:'SP-1257 Work at height', code:'IRATA L2', name:'IRATA Rope Access Technician Level 2', years:3, covers:['IRATA L1'], alias:/irata.*(level ?2|\bl2\b)|rope access.*(level ?2|\bl2\b)/},
   {lvl:'SP-1257 Work at height', code:'IRATA L1', name:'IRATA Rope Access Technician Level 1', years:3, alias:/irata|rope access/},
   {lvl:'SP-1257 Work at height', code:'FASET', name:'FASET Safety Net Rigger', years:null, alias:/faset|safety net/},
+  /* Batch 69: OPAL courses offered by OPAL-approved centres but not in SP-1157 V4.1. No validity is published for these,
+     so certExpiry = no automatic expiry — type the expiry printed on each certificate. */
+  {lvl:'OPAL — other courses', code:'WAH', name:'Working at Height (OPAL)', years:null, certExpiry:true, alias:/work(ing)?[\s-]+at[\s-]+heights?/},
+  {lvl:'OPAL — other courses', code:'RA', name:'Risk Assessment (OPAL)', years:null, certExpiry:true, alias:/risk assessment/},
+  {lvl:'OPAL — other courses', code:'RA-R', name:'Risk Assessment Refresher (OPAL)', years:null, certExpiry:true, base:['RA'], alias:/risk assessment.*(refresh|recert)/},
+  {lvl:'OPAL — other courses', code:'CHA', name:'Chemical Handling Awareness (OPAL)', years:null, certExpiry:true, alias:/chemical handling awareness/},
+  {lvl:'OPAL — other courses', code:'NORMA', name:'NORM Awareness (OPAL)', years:null, certExpiry:true, alias:/(\bnorm\b|radioactive).*awareness/},
+  {lvl:'OPAL — other courses', code:'FW-R', name:'Fire Warden Refresher (OPAL)', years:null, certExpiry:true, base:['FW'], alias:/fire warden.*(refresh|recert)/},
 ];
+function pdoValidity(c){ return c.years ? c.years+' yr'+(c.years>1?'s':'') : c.certExpiry ? 'expiry on certificate' : 'no expiry'; }
 /* Batch 50: course hours — SP-1157 V4.1 "Max. course duration" per course (NEBOSH IGC = 80 tuition hours, Diploma = 241 taught hours);
    SP-1257 V7.0: Basic Scaffold Inspection 3 days, Advanced 2 days, Supervisor 5 days, Supervisor refresher 2 days (8 h a day). Blank = type the hours. */
-const PDO_HOURS={'HSEI':8,'H2SI':8,'H2SR':2,'SCBA':8,'SCBA-R':2,'AHA':14,'EA':4,'FW':5,'AGT':8,'AGT-R':2,'HII':16,'PTW-H':16,'PTWH-R':2,'PTW-S':24,'PTWS-R':2,'HSE LFS':16,'HSE LFS-R':8,'CHM':5,'NORMM':5,'NORMM-R':1,'IOSH-MS':32,'NEBOSH IGC':80,'NEBOSH Dip':241,'VMN':16,'TBP':32,'LV':16,'HV':16,'GR':8,'TN':8,'LB/HB':16,'RT':4,'EVA':8,'EVF':8,'SJM':8,'SJMR':1,'CISRS BSI':24,'CISRS ASI':16,'CISRS SUP':40,'CISRS SUP-R':16};
+const PDO_HOURS={'WAH':8,'HSEI':8,'H2SI':8,'H2SR':2,'SCBA':8,'SCBA-R':2,'AHA':14,'EA':4,'FW':5,'AGT':8,'AGT-R':2,'HII':16,'PTW-H':16,'PTWH-R':2,'PTW-S':24,'PTWS-R':2,'HSE LFS':16,'HSE LFS-R':8,'CHM':5,'NORMM':5,'NORMM-R':1,'IOSH-MS':32,'NEBOSH IGC':80,'NEBOSH Dip':241,'VMN':16,'TBP':32,'LV':16,'HV':16,'GR':8,'TN':8,'LB/HB':16,'RT':4,'EVA':8,'EVF':8,'SJM':8,'SJMR':1,'CISRS BSI':24,'CISRS ASI':16,'CISRS SUP':40,'CISRS SUP-R':16};
 PDO_COURSES.forEach(c=>{ if(PDO_HOURS[c.code]!=null) c.hrs=PDO_HOURS[c.code]; });
 function pdoCourseLabel(c){ return `(${c.code}) ${c.name}`; }
 function pdoCardText(c){ return c.card ? ` — ${c.card} card` : ''; }
@@ -3917,7 +3926,7 @@ function renderReqPanel(){
       ${reqEdit.pdoOpen ? (()=>{ const have=new Set(reqEdit.catalogue.map(t=>{ const c=pdoCourseOf(t); return c?c.code:''; }).filter(Boolean)); const groups=[...new Set(PDO_COURSES.map(c=>c.lvl))];
         return `<div class="panel req-pdo" style="margin-top:10px;"><div class="subhead" style="margin-top:0;">PDO trainings — SP-1157 V4.1 &amp; SP-1257 V7.0 (tick, then “Add ticked”)</div>
           <p class="wsub" style="margin:0 0 8px;">Refresher / recertification courses (H2SR, SCBA-R, AGT-R, PTWH-R, PTWS-R, HSE LFS-R, NORMM-R, SJMR, RT, Supervisor refresher) are not listed — a refresher record counts for the main course automatically. A higher scaffolding card also counts for the lower ones (e.g. Advanced Scaffolder covers Scaffolder; Inspector / Supervisor cover Scaffolding Appreciation).</p>
-          ${groups.map(g=>`<div class="req-pdo-g"><div class="req-grp-h">${esc(g)}</div>${PDO_COURSES.filter(c=>c.lvl===g && !c.base).map(c=>`<label class="chk"><input type="checkbox" data-pdo-add="${esc(c.code)}" ${have.has(c.code)?'checked disabled':''}>${esc(pdoCourseLabel(c))} <span class="wsub">${c.card?esc(c.card)+' card · ':''}${c.years?c.years+' yr'+(c.years>1?'s':''):'no expiry'}${have.has(c.code)?' · in list':''}</span></label>`).join('')}</div>`).join('')}
+          ${groups.map(g=>`<div class="req-pdo-g"><div class="req-grp-h">${esc(g)}</div>${PDO_COURSES.filter(c=>c.lvl===g && !c.base).map(c=>`<label class="chk"><input type="checkbox" data-pdo-add="${esc(c.code)}" ${have.has(c.code)?'checked disabled':''}>${esc(pdoCourseLabel(c))} <span class="wsub">${c.card?esc(c.card)+' card · ':''}${pdoValidity(c)}${have.has(c.code)?' · in list':''}</span></label>`).join('')}</div>`).join('')}
           <div style="display:flex; gap:8px; margin-top:8px;"><button type="button" class="btn btn-sm btn-primary" id="reqPdoAdd">Add ticked</button><button type="button" class="btn btn-sm" id="reqPdoClose">Close</button></div></div>`; })() : ''}
       <div class="form-actions"><button type="button" class="btn" id="reqCancel">Cancel</button><button type="submit" class="btn btn-primary">Save roles &amp; trainings</button></div>
     </form>`;
@@ -3937,7 +3946,7 @@ function reqAddBoxHtml(){
   let body='';
   if(k==='opal'){
     const left=PDO_COURSES.filter(c=>!c.base && !have.has(c.code)).length;
-    body=`<div class="req-add"><select id="reqPdoSel" aria-label="PDO course"><option value="">Select a PDO course (SP-1157 / SP-1257) — ${left} not in the list yet…</option>${groups.map(g=>`<optgroup label="${esc(g)}">${PDO_COURSES.filter(c=>c.lvl===g && !c.base).map(c=>`<option value="${esc(c.code)}" ${have.has(c.code)?'disabled':''}>${esc(pdoCourseLabel(c))}${esc(pdoCardText(c))} — ${c.years?c.years+' yr'+(c.years>1?'s':''):'no expiry'}${have.has(c.code)?' (in list)':''}</option>`).join('')}</optgroup>`).join('')}</select><button type="button" class="btn btn-sm" id="reqAddTraining">+ Add training</button></div>
+    body=`<div class="req-add"><select id="reqPdoSel" aria-label="PDO course"><option value="">Select a PDO course (SP-1157 / SP-1257) — ${left} not in the list yet…</option>${groups.map(g=>`<optgroup label="${esc(g)}">${PDO_COURSES.filter(c=>c.lvl===g && !c.base).map(c=>`<option value="${esc(c.code)}" ${have.has(c.code)?'disabled':''}>${esc(pdoCourseLabel(c))}${esc(pdoCardText(c))} — ${pdoValidity(c)}${have.has(c.code)?' (in list)':''}</option>`).join('')}</optgroup>`).join('')}</select><button type="button" class="btn btn-sm" id="reqAddTraining">+ Add training</button></div>
       <p class="wsub" style="margin:4px 0 0;">Course names and validity as in PDO SP-1157 V4.1 and SP-1257 V7.0 (scaffolding CISRS cards &amp; work at height). <button type="button" class="att-link" id="reqPdoOpen">Tick several at once</button></p>`;
   } else {
     body=`<div class="req-add"><input id="reqNewTraining" list="trainingNameList" placeholder="${k==='client'?'Client training name, e.g. OQ Permit to Work':'Burhan training name, e.g. Rigging & Slinging'}" aria-label="New training name"><button type="button" class="btn btn-sm" id="reqAddTraining">+ Add training</button></div>
@@ -12943,7 +12952,7 @@ function recordTabHtml(w,key,cfg){
     if(f.type==='workers') return workerPickFieldHtml(f, editing, w);
     if(key==='trainings' && f.key==='name'){ const names=[...new Set([...trainingCatalogue(), ...PDO_COURSES.map(pdoCourseLabel)])], cur=pdoCourseOf(val);
       const groups=[...new Set(PDO_COURSES.map(c=>c.lvl))];
-      return `<label class="span-all">PDO course (SP-1157 / SP-1257)<select data-pdo-pick><option value="">— Not a PDO course / type the name below —</option>${groups.map(g=>`<optgroup label="${esc(g)}">${PDO_COURSES.filter(c=>c.lvl===g).map(c=>`<option value="${esc(c.code)}" ${cur&&cur.code===c.code?'selected':''}>${esc(pdoCourseLabel(c))}${esc(pdoCardText(c))} — ${c.years?c.years+' yr'+(c.years>1?'s':''):'no expiry'}</option>`).join('')}</optgroup>`).join('')}</select></label>
+      return `<label class="span-all">PDO course (SP-1157 / SP-1257)<select data-pdo-pick><option value="">— Not a PDO course / type the name below —</option>${groups.map(g=>`<optgroup label="${esc(g)}">${PDO_COURSES.filter(c=>c.lvl===g).map(c=>`<option value="${esc(c.code)}" ${cur&&cur.code===c.code?'selected':''}>${esc(pdoCourseLabel(c))}${esc(pdoCardText(c))} — ${pdoValidity(c)}</option>`).join('')}</optgroup>`).join('')}</select></label>
         <label>${esc(f.label)} *<input type="text" data-field="name" value="${esc(val)}" required list="reqTrainingNames" placeholder="${esc(f.placeholder||'')}"><datalist id="reqTrainingNames">${names.map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist></label>`; }
     const firstVal = editing ? (editing[cfg.fields[0].key]||'') : '';
     const sw = f.showWhen ? ` data-show-when="${esc(f.showWhen.join('|'))}" ${f.showWhen.includes(firstVal)?'':'hidden'}` : '';
@@ -13844,10 +13853,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(!form) return; const nm=form.querySelector('[data-field="name"]'), dt=form.querySelector('[data-field="date"]'), ex=form.querySelector('[data-field="expiry"]'); if(!nm || !dt || !ex) return;
     const c=pdoCourseOf(nm.value), d=dt.value; if(!c || !d) return;
     if(ex.value && ex.dataset.auto!=='1') return;   // a date typed by hand is kept
-    if(c.years){ const x=new Date(d+'T00:00:00'); x.setFullYear(x.getFullYear()+c.years); ex.value=ymd(x); } else ex.value='';
+    if(c.years){ const x=new Date(d+'T00:00:00'); x.setFullYear(x.getFullYear()+c.years); ex.value=ymd(x); } else if(!c.certExpiry) ex.value='';
     ex.dataset.auto='1';
     let hint=form.querySelector('.pdo-hint'); if(!hint){ hint=document.createElement('p'); hint.className='wsub pdo-hint span-all'; hint.style.margin='0'; const lab=ex.closest('label'); (lab||ex).insertAdjacentElement('afterend', hint); }
-    hint.textContent = c.years ? `Valid until set automatically: ${c.code}${c.card?' ('+c.card+' card)':''} is valid ${c.years} year${c.years>1?'s':''} — change it if the certificate / card says otherwise.` : `${c.code} has no re-certification — no expiry.`;
+    hint.textContent = c.certExpiry ? `${c.code}: no validity is published — type the expiry date printed on the certificate.` : c.years ? `Valid until set automatically: ${c.code}${c.card?' ('+c.card+' card)':''} is valid ${c.years} year${c.years>1?'s':''} — change it if the certificate / card says otherwise.` : `${c.code} has no re-certification — no expiry.`;
   }
   document.getElementById('drawerBody').addEventListener('change', e=>{
     const pk=e.target.closest('[data-pdo-pick]'); if(pk){ const form=pk.closest('form'), c=PDO_COURSES.find(x=>x.code===pk.value), nm=form && form.querySelector('[data-field="name"]'); if(c && nm){ nm.value=pdoCourseLabel(c); { const hf=form.querySelector('[data-field="hours"]'); if(hf && (!hf.value || hf.dataset.auto==='1')){ hf.value=c.hrs||''; hf.dataset.auto=c.hrs?'1':''; } } const ex=form.querySelector('[data-field="expiry"]'); if(ex && !ex.value) ex.dataset.auto='1'; pdoAutoExpiry(form); } return; }
