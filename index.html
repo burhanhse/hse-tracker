@@ -251,6 +251,45 @@ button.att-link.att-remove{color:var(--danger);}
 .vi-sigbox{position:relative; border:2px dashed var(--line); border-radius:10px; background:#fff; touch-action:none; max-width:600px;} .vi-sigbox canvas{display:block; width:100%; height:160px; border-radius:8px;} .vi-sighint{position:absolute; inset:0; display:grid; place-items:center; color:#8a929e; font-size:13px; pointer-events:none;}
 @media (max-width:560px){ .vi-item{grid-template-columns:1fr;} }
 .mh-modes{display:flex; flex-direction:column; gap:6px; margin-bottom:8px;} .mh-modes .chk{align-items:flex-start;}
+/* Batch 70: fleet speedometer dashboard (neon instrument style — the dial face stays dark in both themes) */
+.fl-dash{display:grid; grid-template-columns:minmax(290px,380px) 1fr; gap:14px; margin-bottom:16px;}
+@media (max-width:900px){ .fl-dash{grid-template-columns:1fr;} }
+.fl-hero,.fl-divs{border:1px solid var(--line); border-radius:16px; padding:14px 16px; box-shadow:var(--shadow); background:radial-gradient(120% 90% at 50% 0%, #0f2240 0%, #070f1d 70%); color:#e6f1ff;}
+.fl-hero{display:flex; flex-direction:column; align-items:center; position:relative; overflow:hidden;}
+.fl-hero::before{content:""; position:absolute; inset:auto -20% -40% -20%; height:60%; background:radial-gradient(closest-side, rgba(34,211,238,.18), transparent); pointer-events:none;}
+.fl-hero-h,.fl-divs-h{align-self:stretch; display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:#7fb4d6;}
+.fl-hero-h span:first-child{display:inline-flex; align-items:center; gap:6px; color:#e6f1ff;} .fl-hero-h .wsub,.fl-divs-h .wsub{text-transform:none; letter-spacing:0; font-weight:500; color:#7f97ad;}
+.fl-gauge{width:100%; max-width:310px; height:auto; display:block; margin-top:2px;}
+.fl-bezel{fill:none; stroke:rgba(127,180,214,.10); stroke-width:1.5;}
+.fl-sc{stroke:#5d86a8; stroke-width:1;} .fl-sc.maj{stroke:#9fd4f5; stroke-width:2;}
+.fl-scl{font-size:10.5px; fill:#9fd4f5; font-weight:700; font-variant-numeric:tabular-nums;}
+.fl-zone{fill:none; stroke-width:2.5; opacity:.55;}
+.fl-seg{fill:none; stroke:rgba(159,212,245,.10);} .fl-seg.on{opacity:1;}
+.fl-face{stroke:none;} .fl-ring{fill:none; stroke-width:2; opacity:.9;} .fl-ring2{fill:none; stroke:rgba(159,212,245,.18); stroke-width:1; stroke-dasharray:2 4;}
+.fl-cap{font-size:9.5px; letter-spacing:.22em; font-weight:700; fill:#7fd8ff;}
+.fl-pct{font-family:var(--font-display); font-weight:800; font-size:46px; fill:#ffffff; font-variant-numeric:tabular-nums;} .fl-pct-u{font-size:22px; fill:#cfe8ff;}
+.fl-zl{font-size:10px; letter-spacing:.14em; font-weight:800;}
+.fl-needle{transform:rotate(var(--a)); animation:flNeedle 1.2s cubic-bezier(.2,.9,.25,1.1) both;}
+@keyframes flNeedle{from{transform:rotate(150deg);}}
+@media (prefers-reduced-motion:reduce){ .fl-needle{animation:none;} }
+.fl-odo-wrap{display:flex; flex-direction:column; align-items:center; margin-top:-4px; position:relative;}
+.fl-odo{display:inline-flex; gap:4px; padding:6px; border-radius:10px; background:#03070e; border:1px solid #1d3a57; box-shadow:inset 0 2px 8px rgba(0,0,0,.8), 0 0 14px rgba(34,211,238,.18);}
+.fl-dg{width:28px; height:40px; display:grid; place-items:center; border-radius:5px; font-family:var(--font-mono, ui-monospace, monospace); font-weight:700; font-size:24px; color:#7df9ff; text-shadow:0 0 8px rgba(34,211,238,.85); background:linear-gradient(180deg,#14202e 0%,#0a121c 48%,#05090f 52%,#111b28 100%); box-shadow:inset 0 0 0 1px rgba(125,249,255,.08);}
+.fl-dg.lead{color:#27465c; text-shadow:none;}
+.fl-odo-l{font-size:9.5px; letter-spacing:.24em; font-weight:700; color:#7fb4d6; margin-top:6px;}
+.fl-hero-f{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin-top:10px; font-size:12.5px; color:#9db4c8; position:relative;} .fl-hero-f span{display:inline-flex; align-items:center; gap:5px;} .fl-hero-f b{color:#fff;} .fl-hero-f .wf-dot{display:inline-block;}
+.fl-divs{display:flex; flex-direction:column; gap:10px;}
+.fl-div-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(128px,1fr)); gap:10px; flex:1; align-content:start;}
+.fl-div{display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 8px 6px; border:1px solid rgba(127,180,214,.18); border-radius:14px; background:rgba(4,10,20,.55); color:#e6f1ff; font:inherit; cursor:pointer; transition:border-color .15s, transform .15s, box-shadow .15s;}
+.fl-div:hover{border-color:rgba(127,216,255,.55); transform:translateY(-1px); box-shadow:0 0 16px rgba(34,211,238,.15);}
+.fl-div.on{border-color:#22d3ee; box-shadow:0 0 0 1px #22d3ee, 0 0 18px rgba(34,211,238,.3);}
+.fl-div-n{display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px;}
+.fl-mini{width:100%; max-width:150px; height:auto;}
+.fl-mnum{font-family:var(--font-display); font-weight:800; font-size:26px; fill:#fff;} .fl-ml{font-size:7.5px; fill:#7fb4d6; letter-spacing:.18em; font-weight:700;} .fl-mpct{font-size:10px; font-weight:800; letter-spacing:.06em;}
+.fl-div-s{font-size:12px; color:#9db4c8;} .fl-div-s b{color:#fff;}
+.fl-slim{grid-column:1/-1; display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px;}
+@media (max-width:900px){ .fl-slim{grid-template-columns:repeat(2, minmax(0,1fr));} }
+.fl-slim-t{padding:10px 12px;} .fl-slim-t .tile-num{font-size:24px;} .fl-slim-t .tile-icon{width:26px; height:26px;}
 .veh-req-chips{display:flex; flex-wrap:wrap; gap:6px;}
 .veh-age{display:flex; gap:10px; align-items:flex-start; margin:10px 0 4px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;}
 input.auto-filled{outline:2px solid var(--ok, #46a758); transition:outline-color .8s;}
@@ -2780,7 +2819,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b69';
+const APP_BUILD='b70';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10569,19 +10608,93 @@ function renderVehicleTiles(){
   }
   const doc=agg('documents'), ppe=agg('ppe');
   const svc=list.map(vehicleServiceStats), svcOver=svc.filter(x=>x.status==='overdue').length, svcSoon=svc.filter(x=>x.status==='soon').length, bdYear=svc.reduce((n,x)=>n+x.bdYear,0);
-  const tiles=[
-    {label:'Fleet', num:total, cls:'', sub:`${own} own · ${rental} rental`, cat:'--cat-1', icon:ic('truck')},
-    {label:'Documents', num:doc.expired, cls:doc.expired?'danger':(doc.expiring?'warn':'ok'), sub:`${doc.expiring} expiring soon`, cat:'--cat-2', icon:ic('file')},
-    {label:'PPE & safety kit', num:ppe.expired, cls:ppe.expired?'danger':(ppe.expiring?'warn':'ok'), sub:`${ppe.expiring} expiring soon`, cat:'--cat-6', icon:ic('vest')},
-    {label:'Service overdue', num:svcOver, cls:svcOver?'danger':(svcSoon?'warn':'ok'), sub:`${svcSoon} due soon · ${bdYear} breakdown${bdYear===1?'':'s'} this year`, cat:'--cat-4', icon:ic('wrench')},
+  // Batch 70: speedometer-style fleet dashboard — main dial = % of vehicles with no issue, odometer = number of vehicles,
+  // a mini dial per division (click to filter), then a slim row of counts.
+  const ready=list.filter(v=>!vehicleIssues(v).length).length, pct=total?Math.round(ready*100/total):0;
+  const dueInsp=list.filter(v=>!vehInspThisMonth(v)).length, dnu=list.filter(vehDoNotUse).length;
+  const slim=[
+    {label:'Documents', num:doc.expired, cls:doc.expired?'danger':(doc.expiring?'warn':'ok'), sub:`${doc.expiring} expiring soon`, icon:ic('file')},
+    {label:'PPE & safety kit', num:ppe.expired, cls:ppe.expired?'danger':(ppe.expiring?'warn':'ok'), sub:`${ppe.expiring} expiring soon`, icon:ic('vest')},
+    {label:'Service overdue', num:svcOver, cls:svcOver?'danger':(svcSoon?'warn':'ok'), sub:`${svcSoon} due soon · ${bdYear} breakdown${bdYear===1?'':'s'} this year`, icon:ic('wrench')},
+    {label:'Inspection due', num:dueInsp, cls:dueInsp?'warn':'ok', sub:`not inspected in ${monthLabelOf(localToday().slice(0,7)).split(' ')[0]}`, icon:ic('clipcheck')},
+    {label:'Do not use', num:dnu, cls:dnu?'danger':'ok', sub:'Class A defect open', icon:ic('stop')},
   ];
-  document.getElementById('vehicleTiles').innerHTML = tiles.map(t=>`
-    <div class="tile" style="--tile-accent:var(${t.cat})">
-      <div class="tile-head"><div class="tile-icon">${t.icon}</div><div class="tile-label">${t.label}</div></div>
-      <div class="tile-num ${t.cls}">${t.num}</div><div class="tile-sub">${t.sub}</div>
+  const divs=[['Civil','--cat-1'],['Scaffolding','--cat-2'],['Rental','--cat-4'],['Office staff','--cat-6']].map(([d,c])=>({key:d, label:divLabel(d).replace(' Division',''), color:`var(${c})`, list:list.filter(v=>v.division===d)}));
+  const noDiv=list.filter(v=>!v.division); if(noDiv.length) divs.push({key:'__none', label:'No division', color:'var(--line)', list:noDiv});
+  const el=document.getElementById('vehicleTiles'); el.className='fl-dash';
+  el.innerHTML=`<div class="fl-hero" role="img" aria-label="Fleet ready ${pct}% — ${ready} of ${total} vehicles have no open issue">
+      <div class="fl-hero-h"><span>${ic('truck')} Fleet readiness</span><span class="wsub">vehicles with no open issue</span></div>
+      ${flGaugeSvg(pct, total)}
+      <div class="fl-odo-wrap"><div class="fl-odo" title="${total} vehicles in the fleet">${flOdoDigits(total)}</div><div class="fl-odo-l">VEHICLES</div></div>
+      <div class="fl-hero-f"><span><i class="wf-dot" style="background:var(--ok)"></i> Ready <b>${ready}</b></span><span><i class="wf-dot" style="background:var(--danger)"></i> Needs attention <b>${total-ready}</b></span><span>${own} own · ${rental} rental</span></div>
     </div>
-  `).join('');
+    <div class="fl-divs">
+      <div class="fl-divs-h">By division <span class="wsub">— click to show only that division</span></div>
+      <div class="fl-div-grid">${divs.map(d=>{ const n=d.list.length, r=d.list.filter(v=>!vehicleIssues(v).length).length, pc=n?Math.round(r*100/n):null, on=vehicleFilters.division===d.key;
+        return `<button type="button" class="fl-div ${on?'on':''}" data-fl-div="${esc(d.key)}" aria-pressed="${on}" title="${esc(d.label)}: ${n} vehicle${n===1?'':'s'} · ${r} ready${pc!==null?' ('+pc+'%)':''}">
+          <div class="fl-div-n"><i class="wf-dot" style="background:${d.color}"></i>${esc(d.label)}</div>
+          ${flMiniGauge(pc, n)}
+          <div class="fl-div-s">${n?`<b>${r}</b> ready · <b>${n-r}</b> attention`:'no vehicles'}</div></button>`; }).join('')}</div>
+    </div>
+    <div class="fl-slim">${slim.map(t=>`<div class="tile fl-slim-t"><div class="tile-head"><div class="tile-icon">${t.icon}</div><div class="tile-label">${t.label}</div></div><div class="tile-num ${t.cls}">${t.num}</div><div class="tile-sub">${esc(t.sub)}</div></div>`).join('')}</div>`;
 }
+// value 0–100 → 240° dial (starts lower-left, ends lower-right); SVG angles run clockwise from +x
+function flPt(cx,cy,r,a){ const t=a*Math.PI/180; return [(cx+r*Math.cos(t)).toFixed(2), (cy+r*Math.sin(t)).toFixed(2)]; }
+function flArc(cx,cy,r,a1,a2){ const [x1,y1]=flPt(cx,cy,r,a1), [x2,y2]=flPt(cx,cy,r,a2); return `M${x1} ${y1} A${r} ${r} 0 ${a2-a1>180?1:0} 1 ${x2} ${y2}`; }
+function flStatus(p){ return p===null ? 'muted' : p>=90 ? 'ok' : p>=70 ? 'warn' : 'danger'; }
+// neon instrument colours (the dial face is always dark, like a real gauge); zones keep their meaning + a text label
+const FL_NEON={ok:'#2ee59d', warn:'#ffb020', danger:'#ff4d6d', muted:'#5f7488'};
+const FL_ZONE={ok:'GOOD', warn:'WATCH', danger:'ACTION NEEDED', muted:'NO VEHICLES'};
+let flGid=0;
+function flSegs(cx,cy,r,a0,sweep,n,pct,w,cls){
+  // lit segments all wear the current status colour (green / amber / red), brightening towards the reading
+  let h=''; const step=sweep/n, gap=Math.min(1.6, step*0.32), col=FL_NEON[flStatus(pct)];
+  for(let i=0;i<n;i++){ const v=(i+0.5)*100/n, a1=a0+i*step+gap/2, a2=a0+(i+1)*step-gap/2, on=pct!==null && v<=pct+0.0001;
+    h+=`<path d="${flArc(cx,cy,r,a1,a2)}" class="${cls}${on?' on':''}" stroke-width="${w}" ${on?`style="stroke:${col}; opacity:${(0.45+0.55*v/Math.max(1,pct)).toFixed(2)}"`:''}/>`; }
+  return h;
+}
+function flGaugeSvg(pct, total){
+  const id='flg'+(++flGid), cx=130, cy=134, r=94, A=v=>150+240*v/100, val=total?pct:null, st=total?flStatus(pct):'muted', col=FL_NEON[st];
+  let scale=''; for(let v=0; v<=100; v+=5){ const major=v%10===0, [x1,y1]=flPt(cx,cy,r+10,A(v)), [x2,y2]=flPt(cx,cy,r+(major?18:14),A(v));
+    scale+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="fl-sc${major?' maj':''}"/>`;
+    if(major){ const [tx,ty]=flPt(cx,cy,r+28,A(v)); scale+=`<text x="${tx}" y="${ty}" class="fl-scl" text-anchor="middle" dominant-baseline="middle">${v}</text>`; } }
+  const zones=[[0,70,'danger','Below 70% — action needed'],[70,90,'warn','70–90% — watch'],[90,100,'ok','90% and over — good']].map(([a,b,c,t])=>`<path d="${flArc(cx,cy,r+6,A(a)+(a?0.8:0),A(b)-(b<100?0.8:0))}" class="fl-zone" stroke="${FL_NEON[c]}"><title>${t}</title></path>`).join('');
+  return `<svg class="fl-gauge" viewBox="0 0 260 232" aria-hidden="true">
+    <defs><radialGradient id="${id}f" cx="50%" cy="42%" r="60%"><stop offset="0" stop-color="#16263f"/><stop offset=".7" stop-color="#0a1426"/><stop offset="1" stop-color="#050b16"/></radialGradient>
+      <filter id="${id}g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <circle cx="${cx}" cy="${cy}" r="${r+36}" class="fl-bezel"/>
+    ${scale}${zones}
+    <g filter="url(#${id}g)">${flSegs(cx,cy,r,A(0),240,48,val,13,'fl-seg')}</g>
+    <circle cx="${cx}" cy="${cy}" r="${r-17}" fill="url(#${id}f)" class="fl-face"/>
+    <circle cx="${cx}" cy="${cy}" r="${r-17}" class="fl-ring" stroke="${col}" filter="url(#${id}g)"/>
+    <circle cx="${cx}" cy="${cy}" r="${r-25}" class="fl-ring2"/>
+    ${total?`<g class="fl-needle" style="--a:${A(pct)}deg; transform-origin:${cx}px ${cy}px"><circle cx="${cx+r}" cy="${cy}" r="7.5" fill="${col}" class="fl-knob" filter="url(#${id}g)"/><circle cx="${cx+r}" cy="${cy}" r="3" fill="#fff"/></g>`:''}
+    <text x="${cx}" y="${cy-30}" text-anchor="middle" class="fl-cap">FLEET READY</text>
+    <text x="${cx}" y="${cy+12}" text-anchor="middle" class="fl-pct" filter="url(#${id}g)">${total?pct:'—'}<tspan class="fl-pct-u">${total?'%':''}</tspan></text>
+    <text x="${cx}" y="${cy+36}" text-anchor="middle" class="fl-zl" fill="${col}">● ${FL_ZONE[st]}</text>
+  </svg>`;
+}
+function flOdoDigits(n){ const s=String(Math.max(0,n|0)).padStart(4,'0'), lead=s.length-String(Math.max(0,n|0)).length; return [...s].map((d,i)=>`<span class="fl-dg ${i<lead?'lead':''}">${d}</span>`).join(''); }
+function flMiniGauge(pc, n){
+  const id='flm'+(++flGid), cx=60, cy=58, r=46, st=flStatus(n?pc:null), col=FL_NEON[st];
+  return `<svg class="fl-mini" viewBox="0 0 120 112" aria-hidden="true">
+    <defs><radialGradient id="${id}f" cx="50%" cy="40%" r="62%"><stop offset="0" stop-color="#16263f"/><stop offset="1" stop-color="#060d1a"/></radialGradient>
+      <filter id="${id}g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <circle cx="${cx}" cy="${cy}" r="${r+8}" class="fl-bezel"/>
+    <g filter="url(#${id}g)">${flSegs(cx,cy,r,135,270,30,n?pc:null,8,'fl-seg')}</g>
+    <circle cx="${cx}" cy="${cy}" r="${r-10}" fill="url(#${id}f)" class="fl-face"/>
+    <circle cx="${cx}" cy="${cy}" r="${r-10}" class="fl-ring" stroke="${col}" stroke-width="1.2" filter="url(#${id}g)"/>
+    <text x="${cx}" y="${cy+4}" text-anchor="middle" class="fl-mnum" filter="url(#${id}g)">${n}</text>
+    <text x="${cx}" y="${cy+18}" text-anchor="middle" class="fl-ml">VEHICLE${n===1?'':'S'}</text>
+    <text x="${cx}" y="${cy+46}" text-anchor="middle" class="fl-mpct" fill="${col}">${n?pc+'% ready':'—'}</text>
+  </svg>`;
+}
+document.addEventListener('click', e=>{
+  const b=e.target.closest && e.target.closest('[data-fl-div]'); if(!b) return;
+  const k=b.dataset.flDiv; vehicleFilters.division = vehicleFilters.division===k ? 'all' : k;
+  const sel=document.getElementById('vehicleDivisionFilter'); if(sel) sel.value=vehicleFilters.division;
+  renderVehicleTiles(); renderVehicleTable();
+});
 
 function vehicleMatches(v){
   if(v.deleted) return false;
