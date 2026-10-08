@@ -2525,8 +2525,10 @@ let pendingWorkerOpen = new URLSearchParams(location.search).get('worker');
 /* ---------------- vehicle tracker ---------------- */
 const VEHICLE_TABS = [
   {key:'profile', label:'Profile'},
+  {key:'driver', label:'Driver & history'},
   {key:'documents', label:'Documents'},
   {key:'inspections', label:'Inspections'},
+  {key:'tyres', label:'Tyres'},
   {key:'services', label:'Service & maintenance'},
   {key:'ppe', label:'PPE & safety kit'},
 ];
@@ -2557,6 +2559,21 @@ const VEHICLE_RECORD_TYPES = {
       {key:'notes', label:'Notes', type:'textarea'},
     ],
   },
+};
+VEHICLE_RECORD_TYPES.tyres={
+  title:'Tyres', addLabel:'+ Add tyre', hasExpiry:true, hasAttachment:false,
+  cardBadge:r=>tyreBadge(r),
+  fields:[
+    {key:'position', label:'Position', type:'select', options:['Front left','Front right','Rear left','Rear right','Rear left inner','Rear right inner','Axle 2 left','Axle 2 right','Axle 3 left','Axle 3 right','Spare','Spare 2','Other'], required:true},
+    {key:'brand', label:'Brand / pattern', type:'text', placeholder:'e.g. Bridgestone Dueler A/T'},
+    {key:'size', label:'Size', type:'text', placeholder:'e.g. 265/65R17'},
+    {key:'dot', label:'DOT date code (week + year)', type:'text', placeholder:'e.g. 2423 = week 24 of 2023'},
+    {key:'date', label:'Fitted on', type:'date'},
+    {key:'fittedKm', label:'Odometer when fitted (km)', type:'number'},
+    {key:'tread', label:'Tread depth (mm)', type:'number'},
+    {key:'expiry', label:'Replace by (4 years from manufacture)', type:'date', required:true},
+    {key:'notes', label:'Notes', type:'textarea'},
+  ],
 };
 VEHICLE_RECORD_TYPES.services={
   title:'Service & maintenance log', addLabel:'+ Log service / breakdown', hasExpiry:false, hasAttachment:true, attachLabel:'job card / invoice',
@@ -2819,7 +2836,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b71';
+const APP_BUILD='b72';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3112,12 +3129,12 @@ async function exportFleet(){
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection and try again'); return; }
   const list=activeVehicles().slice().sort((a,b)=>String(a.vehicleNumber||'').localeCompare(String(b.vehicleNumber||'')));
   const reqCols=VEH_REQ_COLS.map(([d])=>d);
-  const rows=[['Vehicle number','Model','Vehicle type','Division','Ownership','Project','Year of manufacture','First registration','Age (years)','Fuel','Odometer (km)','PDO age / km limit','Limit status',...VEH_SAFETY_SYSTEMS,'IVMS unit','DFMS device',...reqCols.map(d=>d+' expiry'),'Required documents missing','Inspected this month','Last inspection','Last result','Do not use','Issues']];
+  const rows=[['Vehicle number','Model','Vehicle type','Division','Ownership','Project','Year of manufacture','First registration','Age (years)','Fuel','Odometer (km)','PDO age / km limit','Limit status',...VEH_SAFETY_SYSTEMS,'IVMS unit','DFMS device',...reqCols.map(d=>d+' expiry'),'Required documents missing','Main driver','Driver qualified','Tyres over 4 years','Inspected this month','Last inspection','Last result','Do not use','Issues']];
   for(const v of list){
     const a=vehicleAgeCheck(v), st=vehReqDocStatus(v), has=new Set(v.safetySystems||[]), cur=currentRecs(v.documents||[], 'documents');
     const expOf=d=>{ const r=cur.filter(x=>vehDocMatches(d, x.type)).sort((p,q)=>String(q.expiry||'').localeCompare(String(p.expiry||'')))[0]; return r ? (r.expiry||'no expiry') : ''; };
     rows.push([v.vehicleNumber||'', v.model||'', v.vehicleType||'', v.division?divLabel(v.division):'', v.ownership||'Own', v.projectId?locLabel(v.projectId):'', v.yearMade||'', v.firstRegDate||'', a.age!=null?Number(a.age.toFixed(1)):'', v.fuelType||'', a.odo!==null?Math.round(a.odo):'', a.limitText||'', a.statusText||'',
-      ...VEH_SAFETY_SYSTEMS.map(x=>has.has(x)?'Yes':''), v.ivmsUnitId||'', v.dfmsUnitId||'', ...reqCols.map(expOf), st.filter(x=>x.status==='missing').map(x=>x.req).join(', '), ...(li=>[vehInspThisMonth(v)?'Yes':'No', li?li.date:'', li?(VI_RESULT[li.result].short||'Pass'):'', vehDoNotUse(v)?'YES':''])(viSorted(v)[0]), vehicleIssues(v).join('; ')]);
+      ...VEH_SAFETY_SYSTEMS.map(x=>has.has(x)?'Yes':''), v.ivmsUnitId||'', v.dfmsUnitId||'', ...reqCols.map(expOf), st.filter(x=>x.status==='missing').map(x=>x.req).join(', '), (vehDrivers(v)[0]||{}).fullName||'', vehDrivers(v).length?(vehDriverProblem(v)?'NO':'Yes'):'', currentRecs(v.tyres||[], 'tyres').filter(r=>{ const a=tyreAgeYears(r); return a!==null && a>=4; }).length||'', ...(li=>[vehInspThisMonth(v)?'Yes':'No', li?li.date:'', li?(VI_RESULT[li.result].short||'Pass'):'', vehDoNotUse(v)?'YES':''])(viSorted(v)[0]), vehicleIssues(v).join('; ')]);
   }
   const docs=[['Vehicle number','Model','Vehicle type','Document','Speed limiter setting','Done date','Expiry','Status','Notes']];
   for(const v of list) for(const r of (v.documents||[]).slice().sort((p,q)=>String(p.type||'').localeCompare(String(q.type||'')) || String(q.date||'').localeCompare(String(p.date||''))))
@@ -3521,6 +3538,109 @@ document.addEventListener('submit', async e=>{
   }
   delete e.target.dataset.dirty;
   if(await updateSite(s.id, c)) toast(c.mhMode==='auto' ? 'Man-hours now counted automatically for this project' : 'Man-hours back to manual for this project');
+});
+
+/* ---------------- Batch 72: assigned drivers, vehicle history, tyres ---------------- */
+// SP-2000 3.4: the defensive-driving permit must match the vehicle and is only valid with the ROP licence; Annex A-1: fit to work.
+const VEH_DD_REQ={'Car / SUV':['LV'],'Pickup':['LV'],'Bus':['LB/HB'],'Truck':['HV'],'Prime Mover':['HV'],'HIAB Truck':['HV'],'Crane':['HV'],'Green Water Tanker':['HV','TN']};
+function vehDDCodes(v){ const c=(VEH_DD_REQ[v && v.vehicleType]||[]).slice(); if(v && v.gradedRoads && c.length) c.push('GR'); return c; }
+function vehDrivers(v){ return (v && Array.isArray(v.driverIds) ? v.driverIds : []).map(id=>workers.find(w=>w.id===id && !w.deleted)).filter(Boolean); }
+function workerLicence(w){
+  const recs=(w.licenses||[]).filter(r=>/driv|rop|licen[cs]e/i.test(String(r.type||'')) && !/labou?r|passport|visa|insurance|residen/i.test(String(r.type||'')));
+  if(!recs.length) return {status:'missing'};
+  const best=recs.slice().sort((a,b)=>String(b.expiry||'9999').localeCompare(String(a.expiry||'9999')))[0];
+  return {status:best.expiry?statusFor(best.expiry):'valid', expiry:best.expiry||'', type:best.type};
+}
+function driverCheck(w, v){
+  const items=[];
+  const lic=workerLicence(w); items.push({k:'ROP driving licence', st:lic.status, exp:lic.expiry});
+  for(const code of vehDDCodes(v)){ const c=PDO_COURSES.find(x=>x.code===code); const st=c ? trainingStatusFor(w, pdoCourseLabel(c)) : {status:'missing'}; items.push({k:`Defensive driving ${code}${c?' — '+c.name.replace(/^Defensive Driving,?\s*/i,''):''}`, st:st.status, exp:st.expiry||''}); }
+  const med=computeFlags(w).medical.status; items.push({k:'Medical fitness', st: med==='unfit'?'expired':med==='none'?'missing':med, exp:'', note:med==='unfit'?'UNFIT':''});
+  const bad=items.filter(x=>x.st==='missing'||x.st==='expired'), soon=items.filter(x=>x.st==='expiring');
+  return {items, ok:!bad.length, bad, soon};
+}
+function vehDriverProblem(v){ const ds=vehDrivers(v); return ds.some(w=>!driverCheck(w,v).ok); }
+
+// everything already logged against this vehicle number
+function vehHistory(v){
+  const k=normKey(v.vehicleNumber); if(!k) return [];
+  const out=[];
+  for(const i of activeIncidents()) if(normKey(i.vehicleNo)===k) out.push({date:i.date||'', kind:'Incident', cls:'danger', text:[i.incNo, i.type, String(i.description||'').slice(0,120)].filter(Boolean).join(' · '), incId:i.id});
+  const lab={ivms:'IVMS violation', dfms:'DFMS violation', lsr:'LSR violation', vehicleIncident:'Vehicle incident', vehicleKm:'Km driven', vehicleInspection:'Inspection (Monthly Report)'};
+  for(const e of liveReportEntries()){ if(!lab[e.category] || normKey(e.vehicleNumber)!==k) continue;
+    if(e.category==='vehicleIncident' && e.source==='incident') continue;   // already listed from the Incident Register
+    if(e.category==='vehicleInspection' && e.source==='vehicleInspection') continue;   // listed from the Inspections tab
+    const w=e.driverId ? workers.find(x=>x.id===e.driverId) : null;
+    out.push({date:String(e.date||''), kind:lab[e.category], cat:e.category, cls:e.category==='vehicleKm'?'muted':e.category==='vehicleInspection'?'ok':'warn', km:e.category==='vehicleKm'?(Number(e.km)||0):0, events:['ivms','dfms','lsr'].includes(e.category)?driveEvents(e):0,
+      text:e.category==='vehicleKm' ? `${(Number(e.km)||0).toLocaleString()} km` : [e.type||e.rule, w?w.fullName:'', e.speed?e.speed+' km/h':'', e.description||e.result].filter(Boolean).join(' · ')}); }
+  for(const x of (v.inspections||[])) out.push({date:x.date||'', kind:'Inspection', cls:VI_RESULT[x.result].cls, text:`${VI_RESULT[x.result].short||'Pass'} · ${x.inspector||''}`});
+  return out.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+}
+let vdFormDirty=false;
+function vehDriverTabHtml(v){
+  const ed=canEdit(), ds=vehDrivers(v), codes=vehDDCodes(v), ids=v.driverIds||[];
+  const people=activeWorkers().filter(w=>(w.status||'active')!=='inactive').sort((a,b)=>(/driver/i.test(b.designation||'')-/driver/i.test(a.designation||'')) || String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  const opt=(sel)=>`<option value="">— none —</option>`+people.map(w=>`<option value="${esc(w.id)}" ${w.id===sel?'selected':''}>${esc(w.fullName||'—')}${w.designation?' · '+esc(w.designation):''}</option>`).join('');
+  const stBadge=x=>{ const cls=x.st==='valid'?'ok':x.st==='expiring'?'warn':'danger', t=x.note||(x.st==='valid'?'Valid':x.st==='expiring'?'Expiring':x.st==='expired'?'Expired':'Missing'); return `<span class="badge ${cls}">${esc(t)}${x.exp?' · '+esc(x.exp):''}</span>`; };
+  const card=(w,role)=>{ const c=driverCheck(w,v); return `<div class="record-card"><div class="record-card-top"><div class="record-card-title">${esc(w.fullName||'—')} <span class="wsub">${esc(role)}</span> <span class="badge ${c.ok?(c.soon.length?'warn':'ok'):'danger'}">${c.ok?(c.soon.length?'Qualified — renewal due':'Qualified'):'Not qualified'}</span></div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm" data-open-worker="${esc(w.id)}">Open worker</button></div></div>
+      <div class="record-fields">${c.items.map(x=>`<div class="rf"><span class="rf-k">${esc(x.k)}</span><span class="rf-v">${stBadge(x)}</span></div>`).join('')}</div></div>`; };
+  const h=vehHistory(v), y=localToday().slice(0,4), inY=h.filter(x=>x.date.startsWith(y));
+  const cnt=(kind)=>inY.filter(x=>x.kind===kind).reduce((n,x)=>n+(x.events||1),0);
+  const km=inY.filter(x=>x.cat==='vehicleKm').reduce((n,x)=>n+x.km,0);
+  const sc=(k,val,cls)=>`<div class="stat-card"><div class="stat-card-num ${cls||''}">${val}</div><div class="stat-card-label">${k}</div></div>`;
+  return `<div class="section-head"><h3>Assigned driver</h3></div>
+    <p class="wsub" style="margin:-4px 0 10px;">${codes.length?`A <b>${esc(v.vehicleType)}</b> needs a valid ROP licence, defensive driving <b>${codes.join(' + ')}</b> and medical fitness (SP-2000 3.4, Annex A-1). Recertification (RT) counts.`:v.vehicleType?`No defensive-driving permit is set for <b>${esc(v.vehicleType)}</b> (trailers, forklifts and boom lifts need operator competency instead) — only the licence and medical are checked.`:'Set the vehicle type on the Profile tab so the right permit is checked.'}</p>
+    ${ed?`<form id="vdForm" class="form-grid" style="margin-bottom:12px;">
+      <label>Main driver<select data-vd="d0">${opt(ids[0]||'')}</select></label>
+      <label>Relief driver<select data-vd="d1">${opt(ids[1]||'')}</select></label>
+      <label class="chk span-all" style="align-items:center;"><input type="checkbox" data-vd="graded" ${v.gradedRoads?'checked':''}> Also driven on graded (unpaved) roads — needs Defensive Driving GR</label>
+      <div class="form-actions span-all"><button type="submit" class="btn btn-primary btn-sm">Save driver</button></div></form>`:''}
+    ${ds.length ? ds.map((w,i)=>card(w, (v.driverIds||[])[0]===w.id?'Main driver':'Relief driver')).join('') : '<p class="wsub">No driver assigned.</p>'}
+    <div class="section-head" style="margin-top:18px;"><h3>Vehicle history</h3><span class="wsub">from the Incident Register, Monthly Report and Inspections — matched by vehicle number</span></div>
+    <div class="stat-cards">${sc(`Incidents ${y}`, cnt('Incident')+cnt('Vehicle incident'), (cnt('Incident')+cnt('Vehicle incident'))?'danger':'ok')}${sc(`IVMS violations ${y}`, cnt('IVMS violation'), cnt('IVMS violation')?'warn':'ok')}${sc(`DFMS violations ${y}`, cnt('DFMS violation'), cnt('DFMS violation')?'warn':'ok')}${sc(`LSR violations ${y}`, cnt('LSR violation'), cnt('LSR violation')?'danger':'ok')}${sc(`Km driven ${y}`, km.toLocaleString(), '')}</div>
+    ${h.length?`<div class="table-wrap" style="box-shadow:none; margin-top:10px;"><table><thead><tr><th>Date</th><th>Record</th><th>Details</th></tr></thead><tbody>
+      ${h.slice(0,60).map(x=>`<tr ${x.incId?`data-vh-inc="${esc(x.incId)}" style="cursor:pointer;"`:''}><td class="mono">${esc(x.date)}</td><td><span class="badge ${x.cls}">${esc(x.kind)}</span></td><td>${esc(x.text||'')}</td></tr>`).join('')}
+    </tbody></table></div>${h.length>60?`<p class="wsub">Showing the latest 60 of ${h.length}.</p>`:''}`:`<p class="wsub">Nothing logged for ${esc(v.vehicleNumber||'this vehicle')} yet. IVMS / DFMS / LSR violations and km are logged in the Monthly Report — type the vehicle number exactly as here.</p>`}`;
+}
+document.addEventListener('submit', async e=>{
+  if(e.target.id!=='vdForm') return; e.preventDefault();
+  const v=currentVehicle(); if(!v || !canEdit()) return;
+  const g=k=>e.target.querySelector(`[data-vd="${k}"]`);
+  const d0=g('d0').value, d1=g('d1').value;
+  if(d0 && d0===d1){ toast('Main and relief driver are the same person'); return; }
+  delete e.target.dataset.dirty;
+  await updateVehicle(v.id, {driverIds:[d0,d1].filter(Boolean), gradedRoads:g('graded').checked});
+});
+document.addEventListener('click', e=>{
+  const ow=e.target.closest && e.target.closest('#vehicleDrawerBody [data-open-worker]'); if(ow){ document.querySelector('.sidenav-btn[data-section="workforce"]').click(); openDrawer(ow.dataset.openWorker); return; }
+  const inc=e.target.closest && e.target.closest('[data-vh-inc]'); if(inc){ document.querySelector('.sidenav-btn[data-section="incidents"]').click(); openIncDrawer(inc.dataset.vhInc); }
+});
+
+// Tyres — SP-2000 4.2.8.10: never used beyond 4 years from the date of manufacture; over 2 years = inspect closely.
+// DOT date code on the sidewall = week + year, e.g. 2423 = week 24 of 2023.
+function tyreMfgDate(dot){ const m=/^(\d{2})(\d{2})$/.exec(String(dot||'').replace(/\D/g,'').slice(-4)); if(!m) return ''; const wk=+m[1], yr=2000+(+m[2]); if(wk<1||wk>53) return '';
+  const d=new Date(Date.UTC(yr,0,1+(wk-1)*7)); return d.toISOString().slice(0,10); }
+function tyreAgeYears(r){ const md=tyreMfgDate(r.dot); return md ? daysBetween(md, localToday())/365.25 : null; }
+function tyreBadge(r){
+  const v=currentVehicle(); if(v && isRenewed(v.tyres||[], 'tyres', r)) return '<span class="badge muted" title="A newer tyre is fitted at this position">Replaced</span>';
+  const a=tyreAgeYears(r); if(a===null) return '<span class="badge muted">DOT code not set</span>';
+  if(a>=4) return `<span class="badge danger">${a.toFixed(1)} yrs — replace (over 4 years)</span>`;
+  if(a>=2) return `<span class="badge warn">${a.toFixed(1)} yrs — inspect closely</span>`;
+  return `<span class="badge ok">${a.toFixed(1)} yrs old</span>`;
+}
+const TYRE_POSITIONS=['Front left','Front right','Rear left','Rear right','Rear left inner','Rear right inner','Axle 2 left','Axle 2 right','Axle 3 left','Axle 3 right','Spare','Spare 2','Other'];
+function vehTyreSummaryHtml(v){
+  const cur=currentRecs(v.tyres||[], 'tyres');
+  const ages=cur.map(tyreAgeYears).filter(a=>a!==null), over=ages.filter(a=>a>=4).length, two=ages.filter(a=>a>=2&&a<4).length;
+  return `<div class="panel req-box" style="margin-bottom:14px;"><div class="subhead" style="margin-top:0;">Tyres fitted now: ${cur.length} <span class="wsub" style="display:inline;font-weight:400;">${over?`· <b style="color:var(--danger)">${over} over 4 years</b> `:''}${two?`· ${two} over 2 years (inspect closely) `:''}${ages.length?`· oldest ${Math.max(...ages).toFixed(1)} yrs`:''}</span></div>
+    <p class="wsub" style="margin:0;">SP-2000 4.2.8 / Annex B-3: no tyre (spare included) older than <b>4 years</b> from manufacture · over 2 years inspect closely · same make, type and tread pattern on an axle (all tyres incl. spare on light vehicles) · radial only, no tube in tubeless, no re-grooved tyres. Enter the <b>DOT date code</b> from the sidewall (e.g. 2423 = week 24 of 2023) — "Replace by" fills in automatically. A new tyre at the same position replaces the old one.</p></div>`;
+}
+document.addEventListener('change', e=>{
+  const t=e.target; if(!t || !t.matches || !t.matches('#vehicleDrawerBody #recordForm [data-field="dot"]') || activeVehicleTab!=='tyres') return;
+  const f=t.closest('form'), x=f.querySelector('[data-field="expiry"]'), md=tyreMfgDate(t.value);
+  if(!md){ if(t.value) toast('DOT code = 4 digits, week then year — e.g. 2423'); return; }
+  const next=addYears(md,4); if(!x.value || x.dataset.auto===x.value){ x.value=next; x.dataset.auto=next; }
 });
 
 /* ---------------- training matrix (Workforce) ---------------- */
@@ -10198,7 +10318,7 @@ function badgeHtml(status, labelMap){
    Certificates (training, medical, licence, vehicle documents…) are grouped by their name/type;
    physical items (tools, harnesses, ladders, PPE) only by serial number, so two different items are
    never mixed up. Within a group the record with the latest expiry is current; older ones are history. */
-const RENEW_BY_TITLE={inductions:'site', trainings:'name', competency:'skill', medical:'type', licenses:'type', ppeIssued:'item', documents:'type', hseDocs:'type'};
+const RENEW_BY_TITLE={tyres:'position', inductions:'site', trainings:'name', competency:'skill', medical:'type', licenses:'type', ppeIssued:'item', documents:'type', hseDocs:'type'};
 const RENEW_BY_SERIAL=['ppe','powerTools','harness','ladders','otherPpe'];
 function renewNorm(x){ return String(x==null?'':x).trim().toLowerCase().replace(/\s+/g,' '); }
 function renewKey(key, r){
@@ -10217,7 +10337,7 @@ function renewNewer(a, b){
 }
 function currentRecs(recs, key){
   const groups=new Map(), out=[];
-  for(const r of (recs||[])){ const k=renewKey(key, r); if(k===null){ out.push(r); continue; } const c=groups.get(k); if(!c || renewNewer(r, c)) groups.set(k, r); }
+  for(const r of (recs||[])){ const k=renewKey(key, r); if(k===null){ out.push(r); continue; } const c=groups.get(k); if(!c || (key==='tyres' ? (String(r.date||'')>String(c.date||'') || (String(r.date||'')===String(c.date||'') && String(r.expiry||'')>String(c.expiry||''))) : renewNewer(r, c))) groups.set(k, r); }
   let cur=out.concat([...groups.values()]);
   if(key==='medical'){ // a pre-employment medical is replaced by any later medical
     cur=cur.filter(r=>!(r.type==='Pre-employment Medical' && (recs||[]).some(o=>o!==r && o.type!=='Pre-employment Medical' && String(o.date||'')>String(r.date||''))));
@@ -10756,7 +10876,7 @@ function renderVehicleTable(){
     const doc=vehicleAggFor(v,'documents'), ppe=vehicleAggFor(v,'ppe');
     return `<tr data-id="${v.id}">
       <td class="mono">${esc(v.vehicleNumber)}</td>
-      <td>${esc(v.model||'—')}${v.vehicleType?`<div class="wsub">${esc(v.vehicleType)}</div>`:''}${vehicleAgeCheck(v).status==='over'?' <span class="badge warn" title="SP-2000 4.2.7.2">Over PDO age / km limit</span>':''}</td>
+      <td>${esc(v.model||'—')}${v.vehicleType?`<div class="wsub">${esc(v.vehicleType)}</div>`:''}${(d=>d?`<div class="wsub">${ic('users')} ${esc(d.fullName||'')}${vehDriverProblem(v)?' <span class="badge danger">Driver not qualified</span>':''}</div>`:'')(vehDrivers(v)[0])}${vehicleAgeCheck(v).status==='over'?' <span class="badge warn" title="SP-2000 4.2.7.2">Over PDO age / km limit</span>':''}</td>
       <td>${v.division?esc(divLabel(v.division)):'<span class="wsub">Not set</span>'}</td>
       <td>${(v.ownership||'Own')==='Rental'?'<span class="badge warn">Rental</span>':'<span class="badge ok">Own</span>'}</td>
       <td>${badgeHtml(doc.status)}${(m=>m.length?`<div><span class="badge warn" title="Required for ${esc(v.vehicleType||'')}: ${esc(m.join(', '))}">${m.length} missing</span></div>`:'')(vehMissingDocs(v))}</td>
@@ -11007,6 +11127,8 @@ function vehicleIssues(v){
   { const miss=vehMissingDocs(v); if(miss.length) out.push('Missing: '+miss.join(', ')); }
   if(vehicleAgeCheck(v).status==='over') out.push('Over PDO age / km limit');
   if(vehDoNotUse(v)) out.push('Do not use — Class A defect');
+  if(vehDriverProblem(v)) out.push('Driver not qualified');
+  if((v.tyres||[]).length && vehicleAggFor(v,'tyres').status==='expired') out.push('Tyre over 4 years old');
   if(vehicleAggFor(v,'ppe').status==='expired') out.push('Safety kit expired');
   if(vehicleServiceStats(v).status==='overdue') out.push('Service overdue');
   return out;
@@ -11174,10 +11296,11 @@ function renderVehicleDrawerBody(){
   const body=document.getElementById('vehicleDrawerBody');
   if(activeVehicleTab==='profile'){ body.innerHTML=vehicleProfileTabHtml(v); return; }
   if(activeVehicleTab==='inspections'){ body.innerHTML=vehInspTabHtml(v); if(viFormOpen) viWirePad(); return; }
+  if(activeVehicleTab==='driver'){ body.innerHTML=vehDriverTabHtml(v); return; }
   const cfg=VEHICLE_RECORD_TYPES[activeVehicleTab];
   const savedActiveTab=activeTab, savedEditing=editingRecordId, savedAddOpen=addFormOpen;
   activeTab=activeVehicleTab; editingRecordId=editingVehicleRecordId; addFormOpen=vehicleAddFormOpen;
-  body.innerHTML=(activeVehicleTab==='services' ? vehicleServiceSummaryHtml(v) : activeVehicleTab==='documents' ? vehReqDocsBoxHtml(v) : '') + recordTabHtml(v, activeVehicleTab, cfg);
+  body.innerHTML=(activeVehicleTab==='services' ? vehicleServiceSummaryHtml(v) : activeVehicleTab==='documents' ? vehReqDocsBoxHtml(v) : activeVehicleTab==='tyres' ? vehTyreSummaryHtml(v) : '') + recordTabHtml(v, activeVehicleTab, cfg);
   activeTab=savedActiveTab; editingRecordId=savedEditing; addFormOpen=savedAddOpen;
 }
 
@@ -13336,6 +13459,8 @@ async function buildVehiclePdf(v){
 
   section('Vehicle documents','documents',VEHICLE_RECORD_TYPES.documents);
   section('PPE & safety equipment','ppe',VEHICLE_RECORD_TYPES.ppe);
+  section('Tyres','tyres',VEHICLE_RECORD_TYPES.tyres);
+  { const ds=vehDrivers(v); h2('Assigned driver'); if(!ds.length) kv('Driver', 'None assigned'); for(const w of ds){ const c=driverCheck(w,v); kv(w.fullName||'Driver', (c.ok?'Qualified':'NOT QUALIFIED')+' — '+c.items.map(x=>`${x.k}: ${x.note||x.st}${x.exp?' ('+x.exp+')':''}`).join('; ')); } }
 
   { const s=vehicleServiceStats(v);
     h2('Service & maintenance summary');
