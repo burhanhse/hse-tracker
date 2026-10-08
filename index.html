@@ -2819,7 +2819,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b70';
+const APP_BUILD='b71';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -9762,6 +9762,8 @@ function closeHistoryDrawer(){ document.getElementById('histOverlay').hidden=tru
 /* ---------------- plant & equipment register config ---------------- */
 // Every movable item lives once in the 'equipment' collection with a category,
 // a current location ('store' or a project id), a condition and a move history.
+const CAL_TYPES=['Gas detector — multi-gas','Gas detector — single gas (H2S)','Torque wrench','Pressure / test gauge','Multimeter','Insulation tester (megger)','Clamp meter','PAT tester','Anemometer (wind speed)','WBGT / heat stress meter','Noise (sound level) meter','Lux (light) meter','Load cell / dynamometer','Crane / weighing scale','Other instrument'];
+function calDefaultMonths(t){ return /^Gas detector/.test(String(t||'')) ? 6 : 12; }
 const EQUIP_CATEGORIES = {
   powerTools:{ label:'Power tools & equipment', short:'Power tools', icon:'wrench', noun:'tool / equipment', emailLabel:'Power tool / equipment (TPI)',
     fields:[
@@ -9811,7 +9813,7 @@ const EQUIP_CATEGORIES = {
     display:e=>`${e.extType||'Fire extinguisher'}${e.capacityKg?` · ${e.capacityKg} kg`:''}` },
   specialPpe:{ label:'Specialized PPE', short:'Specialized PPE', icon:'goggles', noun:'PPE item', emailLabel:'Specialized PPE',
     fields:[
-      {key:'name', label:'Item', type:'text', required:true, placeholder:'e.g. SCBA set, gas detector, fall arrester'},
+      {key:'name', label:'Item', type:'text', required:true, placeholder:'e.g. SCBA set, fall arrester'},
       {key:'make', label:'Make / model', type:'text'},
       {key:'serial', label:'Serial number', type:'text', required:true},
       {key:'certNo', label:'TPI certificate no.', type:'text'},
@@ -9819,6 +9821,23 @@ const EQUIP_CATEGORIES = {
       {key:'notes', label:'Notes', type:'textarea'},
     ],
     display:e=>e.name||'PPE item' },
+  /* Batch 71: measuring instruments that must be calibrated (ISO 45001 9.1.1 — monitoring & measuring equipment calibrated or verified).
+     Next due = calibration date + interval (gas detectors 6 months, others 12 — change it if the maker / lab says otherwise). */
+  calibration:{ label:'Calibrated instruments', short:'Calibration', icon:'target', noun:'instrument', emailLabel:'Calibrated instrument', attachLabel:'calibration certificate',
+    note:'Calibration interval: gas detectors every 6 months (maker) plus a bump test before each day\'s use · torque wrenches 12 months or 5,000 uses (ISO 6789) · other instruments 12 months unless the maker says shorter. Use an ISO/IEC 17025 accredited lab and keep the certificate. Next due fills in from the calibration date — you can change it.',
+    fields:[
+      {key:'instType', label:'Instrument', type:'select', required:true, options:CAL_TYPES},
+      {key:'make', label:'Make / model', type:'text', placeholder:'e.g. MSA Altair 4XR'},
+      {key:'serial', label:'Serial number', type:'text', required:true},
+      {key:'range', label:'Range / capacity', type:'text', placeholder:'e.g. 0–100 bar · 20–100 Nm · H2S 0–100 ppm'},
+      {key:'calLab', label:'Calibrated by (lab)', type:'text', placeholder:'Lab / company name'},
+      {key:'certNo', label:'Calibration certificate no.', type:'text'},
+      {key:'calDate', label:'Calibration date', type:'date'},
+      {key:'intervalMonths', label:'Interval (months)', type:'number', placeholder:'6 or 12'},
+      {key:'expiry', label:'Next calibration due', type:'date', required:true},
+      {key:'notes', label:'Notes', type:'textarea'},
+    ],
+    display:e=>(e.instType||'Instrument')+(e.range?` · ${e.range}`:'') },
   firstAid:{ label:'First aid kits', short:'First aid kits', icon:'firstaid', noun:'first aid kit', emailLabel:'First aid kit',
     fields:[
       {key:'kitType', label:'Kit type', type:'select', required:true, options:['Small kit (1–10 persons)','Medium kit (11–25 persons)','Large kit (26–50 persons)','Eye wash station','Burn kit','Other']},
@@ -9840,7 +9859,7 @@ const EQUIP_CATEGORIES = {
     ],
     display:e=>e.name||'Chemical' },
 };
-const EQUIP_CATEGORY_ORDER = ['powerTools','liftingGear','harness','ladders','extinguishers','firstAid','specialPpe','chemicals'];
+const EQUIP_CATEGORY_ORDER = ['powerTools','liftingGear','harness','ladders','extinguishers','firstAid','specialPpe','calibration','chemicals'];
 const EQUIP_CONDITIONS = ['In service','Out for TPI / repair','Damaged / quarantined'];
 // How older project tabs map into the register (used once, automatically)
 const LEGACY_SITE_MAP = {
@@ -9894,8 +9913,23 @@ function equipFieldsHtml(cat, item, attr){
     if(f.type==='select') return `<label>${lbl}<select ${attr}="${f.key}" ${req}><option value="">Select…</option>${f.options.map(o=>`<option value="${esc(o)}" ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
     const extra = f.type==='number' ? 'min="0" step="any"' : '';
     return `<label>${lbl}<input type="${f.type}" ${attr}="${f.key}" value="${esc(val)}" ${req} ${extra} ${f.placeholder?`placeholder="${esc(f.placeholder)}"`:''}></label>`;
-  }).join('');
+  }).join('') + (EQUIP_CATEGORIES[cat].note ? `<p class="wsub" style="grid-column:1/-1; margin:0;">${ic('clock')} ${esc(EQUIP_CATEGORIES[cat].note)}</p>` : '');
 }
+// Batch 71: calibrated instruments — interval follows the instrument type; next due = calibration date + interval (hand-typed values kept)
+document.addEventListener('focusin', e=>{ const t=e.target; if(t && t.matches && t.matches('[data-field="calDate"],[data-efield="calDate"],[data-field="intervalMonths"],[data-efield="intervalMonths"]')) t.dataset.prev=t.value; });
+document.addEventListener('change', e=>{
+  const t=e.target; if(!t || !t.matches || !t.matches('[data-field="instType"],[data-efield="instType"],[data-field="calDate"],[data-efield="calDate"],[data-field="intervalMonths"],[data-efield="intervalMonths"]')) return;
+  const f=t.closest('form'); if(!f) return; const A=t.hasAttribute('data-efield')?'data-efield':'data-field', q=k=>f.querySelector(`[${A}="${k}"]`);
+  const type=q('instType'), cd=q('calDate'), iv=q('intervalMonths'), ex=q('expiry'); if(!cd || !iv || !ex) return;
+  const prevIv=t===iv ? Number(t.dataset.prev)||0 : Number(iv.value)||0, prevCd=t===cd ? (t.dataset.prev||'') : cd.value;
+  if(t===type && (!iv.value || iv.dataset.auto==='1')){ iv.value=calDefaultMonths(type.value); iv.dataset.auto='1'; }
+  const months=Number(iv.value)||calDefaultMonths(type && type.value);
+  if(!cd.value) return;
+  const wasAuto = !ex.value || ex.dataset.auto==='1' || (prevCd && prevIv && ex.value===addMonths(prevCd, prevIv));
+  if(wasAuto){ ex.value=addMonths(cd.value, months); ex.dataset.auto='1'; }
+  t.dataset.prev=t.value;
+});
+document.addEventListener('input', e=>{ const t=e.target; if(t && t.matches && t.matches('[data-field="expiry"],[data-efield="expiry"]')) t.dataset.auto='0'; if(t && t.matches && t.matches('[data-field="intervalMonths"],[data-efield="intervalMonths"]')) t.dataset.auto='0'; });
 function locationOptionsHtml(selected, excludeLoc){
   const opts=[{v:'store', l:'In store'}, ...activeSites().slice().sort((a,b)=>(a.siteName||'').localeCompare(b.siteName||'')).map(s=>({v:s.id, l:s.siteName||'Unnamed project'}))]
     .filter(o=>o.v!==excludeLoc);
@@ -13450,7 +13484,7 @@ async function downloadSiteProfile(){
 
 /* ---------------- import from Excel ---------------- */
 const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-const EQUIP_CATEGORY_ALIASES = {powerTools:['power tool','power tools','tool','tools','power equipment'], liftingGear:['lifting gear','lifting','sling','shackle'], harness:['harness','full body harness','safety harness'],
+const EQUIP_CATEGORY_ALIASES = {calibration:['calibration','calibrated','calibrated instrument','calibrated instruments','instrument','instruments','gas detector','gas detectors','torque wrench'], powerTools:['power tool','power tools','tool','tools','power equipment'], liftingGear:['lifting gear','lifting','sling','shackle'], harness:['harness','full body harness','safety harness'],
   ladders:['ladder','ladders'], extinguishers:['fire extinguisher','fire extinguishers','extinguisher','extinguishers'], firstAid:['first aid','first aid kit','first aid kits'], specialPpe:['specialized ppe','specialised ppe','special ppe','ppe'], chemicals:['chemical','chemicals','msds','sds','coshh']};
 const IMPORT_TYPES = {
   workers:{label:'Workers', noun:'worker', coll:'workers', file:'Burhan_HSE_Workers_template.xlsx', cols:[
@@ -13481,7 +13515,7 @@ const IMPORT_TYPES = {
     {key:'division', h:'Division', help:'Optional: Civil, Scaffolding, Logistics & Rental, Office Staff', ex:'Logistics & Rental'},
   ]},
   equipment:{label:'Plant & Equipment items', noun:'item', coll:'equipment', file:'Burhan_HSE_Equipment_template.xlsx', cols:[
-    {key:'category', h:'Category', req:true, help:'Power tools, Lifting gear, Harness, Ladders, Fire extinguishers, First aid kits, Specialized PPE', ex:'Power tools'},
+    {key:'category', h:'Category', req:true, help:'Power tools, Lifting gear, Harness, Ladders, Fire extinguishers, First aid kits, Specialized PPE, Calibrated instruments', ex:'Power tools'},
     {key:'item', h:'Item / type', req:true, help:'e.g. Grinder · Web sling · Step ladder · CO2 · Small kit · SCBA set (for harness: make/model)', ex:'Angle grinder 230mm'},
     {key:'make', h:'Make / model', ex:'Bosch GWS 22-230'},
     {key:'serial', h:'Serial no.', req:true, help:'Serial / ID tag (used with the category to spot duplicates)', ex:'G-1023'},
@@ -13614,6 +13648,7 @@ function validateImportRows(rows){
       else if(cat==='ladders'){ doc.type=matchOption(item, EQUIP_CATEGORIES.ladders.fields[0].options)||'Other'; }
       else if(cat==='extinguishers'){ doc.extType=matchOption(item, EQUIP_CATEGORIES.extinguishers.fields[0].options)||'Other'; doc.capacityKg=txt('capacityKg'); if(!doc.capacityKg) errors.push('Capacity (kg) is needed for fire extinguishers'); }
       else if(cat==='firstAid'){ doc.kitType=matchOption(item, EQUIP_CATEGORIES.firstAid.fields[0].options)||'Other'; }
+      else if(cat==='calibration'){ doc.instType=matchOption(item, CAL_TYPES)||(/gas/i.test(item)?(/h2s|single/i.test(item)?CAL_TYPES[1]:CAL_TYPES[0]):/torque/i.test(item)?'Torque wrench':/pressure|gauge/i.test(item)?'Pressure / test gauge':'Other instrument'); doc.intervalMonths=calDefaultMonths(doc.instType); if(doc.instType==='Other instrument' && item) doc.notes=[`Instrument: ${item}`, doc.notes].filter(Boolean).join(' · '); }
       if(['liftingGear','ladders','extinguishers','firstAid'].includes(cat) && (doc.type==='Other'||doc.extType==='Other'||doc.kitType==='Other') && item) doc.notes=[`Type: ${item}`, doc.notes].filter(Boolean).join(' · ');
       label = cat ? EQUIP_CATEGORIES[cat].display(doc) : item;
       if(cat && equipmentList.some(e=>e.category===cat && normKey(e.serial)===normKey(key))) return out.push({rowNo, label, key, status:'skip', msg:'Already in the register'});
