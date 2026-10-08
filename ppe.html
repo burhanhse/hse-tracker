@@ -51,6 +51,11 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 .err{background:var(--red-bg); color:var(--red); border:1px solid #f3b9bc; padding:12px; border-radius:12px; font-size:15px; font-weight:700; margin-bottom:12px;}
 .note{font-size:14px; color:var(--muted);}
 .done{text-align:center;} .done .tick{width:70px; height:70px; border-radius:50%; background:var(--ok-bg); color:var(--ok); display:grid; place-items:center; margin:0 auto 12px; font-size:38px; font-weight:900;}
+.pchips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;} .pchip-w{display:inline-flex;} .pchip{border:2px solid var(--line); background:#fff; border-radius:999px; padding:9px 14px; font:inherit; font-size:15px; font-weight:800; color:var(--ink);} .pchip.on{border-color:var(--navy); background:var(--navy); color:#fff;}
+.pchip .cnt{display:inline-block; min-width:22px; margin-left:6px; padding:0 6px; border-radius:999px; background:var(--ok-bg); color:var(--ok); font-size:13px;} .pchip-w .pchip:not(:last-child){border-top-right-radius:0; border-bottom-right-radius:0;}
+.pchip-x{border:2px solid var(--line); border-left:0; background:#fff; border-radius:0 999px 999px 0; padding:0 12px; font-size:15px; color:var(--red); font-weight:800;} .pchip.add{border-style:dashed; color:var(--focus);}
+.addbox{margin-top:12px; padding:12px; border:2px dashed var(--line); border-radius:12px; background:#fafbfd;} .forname{display:block; color:var(--red); font-size:17px; margin-top:2px;}
+.pers-h{font-weight:800; font-size:16px; margin:12px 0 6px; padding-top:10px; border-top:2px solid var(--line);} .pers-h:first-child{border-top:0; padding-top:0; margin-top:0;} .rgroup + .rgroup{margin-top:6px;}
 .hidden{display:none !important;}
 .center{text-align:center; padding:40px 16px; color:var(--muted);}
 footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 24px;}
@@ -96,6 +101,10 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     confirm:['Confirm I received','पुष्टि करें कि मुझे मिला','تأكيد الاستلام'], thanks:['Thank you — receipt saved','धन्यवाद — प्राप्ति दर्ज हो गई','شكراً — تم حفظ الاستلام'],
     st_new:['Waiting for HSE review','एचएसई जाँच बाकी','بانتظار مراجعة السلامة'], st_md:['Waiting for MD approval','एमडी की मंज़ूरी बाकी','بانتظار موافقة المدير العام'],
     st_approved:['Approved — collect from store','मंज़ूर — स्टोर से लें','تمت الموافقة — استلم من المخزن'], st_delivered:['Delivered','मिल गया','تم التسليم'], st_rejected:['Not approved','मंज़ूर नहीं','غير موافق عليه'],
+    div:['Division','डिवीज़न','القسم'], allDiv:['All divisions','सभी डिवीज़न','كل الأقسام'], me:['Me','मैं','أنا'],
+    forWho:['PPE for','पीपीई किसके लिए','المعدات لـ'], addP:['Add another person','दूसरे व्यक्ति को जोड़ें','أضف شخصاً آخر'], add:['Add','जोड़ें','إضافة'],
+    addHint:['Ask for PPE for a colleague too — choose his name, then tap his PPE.','साथी के लिए भी पीपीई मांगें — उसका नाम चुनें, फिर उसका पीपीई चुनें।','اطلب معدات لزميلك أيضاً — اختر اسمه ثم معداته.'],
+    forX:['For','के लिए','لـ'], signOwn:['he signs here, or on his own phone','वह यहाँ या अपने फ़ोन पर हस्ताक्षर करे','يوقّع هنا أو على هاتفه'],
     st_confirm:['Issued to you — please confirm','आपको दिया गया — पुष्टि करें','صُرفت لك — يرجى التأكيد'], st_sent:['Sent — waiting','भेजा गया — प्रतीक्षा','أُرسل — قيد الانتظار'],
   };
   const tr=(k)=>{ const t=T[k]||[k,'','']; return `${esc(t[0])}<span class="tr">${esc(t[1])}${t[2]?` · <span class="ar" dir="rtl">${esc(t[2])}</span>`:''}</span>`; };
@@ -126,78 +135,117 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   if(!/^[A-Za-z0-9]{16,40}$/.test(token)){ bad('This link is incomplete. Scan the QR code again.'); return; }
   let db; try{ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); }catch(e){ bad('The page could not start. Check the internet and open the link again.'); return; }
 
-  let link=null, me=null, view='who', cart=[], reason='', sentLocal=[], recSel=new Set(), pad=null;
+  let link=null, me=null, view='who', people=[], ai=0, addOpen=false, need='', reason='', note='', sentLocal=[], recSel=new Set(), pads={};
   try{ sentLocal=JSON.parse(sessionStorage.getItem('ppeSent_'+token)||'[]'); }catch(e){}
   function load(){ return db.collection('ppeLinks').doc(token).get().then(s=>{ if(!s.exists || (s.data()||{}).active===false){ bad(); return false; } link=s.data(); return true; }).catch(e=>{ console.warn(e); bad(e&&e.code==='permission-denied'?'This link has been switched off.':'Could not open the link — check the internet and try again.'); return false; }); }
   load().then(ok=>{ if(!ok) return; let last=''; try{ last=localStorage.getItem('ppeWho_'+token)||''; }catch(e){} render(last); });
 
   async function sha(s){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16); }
-  const board=()=>{ const b=((link.board||{})[me.id]||[]).slice(); const ids=new Set(b.map(x=>x.id)); for(const s of sentLocal) if(s.w===me.id && !ids.has(s.id) && !b.some(x=>x.k==='req' && x.t===s.t && x.st!=='delivered')) b.unshift({id:s.id, k:'req', st:'sent', d:s.d, t:s.t}); return b; };
+  const board=()=>{ const b=((link.board||{})[me.id]||[]).slice(); const ids=new Set(b.map(x=>x.id)); for(const s of sentLocal) if(s.w===me.id && !ids.has(s.id)) b.unshift({id:s.id, k:'req', st:'sent', d:s.d, t:s.t}); return b; };
+  const wById=id=>(link.workers||[]).find(x=>x.id===id);
+
+  // division + search + name — used for "choose your name" and "add another person"
+  const DIV_ORDER=['Scaffolding','Civil','Logistics & Rental','Office','Sub-contractor','Other'];
+  function divList(){ const m=new Map(); for(const w of link.workers||[]){ const d=w.dv||'Other'; m.set(d,(m.get(d)||0)+1); }
+    return [...m].sort((a,b)=>{ const i=DIV_ORDER.indexOf(a[0]), j=DIV_ORDER.indexOf(b[0]); return (i<0?50:i)-(j<0?50:j) || a[0].localeCompare(b[0]); }); }
+  function pickerHtml(p, div){ const dl=divList();
+    return `${dl.length>1?`<label>${tr('div')}<select id="${p}d"><option value="">${esc(T.allDiv[0])} (${(link.workers||[]).length})</option>${dl.map(([d,n])=>`<option value="${esc(d)}" ${d===div?'selected':''}>${esc(d)} (${n})</option>`).join('')}</select></label>`:''}
+      <label>${tr('search')}<input id="${p}q" placeholder="e.g. Ravi" autocomplete="off"></label>
+      <label>${tr('name')}<select id="${p}s"></select></label>`; }
+  function fillNames(p, exclude, keep){
+    const dEl=$('#'+p+'d'), d=dEl?dEl.value:'', s=$('#'+p+'q').value.trim().toLowerCase(), sel=$('#'+p+'s'), cur=keep!==undefined?keep:sel.value;
+    const ws=(link.workers||[]).filter(w=>!exclude.has(w.id) && (!d || (w.dv||'Other')===d) && (!s || w.name.toLowerCase().includes(s))).sort((a,b)=>a.name.localeCompare(b.name));
+    sel.innerHTML=`<option value="">${esc(T.pick[0])} (${ws.length})</option>`+ws.map(w=>`<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('');
+    if(ws.some(w=>w.id===cur)) sel.value=cur; else if(ws.length===1) sel.value=ws[0].id; else sel.value='';
+  }
+  function wirePicker(p, exclude, keep, onSel){
+    const go=()=>{ fillNames(p, exclude); onSel&&onSel(); };
+    const dEl=$('#'+p+'d'); if(dEl) dEl.addEventListener('change', ()=>{ try{ localStorage.setItem('ppeDiv_'+token, dEl.value); }catch(e){} go(); });
+    $('#'+p+'q').addEventListener('input', go); $('#'+p+'s').addEventListener('change', ()=>onSel&&onSel());
+    fillNames(p, exclude, keep); onSel&&onSel();
+  }
+  const cartOf=i=>people[i].cart;
+  const totalItems=()=>people.reduce((n,p)=>n+p.cart.length,0);
 
   function render(lastId){
     if(view==='who'){
-      const ws=(link.workers||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));
-      app.innerHTML=`<div class="card"><h2>${tr('pick')}</h2>
-        <label>${tr('search')}<input id="q" placeholder="e.g. Ravi" autocomplete="off"></label>
-        <label>${tr('name')}<select id="wsel"><option value="">—</option>${ws.map(w=>`<option value="${esc(w.id)}" ${w.id===lastId?'selected':''}>${esc(w.name)}</option>`).join('')}</select></label>
+      let div=''; try{ div=localStorage.getItem('ppeDiv_'+token)||''; }catch(e){}
+      const lw=wById(lastId); if(lw && div && (lw.dv||'Other')!==div) div=lw.dv||'Other';
+      app.innerHTML=`<div class="card"><h2>${tr('pick')}</h2>${pickerHtml('w', div)}
         <label id="cidBox">${tr('cid')}<input id="cid" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off" placeholder="••••"></label>
         <div id="err" class="err hidden"></div>
         <button class="btn navy" id="go">${tr('cont')}</button></div>`;
-      const sel=$('#wsel'), q=$('#q');
-      const syncCid=()=>{ const w=(link.workers||[]).find(x=>x.id===sel.value); $('#cidBox').classList.toggle('hidden', !!w && !w.h); };
-      q.addEventListener('input', ()=>{ const s=q.value.trim().toLowerCase(); [...sel.options].forEach(o=>{ if(o.value) o.hidden=!!s && !o.textContent.toLowerCase().includes(s); }); const vis=[...sel.options].filter(o=>o.value && !o.hidden); if(vis.length===1){ sel.value=vis[0].value; syncCid(); } });
-      sel.addEventListener('change', syncCid); syncCid();
+      const syncCid=()=>{ const w=wById($('#ws').value); $('#cidBox').classList.toggle('hidden', !!w && !w.h); };
+      wirePicker('w', new Set(), lastId||'', syncCid);
       $('#go').addEventListener('click', async ()=>{
-        const w=(link.workers||[]).find(x=>x.id===sel.value), err=$('#err');
-        if(!w){ err.textContent='Choose your name.'; err.classList.remove('hidden'); sel.classList.add('bad'); return; }
-        if(w.h){ const d=$('#cid').value.replace(/\D/g,''); if(d.length!==4 || await sha(token+':'+d)!==w.h){ err.textContent='The Civil ID digits do not match. Try again, or ask HSE.'; err.classList.remove('hidden'); $('#cid').classList.add('bad'); return; } }
-        me=w; try{ localStorage.setItem('ppeWho_'+token, w.id); }catch(e){} view='home'; render(); window.scrollTo(0,0);
+        const w=wById($('#ws').value), er=$('#err');
+        if(!w){ er.textContent='Choose your name.'; er.classList.remove('hidden'); $('#ws').classList.add('bad'); return; }
+        if(w.h){ const d=$('#cid').value.replace(/\D/g,''); if(d.length!==4 || await sha(token+':'+d)!==w.h){ er.textContent='The Civil ID digits do not match. Try again, or ask HSE.'; er.classList.remove('hidden'); $('#cid').classList.add('bad'); return; } }
+        me=w; try{ localStorage.setItem('ppeWho_'+token, w.id); localStorage.setItem('ppeDiv_'+token, w.dv||''); }catch(e){} view='home'; render(); window.scrollTo(0,0);
       });
       return;
     }
     if(view==='home'){
-      const b=board();
-      app.innerHTML=`<div class="card"><div class="hello"><div>${tr('hello')}<b>${esc(me.name)}</b></div><button class="link" id="out">${tr('notme')}</button></div></div>
-        <div class="big2" style="margin-bottom:14px;"><button class="btn" id="toReq">${svg('helmet')}${tr('req')}</button><button class="btn green" id="toRec">${svg('impact')}${tr('rec')}${b.filter(x=>x.st==='approved'||x.st==='confirm').length?` <span class="badge" style="background:#fff;color:var(--ok)">${b.filter(x=>x.st==='approved'||x.st==='confirm').length}</span>`:''}</button></div>
-        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span></div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
+      const b=board(), nRec=b.filter(x=>x.st==='approved'||x.st==='confirm').length;
+      app.innerHTML=`<div class="card"><div class="hello"><div>${tr('hello')}<b>${esc(me.name)}</b>${me.dv?`<span class="tr">${esc(me.dv)}</span>`:''}</div><button class="link" id="out">${tr('notme')}</button></div></div>
+        <div class="big2" style="margin-bottom:14px;"><button class="btn" id="toReq">${svg('helmet')}${tr('req')}</button><button class="btn green" id="toRec">${svg('impact')}${tr('rec')}${nRec?` <span class="badge" style="background:#fff;color:var(--ok)">${nRec}</span>`:''}</button></div>
+        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span></div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
       $('#out').onclick=()=>{ me=null; view='who'; render(); };
-      $('#toReq').onclick=()=>{ cart=[]; reason=''; view='req'; render(); window.scrollTo(0,0); };
+      $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
       $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
       return;
     }
     if(view==='req'){
-      const items=link.items||[], main=items.filter(i=>i.m), rest=items.filter(i=>!i.m), inCart=n=>cart.some(c=>c.item===n);
+      const items=link.items||[], main=items.filter(i=>i.m), rest=items.filter(i=>!i.m), cart=cartOf(ai), inCart=n=>cart.some(c=>c.item===n);
       const tile=(it,small)=>`<button type="button" class="tile ${inCart(it.n)?'on':''}" data-it="${esc(it.n)}"><div class="pic">${pic(it)}</div><div class="nm">${esc(it.n)}</div>${small?'':itTr(it)}</button>`;
-      app.innerHTML=`<div class="card"><h2>${tr('choose')}</h2><div class="tiles">${main.map(i=>tile(i)).join('')}</div>
+      const chips=people.map((p,i)=>`<span class="pchip-w"><button type="button" class="pchip ${i===ai?'on':''}" data-p="${i}">${i===0?esc(T.me[0])+' · ':''}${esc(p.name)}<span class="cnt">${p.cart.length}</span></button>${i?`<button type="button" class="pchip-x" data-px="${i}" aria-label="Remove ${esc(p.name)}">✕</button>`:''}</span>`).join('');
+      const selBlock=(c,pi,ci)=>{ const it=items.find(x=>x.n===c.item)||{n:c.item, ic:'other', sz:[]}; return `<div class="sel"><div class="sel-h">${pic(it)}<span>${esc(c.item)}</span><button class="link" data-rm="${pi}|${ci}">${T.remove[0]}</button></div>
+            ${(it.sz||[]).length?`<div class="note" style="margin-top:8px;">${tr('size')}</div><div class="szs">${it.sz.map(s=>`<button type="button" class="${c.size===s?'on':''}" data-sz="${pi}|${ci}" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>`:''}
+            <div class="note">${tr('qty')}</div><div class="qty"><button type="button" data-q="${pi}|${ci}" data-d="-1">−</button><b>${c.qty}</b><button type="button" data-q="${pi}|${ci}" data-d="1">+</button></div></div>`; };
+      app.innerHTML=`<div class="card"><div style="font-weight:700; font-size:15px;">${tr('forWho')}</div><div class="pchips">${chips}<button type="button" class="pchip add" id="addP">+ ${esc(T.addP[0])}</button></div>
+          ${addOpen?`<div class="addbox"><div class="note" style="margin-bottom:8px;">${tr('addHint')}</div>${pickerHtml('a', me.dv||'')}<div id="aerr" class="err hidden"></div><div style="display:flex; gap:8px;"><button type="button" class="btn navy" id="addGo">${tr('add')}</button><button type="button" class="btn ghost" id="addNo">${tr('back')}</button></div></div>`:''}</div>
+        <div class="card"><h2>${tr('choose')}${people.length>1?`<span class="forname">${esc(people[ai].name)}</span>`:''}</h2><div class="tiles">${main.map(i=>tile(i)).join('')}</div>
           ${rest.length?`<div style="margin:14px 0 6px; font-weight:800;">${tr('more')}</div><div class="tiles small">${rest.map(i=>tile(i,true)).join('')}</div>`:''}</div>
-        ${cart.length?`<div class="card">${cart.map((c,i)=>{ const it=items.find(x=>x.n===c.item)||{n:c.item, ic:'other', sz:[]}; return `<div class="sel"><div class="sel-h">${pic(it)}<span>${esc(c.item)}</span><button class="link" data-rm="${i}">${T.remove[0]}</button></div>
-            ${(it.sz||[]).length?`<div class="note" style="margin-top:8px;">${tr('size')}</div><div class="szs">${it.sz.map(s=>`<button type="button" class="${c.size===s?'on':''}" data-sz="${i}" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>`:''}
-            <div class="note">${tr('qty')}</div><div class="qty"><button type="button" data-q="${i}" data-d="-1">−</button><b>${c.qty}</b><button type="button" data-q="${i}" data-d="1">+</button></div></div>`; }).join('')}
-          <label>${tr('need')}<input type="date" id="need" value="${esc(cart.need||plusDays(3))}" min="${today()}"></label>
+        ${totalItems()?`<div class="card">${people.map((p,pi)=>p.cart.length?`${people.length>1?`<div class="pers-h">${esc(p.name)}</div>`:''}${p.cart.map((c,ci)=>selBlock(c,pi,ci)).join('')}`:'').join('')}
+          <label>${tr('need')}<input type="date" id="need" value="${esc(need||plusDays(3))}" min="${today()}"></label>
           <div style="font-weight:700; font-size:15px;">${tr('why')}</div><div class="reasons">${['New','Lost','Damaged','Worn out'].map(r=>`<button type="button" class="${reason===r?'on':''}" data-r="${esc(r)}">${tr(r)}</button>`).join('')}</div>
-          <label>${tr('note')}<textarea id="note" maxlength="300"></textarea></label>
+          <label>${tr('note')}<textarea id="note" maxlength="300">${esc(note)}</textarea></label>
           <div id="err" class="err hidden"></div>
-          <button class="btn" id="send">${tr('send')}</button></div>`:''}
+          <button class="btn" id="send">${tr('send')}${people.length>1?` <span class="tr">${people.filter(p=>p.cart.length).length} ${people.filter(p=>p.cart.length).length===1?'person':'people'} · ${totalItems()} items</span>`:''}</button></div>`:''}
         <button class="btn ghost" id="back">${tr('back')}</button>`;
-      app.querySelectorAll('[data-it]').forEach(b=>b.onclick=()=>{ const n=b.dataset.it, i=cart.findIndex(c=>c.item===n); keepNeed(); if(i>=0) cart.splice(i,1); else { const it=items.find(x=>x.n===n)||{}; cart.push({item:n, size:(it.sz||[]).length?'':'-', qty:1}); } render(); });
-      app.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ keepNeed(); cart.splice(+b.dataset.rm,1); render(); });
-      app.querySelectorAll('[data-sz]').forEach(b=>b.onclick=()=>{ keepNeed(); cart[+b.dataset.sz].size=b.dataset.v; render(); });
-      app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ keepNeed(); const c=cart[+b.dataset.q]; c.qty=Math.max(1, Math.min(20, c.qty+Number(b.dataset.d))); render(); });
-      app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ keepNeed(); reason=b.dataset.r; render(); });
+      const keep=()=>{ const n=$('#need'); if(n) need=n.value; const t=$('#note'); if(t) note=t.value; };
+      const pc=v=>{ const [pi,ci]=String(v).split('|').map(Number); return [pi,ci]; };
+      app.querySelectorAll('[data-it]').forEach(b=>b.onclick=()=>{ keep(); const n=b.dataset.it, c=cartOf(ai), i=c.findIndex(x=>x.item===n); if(i>=0) c.splice(i,1); else { const it=items.find(x=>x.n===n)||{}; c.push({item:n, size:(it.sz||[]).length?'':'-', qty:1}); } render(); });
+      app.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ keep(); const [pi,ci]=pc(b.dataset.rm); cartOf(pi).splice(ci,1); render(); });
+      app.querySelectorAll('[data-sz]').forEach(b=>b.onclick=()=>{ keep(); const [pi,ci]=pc(b.dataset.sz); cartOf(pi)[ci].size=b.dataset.v; render(); });
+      app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ keep(); const [pi,ci]=pc(b.dataset.q), c=cartOf(pi)[ci]; c.qty=Math.max(1, Math.min(20, c.qty+Number(b.dataset.d))); render(); });
+      app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ keep(); reason=b.dataset.r; render(); });
+      app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ keep(); ai=+b.dataset.p; render(); });
+      app.querySelectorAll('[data-px]').forEach(b=>b.onclick=()=>{ keep(); const i=+b.dataset.px; people.splice(i,1); if(ai>=people.length || ai===i) ai=0; else if(ai>i) ai--; render(); });
+      $('#addP').onclick=()=>{ keep(); addOpen=true; render(); const q=$('#aq'); if(q) q.focus(); };
+      if(addOpen){ wirePicker('a', new Set(people.map(p=>p.id)), '');
+        $('#addNo').onclick=()=>{ keep(); addOpen=false; render(); };
+        $('#addGo').onclick=()=>{ const w=wById($('#as').value); if(!w){ const e=$('#aerr'); e.textContent='Choose the name.'; e.classList.remove('hidden'); return; } keep(); if(people.length>=25){ return; } people.push({id:w.id, name:w.name, cart:[]}); ai=people.length-1; addOpen=false; render(); }; }
       $('#back').onclick=()=>{ view='home'; render(); };
-      const sendB=$('#send'); if(sendB) sendB.onclick=sendReq;
+      const sendB=$('#send'); if(sendB) sendB.onclick=()=>{ keep(); sendReq(); };
       return;
     }
     if(view==='rec'){
       const wait=board().filter(x=>x.st==='approved'||x.st==='confirm');
-      app.innerHTML=`<div class="card"><h2>${tr('recH')}</h2>${wait.length?wait.map(x=>`<label class="rc ${recSel.has(x.k+':'+x.id)?'on':''}"><input type="checkbox" data-rc="${esc(x.k+':'+x.id)}" ${recSel.has(x.k+':'+x.id)?'checked':''}><span><b>${esc(x.t||'')}</b><span class="tr">${esc(dmy(x.d))} · ${x.st==='confirm'?esc(T.st_confirm[0]):esc(T.st_approved[0])}</span></span></label>`).join('')+`
-          <div style="font-weight:700; margin-top:10px;">${tr('sign')}</div><div class="sigbox"><canvas id="pad" width="600" height="212"></canvas><div class="hint" id="hint">✍</div></div>
-          <div style="display:flex; gap:8px; margin:8px 0 14px;"><button type="button" class="btn ghost" id="clr" style="padding:10px;">${tr('clear')}</button></div>
+      const groups=[]; for(const x of wait){ const wid=x.w||me.id; let g=groups.find(y=>y.wid===wid); if(!g){ g={wid, name:wid===me.id?me.name:(x.f||(wById(wid)||{}).name||'—'), list:[]}; groups.push(g); } g.list.push(x); }
+      groups.sort((a,b)=>(a.wid===me.id?-1:b.wid===me.id?1:a.name.localeCompare(b.name)));
+      const key=x=>x.k+'~'+x.id+'~'+(x.li||0), multi=groups.length>1;
+      app.innerHTML=`<div class="card"><h2>${tr('recH')}</h2>${wait.length?groups.map((g,gi)=>`<div class="rgroup">${multi?`<div class="pers-h">${esc(g.name)}${g.wid!==me.id?` <span class="tr">${tr('signOwn')}</span>`:''}</div>`:''}
+          ${g.list.map(x=>`<label class="rc ${recSel.has(key(x))?'on':''}"><input type="checkbox" data-rc="${esc(key(x))}" ${recSel.has(key(x))?'checked':''}><span><b>${esc(x.t||'')}</b><span class="tr">${esc(dmy(x.d))} · ${x.st==='confirm'?esc(T.st_confirm[0]):esc(T.st_approved[0])}</span></span></label>`).join('')}
+          <div style="font-weight:700; margin-top:10px;">${tr('sign')}${multi||g.wid!==me.id?` — <span class="forname" style="display:inline">${esc(g.name)}</span>`:''}</div><div class="sigbox"><canvas data-pad="${gi}" width="600" height="212"></canvas><div class="hint" data-hint="${gi}">✍</div></div>
+          <div style="display:flex; gap:8px; margin:8px 0 14px;"><button type="button" class="btn ghost" data-clr="${gi}" style="padding:10px;">${tr('clear')}</button></div></div>`).join('')+`
           <div id="err" class="err hidden"></div><button class="btn green" id="conf">${tr('confirm')}</button>`:`<p class="note">${tr('nothing')}</p>`}</div>
         <button class="btn ghost" id="back">${tr('back')}</button>`;
       app.querySelectorAll('[data-rc]').forEach(c=>c.onchange=()=>{ if(c.checked) recSel.add(c.dataset.rc); else recSel.delete(c.dataset.rc); c.closest('.rc').classList.toggle('on', c.checked); });
       $('#back').onclick=()=>{ view='home'; render(); };
-      if(wait.length){ pad=makePad($('#pad')); $('#clr').onclick=()=>pad.clear(); $('#conf').onclick=sendRec; }
+      pads={}; groups.forEach((g,gi)=>{ pads[gi]=makePad(app.querySelector(`[data-pad="${gi}"]`), app.querySelector(`[data-hint="${gi}"]`)); });
+      app.querySelectorAll('[data-clr]').forEach(b=>b.onclick=()=>pads[b.dataset.clr].clear());
+      if(wait.length) $('#conf').onclick=()=>sendRec(groups, key);
       return;
     }
     if(view==='sent' || view==='thanks'){
@@ -205,41 +253,46 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       $('#home').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
     }
   }
-  function keepNeed(){ const n=$('#need'); if(n) cart.need=n.value; }
-  function err(m){ const e=$('#err'); if(e){ e.textContent=m; e.classList.remove('hidden'); } }
+  function err(m){ const e=$('#err'); if(e){ e.textContent=m; e.classList.remove('hidden'); e.scrollIntoView({block:'center'}); } }
   async function sendReq(){
-    keepNeed();
-    if(!cart.length) return err('Tap at least one PPE item.');
-    const noSize=cart.find(c=>!c.size); if(noSize) return err('Choose the size for '+noSize.item+'.');
+    if(!totalItems()) return err('Tap at least one PPE item.');
+    const empty=people.find((p,i)=>i>0 && !p.cart.length); if(empty) return err('Choose the PPE for '+empty.name+' — or remove him with ✕.');
+    for(const p of people){ const ns=p.cart.find(c=>!c.size); if(ns) return err('Choose the size of '+ns.item+(people.length>1?' for '+p.name:'')+'.'); }
     if(!reason) return err('Choose the reason.');
-    const need=cart.need||plusDays(3);
-    const items=cart.map(c=>({item:c.item, size:c.size==='-'?'':c.size, qty:c.qty}));
-    const data={name:me.name, items, neededBy:need, reason, note:String(($('#note')||{}).value||'').trim().slice(0,300)};
+    const mk=p=>p.cart.map(c=>({item:c.item, size:c.size==='-'?'':c.size, qty:c.qty}));
+    const data={name:me.name, items:mk(people[0]), neededBy:need||plusDays(3), reason, note:String(note||'').trim().slice(0,300)};
+    if(people.length>1) data.others=people.slice(1).map(p=>({w:p.id, n:p.name, items:mk(p)}));
     const b=$('#send'); b.disabled=true;
     try{
       const ref=await db.collection('ppeRequests').add({token, kind:'request', workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
-      sentLocal.push({id:ref.id, w:me.id, d:today(), t:items.map(i=>i.item+(i.size?' '+i.size:'')+(i.qty>1?' ×'+i.qty:'')).join(', ')}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
-      cart=[]; reason=''; view='sent'; render(); window.scrollTo(0,0);
+      const txt=t=>t.map(i=>i.item+(i.size?' '+i.size:'')+(i.qty>1?' ×'+i.qty:'')).join(', ');
+      sentLocal.push({id:ref.id, w:me.id, d:today(), t:people.length>1?people.map(p=>p.name+': '+txt(mk(p))).filter((x,i)=>people[i].cart.length).join(' · '):txt(data.items)}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
+      people=[]; reason=''; note=''; need=''; view='sent'; render(); window.scrollTo(0,0);
     }catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Tell HSE.':'Not sent — check the internet and try again.'); }
   }
-  async function sendRec(){
+  async function sendRec(groups, key){
     if(!recSel.size) return err('Tick at least one item you received.');
-    if(!pad || !pad.ink) return err('Please sign with your finger.');
-    const refs=[...recSel].map(s=>{ const [k,id]=s.split(':'); return {t:k, id}; });
+    const todo=groups.map((g,gi)=>({g, gi, sel:g.list.filter(x=>recSel.has(key(x)))})).filter(x=>x.sel.length);
+    const unsigned=todo.find(x=>!pads[x.gi].ink); if(unsigned) return err(unsigned.g.wid===me.id?'Please sign with your finger.':unsigned.g.name+' must sign with his finger.');
     const b=$('#conf'); b.disabled=true;
     try{
-      await db.collection('ppeRequests').add({token, kind:'receipt', workerId:me.id, status:'new', open:true, data:{name:me.name, refs, sig:pad.image(), date:today()}, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
-      if(link.board && link.board[me.id]) link.board[me.id]=link.board[me.id].map(x=>recSel.has(x.k+':'+x.id)?{...x, st:'delivered'}:x);
+      for(const t of todo){
+        const refs=t.sel.map(x=>x.k==='req'?{t:'req', id:x.id, li:x.li||0}:{t:'iss', id:x.id});
+        const data={name:t.g.name, refs, sig:pads[t.gi].image(), date:today()}; if(t.g.wid!==me.id) data.by=me.id;
+        await db.collection('ppeRequests').add({token, kind:'receipt', workerId:t.g.wid, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        for(const x of t.sel) recSel.delete(key(x));
+        if(link.board && link.board[me.id]) link.board[me.id]=link.board[me.id].map(x=>t.sel.includes(x)?{...x, st:'delivered'}:x);
+      }
       view='thanks'; render(); window.scrollTo(0,0);
     }catch(e){ console.warn(e); b.disabled=false; err('Not saved — check the internet and try again.'); }
   }
-  function makePad(cv){
+  function makePad(cv, hint){
     const g=cv.getContext('2d'), p={ink:false};
-    const clear=()=>{ g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); p.ink=false; const h=$('#hint'); if(h) h.classList.remove('hidden'); };
+    const clear=()=>{ g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); p.ink=false; if(hint) hint.classList.remove('hidden'); };
     p.clear=clear; clear(); let on=false, last=null;
     const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
     cv.addEventListener('pointerdown', e=>{ e.preventDefault(); on=true; const er=$('#err'); if(er) er.classList.add('hidden'); last=pos(e); try{ cv.setPointerCapture(e.pointerId); }catch(x){} });
-    cv.addEventListener('pointermove', e=>{ if(!on) return; e.preventDefault(); const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; if(!p.ink){ p.ink=true; const h=$('#hint'); if(h) h.classList.add('hidden'); } });
+    cv.addEventListener('pointermove', e=>{ if(!on) return; e.preventDefault(); const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; if(!p.ink){ p.ink=true; if(hint) hint.classList.add('hidden'); } });
     const end=()=>{ on=false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
     p.image=()=>{ const o=document.createElement('canvas'); o.width=480; o.height=170; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,480,170); c.drawImage(cv,0,0,480,170); return o.toDataURL('image/png'); };
     return p;

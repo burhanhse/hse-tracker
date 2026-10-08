@@ -1054,7 +1054,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ppe-req{border-left:3px solid var(--accent);} .ppe-req .site-link-row{margin-bottom:10px;}
 .ppe-rq-counts{display:flex; flex-wrap:wrap; gap:6px 14px; margin:4px 0 6px; font-size:12.5px; color:var(--ink-muted);} .ppe-rq-counts b{color:var(--ink); font-size:15px; margin-right:3px;}
 .ppe-rq{margin-bottom:8px;} .ppe-rq.busy{opacity:.6;} .ppe-rq .table-wrap{margin:6px 0;} .ppe-rq-t td,.ppe-rq-t th{padding:4px 8px;}
-.ppe-rq-in{width:90px; padding:4px 6px; min-height:0;} .ppe-rq-in.num{width:64px;} .ppe-rq-note{width:100%; margin-top:6px;}
+.ppe-rq-in{width:90px; padding:4px 6px; min-height:0;} .ppe-rq-in.num{width:64px;} .ppe-rq-note{width:100%; margin-top:6px;} .ppe-rq-person{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; margin:8px 0 2px; font-weight:600;} .ppe-out{margin-left:auto; font-weight:600;} .ppe-rq-t tr.ppe-off td{text-decoration:line-through; opacity:.6;}
 .ppe-alert{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--warn); border-left:4px solid var(--warn); border-radius:9px; padding:8px 12px; margin-bottom:12px; font-size:13px;}
 .ppe-img-prev{width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--line); vertical-align:middle; margin-left:6px;}
 @media (max-width:900px){ .ppe-grid{grid-template-columns:1fr;} }
@@ -2845,7 +2845,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b73';
+const APP_BUILD='b75';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -7903,6 +7903,7 @@ function renderPpe(live){
   if(live && (ppeUi.edit || ppeUi.exemptOpen)) return;   // don't wipe the item form while someone is typing in it
   if(live && ppeUi.issueOpen && document.activeElement && pane.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
   if(live && document.activeElement && document.activeElement.closest && document.activeElement.closest('#ppeReqPanel') && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;   // Batch 73: typing in a request card
+  const prArmed=[...pane.querySelectorAll('#ppeReqPanel [data-armed="1"]')].map(el=>{ const at=[...el.attributes].find(x=>x.name.startsWith('data-pr-')); return at?[at.name, at.value, el.textContent]:null; }).filter(Boolean);
   const prVals={}; pane.querySelectorAll('[data-pr-size],[data-pr-qty],[data-pr-note]').forEach(el=>{ prVals[el.dataset.prSize?'s'+el.dataset.prSize:el.dataset.prQty?'q'+el.dataset.prQty:'n'+el.dataset.prNote]=el.value; });
   if(ppeUi.fresh) ppeUi.fresh=false; else ppeReadIssueInputs();
   const keepScroll=window.scrollY;
@@ -7946,6 +7947,7 @@ function renderPpe(live){
       ${list.length?`<div class="table-wrap"><table class="ppe-std"><thead><tr><th>Item</th><th>Standard (international)</th><th>Local / client requirement</th><th>Colour — who wears it</th><th>Approved brand / model · sizes</th><th>Replace every</th><th></th></tr></thead><tbody>${list.map(x=>ppeUi.edit===x.id?`<tr><td colspan="7">${ppeItemFormHtml(x)}</td></tr>`:`<tr class="${(x.status||'Approved')!=='Approved'?'ppe-off':''}"><td><div class="wname">${esc(x.name)} ${x.kit?'<span class="badge ok">Basic kit</span>':''} ${(x.status||'Approved')!=='Approved'?'<span class="badge muted">Withdrawn</span>':''}</div><div class="wsub">${esc(x.cat||'')}${x.type?' · '+esc(x.type):''}</div></td><td>${esc(x.std||'—')}</td><td>${esc(x.local||'—')}</td><td>${esc(x.colour||'—')}</td><td>${esc(x.brand||'—')}${x.sizes?`<div class="wsub">Sizes: ${esc(x.sizes)}</div>`:''}</td><td>${esc(ppeLifeText(x))}</td><td style="white-space:nowrap;">${x.sheet&&x.sheet.url?`<a class="att-link" href="${esc(x.sheet.url)}" target="_blank" rel="noopener">Datasheet</a> `:''}${ed?`<button type="button" class="icon-btn" data-ppe-edit="${esc(x.id)}" aria-label="Edit">${ic('pencil')}</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:`<p class="wsub">No approved PPE list yet${ed?' — click <strong>+ Add suggested list</strong> to start with the usual items and standards, then edit colours, brands and local requirements':''}.</p>`}
     </div>`;
   pane.querySelectorAll('[data-pr-size],[data-pr-qty],[data-pr-note]').forEach(el=>{ const k=el.dataset.prSize?'s'+el.dataset.prSize:el.dataset.prQty?'q'+el.dataset.prQty:'n'+el.dataset.prNote; if(k in prVals) el.value=prVals[k]; });
+  for(const [n,v,t] of prArmed){ const el=pane.querySelector(`[${n}="${CSS.escape(v)}"]`); if(el){ el.dataset.armed='1'; el.textContent=t; } }
   ppeReqPanelAfter();
   if(Math.abs(window.scrollY-keepScroll)>2) window.scrollTo(0, keepScroll);
 }
@@ -8049,14 +8051,16 @@ async function ppeListXlsx(){
   XLSX.utils.book_append_sheet(wb, sh, 'Approved PPE'); XLSX.writeFile(wb, `Approved_PPE_list_${localToday()}.xlsx`);
 }
 // simple wrapped table for the two PPE PDFs
-function ppePdfTable(doc, head, rows, widths, y, x0){
+function ppePdfTable(doc, head, rows, widths, y, x0, imgs){
   const pageH=doc.internal.pageSize.getHeight(), pad=4, lh=10.5;
   const drawHead=()=>{ doc.setFont('helvetica','bold'); doc.setFontSize(8.5); let x=x0; const hs=head.map((h,i)=>doc.splitTextToSize(h, widths[i]-pad*2)); const hh=Math.max(...hs.map(l=>l.length))*lh+pad*2;
     doc.setFillColor(235,238,242); doc.rect(x0, y, widths.reduce((a,b)=>a+b,0), hh, 'F'); hs.forEach((l,i)=>{ doc.text(l, x+pad, y+pad+8); x+=widths[i]; }); y+=hh; };
   drawHead(); doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
-  for(const r of rows){ const cells=r.map((c,i)=>doc.splitTextToSize(String(c==null?'':c), widths[i]-pad*2)); const h=Math.max(...cells.map(l=>l.length))*lh+pad*2;
+  rows.forEach((r,ri)=>{ const img=imgs&&imgs[ri]; const cells=r.map((c,i)=>doc.splitTextToSize(String(c==null?'':c), widths[i]-pad*2)); const h=Math.max(Math.max(...cells.map(l=>l.length))*lh+pad*2, img?36:0);
     if(y+h>pageH-36){ doc.addPage(); y=40; drawHead(); doc.setFont('helvetica','normal'); doc.setFontSize(8.5); }
-    let x=x0; cells.forEach((l,i)=>{ doc.rect(x, y, widths[i], h); doc.text(l, x+pad, y+pad+8); x+=widths[i]; }); y+=h; }
+    let x=x0; cells.forEach((l,i)=>{ doc.rect(x, y, widths[i], h); doc.text(l, x+pad, y+pad+8); x+=widths[i]; });
+    if(img){ const cw=widths[widths.length-1], cx=x-cw; try{ let iw=cw-8, ih=h-6; try{ const pr=doc.getImageProperties(img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', cx+(cw-iw)/2, y+(h-ih)/2, iw, ih); }catch(e){ console.warn(e); } }
+    y+=h; });
   return y;
 }
 function ppeListPdf(){
@@ -8081,6 +8085,7 @@ function ppeIssueSessions(fromD, toD){
     const pid=r.projectId||'', key=r.batchId || [r.date, String(r.issuedBy||'').trim().toLowerCase(), r.condition||'', pid].join('|');
     let s=g.get(key); if(!s){ s={key, date:r.date, issuedBy:r.issuedBy||'', condition:r.condition||'', project:pid||'all', ws:new Map(), n:0}; g.set(key,s); }
     let x=s.ws.get(w.id); if(!x){ x={name:w.fullName||'—', civilId:w.civilId||'', designation:w.designation||'', items:[]}; s.ws.set(w.id,x); }
+    if(r.sigId && !x.sigId){ x.sigId=r.sigId; x.signed=r.receivedDate||''; }
     x.items.push({item:r.item, size:r.size||'', qty:Number(r.quantity)||1}); s.n+=1; }
   return [...g.values()].map(s=>({...s, workers:[...s.ws.values()].sort((a,b)=>a.name.localeCompare(b.name))})).sort((a,b)=>String(b.date).localeCompare(String(a.date)) || b.n-a.n);
 }
@@ -8089,14 +8094,20 @@ function ppeSessionsHtml(fromD, toD, word){
   return `<div class="panel"><div class="subhead" style="margin-top:0;">PPE issues — print the signature sheet again (${ss.length} ${esc(word)})</div>
     ${ss.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Project</th><th>Issued by</th><th class="num">Workers</th><th class="num">Items</th><th></th></tr></thead><tbody>${show.map(s=>`<tr><td class="mono">${esc(s.date)}</td><td>${esc(s.condition||'—')}</td><td>${esc(s.project!=='all'?projectName(s.project):'—')}</td><td>${esc(s.issuedBy||'—')}</td><td class="num">${s.workers.length}</td><td class="num">${s.n}</td><td><button type="button" class="btn btn-sm" data-ppe-sheet="${esc(s.key)}">${ic('printer')} Signature sheet</button></td></tr>`).join('')}</tbody></table></div>${ss.length>show.length?`<button type="button" class="att-link" id="ppeSessAll">Show all ${ss.length}</button>`:''}`:`<p class="wsub">No PPE issued ${esc(word)}.</p>`}</div>`;
 }
-function ppeSheetPdf(batch){
+async function ppeSigImg(id){
+  if(!id) return ''; let s=ppeSigCache.get(id);
+  if(!s){ try{ const snap=await db.collection('ppeSignatures').doc(id).get(); if(!snap.exists) return ''; s=snap.data(); ppeSigCache.set(id, s); }catch(e){ console.warn(e); return ''; } }
+  return s.img||'';
+}
+async function ppeSheetPdf(batch){
   const b=batch||ppeUi.lastBatch; if(!b) return; if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
+  const imgs=[]; for(const w of b.workers) imgs.push(await ppeSigImg(w.sigId));   // Batch 74: signatures given on the worker PPE link
   const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'ppeIssue', docSub:`${isoToDmy(b.date)}${b.project!=='all'?' · '+projectName(b.project):''}`}); doc.setLineWidth(0.5); doc.setDrawColor(150);
   doc.setTextColor(20,20,20); doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
   doc.text(`Date: ${b.date}   ·   Project: ${b.project!=='all'?projectName(b.project):'—'}   ·   Issue type: ${b.condition}   ·   Issued by: ${b.issuedBy||'________________'}`, 32, 58);
   doc.text('I have received the PPE listed below in good condition. I will wear it as instructed, look after it and return it for replacement when worn or damaged.', 32, 72);
-  const rows=b.workers.map((w,i)=>[String(i+1), w.name, w.civilId, w.designation, w.items.map(x=>`${x.item}${x.size?' ('+x.size+')':''}${x.qty>1?' ×'+x.qty:''}`).join(', '), '']);
-  const y=ppePdfTable(doc, ['#','Name','Civil ID','Designation','PPE issued (size)','Signature'], rows, [24,140,70,100,300,140], 86, 32);
+  const rows=b.workers.map((w,i)=>[String(i+1), w.name, w.civilId, w.designation, w.items.map(x=>`${x.item}${x.size?' ('+x.size+')':''}${x.qty>1?' ×'+x.qty:''}`).join(', ')+(w.sigId?`\n(signed on the PPE link${w.signed?' '+isoToDmy(w.signed):''})`:''), '']);
+  const y=ppePdfTable(doc, ['#','Name','Civil ID','Designation','PPE issued (size)','Signature'], rows, [24,140,70,100,300,140], 86, 32, imgs);
   doc.setFontSize(9.5); let yy=y+30; if(yy>doc.internal.pageSize.getHeight()-30){ doc.addPage(); yy=60; } doc.text('Issued by (name & signature): ______________________________          HSE: ______________________________', 32, yy);
   doc.save(`PPE_issue_${b.date}.pdf`);
 }
@@ -8117,7 +8128,7 @@ const PPE_MAIN=[['helmet','Safety helmet'],['impact','Impact gloves'],['coverall
 const PPE_SIZE_ORDER=['XS','S','M','L','XL','XXL','3XL','4XL','5XL'];
 let ppeLinks=[], ppeReqs=[], ppeReqsDone=[], unsubPpeLinks=null, unsubPpeOpen=null, unsubPpeDone=null, ppeLinkTimer=null, ppeProcTimer=null, ppeLinkBusy=false;
 const ppeRcptBusy=new Set(), ppeHashCache=new Map(), ppeSigCache=new Map();
-let ppeReqUi={qr:false, done:false, busy:''};
+let ppeReqUi={qr:false, done:false, busy:'', out:new Set()};
 function isMD(){ const u=auth.currentUser; return !!u && String(u.email||'').toLowerCase()===PPE_MD_EMAIL; }
 function ppeReqLinkUrl(token){ return location.origin + location.pathname.replace(/[^/]*$/, '') + 'ppe.html?t=' + encodeURIComponent(token); }
 function ppeActiveLink(){ return ppeLinks.find(l=>l.active); }
@@ -8203,24 +8214,43 @@ function ppeGoto(){
 }
 
 /* ---- what the public page shows (written by an editor's browser only when something changed) ---- */
+// Batch 75: one request can cover several people ("lines"). Line 0 = the person who sent it (data.items);
+// lines 1.. = data.others [{w, n, items}]. The MD can leave single lines out (mdOut); each line is received separately (got).
+function ppeReqLines(r){
+  const d=(r&&r.data)||{}, mo=new Set((r.mdOut||[]).map(Number)), got=r.got||{}, out=[];
+  out.push({li:0, wid:r.workerId, name:d.name||'', items:d.items||[]});
+  (d.others||[]).forEach((o,i)=>out.push({li:i+1, wid:o.w, name:o.n||'', items:o.items||[]}));
+  return out.filter(l=>l.items.length).map(l=>{ let g=got[l.li]||null;
+    if(!g && l.li===0 && r.status==='delivered' && !r.got) g={date:r.receivedDate||'', sigId:r.sigId||'', paper:!!r.paper};   // requests from before Batch 75
+    return {...l, out:mo.has(l.li), got:g}; });
+}
+function ppeLineSt(r, l){ if(r.status==='rejected' || l.out) return 'rejected'; if(l.got) return 'delivered'; return r.status; }
+function ppeReqItemsText(r){ const ls=ppeReqLines(r); return ls.length>1 || (ls[0] && ls[0].wid!==r.workerId) ? ls.map(l=>`${l.name}: ${ppeItemsText(l.items)}`).join(' · ') : ppeItemsText((ls[0]||{}).items); }
+function ppeWorkerDiv(w){
+  const t=canonTrade((w&&w.trade)||''); if(DIV_SHORT.has(t)) return DIV_SHORT.get(t);
+  const k=workerDivKey(w); return ({Civil:'Civil', Scaffolding:'Scaffolding', Rental:'Logistics & Rental', 'Office staff':'Office'})[k] || 'Other';
+}
 function ppeBoard(){
   const b={}, add=(wid,e)=>{ if(wid) (b[wid]=b[wid]||[]).push(e); };
-  const inRcpt=new Set(); for(const r of ppeReqs) if(r.kind==='receipt' && r.status==='new') for(const x of ((r.data||{}).refs||[])) inRcpt.add(x.t+':'+x.id);
+  const inRcpt=new Set(); for(const r of ppeReqs) if(r.kind==='receipt' && r.status==='new') for(const x of ((r.data||{}).refs||[])) inRcpt.add(x.t+':'+x.id+(x.t==='req'?':'+(Number(x.li)||0):''));
   const seen=new Set(), all=[];
   for(const r of [...ppeReqs, ...ppeReqsDone]) if(r.kind==='request' && !seen.has(r.id)){ seen.add(r.id); all.push(r); }
-  for(const r of all){ let st=r.status; if(!PPE_REQ_ST[st]) continue; if(st==='approved' && inRcpt.has('req:'+r.id)) st='delivered';
-    add(r.workerId, {id:r.id, k:'req', st, d:ppeDateOf(r), t:ppeItemsText((r.data||{}).items)}); }
+  for(const r of all){ if(!PPE_REQ_ST[r.status]) continue; const d=ppeDateOf(r);
+    for(const l of ppeReqLines(r)){ let st=ppeLineSt(r, l); if(st==='approved' && inRcpt.has('req:'+r.id+':'+l.li)) st='delivered';
+      const e={id:r.id, k:'req', st, d, t:ppeItemsText(l.items)}; if(l.li) e.li=l.li;
+      add(l.wid, e);
+      if(l.wid!==r.workerId) add(r.workerId, {...e, f:l.name, w:l.wid}); } }
   const from=dateAdd(localToday(), -60);
   for(const w of activeWorkers()) for(const x of (w.ppeIssued||[])) if(x.needConfirm && !x.receivedAt && String(x.date||'')>=from)
     add(w.id, {id:x.id, k:'iss', st:inRcpt.has('iss:'+x.id)?'delivered':'confirm', d:x.date||'', t:ppeItemsText([{item:x.item, size:x.size, qty:x.quantity}])});
-  for(const k of Object.keys(b)) b[k]=b[k].sort((x,y)=>String(y.d).localeCompare(String(x.d))).slice(0,20);
+  for(const k of Object.keys(b)) b[k]=b[k].sort((x,y)=>String(y.d).localeCompare(String(x.d))).slice(0,30);
   return b;
 }
 async function ppeLinkPayload(token){
   const ws=activeWorkers().filter(w=>(w.status||'active')==='active'), list=[];
   for(const w of ws){ const dg=String(w.civilId||'').replace(/\D/g,''); let h='';
     if(dg.length>=4){ const k=token+':'+dg.slice(-4); h=ppeHashCache.get(k); if(!h){ h=await ppeSha(k); ppeHashCache.set(k,h); } }
-    list.push({id:w.id, name:w.fullName||'—', h}); }
+    list.push({id:w.id, name:w.fullName||'—', h, dv:ppeWorkerDiv(w)}); }
   list.sort((a,b)=>a.name.localeCompare(b.name));
   const dc=docControl('ppeIssue');
   return {workers:list, items:ppeLinkItems(), board:ppeBoard(), docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}};
@@ -8252,16 +8282,17 @@ async function ppeReqUpdate(id, data, okMsg){
 }
 function ppeCardInputs(id){
   const r=ppeReqs.find(x=>x.id===id); if(!r) return null; const d=r.data||{};
-  const items=(d.items||[]).map((it,i)=>{ const s=document.querySelector(`[data-pr-size="${CSS.escape(id+'|'+i)}"]`), q=document.querySelector(`[data-pr-qty="${CSS.escape(id+'|'+i)}"]`);
+  const rd=(li, arr)=>(arr||[]).map((it,i)=>{ const k=id+'|'+li+'|'+i, s=document.querySelector(`[data-pr-size="${CSS.escape(k)}"]`), q=document.querySelector(`[data-pr-qty="${CSS.escape(k)}"]`);
     return {item:it.item, size:s?String(s.value||'').trim().slice(0,20):(it.size||''), qty:q?Math.max(0, Math.min(50, Math.round(Number(q.value)||0))):(Number(it.qty)||1)}; });
   const n=document.querySelector(`[data-pr-note="${CSS.escape(id)}"]`);
-  return {r, d, items, note:n?String(n.value||'').trim().slice(0,300):''};
+  return {r, d, items:rd(0, d.items), others:(d.others||[]).map((o,i)=>({...o, items:rd(i+1, o.items)})), note:n?String(n.value||'').trim().slice(0,300):''};
 }
 async function ppeSendToMd(id){
   if(!canEdit()) return; const x=ppeCardInputs(id); if(!x) return;
-  const items=x.items.filter(i=>i.qty>0); if(!items.length){ toast('Every quantity is 0 — use Reject instead'); return; }
-  const u=auth.currentUser;
-  await ppeReqUpdate(id, {status:'md', data:{...x.d, items}, hseBy:(u&&u.email)||'', hseAt:new Date().toISOString(), hseNote:x.note}, 'Sent to the MD for approval');
+  const items=x.items.filter(i=>i.qty>0), others=x.others.map(o=>({...o, items:o.items.filter(i=>i.qty>0)})).filter(o=>o.items.length);
+  if(!items.length && !others.length){ toast('Every quantity is 0 — use Reject instead'); return; }
+  const u=auth.currentUser, data={...x.d, items}; if(x.d.others || others.length) data.others=others;
+  await ppeReqUpdate(id, {status:'md', data, hseBy:(u&&u.email)||'', hseAt:new Date().toISOString(), hseNote:x.note}, 'Sent to the MD for approval');
 }
 async function ppeRejectHse(id){
   if(!canEdit()) return; const x=ppeCardInputs(id); if(!x) return; const u=auth.currentUser, now=new Date().toISOString();
@@ -8271,19 +8302,32 @@ async function ppeMdDecide(id, ok){
   if(!isMD()) return; const r=ppeReqs.find(x=>x.id===id && x.status==='md'); if(!r) return;
   const n=document.querySelector(`[data-pr-note="${CSS.escape(id)}"]`), note=n?String(n.value||'').trim().slice(0,300):'', now=new Date().toISOString();
   if(!ok && !note){ toast('Write the reason in the comment box first'); if(n) n.focus(); return; }
+  const out=[...ppeReqUi.out].filter(k=>k.startsWith(id+'|')).map(k=>Number(k.split('|')[1]));
+  if(ok && out.length && out.length>=ppeReqLines(r).length){ toast('Everyone is left out — use Not approve instead'); return; }
   const upd={status:ok?'approved':'rejected', mdBy:PPE_MD_EMAIL, mdAt:now, mdNote:note}; if(!ok){ upd.open=false; upd.closedAt=now; }
-  await ppeReqUpdate(id, upd, ok?'Approved — HSE gets the e-mail':'Not approved');
+  if(ok && out.length) upd.mdOut=out;
+  await ppeReqUpdate(id, upd, ok?(out.length?`Approved — ${out.length} ${out.length===1?'person':'people'} left out`:'Approved — HSE gets the e-mail'):'Not approved');
 }
 
 /* ---- delivery: the worker's signed receipt (or a paper signature) → PPE issued records ---- */
-function ppeIssuedNote(q, signed){ return `PPE request (${(q.data||{}).reason||'—'}) · approved by MD · ${signed?'received and signed by the worker on the PPE link':'delivered — paper signature on file'}`; }
-async function ppeAddIssued(w, reqs, iss, date, sigId){
+function ppeIssuedNote(q, li, signed){ const d=q.data||{}; return `PPE request (${d.reason||'—'})${li?' · requested by '+(d.name||'—'):''} · approved by MD · ${signed?'received and signed by the worker on the PPE link':'delivered — paper signature on file'}`; }
+// lines: [{q, li, items}] for this worker; iss: crew-issue records the worker confirmed
+async function ppeAddIssued(w, lines, iss, date, sigId){
   const now=new Date().toISOString(), cur=(w.ppeIssued||[]).slice(), have=new Set(cur.map(x=>x.id)), issIds=new Set(iss.map(x=>x.id));
   const next=cur.map(x=>issIds.has(x.id)?{...x, needConfirm:false, receivedAt:now, receivedDate:date, ...(sigId?{sigId}:{})}:x);
-  for(const q of reqs){ const qd=q.data||{}; (qd.items||[]).forEach((i,n)=>{ const id='pr_'+q.id+'_'+n; if(have.has(id)) return; const std=ppeStdOf(i.item);
+  for(const {q, li, items} of lines){ const qd=q.data||{}; (items||[]).forEach((i,n)=>{ const id=li?`pr_${q.id}_${li}_${n}`:`pr_${q.id}_${n}`; if(have.has(id)) return; const std=ppeStdOf(i.item);
     next.push({id, batchId:'ppereq_'+q.id, item:i.item, size:i.size||'', quantity:Math.max(1, Number(i.qty)||1), date, expiry:std&&std.life?ppeAddMonths(date, std.life):'', issuedBy:'HSE / store',
-      condition:PPE_REASONS[qd.reason]||'New issue', notes:ppeIssuedNote(q, !!sigId), projectId:w.projectId||'', reqId:q.id, ...(sigId?{sigId}:{}), receivedAt:now, receivedDate:date}); }); }
+      condition:PPE_REASONS[qd.reason]||'New issue', notes:ppeIssuedNote(q, li, !!sigId), projectId:w.projectId||'', reqId:q.id, ...(sigId?{sigId}:{}), receivedAt:now, receivedDate:date}); }); }
   await db.collection('workers').doc(w.id).update(stamp({ppeIssued:next})); w.ppeIssued=next;
+}
+// mark lines received; the request is Delivered when every approved line is received
+async function ppeMarkGot(q, lis, date, sigId, paper){
+  const now=new Date().toISOString(), got={...(q.got||{})};
+  if(!q.got){ const l0=ppeReqLines(q).find(l=>l.li===0 && l.got); if(l0) got[0]=l0.got; }
+  for(const li of lis) got[li]={date, sigId:sigId||'', ...(paper?{paper:true}:{})};
+  const left=ppeReqLines({...q, got}).filter(l=>!l.out && !l.got), upd={got};
+  if(!left.length) Object.assign(upd, {status:'delivered', open:false, closedAt:now, deliveredAt:now, receivedDate:date, ...(sigId?{sigId}:{}), ...(paper?{paper:true}:{})});
+  await db.collection('ppeRequests').doc(q.id).update(upd); Object.assign(q, upd);
 }
 async function ppeProcessReceipts(){
   if(!canEdit() || !workers.length) return;
@@ -8295,30 +8339,35 @@ async function ppeProcessReceipts(){
 async function ppeProcessReceipt(r){
   const d=r.data||{}, w=workers.find(x=>x.id===r.workerId); if(!w) return;   // stays in "Problems" on the panel
   const date=/^\d{4}-\d{2}-\d{2}$/.test(d.date||'')?d.date:ppeDateOf(r), now=new Date().toISOString(), u=auth.currentUser, by=(u&&u.email)||'';
-  const reqs=[], iss=[];
+  const lines=[], iss=[];
   for(const ref of (d.refs||[])){
-    if(ref.t==='req'){ const q=ppeReqs.find(x=>x.id===ref.id && x.kind==='request' && x.workerId===w.id && x.status==='approved'); if(q) reqs.push(q); }
+    if(ref.t==='req'){ const li=Number(ref.li)||0, q=ppeReqs.find(x=>x.id===ref.id && x.kind==='request' && x.status==='approved'); if(!q) continue;
+      const l=ppeReqLines(q).find(x=>x.li===li); if(l && l.wid===w.id && !l.out && !l.got && !lines.some(x=>x.q.id===q.id && x.li===li)) lines.push({q, li, items:l.items}); }
     else if(ref.t==='iss'){ const x=(w.ppeIssued||[]).find(y=>y.id===ref.id && !y.receivedAt); if(x) iss.push(x); }
   }
-  const items=[...reqs.flatMap(q=>((q.data||{}).items||[]).map(i=>({item:i.item, size:i.size||'', qty:Math.max(1, Number(i.qty)||1)}))), ...iss.map(x=>({item:x.item, size:x.size||'', qty:Math.max(1, Number(x.quantity)||1)}))];
+  const items=[...lines.flatMap(l=>l.items.map(i=>({item:i.item, size:i.size||'', qty:Math.max(1, Number(i.qty)||1)}))), ...iss.map(x=>({item:x.item, size:x.size||'', qty:Math.max(1, Number(x.quantity)||1)}))];
   let sigId='';
   if(items.length){
+    const byW=d.by && d.by!==w.id ? workers.find(x=>x.id===d.by) : null;
     const ref=await db.collection('ppeSignatures').add({workerId:w.id, name:w.fullName||d.name||'', civilId:w.civilId||'', designation:w.designation||'', projectId:w.projectId||'', img:String(d.sig||''), date, receiptId:r.id,
-      items, requests:reqs.map(q=>({id:q.id, submitted:ppeDateOf(q), reason:(q.data||{}).reason||'', neededBy:(q.data||{}).neededBy||'', hseBy:q.hseBy||'', hseAt:q.hseAt||'', mdBy:q.mdBy||'', mdAt:q.mdAt||''})),
+      ...(byW?{collectedBy:byW.fullName||''}:{}),
+      items, requests:lines.map(({q, li})=>({id:q.id, li, submitted:ppeDateOf(q), reason:(q.data||{}).reason||'', neededBy:(q.data||{}).neededBy||'', requestedBy:li?((q.data||{}).name||''):'', hseBy:q.hseBy||'', hseAt:q.hseAt||'', mdBy:q.mdBy||'', mdAt:q.mdAt||''})),
       crewIssues:iss.map(x=>({id:x.id, date:x.date||'', issuedBy:x.issuedBy||'', condition:x.condition||''})), createdAt:now, createdBy:by});
     sigId=ref.id;
-    await ppeAddIssued(w, reqs, iss, date, sigId);
-    for(const q of reqs) await db.collection('ppeRequests').doc(q.id).update({status:'delivered', open:false, closedAt:now, deliveredAt:now, receivedDate:date, sigId});
+    await ppeAddIssued(w, lines, iss, date, sigId);
+    const qs=[...new Set(lines.map(l=>l.q))];
+    for(const q of qs) await ppeMarkGot(q, lines.filter(l=>l.q===q).map(l=>l.li), date, sigId, false);
   }
   await db.collection('ppeRequests').doc(r.id).update({status:items.length?'done':'void', open:false, closedAt:now, sigId, processedBy:by, data:{...d, sig:''}});
 }
 async function ppeDeliverPaper(id){
-  if(!canEdit()) return; const q=ppeReqs.find(x=>x.id===id && x.status==='approved'), w=q&&workers.find(x=>x.id===q.workerId);
-  if(!q || !w){ toast('Worker not found'); return; }
-  const now=new Date().toISOString(), u=auth.currentUser;
-  try{ await ppeAddIssued(w, [q], [], localToday(), '');
-    await db.collection('ppeRequests').doc(id).update({status:'delivered', open:false, closedAt:now, deliveredAt:now, receivedDate:localToday(), paper:true, deliveredBy:(u&&u.email)||''});
-    toast('Delivered — saved in the worker\'s PPE issued records'); }
+  if(!canEdit()) return; const q=ppeReqs.find(x=>x.id===id && x.status==='approved'); if(!q){ toast('Request not found'); return; }
+  const left=ppeReqLines(q).filter(l=>!l.out && !l.got), date=localToday(), u=auth.currentUser, done=[];
+  try{
+    for(const l of left){ const w=workers.find(x=>x.id===l.wid); if(!w){ toast(`${l.name||'A worker'} is not in the register — skipped`); continue; }
+      await ppeAddIssued(w, [{q, li:l.li, items:l.items}], [], date, ''); done.push(l.li); }
+    if(done.length){ await ppeMarkGot(q, done, date, '', true); if(q.status==='delivered') await db.collection('ppeRequests').doc(id).update({deliveredBy:(u&&u.email)||''}); }
+    toast('Delivered — saved in the PPE issued records'); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
 
@@ -8328,22 +8377,26 @@ function ppeReqCardHtml(r, mode){
   const d=r.data||{}, w=workers.find(x=>x.id===r.workerId), ed=canEdit(), md=isMD();
   const name=w?w.fullName:(d.name||'—'), st=PPE_REQ_ST[r.status]||r.status;
   const badge=r.status==='delivered'?'ok':r.status==='rejected'?'danger':r.status==='approved'?'ok':'warn';
-  const editable=mode==='new' && ed;
-  const rows=(d.items||[]).map((it,i)=>{ const last=ppeLastIssue(w, it.item);
-    return `<tr><td>${esc(it.item)}</td><td>${editable?`<input class="ppe-rq-in" data-pr-size="${esc(r.id+'|'+i)}" value="${esc(it.size||'')}" maxlength="20">`:esc(it.size||'—')}</td><td class="num">${editable?`<input class="ppe-rq-in num" type="number" min="0" max="50" data-pr-qty="${esc(r.id+'|'+i)}" value="${esc(it.qty||1)}">`:esc(it.qty||1)}</td><td class="wsub">${last?'last issued '+esc(isoToDmy(last)):'none on record'}</td></tr>`; }).join('');
-  const trail=[r.hseBy?`HSE checked: ${r.hseBy}${r.hseAt?' · '+isoToDmy(String(r.hseAt).slice(0,10)):''}${r.hseNote?' — '+r.hseNote:''}`:'', r.mdBy?`MD: ${r.mdBy}${r.mdAt?' · '+isoToDmy(String(r.mdAt).slice(0,10)):''}${r.mdNote?' — '+r.mdNote:''}`:'',
-    r.status==='delivered'?(r.paper?'Delivered — paper signature':'Received and signed by the worker')+(r.receivedDate?' · '+isoToDmy(r.receivedDate):''):''].filter(Boolean);
+  const editable=mode==='new' && ed, lines=ppeReqLines(r), group=lines.length>1 || (lines[0] && lines[0].wid!==r.workerId);
+  const lineHtml=l=>{ const lw=workers.find(x=>x.id===l.wid), lst=ppeLineSt(r, l);
+    const rows=l.items.map((it,i)=>{ const k=r.id+'|'+l.li+'|'+i, last=ppeLastIssue(lw, it.item);
+      return `<tr${l.out?' class="ppe-off"':''}><td>${esc(it.item)}</td><td>${editable?`<input class="ppe-rq-in" data-pr-size="${esc(k)}" value="${esc(it.size||'')}" maxlength="20">`:esc(it.size||'—')}</td><td class="num">${editable?`<input class="ppe-rq-in num" type="number" min="0" max="50" data-pr-qty="${esc(k)}" value="${esc(it.qty||1)}">`:esc(it.qty||1)}</td><td class="wsub">${last?'last issued '+esc(isoToDmy(last)):'none on record'}</td></tr>`; }).join('');
+    const tag=l.out?'<span class="badge danger">Left out by MD</span>':l.got?`<span class="badge ok">${l.got.paper?'Delivered — paper':'Received & signed'}${l.got.date?' '+esc(isoToDmy(l.got.date)):''}</span>`:(r.status==='approved'?'<span class="badge warn">To collect</span>':'');
+    const rc=l.got&&l.got.sigId?`<button type="button" class="btn btn-sm" data-pr-rcpt="${esc(l.got.sigId)}">${ic('download')} Receipt${group?' — '+esc(l.name):''} (PDF)</button>`:'';
+    const outBox=mode==='md' && md && lines.length>1 ? `<label class="chk ppe-out"><input type="checkbox" data-pr-out="${esc(r.id+'|'+l.li)}" ${ppeReqUi.out.has(r.id+'|'+l.li)?'checked':''}> Leave out</label>`:'';
+    return `${group?`<div class="ppe-rq-person">${lw?`<button type="button" class="att-link" data-ppe-worker="${esc(lw.id)}">${esc(lw.fullName||l.name)}</button>`:esc(l.name||'—')}${lw&&lw.designation?` <span class="wsub">${esc(lw.designation)}</span>`:''} ${tag}${outBox}</div>`:(tag&&mode!=='new'&&mode!=='md'?`<div class="ppe-rq-person">${tag}</div>`:'')}
+      <div class="table-wrap"><table class="ppe-rq-t"><thead><tr><th>Item</th><th>Size</th><th class="num">Qty</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${rc?`<div style="margin:-2px 0 6px;">${rc}</div>`:''}`; };
+  const trail=[r.hseBy?`HSE checked: ${r.hseBy}${r.hseAt?' · '+isoToDmy(String(r.hseAt).slice(0,10)):''}${r.hseNote?' — '+r.hseNote:''}`:'', r.mdBy?`MD: ${r.mdBy}${r.mdAt?' · '+isoToDmy(String(r.mdAt).slice(0,10)):''}${r.mdNote?' — '+r.mdNote:''}`:''].filter(Boolean);
   let acts='', note='';
   if(mode==='new' && ed){ note=`<input class="ppe-rq-note" data-pr-note="${esc(r.id)}" maxlength="300" placeholder="Comment for the MD / reason if not approved (optional)">`;
-    acts=`<button type="button" class="btn btn-sm btn-primary" data-pr-md="${esc(r.id)}">Send to MD for approval</button><button type="button" class="btn btn-sm" data-pr-rej="${esc(r.id)}" data-armed="0">Reject</button>`; }
+    acts=`<button type="button" class="btn btn-sm btn-primary" data-pr-md="${esc(r.id)}">Send ${group?'all ':''}to MD for approval</button><button type="button" class="btn btn-sm" data-pr-rej="${esc(r.id)}" data-armed="0">Reject</button>`; }
   if(mode==='md' && md){ note=`<input class="ppe-rq-note" data-pr-note="${esc(r.id)}" maxlength="300" placeholder="Comment (needed if not approved)">`;
-    acts=`<button type="button" class="btn btn-sm btn-primary" data-pr-ok="${esc(r.id)}">Approve</button><button type="button" class="btn btn-sm" data-pr-no="${esc(r.id)}" data-armed="0">Not approve</button>`; }
+    acts=`<button type="button" class="btn btn-sm btn-primary" data-pr-ok="${esc(r.id)}">${group?'Approve (ticked people left out)':'Approve'}</button><button type="button" class="btn btn-sm" data-pr-no="${esc(r.id)}" data-armed="0">Not approve${group?' all':''}</button>`; }
   if(mode==='approved' && ed) acts=`<button type="button" class="btn btn-sm" data-pr-paper="${esc(r.id)}" data-armed="0" title="Use when the worker signed a paper form instead of the link">Delivered (paper signature)</button>`;
-  if(mode==='done' && r.sigId) acts=`<button type="button" class="btn btn-sm" data-pr-rcpt="${esc(r.sigId)}">${ic('download')} Receipt (PDF)</button>`;
-  return `<div class="record-card ppe-rq${ppeReqUi.busy===r.id?' busy':''}"><div class="record-card-top"><div class="record-card-title">${w?`<button type="button" class="att-link" data-ppe-worker="${esc(w.id)}">${esc(name)}</button>`:esc(name)} <span class="badge ${badge}">${esc(st)}</span></div><div class="record-card-actions">${acts}</div></div>
-    <div class="wsub">Sent ${esc(ppeWhenTxt(r))} · reason <strong>${esc(d.reason||'—')}</strong> · needed by ${esc(isoToDmy(d.neededBy||'')||'—')}${w&&w.designation?' · '+esc(w.designation):''}${w&&w.projectId?' · '+esc(projectName(w.projectId)):''}</div>
+  return `<div class="record-card ppe-rq${ppeReqUi.busy===r.id?' busy':''}"><div class="record-card-top"><div class="record-card-title">${w?`<button type="button" class="att-link" data-ppe-worker="${esc(w.id)}">${esc(name)}</button>`:esc(name)}${group?` <span class="badge muted">for ${lines.length} ${lines.length===1?'person':'people'}</span>`:''} <span class="badge ${badge}">${esc(st)}</span></div><div class="record-card-actions">${acts}</div></div>
+    <div class="wsub">Sent ${esc(ppeWhenTxt(r))} · reason <strong>${esc(d.reason||'—')}</strong> · needed by ${esc(isoToDmy(d.neededBy||'')||'—')}${!group&&w&&w.designation?' · '+esc(w.designation):''}${w&&w.projectId?' · '+esc(projectName(w.projectId)):''}</div>
     ${d.note?`<div class="wsub">Worker's comment: ${esc(d.note)}</div>`:''}
-    <div class="table-wrap"><table class="ppe-rq-t"><thead><tr><th>Item</th><th>Size</th><th class="num">Qty</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${lines.map(lineHtml).join('')}
     ${trail.length?`<div class="wsub">${trail.map(esc).join('<br>')}</div>`:''}${note}</div>`;
 }
 function ppeReqPanelHtml(){
@@ -8398,19 +8451,20 @@ async function ppeReqClick(b){
     else if(D.prOk) await ppeMdDecide(id, true);
     else if(D.prNo) await ppeMdDecide(id, false);
     else if(D.prPaper) await ppeDeliverPaper(id);
-  } finally { ppeReqUi.busy=''; b.disabled=false; renderPpe(); }
+  } finally { ppeReqUi.busy=''; b.disabled=false; b.dataset.armed='0'; renderPpe(); }
 }
 async function ppeReqXlsx(){
   const seen=new Set(), all=[]; for(const r of [...ppeReqs, ...ppeReqsDone]) if(r.kind==='request' && !seen.has(r.id)){ seen.add(r.id); all.push(r); }
   if(!all.length){ toast('No PPE requests to export'); return; }
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
   all.sort((a,b)=>(ppeTs(b)||0)-(ppeTs(a)||0));
-  const rows=all.map(r=>{ const d=r.data||{}, w=workers.find(x=>x.id===r.workerId)||{};
-    return [ppeDateOf(r), w.fullName||d.name||'', w.civilId||'', w.designation||'', w.projectId?projectName(w.projectId):'', ppeItemsText(d.items), d.reason||'', d.neededBy||'', PPE_REQ_ST[r.status]||r.status,
-      r.hseBy||'', String(r.hseAt||'').slice(0,10), r.mdBy||'', String(r.mdAt||'').slice(0,10), r.mdNote||r.hseNote||'', r.receivedDate||'', r.status==='delivered'?(r.paper?'Paper':'Signed on link'):'']; });
+  const rows=[]; for(const r of all){ const d=r.data||{}, rq=workers.find(x=>x.id===r.workerId)||{};
+    for(const l of ppeReqLines(r)){ const w=workers.find(x=>x.id===l.wid)||{}, st=ppeLineSt(r, l);
+      rows.push([ppeDateOf(r), rq.fullName||d.name||'', w.fullName||l.name||'', w.civilId||'', w.designation||'', w.projectId?projectName(w.projectId):'', ppeItemsText(l.items), d.reason||'', d.neededBy||'', l.out?'Left out by MD':(PPE_REQ_ST[st]||st),
+        r.hseBy||'', String(r.hseAt||'').slice(0,10), r.mdBy||'', String(r.mdAt||'').slice(0,10), r.mdNote||r.hseNote||'', l.got?l.got.date||'':'', l.got?(l.got.paper?'Paper':'Signed on link'):'']); } }
   const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — PPE requests (open + last 30 days)'],['Exported '+localToday()],[],
-    ['Requested','Worker','Civil ID','Designation','Project','Items','Reason','Needed by','Status','HSE checked by','HSE date','MD','MD date','Comment','Received','Proof'], ...rows]);
-  sh['!cols']=[{wch:11},{wch:26},{wch:16},{wch:18},{wch:22},{wch:44},{wch:10},{wch:11},{wch:24},{wch:26},{wch:11},{wch:26},{wch:11},{wch:30},{wch:11},{wch:14}];
+    ['Requested','Requested by','Worker','Civil ID','Designation','Project','Items','Reason','Needed by','Status','HSE checked by','HSE date','MD','MD date','Comment','Received','Proof'], ...rows]);
+  sh['!cols']=[{wch:11},{wch:24},{wch:26},{wch:16},{wch:18},{wch:22},{wch:44},{wch:10},{wch:11},{wch:24},{wch:26},{wch:11},{wch:26},{wch:11},{wch:30},{wch:11},{wch:14}];
   XLSX.utils.book_append_sheet(wb, sh, 'PPE requests'); XLSX.writeFile(wb, `PPE_requests_${localToday()}.xlsx`);
 }
 async function ppeReceiptPdf(sigId){
@@ -8432,7 +8486,8 @@ async function ppeReceiptPdf(sigId){
   kv('DATE RECEIVED', isoToDmy(s.date), 'RECEIPT REF.', sigId.slice(0,10).toUpperCase());
   y+=8; row([{t:'PPE RECEIVED', w:CW-140, bold:true, fill:GREY},{t:'SIZE', w:80, bold:true, fill:GREY},{t:'QTY', w:60, bold:true, fill:GREY}]);
   for(const i of (s.items||[])) row([{t:i.item, w:CW-140},{t:i.size||'—', w:80},{t:String(i.qty||1), w:60}]);
-  for(const q of (s.requests||[])){ y+=8; kv('REQUESTED', `${isoToDmy(q.submitted)} · reason: ${q.reason||'—'}${q.neededBy?' · needed by '+isoToDmy(q.neededBy):''}`);
+  if(s.collectedBy){ kv('COLLECTED BY', `${s.collectedBy} (signed by ${s.name} on his phone)`); }
+  for(const q of (s.requests||[])){ y+=8; kv('REQUESTED', `${isoToDmy(q.submitted)} · reason: ${q.reason||'—'}${q.neededBy?' · needed by '+isoToDmy(q.neededBy):''}${q.requestedBy?' · requested by '+q.requestedBy:''}`);
     kv('HSE REVIEW', [q.hseBy, q.hseAt?isoToDmy(String(q.hseAt).slice(0,10)):''].filter(Boolean).join(' · ')||'—', 'MD APPROVAL', [q.mdBy, q.mdAt?isoToDmy(String(q.mdAt).slice(0,10)):''].filter(Boolean).join(' · ')||'—'); }
   for(const c of (s.crewIssues||[])){ y+=8; kv('CREW ISSUE', `${isoToDmy(c.date)} · ${c.condition||'—'}${c.issuedBy?' · issued by '+c.issuedBy:''}`); }
   ensure(150); y+=14; doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...INK);
@@ -15444,6 +15499,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
   document.getElementById('ppePane').addEventListener('change', e=>{
     const t=e.target;
+    if(t.dataset.prOut!==undefined){ t.checked?ppeReqUi.out.add(t.dataset.prOut):ppeReqUi.out.delete(t.dataset.prOut); return; }   // Batch 75
     if(t.dataset.ppeItem!==undefined){ ppeReadIssueInputs(); t.checked?ppeUi.items.add(t.dataset.ppeItem):ppeUi.items.delete(t.dataset.ppeItem); renderPpe(); return; }
     if(t.dataset.ppeW!==undefined){ ppeReadIssueInputs(); t.checked?ppeUi.workers.add(t.dataset.ppeW):ppeUi.workers.delete(t.dataset.ppeW); renderPpe(); return; }
     if(t.id==='ppeProj'){ ppeReadIssueInputs(); ppeUi.project=t.value; renderPpe(); return; }
