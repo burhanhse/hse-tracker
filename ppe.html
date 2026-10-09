@@ -112,6 +112,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     forWho:['PPE for','पीपीई किसके लिए','المعدات لـ'], addP:['Add another person','दूसरे व्यक्ति को जोड़ें','أضف شخصاً آخر'], add:['Add','जोड़ें','إضافة'],
     addHint:['Ask for PPE for a colleague too — choose his name, then tap his PPE.','साथी के लिए भी पीपीई मांगें — उसका नाम चुनें, फिर उसका पीपीई चुनें।','اطلب معدات لزميلك أيضاً — اختر اسمه ثم معداته.'],
     forX:['For','के लिए','لـ'], signOwn:['he signs here, or on his own phone','वह यहाँ या अपने फ़ोन पर हस्ताक्षर करे','يوقّع هنا أو على هاتفه'],
+    pOther:['Other / not in the list','अन्य / सूची में नहीं','أخرى / غير موجود في القائمة'], pName:['Project name','प्रोजेक्ट का नाम','اسم المشروع'],
+    pNone:['The project list is not loaded yet — choose "Other" and type the project name. HSE will link it.','प्रोजेक्ट सूची अभी नहीं आई — "अन्य" चुनें और नाम लिखें।','قائمة المشاريع غير محمّلة — اختر «أخرى» واكتب اسم المشروع.'],
     tbt:['Toolbox Talk (TRIC)','टूलबॉक्स टॉक (TRIC)','اجتماع صندوق الأدوات (TRIC)'], tbtHint:['Fill this with your crew before the work starts. Everyone signs at the end.','काम शुरू होने से पहले अपनी टीम के साथ भरें। अंत में सभी हस्ताक्षर करें।','املأها مع فريقك قبل بدء العمل. يوقّع الجميع في النهاية.'],
     details:['Job details','काम का विवरण','تفاصيل العمل'], proj:['Project','प्रोजेक्ट','المشروع'], loc:['Location','स्थान','الموقع'], date:['Date','तारीख','التاريخ'], time:['Time','समय','الوقت'], job:['Job','काम','العمل'],
     permit:['Permit number','परमिट नंबर','رقم التصريح'], task:['Daily task','दैनिक काम','المهمة اليومية'], leader:['TBT leader','टीबीटी लीडर','قائد الاجتماع'],
@@ -297,7 +299,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   function tricNew(){ let pid=''; try{ pid=localStorage.getItem('ppeProj_'+token)||''; }catch(e){} const ps=link.projects||[]; if(!ps.some(p=>p.id===pid)) pid=ps.length===1?ps[0].id:'';
     tric={pid, loc:'', date:today(), time:nowHM(), job:'', permit:'', task:'', att:[], musted:[], steps:[], changes:[], lsr:[], hz:[], ctrl:{}, dra:[], debrief:'', addOpen:false, sigs:{}, lead:''}; }
   const tq=(k)=>app.querySelector(`[data-t="${k}"]`);
-  function tricRead(){ if(!tric) return; for(const k of ['pid','loc','date','time','job','permit','task','debrief']){ const el=tq(k); if(el) tric[k]=el.value; }
+  function tricRead(){ if(!tric) return; for(const k of ['pid','pother','loc','date','time','job','permit','task','debrief']){ const el=tq(k); if(el) tric[k]=el.value; }
     app.querySelectorAll('[data-tc]').forEach(el=>{ const [hz,f]=el.dataset.tc.split('|'); (tric.ctrl[hz]=tric.ctrl[hz]||{})[f]=el.value; });
     app.querySelectorAll('[data-td]').forEach(el=>{ const [i,f]=el.dataset.td.split('|'); if(tric.dra[+i]) tric.dra[+i][f]=el.value; }); }
   const respOpts=(sel)=>`<option value="">—</option>`+[{w:me.id, n:me.name}, ...tric.att].map(a=>`<option value="${esc(a.w)}" ${a.w===sel?'selected':''}>${esc(a.n)}</option>`).join('');
@@ -313,7 +315,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <div class="row2"><label>${tr('resp')}<select data-td="${i}|r">${respOpts(c.r)}</select></label><label>${tr('done')}<select data-td="${i}|ok"><option value="">—</option>${['Yes','No'].map(v=>`<option ${c.ok===v?'selected':''}>${v}</option>`).join('')}</select></label></div></div>`).join('');
     app.innerHTML=`<div class="card tric-h"><h2>${tr('tbt')}</h2><p class="note">${tr('tbtHint')}</p></div>
       <div class="card"><div class="sec">1 · ${tr('details')}</div>
-        <label>${tr('proj')}<select data-t="pid"><option value="">—</option>${ps.map(p=>`<option value="${esc(p.id)}" ${p.id===t.pid?'selected':''}>${esc(p.n)}</option>`).join('')}</select></label>
+        <label>${tr('proj')}<select data-t="pid"><option value="">—</option>${ps.map(p=>`<option value="${esc(p.id)}" ${p.id===t.pid?'selected':''}>${esc(p.n)}</option>`).join('')}<option value="__other" ${t.pid==='__other'?'selected':''}>${esc(T.pOther[0])}</option></select></label>
+        ${!ps.length?`<p class="note" style="margin:-8px 0 12px;">${tr('pNone')}</p>`:''}
+        <label id="pOtherBox" class="${t.pid==='__other'?'':'hidden'}">${tr('pName')}<input data-t="pother" value="${esc(t.pother||'')}" maxlength="80" placeholder="e.g. PDO Qarn Alam scaffolding"></label>
         <label>${tr('loc')}<input data-t="loc" value="${esc(t.loc)}" maxlength="80" placeholder="e.g. Well NM-12 / Camp A"></label>
         <div class="row2"><label>${tr('date')}<input type="date" data-t="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-t="time" value="${esc(t.time)}"></label></div>
         <label>${tr('job')}<input data-t="job" value="${esc(t.job)}" maxlength="120" placeholder="e.g. Scaffold erection at Well NM-12"></label>
@@ -340,7 +344,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     app.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{ tricRead(); const a=t.att.splice(+b.dataset.tax,1)[0]; if(a) delete t.sigs[a.w]; keepScroll(renderTric); });
     app.querySelectorAll('[data-tdrx]').forEach(b=>b.onclick=()=>{ tricRead(); t.dra.splice(+b.dataset.tdrx,1); keepScroll(renderTric); });
     $('#tDraAdd').onclick=()=>{ tricRead(); t.dra.push({hz:'', m:'', r:'', ok:''}); keepScroll(renderTric); };
-    const pid=tq('pid'); pid.onchange=()=>{ try{ localStorage.setItem('ppeProj_'+token, pid.value); }catch(e){} };
+    const pid=tq('pid'); pid.onchange=()=>{ $('#pOtherBox').classList.toggle('hidden', pid.value!=='__other'); try{ if(pid.value!=='__other') localStorage.setItem('ppeProj_'+token, pid.value); }catch(e){} };
     if(t.addOpen){ const ex=()=>new Set([me.id, ...t.att.map(a=>a.w)]); wirePicker('t', ex(), '');
       $('#tAdd').onclick=()=>{ const w=wById($('#ts').value); if(!w){ const e=$('#terr'); e.textContent='Choose the name.'; e.classList.remove('hidden'); return; } tricRead(); if(t.att.length<40) t.att.push({w:w.id, n:w.name}); t.addOpen=true; keepScroll(renderTric); };
       $('#tAddAll').onclick=()=>{ tricRead(); const opts=[...$('#ts').options].filter(o=>o.value); for(const o of opts){ const w=wById(o.value); if(w && t.att.length<40 && !t.att.some(a=>a.w===w.id)) t.att.push({w:w.id, n:w.name}); } t.addOpen=false; keepScroll(renderTric); };
@@ -351,7 +355,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   }
   function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
   function tricCheck(){ const t=tric;
-    if(!t.pid) return 'Choose the project.'; if(!t.loc.trim()) return 'Write the location.'; if(!t.date) return 'Choose the date.'; if(!t.job.trim()) return 'Write the job.';
+    if(!t.pid) return 'Choose the project.'; if(t.pid==='__other' && !String(t.pother||'').trim()) return 'Write the project name.'; if(!t.loc.trim()) return 'Write the location.'; if(!t.date) return 'Choose the date.'; if(!t.job.trim()) return 'Write the job.';
     if(!t.att.length) return 'Add the attendees (the crew).';
     const m=TR_MUSTED.findIndex((x,i)=>!t.musted[i]); if(m>=0) return `Musta'ed step ${m+1} (${TR_MUSTED[m][0]}) is not ticked — if you are not ready, do not start the work.`;
     const s=TR_STEPS.findIndex((x,i)=>!t.steps[i]); if(s>=0) return `TBT step not ticked: ${TR_STEPS[s]}.`;
@@ -378,7 +382,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const t=tric, miss=t.att.find(a=>!t.sigs[a.w]); if(miss) return err(miss.n+' has not signed yet.');
     if(!t.lead) return err('TBT leader: please sign at the bottom.');
     const nm=id=>id===me.id?me.name:((t.att.find(a=>a.w===id)||{}).n||'');
-    const data={name:me.name, projectId:t.pid, loc:t.loc.trim().slice(0,80), date:t.date, time:t.time, job:t.job.trim().slice(0,120), permit:t.permit.trim().slice(0,40), task:t.task.trim().slice(0,120),
+    const data={name:me.name, projectId:t.pid==='__other'?'':t.pid, ...(t.pid==='__other'?{projectName:String(t.pother||'').trim().slice(0,80)}:{}), loc:t.loc.trim().slice(0,80), date:t.date, time:t.time, job:t.job.trim().slice(0,120), permit:t.permit.trim().slice(0,40), task:t.task.trim().slice(0,120),
       musted:TR_MUSTED.map((x,i)=>!!t.musted[i]), steps:TR_STEPS.map((x,i)=>!!t.steps[i]), changes:t.changes.slice(), lsr:t.lsr.slice(), hz:t.hz.slice(),
       ctrl:t.hz.map(hz=>{ const c=t.ctrl[hz]||{}; return {hz, m:String(c.m||'').trim().slice(0,200), r:c.r, rn:nm(c.r), ok:c.ok}; }),
       dra:t.dra.map(c=>({hz:String(c.hz||'').trim().slice(0,120), m:String(c.m||'').trim().slice(0,200), r:c.r, rn:nm(c.r), ok:c.ok})),

@@ -1056,7 +1056,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ppe-rq{margin-bottom:8px;} .ppe-rq.busy{opacity:.6;} .ppe-rq .table-wrap{margin:6px 0;} .ppe-rq-t td,.ppe-rq-t th{padding:4px 8px;}
 .ppe-rq-in{width:90px; padding:4px 6px; min-height:0;} .ppe-rq-in.num{width:64px;} .ppe-rq-note{width:100%; margin-top:6px;} .ppe-rq-person{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; margin:8px 0 2px; font-weight:600;} .ppe-out{margin-left:auto; font-weight:600;} .ppe-rq-t tr.ppe-off td{text-decoration:line-through; opacity:.6;}
 .ppe-alert{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--warn); border-left:4px solid var(--warn); border-radius:9px; padding:8px 12px; margin-bottom:12px; font-size:13px;}
-.tric-panel{border-left:3px solid var(--accent);} .tric-card{margin-bottom:8px;} .tric-card.busy{opacity:.6;} .tric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:4px 14px; margin:6px 0; font-size:12.5px;} .tric-grid .rf-k{display:block;}
+.tric-panel{border-left:3px solid var(--accent);} .tric-card{margin-bottom:8px;} .tric-card.busy{opacity:.6;} .tric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:4px 14px; margin:6px 0; font-size:12.5px;} .tric-grid .rf-k{display:block;} .tric-pick{display:block; margin-top:6px; font-weight:600;} .tric-pick select{max-width:340px;}
 .ppe-img-prev{width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--line); vertical-align:middle; margin-left:6px;}
 @media (max-width:900px){ .ppe-grid{grid-template-columns:1fr;} }
 
@@ -2848,7 +2848,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b77';
+const APP_BUILD='b78';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -8595,36 +8595,40 @@ function tricTopic(d){ return String(d.job||d.task||'Toolbox talk').trim().slice
 function tricLinkProjects(){ return activeSites().filter(s=>projectStatus(s)!=='Completed').map(s=>({id:s.id, n:s.siteName||'Project', dv:s.division||''})).sort((a,b)=>a.n.localeCompare(b.n)); }
 function tricCardHtml(x){
   const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId), att=d.att||[], busy=tricUi.busy===x.id;
+  const pick=site?'':`<label class="tric-pick">Project for this TBT${d.projectName?` <span class="wsub">(typed on site: <strong>${esc(d.projectName)}</strong>)</span>`:''}<select data-tric-proj="${esc(x.id)}"><option value="">— choose —</option>${activeSites().slice().sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))).map(s=>`<option value="${esc(s.id)}">${esc(s.siteName||'Project')}</option>`).join('')}</select></label>`;
   const list=(o,keys)=>(keys||[]).map(k=>o[k]||k).join(', ')||'—';
   const ctrl=[...(d.ctrl||[]).map(r=>({...r, t:TRIC_HZ[r.hz]||r.hz})), ...(d.dra||[]).map(r=>({...r, t:r.hz, dra:true}))];
   const musted=(d.musted||[]).filter(Boolean).length, steps=(d.steps||[]).filter(Boolean).length;
   return `<div class="record-card tric-card${busy?' busy':''}"><div class="record-card-top"><div class="record-card-title">${esc(tricTopic(d))} <span class="badge muted">${att.length} attendee${att.length===1?'':'s'}</span></div>
-      <div class="record-card-actions"><button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} TRIC (PDF)</button><button type="button" class="btn btn-sm btn-primary" data-tric-ok="${esc(x.id)}" ${site?'':'disabled title="Project not found"'}>Approve</button><button type="button" class="btn btn-sm" data-tric-no="${esc(x.id)}" data-armed="0">Reject</button></div></div>
-    <div class="wsub">${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(site?site.siteName:'Project not found')}</strong> · ${esc(d.loc||'—')} · TBT leader <strong>${esc(tricWho(x.workerId, {n:d.name}))}</strong>${d.permit?' · permit '+esc(d.permit):''}</div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} TRIC (PDF)</button><button type="button" class="btn btn-sm btn-primary" data-tric-ok="${esc(x.id)}">Approve</button><button type="button" class="btn btn-sm" data-tric-no="${esc(x.id)}" data-armed="0">Reject</button></div></div>
+    <div class="wsub">${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(site?site.siteName:(d.projectName?d.projectName+' (not linked)':'Project not chosen'))}</strong> · ${esc(d.loc||'—')} · TBT leader <strong>${esc(tricWho(x.workerId, {n:d.name}))}</strong>${d.permit?' · permit '+esc(d.permit):''}</div>
     <div class="tric-grid"><div><span class="rf-k">Musta'ed</span> ${musted}/7 ready</div><div><span class="rf-k">TBT steps</span> ${steps}/7 discussed</div>
       <div><span class="rf-k">Life Saving Rules</span> ${esc(list(TRIC_LSR, d.lsr))}</div><div><span class="rf-k">Hazards</span> ${esc(list(TRIC_HZ, d.hz))}</div>
       ${(d.changes||[]).length?`<div><span class="rf-k">Changes on the job</span> ${esc(list(TRIC_CHANGES, d.changes))}</div>`:''}</div>
     ${ctrl.length?`<div class="table-wrap"><table class="ppe-rq-t"><thead><tr><th>Hazard</th><th>Control measure</th><th>Responsible</th><th>Done</th></tr></thead><tbody>${ctrl.map(r=>`<tr><td>${r.dra?'<span class="badge warn">Dynamic</span> ':''}${esc(r.t)}</td><td>${esc(r.m||'—')}</td><td>${esc(tricWho(r.r, {n:r.rn}))}</td><td>${esc(r.ok||'—')}</td></tr>`).join('')}</tbody></table></div>`:''}
     <div class="wsub">Attendees: ${att.map(a=>esc(tricWho(a.w, a))+(a.sig?'':' (not signed)')).join(', ')||'—'}</div>
     ${d.debrief?`<div class="wsub">Debrief: ${esc(d.debrief)}</div>`:''}
-    <input class="ppe-rq-note" data-tric-note="${esc(x.id)}" maxlength="300" placeholder="Reason if rejected (optional)"></div>`;
+    ${pick}<input class="ppe-rq-note" data-tric-note="${esc(x.id)}" maxlength="300" placeholder="Reason if rejected (optional)"></div>`;
 }
 function renderTricPanel(){
   let box=document.getElementById('tricBox'); if(!box) return;
   if(!canEdit()){ box.innerHTML=''; return; }
   const ym=tricUi.month||localToday().slice(0,7), subs=tricSubs.slice().sort((a,b)=>String((a.data||{}).date||'').localeCompare(String((b.data||{}).date||'')));
   const keepNote=[...box.querySelectorAll('[data-tric-note]')].reduce((o,el)=>{ o[el.dataset.tricNote]=el.value; return o; },{});
-  if(document.activeElement && box.contains(document.activeElement) && document.activeElement.matches('input[data-tric-note]')) return;
+  const keepProj=[...box.querySelectorAll('[data-tric-proj]')].reduce((o,el)=>{ o[el.dataset.tricProj]=el.value; return o; },{});
+  if(document.activeElement && box.contains(document.activeElement) && document.activeElement.matches('input[data-tric-note], select[data-tric-proj]')) return;
   box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} Toolbox talks from site — TRIC (${subs.length} waiting)</h3>
       <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><input type="month" id="tricMonth" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx">${ic('download')} Month Excel</button></span></div>
     <p class="wsub" style="margin:-4px 0 8px;">Filled on the worker PPE link (<strong>Toolbox Talk</strong> button) — every attendee signs. <strong>Approve</strong> adds it to the project's toolbox talks and the Monthly Report. The full cards with signatures are <strong>deleted automatically ${TRIC_KEEP_DAYS} days after the TBT</strong> — download each month (PDF + Excel); the project keeps the date, topic and attendees.</p>
     ${subs.length?subs.map(tricCardHtml).join(''):'<p class="wsub" style="margin:0;">Nothing waiting.</p>'}</div>`;
   box.querySelectorAll('[data-tric-note]').forEach(el=>{ if(keepNote[el.dataset.tricNote]) el.value=keepNote[el.dataset.tricNote]; });
+  box.querySelectorAll('[data-tric-proj]').forEach(el=>{ if(keepProj[el.dataset.tricProj]) el.value=keepProj[el.dataset.tricProj]; });
 }
 async function tricGet(id){ const x=tricSubs.find(s=>s.id===id); if(x) return x; try{ const s=await db.collection('tbtSubmissions').doc(id).get(); return s.exists?{id, ...(s.data()||{})}:null; }catch(e){ console.warn(e); return null; } }
 async function tricApprove(id){
-  if(!canEdit()) return; const x=tricSubs.find(s=>s.id===id); if(!x) return; const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId);
-  if(!site){ toast('The project of this TBT is not in Project Details'); return; }
+  if(!canEdit()) return; const x=tricSubs.find(s=>s.id===id); if(!x) return; const d=x.data||{};
+  const sel=document.querySelector(`[data-tric-proj="${CSS.escape(id)}"]`), site=activeSites().find(s=>s.id===d.projectId) || activeSites().find(s=>sel && s.id===sel.value);
+  if(!site){ toast('Choose the project for this TBT first'); if(sel) sel.focus(); return; }
   const ids=[...new Set((d.att||[]).map(a=>a.w).filter(w=>workers.some(y=>y.id===w)))], extra=(d.att||[]).filter(a=>!workers.some(y=>y.id===a.w)).length;
   const rec={id:genId(), topic:tricTopic(d), date:d.date||localToday(), conductedBy:tricWho(x.workerId, {n:d.name}), attendeeIds:ids, extraAttendees:extra?String(extra):'',
     notes:['TRIC card from the PPE link', d.loc?'Location: '+d.loc:'', d.permit?'Permit: '+d.permit:'', (d.lsr||[]).length?'LSR: '+(d.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '):'', (d.hz||[]).length?'Hazards: '+(d.hz||[]).map(k=>TRIC_HZ[k]||k).join(', '):'', d.debrief?'Debrief: '+d.debrief:''].filter(Boolean).join(' · ').slice(0,900), tricId:x.id};
@@ -8656,8 +8660,8 @@ async function tricDownload(kind){
 async function tricXlsx(list, ym){
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
   const rows=[], ctl=[];
-  for(const x of list){ const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId);
-    rows.push([d.date||'', d.time||'', site?site.siteName:'', d.loc||'', tricTopic(d), d.task||'', d.permit||'', tricWho(x.workerId, {n:d.name}), (d.att||[]).length, (d.att||[]).map(a=>tricWho(a.w, a)).join(', '),
+  for(const x of list){ const d=x.data||{}, site=activeSites().find(s=>s.id===(d.projectId||x.projectId));
+    rows.push([d.date||'', d.time||'', site?site.siteName:(d.projectName||''), d.loc||'', tricTopic(d), d.task||'', d.permit||'', tricWho(x.workerId, {n:d.name}), (d.att||[]).length, (d.att||[]).map(a=>tricWho(a.w, a)).join(', '),
       (d.musted||[]).filter(Boolean).length+'/7', (d.steps||[]).filter(Boolean).length+'/7', (d.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), (d.hz||[]).map(k=>TRIC_HZ[k]||k).join(', '), (d.changes||[]).map(k=>TRIC_CHANGES[k]||k).join(', '), d.debrief||'', x.approvedBy||'']);
     for(const r of [...(d.ctrl||[]).map(r=>({...r, t:TRIC_HZ[r.hz]||r.hz, ty:'Hazard'})), ...(d.dra||[]).map(r=>({...r, t:r.hz, ty:'Dynamic risk'}))]) ctl.push([d.date||'', site?site.siteName:'', tricTopic(d), r.ty, r.t, r.m||'', tricWho(r.r, {n:r.rn}), r.ok||'']); }
   const wb=XLSX.utils.book_new();
@@ -8684,9 +8688,9 @@ async function tricPdf(list, fileName, sub){
   const tick=b=>b?'[X]':'[  ]';
   list.forEach((x,ix)=>{
     if(ix){ doc.addPage(); y=32; }
-    const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId), K=90, hw=(CW-2*K)/2;
+    const d=x.data||{}, site=activeSites().find(s=>s.id===(d.projectId||x.projectId)), K=90, hw=(CW-2*K)/2;
     row([{t:'TOOLBOX-TALK RISK IDENTIFICATION CARD (TRIC)', w:CW, bold:true, size:11, fill:GREY}]);
-    row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:site?site.siteName:'—', w:hw},{t:'LOCATION', w:K, bold:true, fill:LBL},{t:d.loc, w:hw}]);
+    row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:site?site.siteName:(d.projectName||'—'), w:hw},{t:'LOCATION', w:K, bold:true, fill:LBL},{t:d.loc, w:hw}]);
     row([{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${isoToDmy(d.date||'')} ${d.time||''}`, w:hw},{t:'TBT LEADER', w:K, bold:true, fill:LBL},{t:tricWho(x.workerId, {n:d.name}), w:hw}]);
     row([{t:'JOB', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'PERMIT NUMBER', w:K, bold:true, fill:LBL},{t:d.permit, w:hw}]);
     row([{t:'DAILY TASK', w:K, bold:true, fill:LBL},{t:d.task, w:CW-K}]);
@@ -15730,7 +15734,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(D.tricDl){ await tricDownload(D.tricDl); return; }
     if(D.tricNo && b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent='Tap again to reject'; return; }
     const id=D.tricOk||D.tricNo; tricUi.busy=id; b.disabled=true;
-    try{ if(D.tricOk) await tricApprove(id); else await tricReject(id); } finally{ tricUi.busy=''; renderTricPanel(); } });
+    try{ if(D.tricOk) await tricApprove(id); else await tricReject(id); } finally{ tricUi.busy=''; b.disabled=false; renderTricPanel(); } });
   document.addEventListener('change', e=>{ if(e.target && e.target.id==='tricMonth') tricUi.month=e.target.value; });
   // Batch 73: banner "PPE requests waiting" + receipt PDF from a worker's PPE issued record
   document.addEventListener('click', e=>{ const g=e.target.closest && e.target.closest('[data-ppe-goto]'); if(g){ ppeGoto(); return; } const r=e.target.closest && e.target.closest('[data-ppe-rcpt]'); if(r) ppeReceiptPdf(r.dataset.ppeRcpt); });
