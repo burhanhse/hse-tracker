@@ -138,8 +138,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     addJob:['Add another job to this TBT','इस टीबीटी में दूसरा काम जोड़ें','أضف عملاً آخر لهذا الاجتماع'], addJobHint:['Same crew, same TBT','वही टीम, वही टीबीटी','نفس الفريق ونفس الاجتماع'],
     pauseChk:['Pause & check — anything changed?','रुकें और जाँचें — कुछ बदला?','توقف وتحقق — هل تغيّر شيء؟'], pauseHint2:['Tick only what changed. Brief the crew before you start.','सिर्फ़ जो बदला उस पर टिक करें। शुरू करने से पहले टीम को बताएँ।','حدد فقط ما تغيّر. أبلغ الفريق قبل البدء.'],
     jobSign:['I briefed the crew','मैंने टीम को बताया','أبلغت الفريق'], jobSave:['Save job','काम सेव करें','حفظ العمل'],
+    work:['Work / task','काम / कार्य','العمل / المهمة'],
     tbtReq:['TBT request','टीबीटी अनुरोध','طلب اجتماع السلامة'], tbtReqHint:['Send before the work. HSE writes the topic, then everyone signs here.','काम से पहले भेजें। एचएसई विषय लिखेगा, फिर सभी यहाँ हस्ताक्षर करेंगे।','أرسله قبل العمل. يكتب قسم السلامة الموضوع ثم يوقّع الجميع هنا.'],
-    loc:['Location / Well No.','स्थान / वेल नंबर','الموقع / رقم البئر'], jp:['Journey plan number','जर्नी प्लान नंबर','رقم خطة الرحلة'], optional:['optional','वैकल्पिक','اختياري'],
+    loc:['Location / Well No.','स्थान / वेल नंबर','الموقع / رقم البئر'], locX:['Location','स्थान','الموقع'], jp:['Journey plan number','जर्नी प्लान नंबर','رقم خطة الرحلة'], optional:['optional','वैकल्पिक','اختياري'],
     crew:['People for this TBT','इस टीबीटी के लोग','الأشخاص في هذا الاجتماع'], tbtSend:['Send TBT request','टीबीटी अनुरोध भेजें','إرسال الطلب'],
     tbtSent:['TBT request sent','टीबीटी अनुरोध भेज दिया','تم إرسال الطلب'], tbtSent2:['HSE will review it. Then you get "Sign now" here.','एचएसई जाँच करेगा। फिर यहाँ "अभी हस्ताक्षर करें" आएगा।','سيراجعه قسم السلامة، ثم يظهر «وقّع الآن» هنا.'],
     tbtToSign:['TBT — waiting for your signature','टीबीटी — आपके हस्ताक्षर बाकी','بانتظار توقيعك'], signNow:['Sign now','अभी हस्ताक्षर करें','وقّع الآن'], open:['Open','खोलें','فتح'],
@@ -318,24 +319,28 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   const nowHM=()=>{ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
   let tbtF=null, tbtX=null, tpads={};
   const dsOf=id=>(wById(id)||{}).ds||'';
+  // Batch 81: Scaffolding = job buttons + journey plan; Civil = free text work, no journey plan; Rental = free text work + journey plan
+  const isScaf=()=>!link.division || link.division==='Scaffolding', noJp=()=>link.division==='Civil';
+  const jpField=(attr,v)=>noJp()?'':`<label>${tr('jp')}<input ${attr}="jp" value="${esc(v)}" maxlength="40" placeholder="${esc(T.optional[0])}"></label>`;
+  const jobField=(attr,btn,v)=>isScaf()?`<div style="font-weight:700; font-size:15px;">${tr('job')}</div><div class="reasons">${TB_JOBS.map(([j,h,a])=>`<button type="button" class="${v===j?'on':''}" ${btn}="${esc(j)}">${esc(j)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>`
+    :`<label>${tr('work')}<textarea ${attr}="job" maxlength="120" placeholder="e.g. Block work — ground floor, Building A">${esc(v)}</textarea></label>`;
   const TB_SHIFT=[['Day','दिन','نهاري'],['Night','रात','ليلي']];
   const TB_CHG={pm:['People changed','लोग बदले','تغيّر الأشخاص'], te:['Tools / equipment changed','औज़ार / उपकरण बदले','تغيّرت الأدوات'], nh:['New hazards','नए खतरे','مخاطر جديدة'], we:['Weather','मौसम','الطقس']};
   function tbtNew(){ const cl=link.clients||[]; tbtF={date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(link.clientName)?link.clientName:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
   const tq=k=>app.querySelector(`[data-b="${k}"]`);
-  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother']){ const el=tq(k); if(el) tbtF[k]=el.value; } }
+  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
   function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
   function renderTbtReq(){
     const t=tbtF, locs=link.locs||[];
     app.innerHTML=`<div class="card"><h2>${tr('tbtReq')}</h2><p class="note">${tr('tbtReqHint')}</p>
         <div class="row2"><label>${tr('date')}<input type="date" data-b="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-b="time" value="${esc(t.time)}"></label></div>
-        <label>${tr('loc')}<input data-b="loc" list="tbLocs" value="${esc(t.loc)}" maxlength="80" placeholder="e.g. NM-12" autocomplete="off"><datalist id="tbLocs">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
+        <label>${tr(isScaf()?'loc':'locX')}<input data-b="loc" list="tbLocs" value="${esc(t.loc)}" maxlength="80" placeholder="${isScaf()?'e.g. NM-12':'e.g. Building A, ground floor'}" autocomplete="off"><datalist id="tbLocs">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
         <div style="font-weight:700; font-size:15px;">${tr('shift')}</div>
         <div class="reasons">${TB_SHIFT.map(([v,h,a])=>`<button type="button" class="${t.shift===v?'on':''}" data-shift="${esc(v)}">${v==='Day'?'☀ ':'☾ '}${esc(v)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>
         <label>${tr('client')}<select data-b="client"><option value="">—</option>${(link.clients||[]).map(c=>`<option ${c===t.client?'selected':''}>${esc(c)}</option>`).join('')}<option value="__other" ${t.client==='__other'?'selected':''}>${esc(T.pOther[0])}</option></select></label>
         <label id="cOtherBox" class="${t.client==='__other'?'':'hidden'}">${tr('clientName')}<input data-b="cother" value="${esc(t.cother||'')}" maxlength="60"></label>
-        <label>${tr('jp')}<input data-b="jp" value="${esc(t.jp)}" maxlength="40" placeholder="${esc(T.optional[0])}"></label>
-        <div style="font-weight:700; font-size:15px;">${tr('job')}</div>
-        <div class="reasons">${TB_JOBS.map(([j,h,a])=>`<button type="button" class="${t.job===j?'on':''}" data-job="${esc(j)}">${esc(j)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div></div>
+        ${jpField('data-b', t.jp)}
+        ${jobField('data-b','data-job',t.job)}</div>
       <div class="card"><div class="sec">${tr('crew')} (${t.att.length})</div>
         <div class="pchips">${t.att.map((a,i)=>`<span class="pchip-w"><span class="pchip ${i===0?'on':''}">${i===0?esc(T.me[0])+' · ':''}${esc(a.n)}${dsOf(a.w)?`<span class="pds">${esc(dsOf(a.w))}</span>`:''}</span>${i?`<button type="button" class="pchip-x" data-tax="${i}" aria-label="Remove ${esc(a.n)}">✕</button>`:''}</span>`).join('')}</div>
         ${t.addOpen?`<div class="addbox">${pickerHtml('b', '')}<div id="berr" class="err hidden"></div><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" class="btn navy" id="bAdd" style="flex:1">${tr('add')}</button><button type="button" class="btn ghost" id="bAddAll" style="flex:1">${tr('addAll')}</button></div><button type="button" class="btn ghost" id="bAddNo" style="margin-top:8px;">${tr('back')}</button></div>`
@@ -356,9 +361,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   }
   async function sendTbt(){
     tbtRead(); const t=tbtF;
-    if(!t.date) return err('Choose the date.'); if(!t.loc.trim()) return err('Write the location / well number.'); if(!t.job) return err('Choose the job: Rig up, Rig down, Modification or Inspection.');
+    if(!t.date) return err('Choose the date.'); if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job: Rig up, Rig down, Modification or Inspection.':'Write the work you will do.');
     if(!t.shift) return err('Choose Day or Night job.'); if(!t.client) return err('Choose the client.'); if(t.client==='__other' && !String(t.cother||'').trim()) return err('Write the client name.');
-    const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:t.jp.trim().slice(0,40), job:t.job, att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
+    const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), job:String(t.job).trim().slice(0,120), att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
     const b=$('#bSend'); b.disabled=true;
     try{ const ref=await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
       sentLocal.push({id:ref.id, w:me.id, d:t.date, t:`TBT · ${t.job} · ${data.loc}`, k:'tbt'}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
@@ -397,13 +402,13 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   let jobF=null;
   function renderTbtJob(){
     const t=jobF, x=tbtX, d=x.data||{}, locs=link.locs||[];
-    const read=()=>{ for(const k of ['time','loc','jp']){ const el=app.querySelector(`[data-j="${k}"]`); if(el) t[k]=el.value; } };
+    const read=()=>{ for(const k of ['time','loc','jp']){ const el=app.querySelector(`[data-j="${k}"]`); if(el) t[k]=el.value; } if(!isScaf()){ const j=app.querySelector('[data-j="job"]'); if(j) t.job=j.value; } };
     app.innerHTML=`<div class="card"><h2>${tr('addJob')}</h2><p class="note">${tr('addJobHint')}: <b>${esc(x.topic||d.job)}</b> (${esc(dmy(d.date))})</p>
         <div class="row2"><label>${tr('time')}<input type="time" data-j="time" value="${esc(t.time)}"></label><div></div></div>
         <div style="font-weight:700; font-size:15px;">${tr('shift')}</div><div class="reasons">${TB_SHIFT.map(([v,h,a])=>`<button type="button" class="${t.shift===v?'on':''}" data-jshift="${esc(v)}">${v==='Day'?'☀ ':'☾ '}${esc(v)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>
-        <label>${tr('loc')}<input data-j="loc" list="tbLocs2" value="${esc(t.loc)}" maxlength="80" autocomplete="off"><datalist id="tbLocs2">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
-        <label>${tr('jp')}<input data-j="jp" value="${esc(t.jp)}" maxlength="40" placeholder="${esc(T.optional[0])}"></label>
-        <div style="font-weight:700; font-size:15px;">${tr('job')}</div><div class="reasons">${TB_JOBS.map(([j,h,a])=>`<button type="button" class="${t.job===j?'on':''}" data-jjob="${esc(j)}">${esc(j)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>
+        <label>${tr(isScaf()?'loc':'locX')}<input data-j="loc" list="tbLocs2" value="${esc(t.loc)}" maxlength="80" autocomplete="off"><datalist id="tbLocs2">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
+        ${jpField('data-j', t.jp)}
+        ${jobField('data-j','data-jjob',t.job)}
         <div style="font-weight:700; font-size:15px;">${tr('pauseChk')}</div><p class="note" style="margin:0 0 6px;">${tr('pauseHint2')}</p>
         <div class="tk-grid">${Object.entries(TB_CHG).map(([k,[l,h,a]])=>`<label class="tk ${t.chg.includes(k)?'on':''}"><input type="checkbox" data-jchg="${k}" ${t.chg.includes(k)?'checked':''}><span><b>${esc(l)}</b><span class="tk-s">${esc(h)} · ${esc(a)}</span></span></label>`).join('')}</div>
         <div class="sgn"><div class="sgn-h">${tr('jobSign')}: ${esc(me.name)}</div><div class="sigbox small"><canvas data-sp="job" width="600" height="200"></canvas><div class="hint" data-sh="job">✍</div></div></div>
@@ -415,8 +420,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     app.querySelectorAll('[data-jchg]').forEach(c=>c.onchange=()=>{ const k=c.dataset.jchg, i=t.chg.indexOf(k); if(c.checked && i<0) t.chg.push(k); if(!c.checked && i>=0) t.chg.splice(i,1); c.closest('.tk').classList.toggle('on', c.checked); });
     $('#back').onclick=()=>{ view='tbtSign'; render(); };
     $('#jSave').onclick=async()=>{ read();
-      if(!t.loc.trim()) return err('Write the location / well number.'); if(!t.job) return err('Choose the job.'); if(!pad.ink) return err('Please sign to confirm the crew was briefed.');
-      const job={time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), jp:t.jp.trim().slice(0,40), job:t.job, chg:t.chg.map(k=>TB_CHG[k][0]), by:me.id, sig:pad.image(300,100), at:new Date().toISOString()};
+      if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job.':'Write the work you will do.'); if(!pad.ink) return err('Please sign to confirm the crew was briefed.');
+      const job={time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), job:String(t.job).trim().slice(0,120), chg:t.chg.map(k=>TB_CHG[k][0]), by:me.id, sig:pad.image(300,100), at:new Date().toISOString()};
       const b=$('#jSave'); b.disabled=true;
       try{ const fresh=await tbtFetch(x.id); if(!fresh){ tbtX=null; view='tbtSign'; render(); return; }
         const jobs=[...(fresh.jobs||[]), job]; await db.collection('tbtSubmissions').doc(x.id).update({jobs});
@@ -476,7 +481,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     row([{t:'TOOLBOX TALK RECORD (TBT)', w:CW-170, bold:true, size:11.5},{t:`${dmy2(d.date)}  ·  ${d.shift||'—'} shift`, w:170, bold:true, color:RED}], 22);
     row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy2(d.date)} ${d.time||''}`, w:hw}]);
     row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
-    row([{t:'JOB', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
+    row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
     row([{t:'REQUESTED BY', w:K, bold:true, fill:LBL},{t:who(x.workerId), sub:ds(x.workerId), w:hw},{t:'CLIENT', w:K, bold:true, fill:LBL},{t:d.client||'—', w:hw}]);
     row([{t:'TOPIC', w:K, bold:true, fill:LBL},{t:x.topic, w:CW-K, bold:true}], 18);
     head("MUSTA'ED — ARE YOU READY?");
@@ -505,7 +510,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     for(const p of people){ const ns=p.cart.find(c=>!c.size); if(ns) return err('Choose the size of '+ns.item+(people.length>1?' for '+p.name:'')+'.'); }
     if(!reason) return err('Choose the reason.');
     const mk=p=>p.cart.map(c=>({item:c.item, size:c.size==='-'?'':c.size, qty:c.qty}));
-    const data={name:me.name, items:mk(people[0]), neededBy:need||plusDays(3), reason, note:String(note||'').trim().slice(0,300)};
+    const data={name:me.name, items:mk(people[0]), neededBy:need||plusDays(3), reason, note:String(note||'').trim().slice(0,300), ...(link.projectId?{projectId:link.projectId}:{})};
     if(people.length>1) data.others=people.slice(1).map(p=>({w:p.id, n:p.name, items:mk(p)}));
     const b=$('#send'); b.disabled=true;
     try{

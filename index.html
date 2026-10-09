@@ -2632,6 +2632,7 @@ const SITE_TABS = [
   {key:'profile', label:'Profile'},
   {key:'hseStats', label:'HSE statistics'},
   {key:'toolboxTalks', label:'Toolbox talks'},
+  {key:'ppe', label:'PPE'},
   {key:'permits', label:'Permits to work'},
   {key:'actions', label:'Corrective actions'},
   {key:'complaints', label:'Client complaints'},
@@ -2848,7 +2849,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b80';
+const APP_BUILD='b81';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -8138,7 +8139,8 @@ function ppeReqLinkUrl(token){ return location.origin + location.pathname.replac
 function ppeActiveLink(){ return ppeLinks.find(l=>l.active && l.projectId); }
 // Batch 79: one link per Scaffolding project — the link shows only the workers assigned to that project
 function ppeLinkOf(pid){ return ppeLinks.find(l=>l.active && l.projectId===pid); }
-function ppeLinkProjects(){ return activeSites().filter(s=>s.division==='Scaffolding' && projectStatus(s)!=='Completed').sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))); }
+const PPE_LINK_DIVS=['Scaffolding','Civil','Rental'];   // Batch 81: project links for these divisions
+function ppeLinkProjects(){ return activeSites().filter(s=>PPE_LINK_DIVS.includes(s.division||'Civil') && projectStatus(s)!=='Completed').sort((a,b)=>PPE_LINK_DIVS.indexOf(a.division||'Civil')-PPE_LINK_DIVS.indexOf(b.division||'Civil') || String(a.siteName||'').localeCompare(String(b.siteName||''))); }
 function ppeIconKey(name){
   const n=String(name||'').toLowerCase();
   if(/helmet|hard ?hat/.test(n)) return 'helmet';
@@ -8201,7 +8203,7 @@ function stopPpeReqData(){
   ppeAlertRender();
 }
 function ppeReqChanged(){
-  renderPpe(true); ppeAlertRender();
+  renderPpe(true); ppeAlertRender(); if(typeof activeSiteTab!=='undefined' && activeSiteTab==='ppe' && typeof renderSiteDrawer==='function' && document.getElementById('siteDrawerBody') && currentSite()) renderSiteDrawer();
   if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(ppeProcTimer); ppeProcTimer=setTimeout(ppeProcessReceipts, 1200); }
 }
 function ppeOpenReqs(st){ return ppeReqs.filter(r=>r.kind==='request' && r.status===st).sort((a,b)=>(ppeTs(a)||0)-(ppeTs(b)||0)); }
@@ -8262,8 +8264,11 @@ async function ppeLinkPayload(token, pid){
   list.sort((a,b)=>a.name.localeCompare(b.name));
   const dc=docControl('ppeIssue'), dt=docControl('tric'), site=activeSites().find(s=>s.id===pid), ids=new Set(list.map(w=>w.id)), all=ppeBoard(), board={};
   for(const k of Object.keys(all)) if(ids.has(k)) board[k]=all[k];
-  const locs=[...new Set([...scaffWellOptions(), ...scaffLocations()])].sort((a,b)=>a.localeCompare(b)).slice(0,300);
-  return {projectId:pid, projectName:(site&&site.siteName)||'', clientName:(site&&site.clientName)||'', clients:scaffClientList().slice(0,60), workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
+  const div=(site&&site.division)||'Civil', prevLocs=tricAll().filter(x=>(x.data||{}).projectId===pid).map(x=>(x.data||{}).loc).filter(Boolean);
+  const locs=div==='Scaffolding' ? [...new Set([...scaffWellOptions(), ...scaffLocations()])].sort((a,b)=>a.localeCompare(b)).slice(0,300)
+    : [...new Set([site&&site.location, ...prevLocs].filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,100);
+  const clients=[...new Set([site&&site.clientName, ...(div==='Scaffolding'?scaffClientList():[])].filter(Boolean))].slice(0,60);
+  return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
 }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
@@ -8320,6 +8325,8 @@ async function ppeMdDecide(id, ok){
 }
 
 /* ---- delivery: the worker's signed receipt (or a paper signature) → PPE issued records ---- */
+// Batch 81: the project of a request = the project of the link it came from (falls back to the worker's project)
+function ppeReqProject(q, w){ const d=(q&&q.data)||{}; return d.projectId || ((ppeLinks.find(l=>l.id===(q&&q.token))||{}).projectId) || (w&&w.projectId) || ''; }
 function ppeIssuedNote(q, li, signed){ const d=q.data||{}; return `PPE request (${d.reason||'—'})${li?' · requested by '+(d.name||'—'):''} · approved by MD · ${signed?'received and signed by the worker on the PPE link':'delivered — paper signature on file'}`; }
 // lines: [{q, li, items}] for this worker; iss: crew-issue records the worker confirmed
 async function ppeAddIssued(w, lines, iss, date, sigId){
@@ -8327,7 +8334,7 @@ async function ppeAddIssued(w, lines, iss, date, sigId){
   const next=cur.map(x=>issIds.has(x.id)?{...x, needConfirm:false, receivedAt:now, receivedDate:date, ...(sigId?{sigId}:{})}:x);
   for(const {q, li, items} of lines){ const qd=q.data||{}; (items||[]).forEach((i,n)=>{ const id=li?`pr_${q.id}_${li}_${n}`:`pr_${q.id}_${n}`; if(have.has(id)) return; const std=ppeStdOf(i.item);
     next.push({id, batchId:'ppereq_'+q.id, item:i.item, size:i.size||'', quantity:Math.max(1, Number(i.qty)||1), date, expiry:std&&std.life?ppeAddMonths(date, std.life):'', issuedBy:'HSE / store',
-      condition:PPE_REASONS[qd.reason]||'New issue', notes:ppeIssuedNote(q, li, !!sigId), projectId:w.projectId||'', reqId:q.id, ...(sigId?{sigId}:{}), receivedAt:now, receivedDate:date}); }); }
+      condition:PPE_REASONS[qd.reason]||'New issue', notes:ppeIssuedNote(q, li, !!sigId), projectId:ppeReqProject(q, w), reqId:q.id, ...(sigId?{sigId}:{}), receivedAt:now, receivedDate:date}); }); }
   await db.collection('workers').doc(w.id).update(stamp({ppeIssued:next})); w.ppeIssued=next;
 }
 // mark lines received; the request is Delivered when every approved line is received
@@ -8379,6 +8386,32 @@ async function ppeDeliverPaper(id){
     if(done.length){ await ppeMarkGot(q, done, date, '', true); if(q.status==='delivered') await db.collection('ppeRequests').doc(id).update({deliveredBy:(u&&u.email)||''}); }
     toast('Delivered — saved in the PPE issued records'); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
+}
+
+/* ---- Batch 81: Project Details → PPE tab — everything issued for this project, open requests, the project link ---- */
+function sitePpeRecords(s){ const out=[]; for(const w of workers) for(const r of (w.ppeIssued||[])) if(r.projectId===s.id) out.push({...r, w}); return out.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))); }
+function sitePpeTabHtml(s){
+  const recs=sitePpeRecords(s), t=localToday(), ym=t.slice(0,7), qty=r=>Math.max(1, Number(r.quantity)||1);
+  const month=recs.filter(r=>String(r.date||'').startsWith(ym)), people=new Set(recs.map(r=>r.w.id)).size;
+  const open=ppeReqs.filter(r=>r.kind==='request' && ppeReqProject(r, workers.find(w=>w.id===r.workerId))===s.id);
+  const link=ppeLinks.find(l=>l.active && l.projectId===s.id), signed=recs.filter(r=>r.sigId).length;
+  const byItem=new Map(); for(const r of recs) byItem.set(r.item||'—', (byItem.get(r.item||'—')||0)+qty(r));
+  const proof=r=>r.sigId?`<button type="button" class="att-link" data-ppe-rcpt="${esc(r.sigId)}">Signed (PDF)</button>`:(/paper/i.test(r.notes||'')?'Paper':(r.needConfirm&&!r.receivedAt?'<span class="badge warn">Worker to confirm</span>':'—'));
+  return `<p class="wsub" style="margin:0 0 10px;">All PPE issued for <strong>${esc(s.siteName||'this project')}</strong> — from the project link (requests, MD approval, worker signature) and from <em>Issue PPE to crew</em>. ${link?'<span class="badge ok">Project link active</span>':'<span class="badge muted">No project link</span> — create it in Workforce → PPE.'}</p>
+    <div class="record-fields" style="margin-bottom:12px;"><div class="rf"><span class="rf-k">Items issued (all)</span><span class="rf-v">${recs.reduce((n,r)=>n+qty(r),0)}</span></div><div class="rf"><span class="rf-k">This month</span><span class="rf-v">${month.reduce((n,r)=>n+qty(r),0)}</span></div>
+      <div class="rf"><span class="rf-k">Workers</span><span class="rf-v">${people}</span></div><div class="rf"><span class="rf-k">Signed by the worker</span><span class="rf-v">${signed} of ${recs.length} records</span></div><div class="rf"><span class="rf-k">Open requests</span><span class="rf-v">${open.length}</span></div></div>
+    ${open.length?`<div class="subhead">Open PPE requests (${open.length})</div><div class="table-wrap"><table><thead><tr><th>Sent</th><th>Requested by</th><th>Items</th><th>Status</th></tr></thead><tbody>${open.map(r=>`<tr><td class="mono">${esc(ppeDateOf(r))}</td><td>${esc(tbtWho(r.workerId,(r.data||{}).name))}</td><td>${esc(ppeReqItemsText(r))}</td><td>${esc(PPE_REQ_ST[r.status]||r.status)}</td></tr>`).join('')}</tbody></table></div>`:''}
+    <div class="subhead" style="display:flex; align-items:center; gap:8px;">PPE issued (${recs.length})${recs.length?`<button type="button" class="btn btn-sm" data-site-ppe-xlsx="${esc(s.id)}" style="margin-left:auto;">${ic('download')} Excel</button>`:''}</div>
+    ${byItem.size?`<p class="wsub" style="margin:0 0 6px;">${[...byItem].sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${esc(k)} <strong>${n}</strong>`).join(' · ')}</p>`:''}
+    ${recs.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Worker</th><th>Item</th><th>Size</th><th class="num">Qty</th><th>Issue type</th><th>Proof</th></tr></thead><tbody>${recs.slice(0,300).map(r=>`<tr><td class="mono">${esc(r.date||'')}</td><td><button type="button" class="att-link" data-ppe-worker="${esc(r.w.id)}">${esc(r.w.fullName||'—')}</button></td><td>${esc(r.item||'')}</td><td>${esc(r.size||'—')}</td><td class="num">${qty(r)}</td><td>${esc(r.condition||'—')}</td><td>${proof(r)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="wsub">No PPE issued for this project yet.</p>'}`;
+}
+async function sitePpeXlsx(pid){
+  const s=activeSites().find(x=>x.id===pid); if(!s) return; const recs=sitePpeRecords(s);
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
+  const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — PPE issued · '+(s.siteName||'')],['Exported '+localToday()],[],['Date','Worker','Civil ID','Designation','Item','Size','Qty','Issue type','Issued by','Replace by','Proof','Notes'],
+    ...recs.map(r=>[r.date||'', r.w.fullName||'', r.w.civilId||'', r.w.designation||'', r.item||'', r.size||'', Math.max(1, Number(r.quantity)||1), r.condition||'', r.issuedBy||'', r.expiry||'', r.sigId?'Signed on link':(/paper/i.test(r.notes||'')?'Paper':(r.needConfirm&&!r.receivedAt?'Worker to confirm':'')), r.notes||''])]);
+  sh['!cols']=[{wch:11},{wch:26},{wch:16},{wch:18},{wch:22},{wch:8},{wch:5},{wch:22},{wch:16},{wch:11},{wch:14},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, sh, 'PPE issued'); XLSX.writeFile(wb, `PPE_issued_${String(s.siteName||'project').replace(/[^A-Za-z0-9]+/g,'_')}_${localToday()}.xlsx`);
 }
 
 /* ---- Batch 76: delete (test) entries — editors only ---- */
@@ -8446,7 +8479,7 @@ function ppeReqCardHtml(r, mode){
   if(mode==='approved' && ed) acts=`<button type="button" class="btn btn-sm" data-pr-paper="${esc(r.id)}" data-armed="0" title="Use when the worker signed a paper form instead of the link">Delivered (paper signature)</button>`;
   if(ed) acts+=`<button type="button" class="btn btn-sm btn-ghost" data-pr-del="${esc(r.id)}" data-armed="0" title="Delete this request, the PPE records made from it and its signatures (e.g. test entries)">Delete</button>`;
   return `<div class="record-card ppe-rq${ppeReqUi.busy===r.id?' busy':''}"><div class="record-card-top"><div class="record-card-title">${w?`<button type="button" class="att-link" data-ppe-worker="${esc(w.id)}">${esc(name)}</button>`:esc(name)}${group?` <span class="badge muted">for ${lines.length} ${lines.length===1?'person':'people'}</span>`:''} <span class="badge ${badge}">${esc(st)}</span></div><div class="record-card-actions">${acts}</div></div>
-    <div class="wsub">Sent ${esc(ppeWhenTxt(r))} · reason <strong>${esc(d.reason||'—')}</strong> · needed by ${esc(isoToDmy(d.neededBy||'')||'—')}${!group&&w&&w.designation?' · '+esc(w.designation):''}${w&&w.projectId?' · '+esc(projectName(w.projectId)):''}</div>
+    <div class="wsub">Sent ${esc(ppeWhenTxt(r))} · reason <strong>${esc(d.reason||'—')}</strong> · needed by ${esc(isoToDmy(d.neededBy||'')||'—')}${!group&&w&&w.designation?' · '+esc(w.designation):''}${ppeReqProject(r, w)?' · <strong>'+esc(projectName(ppeReqProject(r, w)))+'</strong>':''}</div>
     ${d.note?`<div class="wsub">Worker's comment: ${esc(d.note)}</div>`:''}
     ${lines.map(lineHtml).join('')}
     ${trail.length?`<div class="wsub">${trail.map(esc).join('<br>')}</div>`:''}${note}</div>`;
@@ -8465,7 +8498,8 @@ function ppeReqPanelHtml(){
         :`<button type="button" class="btn btn-sm btn-primary" data-pr-create="${esc(p.id)}">+ Create project link</button>${off?`<button type="button" class="btn btn-sm" data-pr-on="${esc(off.id)}">Switch the old link back on</button>`:''}`}</div>`:''}
       ${l && ed && ppeReqUi.qr===l.id?`<div class="site-qr"><div class="site-qr-img" id="ppeQrBox" data-tok="${esc(l.id)}"></div><div><div class="wsub">QR for the <strong>${esc(p.siteName||'project')}</strong> crew — scan, pick your name, then <strong>Request PPE</strong>, <strong>I received PPE</strong> or <strong>TBT request</strong>.</div><div class="mono site-url">${esc(ppeReqLinkUrl(l.id))}</div><button type="button" class="btn btn-sm" data-pr-qrdl="${esc(l.id)}">${ic('download')} Download QR (PNG)</button></div></div>`:''}</div>`; };
   const oldGen=ppeLinks.filter(l=>l.active && !l.projectId), lps=ppeLinkProjects();
-  const linkHtml = (ed||ppeLinks.some(l=>l.active)) ? `<div class="subhead" style="margin-top:4px;">Project links — Scaffolding projects (PPE + TBT)</div><div class="site-links">${lps.length?lps.map(lrow).join(''):'<p class="wsub">No active Scaffolding project in Project Details.</p>'}
+  const byDiv=PPE_LINK_DIVS.map(dv=>[dv, lps.filter(p=>(p.division||'Civil')===dv)]).filter(([,l])=>l.length);
+  const linkHtml = (ed||ppeLinks.some(l=>l.active)) ? `<div class="subhead" style="margin-top:4px;">Project links (PPE + TBT) — one link per project</div><div class="site-links">${byDiv.length?byDiv.map(([dv,l])=>`<div class="wsub" style="margin:6px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${esc(divLabel?divLabel(dv):dv)} division</div>`+l.map(lrow).join('')).join(''):'<p class="wsub">No active Scaffolding, Civil or Rental project in Project Details.</p>'}
       ${oldGen.map(l=>`<div class="site-link-row off"><div><strong>Old link for all workers</strong> <span class="badge warn">Still on</span><div class="wsub">Replaced by the project links — switch it off once the crews have the new QR codes.</div></div>${ed?`<div class="site-link-acts"><button type="button" class="btn btn-sm" data-pr-off="${esc(l.id)}" data-armed="0">Switch off</button></div>`:''}</div>`).join('')}</div>` : '';
   const sec=(title, list, mode, empty)=>`<div class="subhead">${title} (${list.length})</div>${list.length?list.map(r=>ppeReqCardHtml(r, mode)).join(''):`<p class="wsub" style="margin:0 0 6px;">${empty}</p>`}`;
   const shownDone=ppeReqUi.done?done:done.slice(0,6);
@@ -8519,7 +8553,7 @@ async function ppeReqXlsx(){
   all.sort((a,b)=>(ppeTs(b)||0)-(ppeTs(a)||0));
   const rows=[]; for(const r of all){ const d=r.data||{}, rq=workers.find(x=>x.id===r.workerId)||{};
     for(const l of ppeReqLines(r)){ const w=workers.find(x=>x.id===l.wid)||{}, st=ppeLineSt(r, l);
-      rows.push([ppeDateOf(r), rq.fullName||d.name||'', w.fullName||l.name||'', w.civilId||'', w.designation||'', w.projectId?projectName(w.projectId):'', ppeItemsText(l.items), d.reason||'', d.neededBy||'', l.out?'Left out by MD':(PPE_REQ_ST[st]||st),
+      rows.push([ppeDateOf(r), rq.fullName||d.name||'', w.fullName||l.name||'', w.civilId||'', w.designation||'', ppeReqProject(r, w)?projectName(ppeReqProject(r, w)):'', ppeItemsText(l.items), d.reason||'', d.neededBy||'', l.out?'Left out by MD':(PPE_REQ_ST[st]||st),
         r.hseBy||'', String(r.hseAt||'').slice(0,10), r.mdBy||'', String(r.mdAt||'').slice(0,10), r.mdNote||r.hseNote||'', l.got?l.got.date||'':'', l.got?(l.got.paper?'Paper':'Signed on link'):'']); } }
   const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — PPE requests (open + last 30 days)'],['Exported '+localToday()],[],
     ['Requested','Requested by','Worker','Civil ID','Designation','Project','Items','Reason','Needed by','Status','HSE checked by','HSE date','MD','MD date','Comment','Received','Proof'], ...rows]);
@@ -8761,7 +8795,7 @@ function tbtPdfBody(doc, x, o){
   row([{t:'TOOLBOX TALK RECORD (TBT)', w:CW-170, bold:true, size:11.5},{t:`${dmy2(d.date)}  ·  ${d.shift||'—'} shift`, w:170, bold:true, color:RED}], 22);
   row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy2(d.date)} ${d.time||''}`, w:hw}]);
   row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
-  row([{t:'JOB', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
+  row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
   row([{t:'REQUESTED BY', w:K, bold:true, fill:LBL},{t:who(x.workerId), sub:ds(x.workerId), w:hw},{t:'CLIENT', w:K, bold:true, fill:LBL},{t:d.client||'—', w:hw}]);
   row([{t:'TOPIC', w:K, bold:true, fill:LBL},{t:x.topic, w:CW-K, bold:true}], 18);
   head("MUSTA'ED — ARE YOU READY?");
@@ -12177,6 +12211,7 @@ function siteTabCount(s, key){
   if(key==='actions'){ const l=(s.actions||[]).filter(r=>(r.status||'Open')!=='Closed'); return l.length ? {n:l.length, cls:l.some(r=>complaintOverdueDays(r))?'danger':'warn'} : null; }
   if(key==='permits'){ const l=(s.permits||[]).filter(r=>(r.status||'Open')==='Open'); return l.length ? {n:l.length, cls:l.some(r=>permitOverdueDays(r))?'danger':'warn'} : null; }
   if(key==='toolboxTalks'){ const n=(s.toolboxTalks||[]).length; return n ? {n, cls:''} : null; }
+  if(key==='ppe'){ const n=ppeReqs.filter(r=>r.kind==='request' && ppeReqProject(r, workers.find(w=>w.id===r.workerId))===s.id).length; return n ? {n, cls:'warn'} : null; }
   if(key==='emergency'){ const n=emergencyGaps(s).length; return n ? {n, cls:'warn'} : null; }
   return null;
 }
@@ -12278,6 +12313,7 @@ function renderSiteDrawerBody(){
   if(activeSiteTab==='team'){ body.innerHTML=siteTeamTabHtml(s); return; }
   if(activeSiteTab==='vehicles'){ body.innerHTML=siteVehiclesTabHtml(s); return; }
   if(activeSiteTab==='emergency'){ body.innerHTML=siteEmergencyTabHtml(s); return; }
+  if(activeSiteTab==='ppe'){ body.innerHTML=sitePpeTabHtml(s); return; }
   const cfg=SITE_RECORD_TYPES[activeSiteTab];
   const savedActiveTab=activeTab, savedEditing=editingRecordId, savedAddOpen=addFormOpen;
   activeTab=activeSiteTab; editingRecordId=editingSiteRecordId; addFormOpen=siteAddFormOpen;
@@ -15794,6 +15830,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const list=[...e.target.querySelectorAll('[data-ppe-exempt]:checked')].map(x=>x.value);
     if(await saveSettings('ppeStandards', {kitExempt:list, kitFix58:true}, ppeUi.exemptBase)){ ppeUi.exemptOpen=false; toast(list.length?`${list.length} role${list.length===1?'':'s'} left out of the basic kit check`:'All roles need the basic kit'); renderPpe(); } });
   document.getElementById('ppePane').addEventListener('submit', e=>{ if(e.target.id!=='ppeItemForm') return; e.preventDefault(); ppeSaveItem(e.target); });
+  document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-site-ppe-xlsx]'); if(b) sitePpeXlsx(b.dataset.sitePpeXlsx); });   // Batch 81
   // Batch 79: TBT requests in Project Details
   document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-dl],[data-tbt-send],[data-tbt-no],[data-tbt-cancel],[data-tbt-rm],[data-tbt-allm],[data-tbt-draadd],[data-tbt-drax]'); if(!b) return; const D=b.dataset;
     if(D.tbtDraadd){ const x=tricSubs.find(s=>s.id===D.tbtDraadd); if(x){ tricRv(x).dra.push({hz:'', m:'', r:''}); renderTricPanel(); } return; }
