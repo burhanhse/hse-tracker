@@ -2849,7 +2849,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b81';
+const APP_BUILD='b82';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -8648,7 +8648,8 @@ function tbtBoardEntries(add){
   for(const x of tricAll()){ const d=x.data||{}, s=x.sigs||{}, t=`TBT · ${d.job} · ${d.loc||'—'}`;
     const st0={new:'tbtnew', sign:'tbtsign', done:'tbtdone', rejected:'tbtrej'}[x.status]; if(!st0) continue;
     const ids=new Set(tbtAtt(x).map(p=>p.w)); ids.add(x.workerId);
-    for(const w of ids){ let st=st0; if(st0==='tbtsign' && (s[w] || !tbtAtt(x).some(p=>p.w===w))) st=tbtSignedAll(x)?'tbtdone':'tbtsigned'; if(st0==='tbtsign' && tbtSignedAll(x)) st='tbtdone';
+    for(const w of ids){ let st=st0;
+      /* Batch 82: the crew sign before the HSE review */ if(st0==='tbtnew') st=(s[w] || !tbtAtt(x).some(p=>p.w===w)) ? 'tbtpend' : 'tbtsign'; if(st0==='tbtsign' && (s[w] || !tbtAtt(x).some(p=>p.w===w))) st=tbtSignedAll(x)?'tbtdone':'tbtsigned'; if(st0==='tbtsign' && tbtSignedAll(x)) st='tbtdone';
       add(w, {id:x.id, k:'tbt', st, d:d.date||ppeDateOf(x), t, ...(w===x.workerId?{r:1}:{})}); } }
 }
 // review state (kept while the panel redraws)
@@ -8657,9 +8658,10 @@ function tricReviewCard(x){
   const d=x.data||{}, site=tbtSite(x), r=tricRv(x), busy=tricUi.busy===x.id;
   const crew=activeWorkers().filter(w=>(w.status||'active')==='active' && site && w.projectId===site.id && !r.att.some(p=>p.w===w.id)).sort((a,b)=>String(a.fullName).localeCompare(String(b.fullName)));
   return `<div class="record-card tbt-card${busy?' busy':''}" data-tbt-card="${esc(x.id)}"><div class="record-card-top"><div class="record-card-title">TBT request — <strong>${esc(d.job)}</strong> · ${esc(d.loc||'—')} <span class="badge muted">${r.att.length} people</span></div>
-      <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-tbt-send="${esc(x.id)}">Send for signatures</button><button type="button" class="btn btn-sm" data-tbt-no="${esc(x.id)}" data-armed="0">Reject</button></div></div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-tbt-send="${esc(x.id)}">✓ Reviewed</button><button type="button" class="btn btn-sm" data-tbt-no="${esc(x.id)}" data-armed="0">Reject</button></div></div>
     <div class="wsub">Requested by <strong>${esc(tbtWho(x.workerId, d.name))}</strong> · ${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(d.shift||'—')} job</strong> · <strong>${esc(site?site.siteName:'Project not found')}</strong>${d.client?' · client '+esc(d.client):''}${d.jp?' · Journey plan '+esc(d.jp):''}</div>
-    <div class="tbt-crew">${r.att.map(p=>`<span class="site-chip">${esc(tbtWho(p.w, p.n))}${(()=>{ const w=workers.find(y=>y.id===p.w); return w&&w.designation?` <span class="wsub">${esc(w.designation)}</span>`:''; })()}${p.w===x.workerId?' <span class="wsub">(requester)</span>':` <button type="button" class="site-chip-x" data-tbt-rm="${esc(x.id+'|'+p.w)}" aria-label="Remove">×</button>`}</span>`).join('')}
+    <div class="wsub" style="margin-top:4px;">Signed on the link: <strong>${r.att.filter(p=>(x.sigs||{})[p.w]).length} of ${r.att.length}</strong>${r.att.every(p=>(x.sigs||{})[p.w])?' — everyone signed':''}</div>
+    <div class="tbt-crew">${r.att.map(p=>`<span class="site-chip">${(x.sigs||{})[p.w]?'✓ ':''}${esc(tbtWho(p.w, p.n))}${(()=>{ const w=workers.find(y=>y.id===p.w); return w&&w.designation?` <span class="wsub">${esc(w.designation)}</span>`:''; })()}${p.w===x.workerId?' <span class="wsub">(requester)</span>':` <button type="button" class="site-chip-x" data-tbt-rm="${esc(x.id+'|'+p.w)}" aria-label="Remove">×</button>`}</span>`).join('')}
       ${crew.length?`<select data-tbt-addsel="${esc(x.id)}" class="tbt-addsel"><option value="">+ add from the project crew</option>${crew.map(w=>`<option value="${esc(w.id)}" ${r.add===w.id?'selected':''}>${esc(w.fullName||'—')}</option>`).join('')}</select>`:''}</div>
     <label class="tbt-topic">Topic *<input data-tbt-topic="${esc(x.id)}" value="${esc(r.topic)}" maxlength="120" placeholder="e.g. Working at height — scaffold erection, harness and 100% tie-off"></label>
     <div class="tbt-ticks"><div><div class="subhead" style="margin:6px 0 4px;">Musta'ed — are you ready? <button type="button" class="att-link" data-tbt-allm="${esc(x.id)}">tick all</button></div>
@@ -8694,10 +8696,10 @@ function renderTricPanel(){
   const ym=tricUi.month||localToday().slice(0,7);
   box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} TBT requests from the project links</h3>
       <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><input type="month" id="tricMonth" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx">${ic('download')} Month Excel</button></span></div>
-    <p class="wsub" style="margin:-4px 0 8px;">The crew request a TBT on their project link → you write the <strong>topic</strong> and tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong> → <strong>Send for signatures</strong> → everyone signs on the link → the TBT is complete (PDF here and on their phones) and counted in the project's toolbox talks. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month.</p>
+    <p class="wsub" style="margin:-4px 0 8px;">The crew fill the TBT on their project link and <strong>everyone signs straight away</strong> (they can download it marked “pending HSE review”) → you write the <strong>topic</strong>, tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong>, add dynamic risks → <strong>✓ Reviewed</strong> → the final PDF is on their link and the TBT is counted in the project's toolbox talks. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month.</p>
     ${(()=>{ const t=localToday(), ej=all.flatMap(x=>(x.jobs||[]).filter(q=>String(q.at||'').slice(0,10)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
     <div class="subhead">Waiting for your review (${nw.length})</div>${nw.length?nw.map(tricReviewCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing to review.</p>'}
-    <div class="subhead">Waiting for signatures (${sg.length})</div>${sg.length?sg.map(tricSignCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing waiting.</p>'}
+    <div class="subhead">Reviewed — waiting for signatures (${sg.length})</div>${sg.length?sg.map(tricSignCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing waiting.</p>'}
     <div class="subhead">Complete / rejected — last 7 days (${dn.length})</div>${dn.length?dn.map(tricDoneCard).join(''):'<p class="wsub" style="margin:0;">Nothing yet.</p>'}
   </div>`;
 }
@@ -8708,8 +8710,8 @@ async function tricSend(id){
   const u=auth.currentUser;
   try{ await db.collection('tbtSubmissions').doc(id).update({status:'sign', topic:r.topic.trim().slice(0,120), musted:TRIC_MUSTED.map((m,i)=>r.m.has(i)), lsr:Object.keys(TRIC_LSR).filter(k=>r.l.has(k)),
       data:{...d, att:r.att.map(p=>{ const w=workers.find(y=>y.id===p.w); return {w:p.w, n:tbtWho(p.w, p.n), ds:String((w&&w.designation)||p.ds||'').slice(0,40)}; })},
-      dra:r.dra.filter(q=>String(q.hz||'').trim()||String(q.m||'').trim()).map(q=>({hz:String(q.hz||'').trim().slice(0,120), m:String(q.m||'').trim().slice(0,200), r:q.r||'', rn:q.r?tbtWho(q.r,''):''})), sigs:{}, reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString()});
-    delete tricUi.rv[id]; toast('Sent — the crew can sign on their project link'); }
+      dra:r.dra.filter(q=>String(q.hz||'').trim()||String(q.m||'').trim()).map(q=>({hz:String(q.hz||'').trim().slice(0,120), m:String(q.m||'').trim().slice(0,200), r:q.r||'', rn:q.r?tbtWho(q.r,''):''})), sigs:Object.fromEntries(Object.entries(x.sigs||{}).filter(([w])=>r.att.some(p=>p.w===w))), reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString()});
+    delete tricUi.rv[id]; toast(r.att.every(p=>(x.sigs||{})[p.w])?'Reviewed — the final PDF is ready on their link':'Reviewed — waiting for the people who have not signed yet'); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
 async function tricReject(id, cancel){
@@ -8793,6 +8795,7 @@ function tbtPdfBody(doc, x, o){
   // title band
   doc.setFillColor(...RED); doc.rect(M,y,CW,3,'F'); y+=3;
   row([{t:'TOOLBOX TALK RECORD (TBT)', w:CW-170, bold:true, size:11.5},{t:`${dmy2(d.date)}  ·  ${d.shift||'—'} shift`, w:170, bold:true, color:RED}], 22);
+  if(x.status==='new') row([{t:'PENDING HSE REVIEW — topic, Musta\'ed and Life Saving Rules are completed by HSE. Download the final PDF from the link after the review.', w:CW, bold:true, color:[255,255,255], fill:RED}]);
   row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy2(d.date)} ${d.time||''}`, w:hw}]);
   row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
   row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
@@ -8814,7 +8817,7 @@ function tbtPdfBody(doc, x, o){
   row([{t:'#', w:22, bold:true, fill:LBL},{t:'Time / shift', w:70, bold:true, fill:LBL},{t:'Location / well', w:100, bold:true, fill:LBL},{t:'Journey plan', w:70, bold:true, fill:LBL},{t:'Job', w:70, bold:true, fill:LBL},{t:'Pause & check — changes', w:CW-22-70-100-70-70-90, bold:true, fill:LBL},{t:'Confirmed by', w:90, bold:true, fill:LBL}]);
   jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job, w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
     j.first?{t:'All attendees', w:90, color:SUB}:{img:j.sig, t:j.sig?'':who(j.by), w:90}], j.first?15:26));
-  y+=6; row([{t:`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?'  ·  '+dmy2(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?'  ·  Complete — all attendees signed':''}`, w:CW, size:7.6, color:SUB}]);
+  y+=6; row([{t:x.status==='new'?'Reviewed by HSE: PENDING':`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?'  ·  '+dmy2(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?'  ·  Complete — all attendees signed':''}`, w:CW, size:7.6, color:SUB}]);
   row([{t:'Remember the 3 golden rules: 1) Comply  2) Intervene  3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.6, bold:true, color:RED}]);
 }
 async function tricOnePdf(id){

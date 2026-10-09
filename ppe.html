@@ -63,7 +63,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
 .sgn{border-top:1px solid var(--line); padding:10px 0;} .sgn:first-of-type{border-top:0;} .sgn-h{font-weight:800;} .sgn.lead{border-top:2px solid var(--navy); margin-top:6px;} .sigbox.small canvas{height:110px;}
 @media (max-width:380px){ .tk-grid{grid-template-columns:1fr;} }
-.b-tbtnew{background:var(--warn-bg); color:var(--warn);} .b-tbtsign,.b-tbtsigned{background:var(--blue-bg); color:#1d4f91;} .b-tbtdone{background:var(--ok-bg); color:var(--ok);} .b-tbtrej{background:var(--red-bg); color:var(--red);}
+.b-tbtnew,.b-tbtpend{background:var(--warn-bg); color:var(--warn);} .b-tbtsign,.b-tbtsigned{background:var(--blue-bg); color:#1d4f91;} .b-tbtdone{background:var(--ok-bg); color:var(--ok);} .b-tbtrej{background:var(--red-bg); color:var(--red);}
 .signme{border:2px solid var(--ok); background:#f6fffa;}
 .pds{display:block; font-size:11.5px; font-weight:600; opacity:.75;} .pchip .pds{display:block;}
 .dra{border:2px solid var(--red); background:var(--red-bg); border-radius:12px; padding:10px; margin-bottom:10px;} .dra-r{padding:4px 0; border-top:1px solid #f3c4c6;} .dra-r:first-of-type{border-top:0;} .dra-r b{display:block;} .dra-r span{font-size:14px;}
@@ -139,6 +139,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     pauseChk:['Pause & check — anything changed?','रुकें और जाँचें — कुछ बदला?','توقف وتحقق — هل تغيّر شيء؟'], pauseHint2:['Tick only what changed. Brief the crew before you start.','सिर्फ़ जो बदला उस पर टिक करें। शुरू करने से पहले टीम को बताएँ।','حدد فقط ما تغيّر. أبلغ الفريق قبل البدء.'],
     jobSign:['I briefed the crew','मैंने टीम को बताया','أبلغت الفريق'], jobSave:['Save job','काम सेव करें','حفظ العمل'],
     work:['Work / task','काम / कार्य','العمل / المهمة'],
+    tbtNext:['Next: everyone signs','आगे: सभी हस्ताक्षर करें','التالي: يوقّع الجميع'], pdfPend:['Download PDF (pending HSE review)','पीडीएफ डाउनलोड करें (एचएसई जाँच बाकी)','تنزيل PDF (بانتظار المراجعة)'],
+    pdfPendHint:['After the HSE review the final PDF is here.','एचएसई जाँच के बाद अंतिम पीडीएफ यहीं मिलेगी।','بعد مراجعة السلامة يكون الملف النهائي هنا.'],
+    st_tbtpend:['TBT — signed, waiting for HSE review','टीबीटी — हस्ताक्षर हो गए, एचएसई जाँच बाकी','تم التوقيع، بانتظار مراجعة السلامة'],
     tbtReq:['TBT request','टीबीटी अनुरोध','طلب اجتماع السلامة'], tbtReqHint:['Send before the work. HSE writes the topic, then everyone signs here.','काम से पहले भेजें। एचएसई विषय लिखेगा, फिर सभी यहाँ हस्ताक्षर करेंगे।','أرسله قبل العمل. يكتب قسم السلامة الموضوع ثم يوقّع الجميع هنا.'],
     loc:['Location / Well No.','स्थान / वेल नंबर','الموقع / رقم البئر'], locX:['Location','स्थान','الموقع'], jp:['Journey plan number','जर्नी प्लान नंबर','رقم خطة الرحلة'], optional:['optional','वैकल्पिक','اختياري'],
     crew:['People for this TBT','इस टीबीटी के लोग','الأشخاص في هذا الاجتماع'], tbtSend:['Send TBT request','टीबीटी अनुरोध भेजें','إرسال الطلب'],
@@ -235,7 +238,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <div class="big2" style="margin-bottom:14px;"><button class="btn" id="toReq">${svg('helmet')}${tr('req')}</button><button class="btn green" id="toRec">${svg('impact')}${tr('rec')}${nRec?` <span class="badge" style="background:#fff;color:var(--ok)">${nRec}</span>`:''}</button></div>
         <button class="btn navy" id="toTbt" style="margin-bottom:14px;">${tr('tbtReq')}</button>
         ${toSign.length?`<div class="card signme"><h2>${esc(T.tbtToSign[0])} (${toSign.length})<span class="tr">${esc(T.tbtToSign[1])} · <span class="ar" dir="rtl">${esc(T.tbtToSign[2])}</span></span></h2>${toSign.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><button class="btn green" data-tbt-open="${esc(x.id)}" style="margin-top:6px; padding:11px;">${tr('signNow')}</button></div>`).join('')}</div>`:''}
-        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtnew'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
+        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
       $('#out').onclick=()=>{ me=null; tbtF=null; view='who'; render(); };
       app.querySelectorAll('[data-tbt-open]').forEach(bt=>bt.onclick=()=>openTbt(bt.dataset.tbtOpen));
       $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
@@ -345,7 +348,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <div class="pchips">${t.att.map((a,i)=>`<span class="pchip-w"><span class="pchip ${i===0?'on':''}">${i===0?esc(T.me[0])+' · ':''}${esc(a.n)}${dsOf(a.w)?`<span class="pds">${esc(dsOf(a.w))}</span>`:''}</span>${i?`<button type="button" class="pchip-x" data-tax="${i}" aria-label="Remove ${esc(a.n)}">✕</button>`:''}</span>`).join('')}</div>
         ${t.addOpen?`<div class="addbox">${pickerHtml('b', '')}<div id="berr" class="err hidden"></div><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" class="btn navy" id="bAdd" style="flex:1">${tr('add')}</button><button type="button" class="btn ghost" id="bAddAll" style="flex:1">${tr('addAll')}</button></div><button type="button" class="btn ghost" id="bAddNo" style="margin-top:8px;">${tr('back')}</button></div>`
           :`<button type="button" class="pchip add" id="bAddOpen" style="margin-top:8px;">+ ${esc(T.addP[0])}</button>`}</div>
-      <div class="card"><div id="err" class="err hidden"></div><button class="btn" id="bSend">${tr('tbtSend')}</button></div>
+      <div class="card"><div id="err" class="err hidden"></div><button class="btn" id="bSend">${tr('tbtNext')}</button></div>
       <button class="btn ghost" id="back">${tr('back')}</button>`;
     app.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{ tbtRead(); t.job=b.dataset.job; keepScroll(renderTbtReq); });
     app.querySelectorAll('[data-shift]').forEach(b=>b.onclick=()=>{ tbtRead(); t.shift=b.dataset.shift; keepScroll(renderTbtReq); });
@@ -367,7 +370,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const b=$('#bSend'); b.disabled=true;
     try{ const ref=await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
       sentLocal.push({id:ref.id, w:me.id, d:t.date, t:`TBT · ${t.job} · ${data.loc}`, k:'tbt'}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
-      tbtF=null; view='tbtSent'; render(); window.scrollTo(0,0); }
+      tbtF=null; await openTbt(ref.id); }
     catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Tell HSE.':'Not sent — check the internet and try again.'); }
   }
   async function tbtFetch(id){ const s=await db.collection('tbtSubmissions').doc(id).get(); return s.exists?{id, ...(s.data()||{})}:null; }
@@ -382,15 +385,15 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     if(!x){ app.innerHTML=`<div class="card"><h2>${tr('tbtGone')}</h2></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; render(); }; return; }
     const d=x.data||{}, s=x.sigs||{}, att=d.att||[], mine=x.workerId===me.id, all=tbtAllSigned(x);
     const head=`<div class="card"><h2>${esc(d.job)} · ${esc(d.loc||'')}</h2><p class="note">${esc(dmy(d.date))} ${esc(d.time||'')}${x.topic?' · '+esc(x.topic):''}</p>`;
-    if(x.status==='new'){ app.innerHTML=head+`<p class="note"><span class="badge b-tbtnew">${tr('st_tbtnew')}</span></p></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; render(); }; return; }
+    const pend=x.status==='new' ? `<p class="note"><span class="badge b-tbtnew">${tr('st_tbtnew')}</span></p>` : '';
     if(x.status==='rejected'){ app.innerHTML=head+`<p class="note"><span class="badge b-tbtrej">${tr('st_tbtrej')}</span>${x.rejectNote?' '+esc(x.rejectNote):''}</p></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; render(); }; return; }
     const todo=att.filter(p=>!s[p.w] && (mine || p.w===me.id)), dra=x.dra||[], jobs=x.jobs||[];
-    app.innerHTML=head+`${dra.length?`<div class="dra"><div class="sec" style="color:var(--red);">⚠ ${tr('dra')}</div>${dra.map(q=>`<div class="dra-r"><b>${esc(q.hz)}</b><span>${esc(q.m)}${q.rn?' — '+esc(q.rn):''}</span></div>`).join('')}</div>`:''}
+    app.innerHTML=head+pend+`${dra.length?`<div class="dra"><div class="sec" style="color:var(--red);">⚠ ${tr('dra')}</div>${dra.map(q=>`<div class="dra-r"><b>${esc(q.hz)}</b><span>${esc(q.m)}${q.rn?' — '+esc(q.rn):''}</span></div>`).join('')}</div>`:''}
         <div class="note" style="margin-bottom:8px;">${att.map(p=>`${s[p.w]?'✅':'⬜'} ${esc(p.n)}${p.ds?` <span class="pds">${esc(p.ds)}</span>`:''}`).join('<br>')}</div>
         ${jobs.length?`<div class="note" style="margin-bottom:8px;"><b>${jobs.length+1} ${esc(T.jobsN[0])}</b><br>1. ${esc(d.job)} · ${esc(d.loc||'')}${jobs.map((q,i)=>`<br>${i+2}. ${esc(q.time||'')} ${esc(q.job)} · ${esc(q.loc||'')}`).join('')}</div>`:''}
-        ${all?`<button class="btn green" id="tPdf">${tr('pdf')}</button>`:todo.length?`<p class="note">${tr(mine?'signHint':'signMine')}</p>`+todo.map(p=>`<div class="sgn"><div class="sgn-h">${esc(p.n)}</div><div class="sigbox small"><canvas data-sp="${esc(p.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(p.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(p.w)}">${T.clear[0]}</button></div>`).join('')
+        ${all?`<button class="btn green" id="tPdf">${tr(x.status==='new'?'pdfPend':'pdf')}</button>${x.status==='new'?`<p class="note">${tr('pdfPendHint')}</p>`:''}`:todo.length?`<p class="note">${tr(mine?'signHint':'signMine')}</p>`+todo.map(p=>`<div class="sgn"><div class="sgn-h">${esc(p.n)}</div><div class="sigbox small"><canvas data-sp="${esc(p.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(p.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(p.w)}">${T.clear[0]}</button></div>`).join('')
           +`<div id="err" class="err hidden"></div><button class="btn green" id="tSave">${tr('saveSig')}</button>`:`<p class="note">${tr('waitOthers')}</p>`}
-        ${mine && (x.status==='sign'||x.status==='done') && jobs.length<9?`<button class="btn navy" id="tJob" style="margin-top:10px;">+ ${tr('addJob')}</button>`:''}
+        ${mine && ['new','sign','done'].includes(x.status) && jobs.length<9?`<button class="btn navy" id="tJob" style="margin-top:10px;">+ ${tr('addJob')}</button>`:''}
       </div><button class="btn ghost" id="back">${tr('back')}</button>`;
     $('#back').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
     tpads={}; app.querySelectorAll('[data-sp]').forEach(cv=>{ const k=cv.dataset.sp; tpads[k]=makePad(cv, app.querySelector(`[data-sh="${CSS.escape(k)}"]`)); });
@@ -433,7 +436,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     if(!Object.keys(add).length) return err('Sign in at least one box.');
     const b=$('#tSave'); b.disabled=true;
     for(let attempt=0; attempt<3; attempt++){
-      try{ const fresh=await tbtFetch(tbtX.id); if(!fresh || fresh.status!=='sign'){ tbtX=fresh; render(); return; }
+      try{ const fresh=await tbtFetch(tbtX.id); if(!fresh || !['new','sign'].includes(fresh.status)){ tbtX=fresh; render(); return; }
         const sigs={...(fresh.sigs||{})}; for(const [w,v] of Object.entries(add)) if(!sigs[w]) sigs[w]=v;
         await db.collection('tbtSubmissions').doc(tbtX.id).update({sigs});
         tbtX={...fresh, sigs}; if(link.board && link.board[me.id]) link.board[me.id]=link.board[me.id].map(e=>e.id===tbtX.id?{...e, st:tbtAllSigned(tbtX)?'tbtdone':'tbtsigned'}:e);
@@ -479,6 +482,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     // title band
     doc.setFillColor(...RED); doc.rect(M,y,CW,3,'F'); y+=3;
     row([{t:'TOOLBOX TALK RECORD (TBT)', w:CW-170, bold:true, size:11.5},{t:`${dmy2(d.date)}  ·  ${d.shift||'—'} shift`, w:170, bold:true, color:RED}], 22);
+    if(x.status==='new') row([{t:'PENDING HSE REVIEW — topic, Musta\'ed and Life Saving Rules are completed by HSE. Download the final PDF from the link after the review.', w:CW, bold:true, color:[255,255,255], fill:RED}]);
     row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy2(d.date)} ${d.time||''}`, w:hw}]);
     row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
     row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
@@ -500,7 +504,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     row([{t:'#', w:22, bold:true, fill:LBL},{t:'Time / shift', w:70, bold:true, fill:LBL},{t:'Location / well', w:100, bold:true, fill:LBL},{t:'Journey plan', w:70, bold:true, fill:LBL},{t:'Job', w:70, bold:true, fill:LBL},{t:'Pause & check — changes', w:CW-22-70-100-70-70-90, bold:true, fill:LBL},{t:'Confirmed by', w:90, bold:true, fill:LBL}]);
     jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job, w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
       j.first?{t:'All attendees', w:90, color:SUB}:{img:j.sig, t:j.sig?'':who(j.by), w:90}], j.first?15:26));
-    y+=6; row([{t:`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?'  ·  '+dmy2(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?'  ·  Complete — all attendees signed':''}`, w:CW, size:7.6, color:SUB}]);
+    y+=6; row([{t:x.status==='new'?'Reviewed by HSE: PENDING':`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?'  ·  '+dmy2(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?'  ·  Complete — all attendees signed':''}`, w:CW, size:7.6, color:SUB}]);
     row([{t:'Remember the 3 golden rules: 1) Comply  2) Intervene  3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.6, bold:true, color:RED}]);
   }
   function err(m){ const e=$('#err'); if(e){ e.textContent=m; e.classList.remove('hidden'); e.scrollIntoView({block:'center'}); } }
