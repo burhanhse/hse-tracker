@@ -1056,7 +1056,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ppe-rq{margin-bottom:8px;} .ppe-rq.busy{opacity:.6;} .ppe-rq .table-wrap{margin:6px 0;} .ppe-rq-t td,.ppe-rq-t th{padding:4px 8px;}
 .ppe-rq-in{width:90px; padding:4px 6px; min-height:0;} .ppe-rq-in.num{width:64px;} .ppe-rq-note{width:100%; margin-top:6px;} .ppe-rq-person{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; margin:8px 0 2px; font-weight:600;} .ppe-out{margin-left:auto; font-weight:600;} .ppe-rq-t tr.ppe-off td{text-decoration:line-through; opacity:.6;}
 .ppe-alert{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--warn); border-left:4px solid var(--warn); border-radius:9px; padding:8px 12px; margin-bottom:12px; font-size:13px;}
-.tric-panel{border-left:3px solid var(--accent);} .tbt-card{margin-bottom:8px;} .tbt-card.busy{opacity:.6;} .tbt-crew{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0;} .tbt-addsel{max-width:260px; min-height:0; padding:4px 8px;} .tbt-topic{display:block; margin:6px 0; font-weight:600;} .tbt-topic input{width:100%;} .tbt-ticks{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0 18px;} .tbt-chk{display:flex; gap:6px; align-items:center; margin:2px 0;} .tric-card{margin-bottom:8px;} .tric-card.busy{opacity:.6;} .tric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:4px 14px; margin:6px 0; font-size:12.5px;} .tric-grid .rf-k{display:block;} .tric-pick{display:block; margin-top:6px; font-weight:600;} .tric-pick select{max-width:340px;}
+.tric-panel{border-left:3px solid var(--accent);} .tbt-card{margin-bottom:8px;} .tbt-card.busy{opacity:.6;} .tbt-crew{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0;} .tbt-addsel{max-width:260px; min-height:0; padding:4px 8px;} .tbt-topic{display:block; margin:6px 0; font-weight:600;} .tbt-topic input{width:100%;} .tbt-ticks{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0 18px;} .tbt-chk{display:flex; gap:6px; align-items:center; margin:2px 0;} .tbt-dra{display:grid; grid-template-columns:1fr 1.4fr 180px auto; gap:6px; margin-bottom:6px;} .tbt-dra input,.tbt-dra select{min-height:0; padding:5px 8px;} .tbt-jobs{margin-top:6px; padding:6px 8px; border-left:3px solid var(--warn); font-size:12.5px; background:var(--surface-2);} @media (max-width:700px){ .tbt-dra{grid-template-columns:1fr;} } .tric-card{margin-bottom:8px;} .tric-card.busy{opacity:.6;} .tric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:4px 14px; margin:6px 0; font-size:12.5px;} .tric-grid .rf-k{display:block;} .tric-pick{display:block; margin-top:6px; font-weight:600;} .tric-pick select{max-width:340px;}
 .ppe-img-prev{width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--line); vertical-align:middle; margin-left:6px;}
 @media (max-width:900px){ .ppe-grid{grid-template-columns:1fr;} }
 
@@ -2848,7 +2848,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b79';
+const APP_BUILD='b80';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -8258,12 +8258,12 @@ async function ppeLinkPayload(token, pid){
   const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===pid), list=[];
   for(const w of ws){ const dg=String(w.civilId||'').replace(/\D/g,''); let h='';
     if(dg.length>=4){ const k=token+':'+dg.slice(-4); h=ppeHashCache.get(k); if(!h){ h=await ppeSha(k); ppeHashCache.set(k,h); } }
-    list.push({id:w.id, name:w.fullName||'—', h, dv:ppeWorkerDiv(w)}); }
+    list.push({id:w.id, name:w.fullName||'—', h, dv:ppeWorkerDiv(w), ds:String(w.designation||'').slice(0,40)}); }
   list.sort((a,b)=>a.name.localeCompare(b.name));
   const dc=docControl('ppeIssue'), dt=docControl('tric'), site=activeSites().find(s=>s.id===pid), ids=new Set(list.map(w=>w.id)), all=ppeBoard(), board={};
   for(const k of Object.keys(all)) if(ids.has(k)) board[k]=all[k];
   const locs=[...new Set([...scaffWellOptions(), ...scaffLocations()])].sort((a,b)=>a.localeCompare(b)).slice(0,300);
-  return {projectId:pid, projectName:(site&&site.siteName)||'', workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
+  return {projectId:pid, projectName:(site&&site.siteName)||'', clientName:(site&&site.clientName)||'', clients:scaffClientList().slice(0,60), workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
 }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
@@ -8618,20 +8618,23 @@ function tbtBoardEntries(add){
       add(w, {id:x.id, k:'tbt', st, d:d.date||ppeDateOf(x), t, ...(w===x.workerId?{r:1}:{})}); } }
 }
 // review state (kept while the panel redraws)
-function tricRv(x){ let r=tricUi.rv[x.id]; if(!r){ r=tricUi.rv[x.id]={topic:'', m:new Set(), l:new Set(), att:tbtAtt(x).map(p=>({...p})), note:'', add:''}; } return r; }
+function tricRv(x){ let r=tricUi.rv[x.id]; if(!r){ r=tricUi.rv[x.id]={topic:'', m:new Set(), l:new Set(), att:tbtAtt(x).map(p=>({...p})), note:'', add:'', dra:[]}; } return r; }
 function tricReviewCard(x){
   const d=x.data||{}, site=tbtSite(x), r=tricRv(x), busy=tricUi.busy===x.id;
   const crew=activeWorkers().filter(w=>(w.status||'active')==='active' && site && w.projectId===site.id && !r.att.some(p=>p.w===w.id)).sort((a,b)=>String(a.fullName).localeCompare(String(b.fullName)));
   return `<div class="record-card tbt-card${busy?' busy':''}" data-tbt-card="${esc(x.id)}"><div class="record-card-top"><div class="record-card-title">TBT request — <strong>${esc(d.job)}</strong> · ${esc(d.loc||'—')} <span class="badge muted">${r.att.length} people</span></div>
       <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-tbt-send="${esc(x.id)}">Send for signatures</button><button type="button" class="btn btn-sm" data-tbt-no="${esc(x.id)}" data-armed="0">Reject</button></div></div>
-    <div class="wsub">Requested by <strong>${esc(tbtWho(x.workerId, d.name))}</strong> · ${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(site?site.siteName:'Project not found')}</strong>${d.jp?' · Journey plan '+esc(d.jp):''}</div>
-    <div class="tbt-crew">${r.att.map(p=>`<span class="site-chip">${esc(tbtWho(p.w, p.n))}${p.w===x.workerId?' <span class="wsub">(requester)</span>':` <button type="button" class="site-chip-x" data-tbt-rm="${esc(x.id+'|'+p.w)}" aria-label="Remove">×</button>`}</span>`).join('')}
+    <div class="wsub">Requested by <strong>${esc(tbtWho(x.workerId, d.name))}</strong> · ${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(d.shift||'—')} job</strong> · <strong>${esc(site?site.siteName:'Project not found')}</strong>${d.client?' · client '+esc(d.client):''}${d.jp?' · Journey plan '+esc(d.jp):''}</div>
+    <div class="tbt-crew">${r.att.map(p=>`<span class="site-chip">${esc(tbtWho(p.w, p.n))}${(()=>{ const w=workers.find(y=>y.id===p.w); return w&&w.designation?` <span class="wsub">${esc(w.designation)}</span>`:''; })()}${p.w===x.workerId?' <span class="wsub">(requester)</span>':` <button type="button" class="site-chip-x" data-tbt-rm="${esc(x.id+'|'+p.w)}" aria-label="Remove">×</button>`}</span>`).join('')}
       ${crew.length?`<select data-tbt-addsel="${esc(x.id)}" class="tbt-addsel"><option value="">+ add from the project crew</option>${crew.map(w=>`<option value="${esc(w.id)}" ${r.add===w.id?'selected':''}>${esc(w.fullName||'—')}</option>`).join('')}</select>`:''}</div>
     <label class="tbt-topic">Topic *<input data-tbt-topic="${esc(x.id)}" value="${esc(r.topic)}" maxlength="120" placeholder="e.g. Working at height — scaffold erection, harness and 100% tie-off"></label>
     <div class="tbt-ticks"><div><div class="subhead" style="margin:6px 0 4px;">Musta'ed — are you ready? <button type="button" class="att-link" data-tbt-allm="${esc(x.id)}">tick all</button></div>
       ${TRIC_MUSTED.map(([h,s],i)=>`<label class="chk tbt-chk" title="${esc(s)}"><input type="checkbox" data-tbt-m="${esc(x.id+'|'+i)}" ${r.m.has(i)?'checked':''}> ${i+1}. ${esc(h)}</label>`).join('')}</div>
       <div><div class="subhead" style="margin:6px 0 4px;">Life Saving Rules discussed</div>
       ${Object.entries(TRIC_LSR).map(([k,l])=>`<label class="chk tbt-chk"><input type="checkbox" data-tbt-l="${esc(x.id+'|'+k)}" ${r.l.has(k)?'checked':''}> ${esc(l)}</label>`).join('')}</div></div>
+    <div class="subhead" style="margin:8px 0 4px;">Dynamic risk assessment <span class="wsub">(only if there is something to add)</span></div>
+    ${r.dra.map((q,i)=>`<div class="tbt-dra"><input data-tbt-dra="${esc(x.id+'|'+i+'|hz')}" value="${esc(q.hz||'')}" maxlength="120" placeholder="Risk / hazard"><input data-tbt-dra="${esc(x.id+'|'+i+'|m')}" value="${esc(q.m||'')}" maxlength="200" placeholder="Control measure"><select data-tbt-dra="${esc(x.id+'|'+i+'|r')}"><option value="">Responsible…</option>${r.att.map(p=>`<option value="${esc(p.w)}" ${q.r===p.w?'selected':''}>${esc(tbtWho(p.w, p.n))}</option>`).join('')}</select><button type="button" class="icon-btn" data-tbt-drax="${esc(x.id+'|'+i)}" aria-label="Remove">×</button></div>`).join('')}
+    <button type="button" class="btn btn-sm btn-ghost" data-tbt-draadd="${esc(x.id)}">+ Add a risk</button>
     <input class="ppe-rq-note" data-tbt-note="${esc(x.id)}" value="${esc(r.note)}" maxlength="300" placeholder="Reason if rejected (optional)"></div>`;
 }
 function tricSignCard(x){
@@ -8639,13 +8642,14 @@ function tricSignCard(x){
   return `<div class="record-card tbt-card"><div class="record-card-top"><div class="record-card-title">${esc(x.topic||d.job)} <span class="badge ${n===a.length?'ok':'warn'}">${n}/${a.length} signed</span></div>
       <div class="record-card-actions"><button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button><button type="button" class="btn btn-sm btn-ghost" data-tbt-cancel="${esc(x.id)}" data-armed="0">Cancel</button></div></div>
     <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(site?site.siteName:'—')} · requested by ${esc(tbtWho(x.workerId, d.name))}</div>
-    <div class="wsub">${a.map(p=>`${s[p.w]?'✓':'…'} ${esc(tbtWho(p.w, p.n))}`).join(' · ')}</div></div>`;
+    <div class="wsub">${a.map(p=>`${s[p.w]?'✓':'…'} ${esc(tbtWho(p.w, p.n))}`).join(' · ')}</div>${tricJobsHtml(x)}</div>`;
 }
+function tricJobsHtml(x){ const j=x.jobs||[]; if(!j.length) return ''; return `<div class="tbt-jobs"><strong>${j.length+1} jobs under this TBT</strong>${j.map((q,i)=>`<div>Job ${i+2}: ${esc(q.time||'')} ${esc(q.shift||'')} · <strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')}${q.jp?' · JP '+esc(q.jp):''} · ${q.chg&&q.chg.length?'<span class="badge warn">changes: '+esc(q.chg.join(', '))+'</span>':'no changes'}</div>`).join('')}</div>`; }
 function tricDoneCard(x){
   const d=x.data||{}, site=tbtSite(x), done=x.status==='done';
   return `<div class="record-card tbt-card"><div class="record-card-top"><div class="record-card-title">${esc(x.topic||d.job)} <span class="badge ${done?'ok':'danger'}">${done?'Complete':'Rejected'}</span></div>
       <div class="record-card-actions">${done?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button>`:''}</div></div>
-    <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(site?site.siteName:'—')} · ${tbtAtt(x).length} people${x.rejectNote?' · '+esc(x.rejectNote):''}</div></div>`;
+    <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(d.shift||'')} · ${esc(site?site.siteName:'—')} · ${tbtAtt(x).length} people${x.rejectNote?' · '+esc(x.rejectNote):''}</div>${tricJobsHtml(x)}</div>`;
 }
 function renderTricPanel(){
   const box=document.getElementById('tricBox'); if(!box) return;
@@ -8657,6 +8661,7 @@ function renderTricPanel(){
   box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} TBT requests from the project links</h3>
       <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><input type="month" id="tricMonth" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx">${ic('download')} Month Excel</button></span></div>
     <p class="wsub" style="margin:-4px 0 8px;">The crew request a TBT on their project link → you write the <strong>topic</strong> and tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong> → <strong>Send for signatures</strong> → everyone signs on the link → the TBT is complete (PDF here and on their phones) and counted in the project's toolbox talks. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month.</p>
+    ${(()=>{ const t=localToday(), ej=all.flatMap(x=>(x.jobs||[]).filter(q=>String(q.at||'').slice(0,10)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
     <div class="subhead">Waiting for your review (${nw.length})</div>${nw.length?nw.map(tricReviewCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing to review.</p>'}
     <div class="subhead">Waiting for signatures (${sg.length})</div>${sg.length?sg.map(tricSignCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing waiting.</p>'}
     <div class="subhead">Complete / rejected — last 7 days (${dn.length})</div>${dn.length?dn.map(tricDoneCard).join(''):'<p class="wsub" style="margin:0;">Nothing yet.</p>'}
@@ -8668,7 +8673,8 @@ async function tricSend(id){
   if(!r.att.length){ toast('No people left on this TBT'); return; }
   const u=auth.currentUser;
   try{ await db.collection('tbtSubmissions').doc(id).update({status:'sign', topic:r.topic.trim().slice(0,120), musted:TRIC_MUSTED.map((m,i)=>r.m.has(i)), lsr:Object.keys(TRIC_LSR).filter(k=>r.l.has(k)),
-      data:{...d, att:r.att.map(p=>({w:p.w, n:tbtWho(p.w, p.n)}))}, sigs:{}, reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString()});
+      data:{...d, att:r.att.map(p=>{ const w=workers.find(y=>y.id===p.w); return {w:p.w, n:tbtWho(p.w, p.n), ds:String((w&&w.designation)||p.ds||'').slice(0,40)}; })},
+      dra:r.dra.filter(q=>String(q.hz||'').trim()||String(q.m||'').trim()).map(q=>({hz:String(q.hz||'').trim().slice(0,120), m:String(q.m||'').trim().slice(0,200), r:q.r||'', rn:q.r?tbtWho(q.r,''):''})), sigs:{}, reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString()});
     delete tricUi.rv[id]; toast('Sent — the crew can sign on their project link'); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
@@ -8713,46 +8719,69 @@ async function tricDownload(kind){
 }
 async function tricXlsx(list, ym){
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
-  const rows=list.map(x=>{ const d=x.data||{}, site=tbtSite(x); return [d.date||'', d.time||'', site?site.siteName:'', d.loc||'', d.jp||'', d.job||'', x.topic||'', tbtWho(x.workerId, d.name), tbtAtt(x).length, tbtAtt(x).map(p=>tbtWho(p.w, p.n)).join(', '),
-    (x.musted||[]).filter(Boolean).length+'/7', (x.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), x.reviewedBy||'']; });
+  const rows=list.map(x=>{ const d=x.data||{}, site=tbtSite(x); return [d.date||'', d.time||'', d.shift||'', site?site.siteName:'', d.client||'', d.loc||'', d.jp||'', d.job||'', x.topic||'', tbtWho(x.workerId, d.name), tbtAtt(x).length, tbtAtt(x).map(p=>tbtWho(p.w, p.n)).join(', '),
+    (x.musted||[]).filter(Boolean).length+'/7', (x.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), (x.dra||[]).length, 1+(x.jobs||[]).length, x.reviewedBy||'']; });
+  const jobs=[]; for(const x of list){ const d=x.data||{}, site=tbtSite(x); [{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, main:true}, ...(x.jobs||[])].forEach((q,i)=>jobs.push([d.date||'', site?site.siteName:'', x.topic||'', i+1, q.time||'', q.shift||'', q.loc||'', q.jp||'', q.job||'', q.main?'Main TBT':(q.chg&&q.chg.length?q.chg.join(', '):'No changes'), q.main?tbtWho(x.workerId, d.name):tbtWho(q.by, d.name)])); }
   const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — Toolbox talks (TBT) '+monthLabel(ym)],['Exported '+localToday()],[],
-    ['Date','Time','Project','Location / well no.','Journey plan no.','Job','Topic','Requested by','People','Names',"Musta'ed",'Life Saving Rules','Reviewed by'], ...rows]);
-  sh['!cols']=[{wch:11},{wch:7},{wch:24},{wch:20},{wch:14},{wch:13},{wch:40},{wch:22},{wch:7},{wch:60},{wch:9},{wch:40},{wch:26}];
-  XLSX.utils.book_append_sheet(wb, sh, 'Toolbox talks'); XLSX.writeFile(wb, `TBT_records_${ym}.xlsx`);
+    ['Date','Time','Shift','Project','Client','Location / well no.','Journey plan no.','Job','Topic','Requested by','People','Names',"Musta'ed",'Life Saving Rules','Dynamic risks','Jobs','Reviewed by'], ...rows]);
+  sh['!cols']=[{wch:11},{wch:7},{wch:7},{wch:24},{wch:16},{wch:20},{wch:14},{wch:13},{wch:40},{wch:22},{wch:7},{wch:60},{wch:9},{wch:40},{wch:8},{wch:6},{wch:26}];
+  const sj=XLSX.utils.aoa_to_sheet([['Date','Project','TBT topic','Job no.','Time','Shift','Location / well no.','Journey plan no.','Job','Pause & check','Confirmed by'], ...jobs]);
+  sj['!cols']=[{wch:11},{wch:24},{wch:36},{wch:7},{wch:7},{wch:7},{wch:20},{wch:14},{wch:13},{wch:30},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, sh, 'Toolbox talks'); XLSX.utils.book_append_sheet(wb, sj, 'Jobs'); XLSX.writeFile(wb, `TBT_records_${ym}.xlsx`);
 }
 async function tricPdf(list, fileName, sub){
   if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
   preloadPdfLogo();
   const doc=pdfDoc({unit:'pt', format:'a4', docKey:'tric', docSub:sub||''});
   list.forEach((x,ix)=>{ if(ix) doc.addPage(); const site=tbtSite(x);
-    tbtPdfBody(doc, x, {project:site?site.siteName:'—', who:id=>tbtWho(id, (tbtAtt(x).find(p=>p.w===id)||{}).n||(x.data||{}).name), top:32}); });
+    tbtPdfBody(doc, x, {project:site?site.siteName:'—', who:id=>tbtWho(id, (tbtAtt(x).find(p=>p.w===id)||{}).n||(x.data||{}).name), ds:id=>{ const w=workers.find(y=>y.id===id); return (w&&w.designation)||((tbtAtt(x).find(p=>p.w===id)||{}).ds)||''; }, musted:TRIC_MUSTED, lsr:TRIC_LSR, top:32}); });
   doc.save(fileName);
 }
-// the same drawing is used on the crew's phones (ppe.html has a copy)
+  // TBT PDF body — the same code is in the tracker (index.html) and on the crew's phones (ppe.html)
 function tbtPdfBody(doc, x, o){
-  const d=x.data||{}, s=x.sigs||{}, M=30, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, FS=8.6, LH=10, INK=[20,22,28], LBL=[244,246,248], GRN=[16,140,72], GREY=[226,229,234];
-  let y=o.top||32; const ensure=h=>{ if(y+h>H-26){ doc.addPage(); y=o.top||32; } };
-  const row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:c.img?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
-    const h=Math.max(minH||14, ...pc.map(c=>c.l.length*LH+5)); ensure(h); let xx=M;
-    for(const c of pc){ if(c.fill){ doc.setFillColor(...c.fill); doc.rect(xx,y,c.w,h,'F'); } doc.setDrawColor(120,126,136); doc.setLineWidth(0.5); doc.rect(xx,y,c.w,h);
-      if(c.img){ try{ let iw=c.w-8, ih=h-4; try{ const pr=doc.getImageProperties(c.img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(c.img, 'PNG', xx+(c.w-iw)/2, y+(h-ih)/2, iw, ih); }catch(e){} }
-      doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); doc.setTextColor(...(c.color||INK)); c.l.forEach((ln,i)=>doc.text(ln, xx+4, y+10+i*LH)); xx+=c.w; }
+  const d=x.data||{}, s=x.sigs||{}, M=30, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, FS=8.6, LH=10;
+  const INK=[20,22,28], LBL=[246,247,249], RED=[179,18,26], SUB=[90,96,106];
+  let y=o.top||32; const ensure=h=>{ if(y+h>H-28){ doc.addPage(); y=o.top||32; } };
+  const dmy2=v=>{ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v||''); return m?`${m[3]}-${m[2]}-${m[1]}`:(v||''); };
+  const drawTick=(cx,cy,on)=>{ doc.setDrawColor(110,116,126); doc.setLineWidth(0.6); doc.rect(cx-5,cy-5,10,10);
+    if(on){ doc.setDrawColor(...INK); doc.setLineWidth(1.6); doc.line(cx-3.2,cy+0.2,cx-0.8,cy+2.8); doc.line(cx-0.8,cy+2.8,cx+3.8,cy-3.2); } doc.setLineWidth(0.5); };
+  const row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:(c.img||c.check!==undefined)?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
+    const h=Math.max(minH||15, ...pc.map(c=>c.l.length*LH+5+(c.sub?LH:0))); ensure(h); let xx=M;
+    for(const c of pc){ if(c.fill){ doc.setFillColor(...c.fill); doc.rect(xx,y,c.w,h,'F'); } doc.setDrawColor(150,156,166); doc.setLineWidth(0.5); doc.rect(xx,y,c.w,h);
+      if(c.img){ try{ let iw=c.w-10, ih=h-6; try{ const pr=doc.getImageProperties(c.img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(c.img, 'PNG', xx+(c.w-iw)/2, y+(h-ih)/2, iw, ih); }catch(e){} }
+      if(c.check!==undefined) drawTick(xx+c.w/2, y+h/2, !!c.check);
+      doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); doc.setTextColor(...(c.color||INK)); c.l.forEach((ln,i)=>doc.text(ln, xx+5, y+10.5+i*LH));
+      if(c.sub){ doc.setFont('helvetica','normal'); doc.setFontSize(7.4); doc.setTextColor(...SUB); doc.text(String(c.sub), xx+5, y+10.5+c.l.length*LH); }
+      xx+=c.w; }
     y+=h; doc.setTextColor(...INK); };
-  const head=t=>{ ensure(30); y+=5; row([{t, w:CW, bold:true, fill:GRN, color:[255,255,255]}]); };
-  const tick=b=>b?'[X]':'[  ]', K=100, hw=(CW-2*K)/2, dmy=v=>{ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v||''); return m?`${m[3]}-${m[2]}-${m[1]}`:(v||''); };
-  row([{t:'TOOLBOX TALK RECORD (TBT)', w:CW, bold:true, size:11, fill:GREY}]);
-  row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy(d.date)} ${d.time||''}`, w:hw}]);
+  const head=t=>{ ensure(34); y+=7; row([{t, w:CW, bold:true, fill:RED, color:[255,255,255], size:8.8}], 16); };
+  const K=104, hw=(CW-2*K)/2, who=o.who, ds=o.ds||(()=>'');
+  // title band
+  doc.setFillColor(...RED); doc.rect(M,y,CW,3,'F'); y+=3;
+  row([{t:'TOOLBOX TALK RECORD (TBT)', w:CW-170, bold:true, size:11.5},{t:`${dmy2(d.date)}  ·  ${d.shift||'—'} shift`, w:170, bold:true, color:RED}], 22);
+  row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy2(d.date)} ${d.time||''}`, w:hw}]);
   row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
-  row([{t:'JOB', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'REQUESTED BY', w:K, bold:true, fill:LBL},{t:o.who(x.workerId), w:hw}]);
-  row([{t:'TOPIC', w:K, bold:true, fill:LBL},{t:x.topic, w:CW-K, bold:true}]);
+  row([{t:'JOB', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
+  row([{t:'REQUESTED BY', w:K, bold:true, fill:LBL},{t:who(x.workerId), sub:ds(x.workerId), w:hw},{t:'CLIENT', w:K, bold:true, fill:LBL},{t:d.client||'—', w:hw}]);
+  row([{t:'TOPIC', w:K, bold:true, fill:LBL},{t:x.topic, w:CW-K, bold:true}], 18);
   head("MUSTA'ED — ARE YOU READY?");
-  TRIC_MUSTED.forEach(([t,sx],i)=>row([{t:`${i+1}. ${t}`, w:110, bold:true, fill:LBL},{t:sx.replace(/ · /g,'; '), w:CW-150},{t:tick((x.musted||[])[i]), w:40, bold:true}]));
+  o.musted.forEach(([t,sx],i)=>row([{t:`${i+1}. ${t}`, w:112, bold:true, fill:LBL},{t:sx.replace(/ · /g,'; '), w:CW-150},{check:(x.musted||[])[i], w:38}]));
   head('LIFE SAVING RULES DISCUSSED');
-  const lsr=Object.entries(TRIC_LSR); for(let i=0;i<lsr.length;i+=3) row([0,1,2].flatMap(j=>lsr[i+j]?[{t:lsr[i+j][1], w:CW/3-34},{t:tick((x.lsr||[]).includes(lsr[i+j][0])), w:34, bold:true}]:[{t:'', w:CW/3, blank:true}]));
-  const att=tbtAtt(x); head(`ATTENDEES (${att.length}) — signed on the project link`);
-  for(let i=0;i<att.length;i+=2){ const c=[]; [0,1].forEach(j=>{ const p=att[i+j]; if(p) c.push({t:`${i+j+1}. ${o.who(p.w)}`, w:CW/2-120}, {img:s[p.w], t:s[p.w]?'':'not signed', w:120}); else c.push({t:'', w:CW/2, blank:true}); }); row(c, 36); }
-  y+=4; row([{t:`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?' · '+dmy(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?' · Complete':''}`, w:CW, size:7.5, color:[90,96,106]}]);
-  row([{t:'Remember 3 golden rules: 1) Comply 2) Intervene 3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.5, color:[150,20,20]}]);
+  const lsr=Object.entries(o.lsr); for(let i=0;i<lsr.length;i+=3) row([0,1,2].flatMap(j=>lsr[i+j]?[{t:lsr[i+j][1], w:CW/3-30},{check:(x.lsr||[]).includes(lsr[i+j][0]), w:30}]:[{t:'', w:CW/3, blank:true}]));
+  const dra=x.dra||[];
+  if(dra.length){ head('DYNAMIC RISK ASSESSMENT');
+    row([{t:'Risk / hazard', w:150, bold:true, fill:LBL},{t:'Control measure', w:CW-150-130, bold:true, fill:LBL},{t:'Responsible', w:130, bold:true, fill:LBL}]);
+    dra.forEach(r=>row([{t:r.hz, w:150},{t:r.m, w:CW-280},{t:r.r?who(r.r):(r.rn||'—'), w:130}])); }
+  const att=d.att||[]; head(`ATTENDEES (${att.length}) — signed on the project link`);
+  row([{t:'#', w:22, bold:true, fill:LBL},{t:'Name', w:CW/2-22-120+40, bold:true, fill:LBL},{t:'Designation', w:CW/2-40, bold:true, fill:LBL},{t:'Signature', w:120, bold:true, fill:LBL}]);
+  att.forEach((p,i)=>row([{t:String(i+1), w:22},{t:who(p.w), w:CW/2-102},{t:ds(p.w)||p.ds||'—', w:CW/2-40},{img:s[p.w], t:s[p.w]?'':'not signed', w:120, color:SUB}], 30));
+  const jobs=[{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, first:true}, ...(x.jobs||[])];
+  head(`JOBS CARRIED OUT UNDER THIS TBT (${jobs.length})`);
+  row([{t:'#', w:22, bold:true, fill:LBL},{t:'Time / shift', w:70, bold:true, fill:LBL},{t:'Location / well', w:100, bold:true, fill:LBL},{t:'Journey plan', w:70, bold:true, fill:LBL},{t:'Job', w:70, bold:true, fill:LBL},{t:'Pause & check — changes', w:CW-22-70-100-70-70-90, bold:true, fill:LBL},{t:'Confirmed by', w:90, bold:true, fill:LBL}]);
+  jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job, w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
+    j.first?{t:'All attendees', w:90, color:SUB}:{img:j.sig, t:j.sig?'':who(j.by), w:90}], j.first?15:26));
+  y+=6; row([{t:`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?'  ·  '+dmy2(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?'  ·  Complete — all attendees signed':''}`, w:CW, size:7.6, color:SUB}]);
+  row([{t:'Remember the 3 golden rules: 1) Comply  2) Intervene  3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.6, bold:true, color:RED}]);
 }
 async function tricOnePdf(id){
   const x=await tricGet(id);
@@ -15766,7 +15795,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(await saveSettings('ppeStandards', {kitExempt:list, kitFix58:true}, ppeUi.exemptBase)){ ppeUi.exemptOpen=false; toast(list.length?`${list.length} role${list.length===1?'':'s'} left out of the basic kit check`:'All roles need the basic kit'); renderPpe(); } });
   document.getElementById('ppePane').addEventListener('submit', e=>{ if(e.target.id!=='ppeItemForm') return; e.preventDefault(); ppeSaveItem(e.target); });
   // Batch 79: TBT requests in Project Details
-  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-dl],[data-tbt-send],[data-tbt-no],[data-tbt-cancel],[data-tbt-rm],[data-tbt-allm]'); if(!b) return; const D=b.dataset;
+  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-dl],[data-tbt-send],[data-tbt-no],[data-tbt-cancel],[data-tbt-rm],[data-tbt-allm],[data-tbt-draadd],[data-tbt-drax]'); if(!b) return; const D=b.dataset;
+    if(D.tbtDraadd){ const x=tricSubs.find(s=>s.id===D.tbtDraadd); if(x){ tricRv(x).dra.push({hz:'', m:'', r:''}); renderTricPanel(); } return; }
+    if(D.tbtDrax){ const [id,i]=D.tbtDrax.split('|'), x=tricSubs.find(s=>s.id===id); if(x){ tricRv(x).dra.splice(+i,1); renderTricPanel(); } return; }
     if(D.tricGoto){ tricGoto(); return; }
     if(D.tricPdf){ await tricOnePdf(D.tricPdf); return; }
     if(D.tricDl){ await tricDownload(D.tricDl); return; }
@@ -15780,7 +15811,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const m=t.dataset.tbtM, l=t.dataset.tbtL, add=t.dataset.tbtAddsel;
     if(m||l){ const [id,k]=(m||l).split('|'), x=tricSubs.find(s=>s.id===id); if(!x) return; const r=tricRv(x), set=m?r.m:r.l, key=m?Number(k):k; t.checked?set.add(key):set.delete(key); return; }
     if(add){ const x=tricSubs.find(s=>s.id===add); if(!x || !t.value) return; const r=tricRv(x), w=workers.find(y=>y.id===t.value); if(w && !r.att.some(p=>p.w===w.id)) r.att.push({w:w.id, n:w.fullName||'—'}); t.blur(); renderTricPanel(); } });
-  document.addEventListener('input', e=>{ const t=e.target; if(!t || !t.dataset) return; const id=t.dataset.tbtTopic||t.dataset.tbtNote; if(!id) return; const x=tricSubs.find(s=>s.id===id); if(!x) return; const r=tricRv(x); if(t.dataset.tbtTopic) r.topic=t.value; else r.note=t.value; });
+  const tbtDraSet=t=>{ const [id,i,f]=t.dataset.tbtDra.split('|'), x=tricSubs.find(s=>s.id===id); if(!x) return; const q=tricRv(x).dra[+i]; if(q) q[f]=t.value; };
+  document.addEventListener('change', e=>{ if(e.target && e.target.dataset && e.target.dataset.tbtDra) tbtDraSet(e.target); });
+  document.addEventListener('input', e=>{ const t=e.target; if(!t || !t.dataset) return; if(t.dataset.tbtDra){ tbtDraSet(t); return; } const id=t.dataset.tbtTopic||t.dataset.tbtNote; if(!id) return; const x=tricSubs.find(s=>s.id===id); if(!x) return; const r=tricRv(x); if(t.dataset.tbtTopic) r.topic=t.value; else r.note=t.value; });
   // Batch 73: banner "PPE requests waiting" + receipt PDF from a worker's PPE issued record
   document.addEventListener('click', e=>{ const g=e.target.closest && e.target.closest('[data-ppe-goto]'); if(g){ ppeGoto(); return; } const r=e.target.closest && e.target.closest('[data-ppe-rcpt]'); if(r) ppeReceiptPdf(r.dataset.ppeRcpt); });
   // worker drawer → PPE issued → "Issue new joiner kit"
