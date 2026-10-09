@@ -1056,6 +1056,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ppe-rq{margin-bottom:8px;} .ppe-rq.busy{opacity:.6;} .ppe-rq .table-wrap{margin:6px 0;} .ppe-rq-t td,.ppe-rq-t th{padding:4px 8px;}
 .ppe-rq-in{width:90px; padding:4px 6px; min-height:0;} .ppe-rq-in.num{width:64px;} .ppe-rq-note{width:100%; margin-top:6px;} .ppe-rq-person{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; margin:8px 0 2px; font-weight:600;} .ppe-out{margin-left:auto; font-weight:600;} .ppe-rq-t tr.ppe-off td{text-decoration:line-through; opacity:.6;}
 .ppe-alert{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--warn); border-left:4px solid var(--warn); border-radius:9px; padding:8px 12px; margin-bottom:12px; font-size:13px;}
+.tric-panel{border-left:3px solid var(--accent);} .tric-card{margin-bottom:8px;} .tric-card.busy{opacity:.6;} .tric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:4px 14px; margin:6px 0; font-size:12.5px;} .tric-grid .rf-k{display:block;}
 .ppe-img-prev{width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--line); vertical-align:middle; margin-left:6px;}
 @media (max-width:900px){ .ppe-grid{grid-template-columns:1fr;} }
 
@@ -1127,6 +1128,7 @@ details.icam-grp .cause-list{margin:6px 0;}
   <div class="app-content">
 
     <div class="ppe-alert" id="ppeReqAlert" hidden></div>
+    <div class="ppe-alert" id="tricAlert" hidden></div>
     <div class="sample-banner" id="dbUnavailableBanner" hidden>
       Could not reach the database. Check the Firebase config at the top of the script and your internet connection.
     </div>
@@ -1405,6 +1407,7 @@ details.icam-grp .cause-list{margin:6px 0;}
         </div>
       </div>
 
+      <div id="tricBox"></div>
       <div class="tiles tiles-4" id="siteTiles"></div>
 
       <div class="panel" id="addSitePanel" hidden>
@@ -2147,7 +2150,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Risk Identification Card (TRIC)'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2845,7 +2848,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b76';
+const APP_BUILD='b77';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4374,7 +4377,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -8254,7 +8257,7 @@ async function ppeLinkPayload(token){
     list.push({id:w.id, name:w.fullName||'—', h, dv:ppeWorkerDiv(w)}); }
   list.sort((a,b)=>a.name.localeCompare(b.name));
   const dc=docControl('ppeIssue');
-  return {workers:list, items:ppeLinkItems(), board:ppeBoard(), docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}};
+  return {workers:list, items:ppeLinkItems(), board:ppeBoard(), projects:tricLinkProjects(), docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}};
 }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
@@ -8553,6 +8556,166 @@ function ppeImgResize(file){
   return new Promise((res, rej)=>{ const fr=new FileReader(); fr.onerror=()=>rej(new Error('read')); fr.onload=()=>{ const im=new Image(); im.onerror=()=>rej(new Error('image')); im.onload=()=>{
     const S=160, cv=document.createElement('canvas'); cv.width=S; cv.height=S; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,S,S);
     const k=Math.min(S/im.width, S/im.height), w=im.width*k, h=im.height*k; g.drawImage(im, (S-w)/2, (S-h)/2, w, h); res(cv.toDataURL('image/jpeg', 0.8)); }; im.src=fr.result; }; fr.readAsDataURL(file); });
+}
+
+/* ================= Batch 77: Toolbox Talk Risk Identification Card (TRIC) from the worker PPE link =================
+   Anyone opens the PPE link → "Toolbox Talk (TRIC)" → project, location, job, attendees from the name list,
+   Musta'ed 7 steps, TBT discussion steps, Life Saving Rules, hazard signs, hazards control sheet (a row per ticked hazard),
+   dynamic risk assessment, debrief → every attendee signs + TBT leader signs → tbtSubmissions (status 'new').
+   HSE approves in Project Details → a normal project toolbox talk (counts in the Monthly Report, shows on each attendee).
+   Full cards (with signatures) are deleted by the Apps Script 60 days after the TBT — download each month (PDF + Excel). */
+const TRIC_MUSTED=[['PLAN','Procedure / Work Instruction / Risk Assessment · Lift plan / Permit to work / Third party checklist · Barrier owners identified / Role · Verify understanding / Competency'],
+  ['CHECK EQUIPMENT','Certification (COC & COS) / Calibrated · Inspected / Tested / Fit for purpose / Backup available'],
+  ['PREPARE AREA','House keeping · Zone management (Red / No-Go) · SIMOPS (Above / Below / Beside) · Emergency preparedness'],
+  ['CONTROL ENERGY','Isolate (Lock out, Tag out & Test) · Line of fire: manage stored energy i.e. pressurized equipment, tension lines, rotating equipment etc.'],
+  ['COMMUNICATE','Toolbox talk (transition to work — ask open questions) · Radios / Hand signals / Signage · LFI / Focus area — personal & process safety'],
+  ['FINAL CHECKS','100% ready to go / Complete permit to work · Emergency response plan in place · Walk the line with P&ID'],
+  ['START WORK','Comply – Intervene – Respect · Adhere to Life Saving Rules · Well barriers / DROPS / Hands off · STOP & re-assess risk when things change']];
+const TRIC_STEPS=['Introduction, headcount, fitness check','Discuss activity / task scope','Share roles and responsibilities','Discuss hazard and risk of the activity','Check risk control, mitigation availability','Discuss best practice','Two-way effective communication, confirm understanding'];
+const TRIC_CHANGES={pm:'People, methods, process', te:'Tools or equipment', nh:'New hazards identified', we:'Weather'};
+const TRIC_LSR={bsc:'Bypassing safety controls', cs:'Confined space', drv:'Driving', ei:'Energy isolation', hw:'Hot work', lof:'Line-of-fire', sml:'Safe mechanical lifting', wa:'Work authorisation', wah:'Working at height'};
+const TRIC_HZ={mv:'Moving vehicles or machinery', el:'Electrical equipment / installation', sl:'Uneven or slippery surfaces', hp:'High pressure / high temperature', ch:'Chemicals / radiation', gas:'Gas release / H2S / fire', dro:'Dropped objects', lh:'Lifting & handling', no:'Noise or other environmental hazards'};
+const TRIC_KEEP_DAYS=60;
+let tricSubs=[], unsubTric=null, tricUi={busy:'', month:'', open:true};
+function startTricData(){
+  stopTricData(); if(!canEdit()) return;
+  try{ unsubTric=db.collection('tbtSubmissions').where('status','==','new').onSnapshot(snap=>{ tricSubs=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); renderTricPanel(); tricAlertRender(); },
+      err=>{ console.warn('tbtSubmissions', err); tricSubs=[]; renderTricPanel(); tricAlertRender(); }); }
+  catch(e){ console.warn('TRIC', e); }
+}
+function stopTricData(){ if(unsubTric){ try{ unsubTric(); }catch(e){} unsubTric=null; } tricSubs=[]; tricAlertRender(); }
+function tricAlertRender(){
+  const el=document.getElementById('tricAlert'); if(!el) return; const n=canEdit()?tricSubs.length:0;
+  if(!n){ el.hidden=true; el.innerHTML=''; return; }
+  el.hidden=false; el.innerHTML=`<span>${ic('clipboard')} <strong>${n}</strong> toolbox talk${n===1?'':'s'} (TRIC) from site waiting for HSE approval</span><button type="button" class="btn btn-sm btn-primary" data-tric-goto="1">Open</button>`;
+}
+function tricGoto(){ const b=document.querySelector('.sidenav-btn[data-section="site"]'); if(b) b.click(); renderTricPanel(); const p=document.getElementById('tricBox'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); }
+function tricWho(id, d){ const w=workers.find(x=>x.id===id); return w?(w.fullName||'—'):((d&&d.n)||'—'); }
+function tricTopic(d){ return String(d.job||d.task||'Toolbox talk').trim().slice(0,120); }
+function tricLinkProjects(){ return activeSites().filter(s=>projectStatus(s)!=='Completed').map(s=>({id:s.id, n:s.siteName||'Project', dv:s.division||''})).sort((a,b)=>a.n.localeCompare(b.n)); }
+function tricCardHtml(x){
+  const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId), att=d.att||[], busy=tricUi.busy===x.id;
+  const list=(o,keys)=>(keys||[]).map(k=>o[k]||k).join(', ')||'—';
+  const ctrl=[...(d.ctrl||[]).map(r=>({...r, t:TRIC_HZ[r.hz]||r.hz})), ...(d.dra||[]).map(r=>({...r, t:r.hz, dra:true}))];
+  const musted=(d.musted||[]).filter(Boolean).length, steps=(d.steps||[]).filter(Boolean).length;
+  return `<div class="record-card tric-card${busy?' busy':''}"><div class="record-card-top"><div class="record-card-title">${esc(tricTopic(d))} <span class="badge muted">${att.length} attendee${att.length===1?'':'s'}</span></div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} TRIC (PDF)</button><button type="button" class="btn btn-sm btn-primary" data-tric-ok="${esc(x.id)}" ${site?'':'disabled title="Project not found"'}>Approve</button><button type="button" class="btn btn-sm" data-tric-no="${esc(x.id)}" data-armed="0">Reject</button></div></div>
+    <div class="wsub">${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(site?site.siteName:'Project not found')}</strong> · ${esc(d.loc||'—')} · TBT leader <strong>${esc(tricWho(x.workerId, {n:d.name}))}</strong>${d.permit?' · permit '+esc(d.permit):''}</div>
+    <div class="tric-grid"><div><span class="rf-k">Musta'ed</span> ${musted}/7 ready</div><div><span class="rf-k">TBT steps</span> ${steps}/7 discussed</div>
+      <div><span class="rf-k">Life Saving Rules</span> ${esc(list(TRIC_LSR, d.lsr))}</div><div><span class="rf-k">Hazards</span> ${esc(list(TRIC_HZ, d.hz))}</div>
+      ${(d.changes||[]).length?`<div><span class="rf-k">Changes on the job</span> ${esc(list(TRIC_CHANGES, d.changes))}</div>`:''}</div>
+    ${ctrl.length?`<div class="table-wrap"><table class="ppe-rq-t"><thead><tr><th>Hazard</th><th>Control measure</th><th>Responsible</th><th>Done</th></tr></thead><tbody>${ctrl.map(r=>`<tr><td>${r.dra?'<span class="badge warn">Dynamic</span> ':''}${esc(r.t)}</td><td>${esc(r.m||'—')}</td><td>${esc(tricWho(r.r, {n:r.rn}))}</td><td>${esc(r.ok||'—')}</td></tr>`).join('')}</tbody></table></div>`:''}
+    <div class="wsub">Attendees: ${att.map(a=>esc(tricWho(a.w, a))+(a.sig?'':' (not signed)')).join(', ')||'—'}</div>
+    ${d.debrief?`<div class="wsub">Debrief: ${esc(d.debrief)}</div>`:''}
+    <input class="ppe-rq-note" data-tric-note="${esc(x.id)}" maxlength="300" placeholder="Reason if rejected (optional)"></div>`;
+}
+function renderTricPanel(){
+  let box=document.getElementById('tricBox'); if(!box) return;
+  if(!canEdit()){ box.innerHTML=''; return; }
+  const ym=tricUi.month||localToday().slice(0,7), subs=tricSubs.slice().sort((a,b)=>String((a.data||{}).date||'').localeCompare(String((b.data||{}).date||'')));
+  const keepNote=[...box.querySelectorAll('[data-tric-note]')].reduce((o,el)=>{ o[el.dataset.tricNote]=el.value; return o; },{});
+  if(document.activeElement && box.contains(document.activeElement) && document.activeElement.matches('input[data-tric-note]')) return;
+  box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} Toolbox talks from site — TRIC (${subs.length} waiting)</h3>
+      <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><input type="month" id="tricMonth" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx">${ic('download')} Month Excel</button></span></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Filled on the worker PPE link (<strong>Toolbox Talk</strong> button) — every attendee signs. <strong>Approve</strong> adds it to the project's toolbox talks and the Monthly Report. The full cards with signatures are <strong>deleted automatically ${TRIC_KEEP_DAYS} days after the TBT</strong> — download each month (PDF + Excel); the project keeps the date, topic and attendees.</p>
+    ${subs.length?subs.map(tricCardHtml).join(''):'<p class="wsub" style="margin:0;">Nothing waiting.</p>'}</div>`;
+  box.querySelectorAll('[data-tric-note]').forEach(el=>{ if(keepNote[el.dataset.tricNote]) el.value=keepNote[el.dataset.tricNote]; });
+}
+async function tricGet(id){ const x=tricSubs.find(s=>s.id===id); if(x) return x; try{ const s=await db.collection('tbtSubmissions').doc(id).get(); return s.exists?{id, ...(s.data()||{})}:null; }catch(e){ console.warn(e); return null; } }
+async function tricApprove(id){
+  if(!canEdit()) return; const x=tricSubs.find(s=>s.id===id); if(!x) return; const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId);
+  if(!site){ toast('The project of this TBT is not in Project Details'); return; }
+  const ids=[...new Set((d.att||[]).map(a=>a.w).filter(w=>workers.some(y=>y.id===w)))], extra=(d.att||[]).filter(a=>!workers.some(y=>y.id===a.w)).length;
+  const rec={id:genId(), topic:tricTopic(d), date:d.date||localToday(), conductedBy:tricWho(x.workerId, {n:d.name}), attendeeIds:ids, extraAttendees:extra?String(extra):'',
+    notes:['TRIC card from the PPE link', d.loc?'Location: '+d.loc:'', d.permit?'Permit: '+d.permit:'', (d.lsr||[]).length?'LSR: '+(d.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '):'', (d.hz||[]).length?'Hazards: '+(d.hz||[]).map(k=>TRIC_HZ[k]||k).join(', '):'', d.debrief?'Debrief: '+d.debrief:''].filter(Boolean).join(' · ').slice(0,900), tricId:x.id};
+  const u=auth.currentUser, FV=fsFieldValue();
+  try{
+    await db.collection('siteEquipment').doc(site.id).update(stamp({toolboxTalks: FV?FV.arrayUnion(rec):[...(site.toolboxTalks||[]), rec]}));
+    await syncToolboxToReport(site, rec);
+    await db.collection('tbtSubmissions').doc(id).update({status:'approved', tbtDate:d.date||localToday(), projectId:site.id, talkId:rec.id, approvedBy:(u&&u.email)||'', approvedAt:new Date().toISOString()});
+    toast(`Approved — added to ${site.siteName||'the project'}'s toolbox talks`);
+  }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not approve'); }
+}
+async function tricReject(id){
+  if(!canEdit()) return; const n=document.querySelector(`[data-tric-note="${CSS.escape(id)}"]`), u=auth.currentUser, x=tricSubs.find(s=>s.id===id)||{};
+  try{ await db.collection('tbtSubmissions').doc(id).update({status:'rejected', tbtDate:(x.data||{}).date||localToday(), rejectNote:n?String(n.value||'').trim().slice(0,300):'', approvedBy:(u&&u.email)||'', approvedAt:new Date().toISOString()}); toast('TBT rejected'); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
+}
+async function tricMonthList(ym){
+  const next=monthAdd(ym,1)+'-01';
+  const snap=await db.collection('tbtSubmissions').where('tbtDate','>=',ym+'-01').get();
+  return snap.docs.map(d=>({id:d.id, ...(d.data()||{})})).filter(x=>x.status==='approved' && String(x.tbtDate||'')<next).sort((a,b)=>String(a.tbtDate).localeCompare(String(b.tbtDate)) || String((a.data||{}).time||'').localeCompare(String((b.data||{}).time||'')));
+}
+async function tricDownload(kind){
+  const ym=(document.getElementById('tricMonth')||{}).value || localToday().slice(0,7);
+  let list; try{ list=await tricMonthList(ym); }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not load the TBTs'); return; }
+  if(!list.length){ toast('No approved TRIC cards in '+monthLabel(ym)+' (or they were already deleted after '+TRIC_KEEP_DAYS+' days)'); return; }
+  if(kind==='xlsx') return tricXlsx(list, ym);
+  return tricPdf(list, `TRIC_cards_${ym}.pdf`, monthLabel(ym));
+}
+async function tricXlsx(list, ym){
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
+  const rows=[], ctl=[];
+  for(const x of list){ const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId);
+    rows.push([d.date||'', d.time||'', site?site.siteName:'', d.loc||'', tricTopic(d), d.task||'', d.permit||'', tricWho(x.workerId, {n:d.name}), (d.att||[]).length, (d.att||[]).map(a=>tricWho(a.w, a)).join(', '),
+      (d.musted||[]).filter(Boolean).length+'/7', (d.steps||[]).filter(Boolean).length+'/7', (d.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), (d.hz||[]).map(k=>TRIC_HZ[k]||k).join(', '), (d.changes||[]).map(k=>TRIC_CHANGES[k]||k).join(', '), d.debrief||'', x.approvedBy||'']);
+    for(const r of [...(d.ctrl||[]).map(r=>({...r, t:TRIC_HZ[r.hz]||r.hz, ty:'Hazard'})), ...(d.dra||[]).map(r=>({...r, t:r.hz, ty:'Dynamic risk'}))]) ctl.push([d.date||'', site?site.siteName:'', tricTopic(d), r.ty, r.t, r.m||'', tricWho(r.r, {n:r.rn}), r.ok||'']); }
+  const wb=XLSX.utils.book_new();
+  const s1=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — Toolbox talks (TRIC) '+monthLabel(ym)],['Exported '+localToday()],[],['Date','Time','Project','Location','Job / topic','Daily task','Permit no.','TBT leader','Attendees','Attendee names',"Musta'ed",'TBT steps','Life Saving Rules','Hazards','Changes on the job','Debrief','Approved by'], ...rows]);
+  s1['!cols']=[{wch:11},{wch:7},{wch:24},{wch:20},{wch:30},{wch:24},{wch:14},{wch:22},{wch:9},{wch:60},{wch:9},{wch:9},{wch:40},{wch:40},{wch:24},{wch:30},{wch:26}];
+  const s2=XLSX.utils.aoa_to_sheet([['Date','Project','Job / topic','Type','Hazard','Control measure','Responsible','Done'], ...ctl]);
+  s2['!cols']=[{wch:11},{wch:24},{wch:30},{wch:12},{wch:34},{wch:50},{wch:24},{wch:7}];
+  XLSX.utils.book_append_sheet(wb, s1, 'Toolbox talks'); XLSX.utils.book_append_sheet(wb, s2, 'Hazard controls');
+  XLSX.writeFile(wb, `TRIC_toolbox_talks_${ym}.xlsx`);
+}
+async function tricPdf(list, fileName, sub){
+  if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
+  preloadPdfLogo();
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'tric', docSub:sub||''});
+  const M=30, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, FS=8, LH=9.2, INK=[20,22,28], LBL=[244,246,248], GRN=[16,140,72], GREY=[226,229,234];
+  let y=32; const ensure=h=>{ if(y+h>H-26){ doc.addPage(); y=32; } };
+  const row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:c.img?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
+    const h=Math.max(minH||13, ...pc.map(c=>c.l.length*LH+4)); ensure(h); let xx=M;
+    for(const c of pc){ if(c.fill){ doc.setFillColor(...c.fill); doc.rect(xx,y,c.w,h,'F'); } doc.setDrawColor(120,126,136); doc.setLineWidth(0.5); doc.rect(xx,y,c.w,h);
+      if(c.img){ try{ let iw=c.w-8, ih=h-4; try{ const pr=doc.getImageProperties(c.img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(c.img, 'PNG', xx+(c.w-iw)/2, y+(h-ih)/2, iw, ih); }catch(e){ console.warn(e); } }
+      doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); doc.setTextColor(...(c.color||INK)); c.l.forEach((ln,i)=>doc.text(ln, xx+4, y+9+i*LH)); xx+=c.w; }
+    y+=h; doc.setTextColor(...INK); };
+  const head=t=>{ ensure(30); y+=4; row([{t, w:CW, bold:true, fill:GRN, color:[255,255,255]}]); };
+  const tick=b=>b?'[X]':'[  ]';
+  list.forEach((x,ix)=>{
+    if(ix){ doc.addPage(); y=32; }
+    const d=x.data||{}, site=activeSites().find(s=>s.id===d.projectId), K=90, hw=(CW-2*K)/2;
+    row([{t:'TOOLBOX-TALK RISK IDENTIFICATION CARD (TRIC)', w:CW, bold:true, size:11, fill:GREY}]);
+    row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:site?site.siteName:'—', w:hw},{t:'LOCATION', w:K, bold:true, fill:LBL},{t:d.loc, w:hw}]);
+    row([{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${isoToDmy(d.date||'')} ${d.time||''}`, w:hw},{t:'TBT LEADER', w:K, bold:true, fill:LBL},{t:tricWho(x.workerId, {n:d.name}), w:hw}]);
+    row([{t:'JOB', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'PERMIT NUMBER', w:K, bold:true, fill:LBL},{t:d.permit, w:hw}]);
+    row([{t:'DAILY TASK', w:K, bold:true, fill:LBL},{t:d.task, w:CW-K}]);
+    row([{t:'Remember 3 golden rules: 1) Comply 2) Intervene 3) Respect. The TRIC card shall not be used as authority to proceed if work goes outside the boundary of the primary work scope.', w:CW, size:7.5, color:[150,20,20]}]);
+    head("MUSTA'ED — ARE YOU READY?");
+    TRIC_MUSTED.forEach(([t,s],i)=>row([{t:`${i+1}. ${t}`, w:110, bold:true, fill:LBL},{t:s.replace(/ · /g,'; '), w:CW-150},{t:tick((d.musted||[])[i]), w:40, bold:true}]));
+    head('TBT DISCUSSION STEPS');
+    for(let i=0;i<TRIC_STEPS.length;i+=2) row([{t:TRIC_STEPS[i], w:CW/2-34},{t:tick((d.steps||[])[i]), w:34, bold:true},{t:TRIC_STEPS[i+1]||'', w:CW/2-34, blank:true},{t:i+1<TRIC_STEPS.length?tick((d.steps||[])[i+1]):'', w:34, bold:true, blank:true}]);
+    head('LIFE SAVING RULES (ticked rules discussed)');
+    const lsr=Object.entries(TRIC_LSR); for(let i=0;i<lsr.length;i+=3) row([0,1,2].flatMap(j=>lsr[i+j]?[{t:lsr[i+j][1], w:CW/3-34},{t:tick((d.lsr||[]).includes(lsr[i+j][0])), w:34, bold:true}]:[{t:'', w:CW/3, blank:true}]));
+    head('HAZARDS (warning signs used as reminders)');
+    const hz=Object.entries(TRIC_HZ); for(let i=0;i<hz.length;i+=3) row([0,1,2].flatMap(j=>hz[i+j]?[{t:hz[i+j][1], w:CW/3-34},{t:tick((d.hz||[]).includes(hz[i+j][0])), w:34, bold:true}]:[{t:'', w:CW/3, blank:true}]));
+    row([{t:'PAUSE, CHECK — changes on the job', w:170, bold:true, fill:LBL},{t:(d.changes||[]).map(k=>TRIC_CHANGES[k]||k).join(', ')||'None', w:CW-170}]);
+    head('HAZARDS CONTROL SHEET — actions confirmed by the TBT leader');
+    row([{t:'Hazard', w:130, bold:true, fill:LBL},{t:'Control measure', w:CW-130-130-50, bold:true, fill:LBL},{t:'Responsible', w:130, bold:true, fill:LBL},{t:'Yes/No', w:50, bold:true, fill:LBL}]);
+    (d.ctrl||[]).forEach(r=>row([{t:TRIC_HZ[r.hz]||r.hz, w:130},{t:r.m, w:CW-310},{t:tricWho(r.r, {n:r.rn}), w:130},{t:r.ok, w:50}]));
+    if((d.dra||[]).length){ head('DYNAMIC RISK ASSESSMENT (risks not in the Job HSE Plan)'); (d.dra||[]).forEach(r=>row([{t:r.hz, w:130},{t:r.m, w:CW-310},{t:tricWho(r.r, {n:r.rn}), w:130},{t:r.ok, w:50}])); }
+    row([{t:'DEBRIEF', w:K, bold:true, fill:LBL},{t:d.debrief||'', w:CW-K, blank:true}], 24);
+    head(`ATTENDEES (${(d.att||[]).length}) — each signed on the PPE link`);
+    const att=d.att||[], cw=CW/2;
+    for(let i=0;i<att.length;i+=2){ const c=[]; [0,1].forEach(j=>{ const a=att[i+j]; if(a) c.push({t:`${i+j+1}. ${tricWho(a.w, a)}`, w:cw-110}, {img:a.sig, t:a.sig?'':'not signed', w:110}); else c.push({t:'', w:cw, blank:true}); }); row(c, 26); }
+    ensure(40); y+=4; row([{t:'TBT LEADER — '+tricWho(x.workerId, {n:d.name})+(x.status==='approved'?`\nApproved by ${x.approvedBy||'HSE'} ${x.approvedAt?isoToDmy(String(x.approvedAt).slice(0,10)):''}`:''), w:CW-160, bold:true, fill:LBL},{img:d.leadSig, t:d.leadSig?'':'not signed', w:160}], 32);
+  });
+  doc.save(fileName);
+}
+async function tricOnePdf(id){
+  const x=await tricGet(id);
+  if(!x){ toast(`This TRIC card was deleted ${TRIC_KEEP_DAYS} days after the TBT — use your monthly download`); return; }
+  const d=x.data||{}; await tricPdf([x], `TRIC_${String(tricTopic(d)).replace(/[^A-Za-z0-9]+/g,'_').slice(0,40)}_${d.date||''}.pdf`, [d.date?isoToDmy(d.date):'', d.loc||''].filter(Boolean).join(' · '));
 }
 
 /* ---- action tracker: extra sources ---- */
@@ -10886,6 +11049,7 @@ new MutationObserver(()=>lockFormsForViewer()).observe(document.documentElement,
 function stopDataListeners(){
   stopSiteLinkData();
   stopPpeReqData();
+  stopTricData();
   if(unsubscribeWorkers){ unsubscribeWorkers(); unsubscribeWorkers=null; }
   if(unsubscribeVehicles){ unsubscribeVehicles(); unsubscribeVehicles=null; }
   if(unsubscribeSiteEquipment){ unsubscribeSiteEquipment(); unsubscribeSiteEquipment=null; }
@@ -10921,6 +11085,7 @@ auth.onAuthStateChanged(user=>{
     startRegData();
     startSiteLinkData();
     startPpeReqData();   // Batch 73
+    startTricData();   // Batch 77
   } else {
     stopDataListeners();
     document.getElementById('dbUnavailableBanner').hidden=true;
@@ -10966,6 +11131,7 @@ function startSiteData(){
     unsubscribeSiteEquipment = db.collection('siteEquipment').orderBy('siteName','asc').onSnapshot(snap=>{
       siteEquipmentList = snap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
       renderSiteAll();
+      if(typeof renderTricPanel==='function'){ renderTricPanel(); if(canEdit()) ppeLinkSyncSoon(); }   // Batch 77: project names on TRIC cards / link
       renderEquipAll();           // location names come from projects
       renderReportAll();          // project names / filter in the Monthly Report
       if(regState.scaff && !document.getElementById('scaffSection')?.hidden) renderRegAll('scaff');
@@ -13687,6 +13853,7 @@ function recordTabHtml(w,key,cfg){
         </div>
       </div>
       <div class="record-fields">${fieldsHtml}</div>
+      ${key==='toolboxTalks'&&r.tricId?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(r.tricId)}" style="margin-top:6px;">${ic('download')} TRIC card (PDF)</button>`:''}
       ${key==='ppeIssued'&&r.sigId?`<button type="button" class="btn btn-sm" data-ppe-rcpt="${esc(r.sigId)}" style="margin-top:6px;">${ic('download')} Signed receipt (PDF)</button>`:''}
       ${attach}
     </div>`;
@@ -15556,6 +15723,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const list=[...e.target.querySelectorAll('[data-ppe-exempt]:checked')].map(x=>x.value);
     if(await saveSettings('ppeStandards', {kitExempt:list, kitFix58:true}, ppeUi.exemptBase)){ ppeUi.exemptOpen=false; toast(list.length?`${list.length} role${list.length===1?'':'s'} left out of the basic kit check`:'All roles need the basic kit'); renderPpe(); } });
   document.getElementById('ppePane').addEventListener('submit', e=>{ if(e.target.id!=='ppeItemForm') return; e.preventDefault(); ppeSaveItem(e.target); });
+  // Batch 77: TRIC (toolbox talk) approvals in Project Details
+  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-ok],[data-tric-no],[data-tric-dl]'); if(!b) return; const D=b.dataset;
+    if(D.tricGoto){ tricGoto(); return; }
+    if(D.tricPdf){ await tricOnePdf(D.tricPdf); return; }
+    if(D.tricDl){ await tricDownload(D.tricDl); return; }
+    if(D.tricNo && b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent='Tap again to reject'; return; }
+    const id=D.tricOk||D.tricNo; tricUi.busy=id; b.disabled=true;
+    try{ if(D.tricOk) await tricApprove(id); else await tricReject(id); } finally{ tricUi.busy=''; renderTricPanel(); } });
+  document.addEventListener('change', e=>{ if(e.target && e.target.id==='tricMonth') tricUi.month=e.target.value; });
   // Batch 73: banner "PPE requests waiting" + receipt PDF from a worker's PPE issued record
   document.addEventListener('click', e=>{ const g=e.target.closest && e.target.closest('[data-ppe-goto]'); if(g){ ppeGoto(); return; } const r=e.target.closest && e.target.closest('[data-ppe-rcpt]'); if(r) ppeReceiptPdf(r.dataset.ppeRcpt); });
   // worker drawer → PPE issued → "Issue new joiner kit"

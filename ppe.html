@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0b2140">
-<title>PPE Request &amp; Receipt — Burhan</title>
+<title>PPE &amp; Toolbox Talk — Burhan</title>
 <link rel="icon" href="icon-192.png">
 <style>
 :root{--navy:#0b2140; --navy2:#13325c; --red:#b3121a; --red-bg:#fdecec; --ink:#16202e; --muted:#5d6878; --line:#cfd6e0; --bg:#f3f5f8; --card:#fff; --ok:#1e7a4c; --ok-bg:#e3f4ea; --warn:#9a6a00; --warn-bg:#fff6de; --focus:#1f6fd1; --blue-bg:#eaf2fd;}
@@ -56,6 +56,13 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 .pchip-x{border:2px solid var(--line); border-left:0; background:#fff; border-radius:0 999px 999px 0; padding:0 12px; font-size:15px; color:var(--red); font-weight:800;} .pchip.add{border-style:dashed; color:var(--focus);}
 .addbox{margin-top:12px; padding:12px; border:2px dashed var(--line); border-radius:12px; background:#fafbfd;} .forname{display:block; color:var(--red); font-size:17px; margin-top:2px;}
 .pers-h{font-weight:800; font-size:16px; margin:12px 0 6px; padding-top:10px; border-top:2px solid var(--line);} .pers-h:first-child{border-top:0; padding-top:0; margin-top:0;} .rgroup + .rgroup{margin-top:6px;}
+.sec{font-weight:800; font-size:16px; color:var(--navy); margin-bottom:8px;}
+.tk{display:flex; gap:10px; align-items:flex-start; border:2px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px; cursor:pointer; font-weight:400;} .tk input{width:24px; height:24px; min-height:0; margin:2px 0 0; flex:none;} .tk.on{border-color:var(--ok); background:var(--ok-bg);}
+.tk b{display:block; font-size:15px;} .tk-s{display:block; font-size:13px; color:var(--muted); margin-top:2px;} .tk-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 8px;} .tk-grid .tk{margin-bottom:8px;}
+.crow{border:2px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; background:#fbfcfe;} .crow-h{font-weight:800; margin-bottom:8px;} .crow label{margin-bottom:8px;}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.sgn{border-top:1px solid var(--line); padding:10px 0;} .sgn:first-of-type{border-top:0;} .sgn-h{font-weight:800;} .sgn.lead{border-top:2px solid var(--navy); margin-top:6px;} .sigbox.small canvas{height:110px;}
+@media (max-width:380px){ .tk-grid{grid-template-columns:1fr;} }
 .hidden{display:none !important;}
 .center{text-align:center; padding:40px 16px; color:var(--muted);}
 footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 24px;}
@@ -63,7 +70,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
 </style>
 </head>
 <body>
-<header><img src="logo.png" alt="Burhan Oil &amp; Trade Services"><div><div class="t1">PPE Request &amp; Receipt</div><div class="t2">Burhan Oil &amp; Trade Services · Think Safe, Work Safe, Home Safe</div></div></header>
+<header><img src="logo.png" alt="Burhan Oil &amp; Trade Services"><div><div class="t1">PPE &amp; Toolbox Talk</div><div class="t2">Burhan Oil &amp; Trade Services · Think Safe, Work Safe, Home Safe</div></div></header>
 <main id="app"><div class="center">Opening…</div></main>
 <footer>Burhan Oil &amp; Trade Services · HSE Department</footer>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -105,6 +112,20 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     forWho:['PPE for','पीपीई किसके लिए','المعدات لـ'], addP:['Add another person','दूसरे व्यक्ति को जोड़ें','أضف شخصاً آخر'], add:['Add','जोड़ें','إضافة'],
     addHint:['Ask for PPE for a colleague too — choose his name, then tap his PPE.','साथी के लिए भी पीपीई मांगें — उसका नाम चुनें, फिर उसका पीपीई चुनें।','اطلب معدات لزميلك أيضاً — اختر اسمه ثم معداته.'],
     forX:['For','के लिए','لـ'], signOwn:['he signs here, or on his own phone','वह यहाँ या अपने फ़ोन पर हस्ताक्षर करे','يوقّع هنا أو على هاتفه'],
+    tbt:['Toolbox Talk (TRIC)','टूलबॉक्स टॉक (TRIC)','اجتماع صندوق الأدوات (TRIC)'], tbtHint:['Fill this with your crew before the work starts. Everyone signs at the end.','काम शुरू होने से पहले अपनी टीम के साथ भरें। अंत में सभी हस्ताक्षर करें।','املأها مع فريقك قبل بدء العمل. يوقّع الجميع في النهاية.'],
+    details:['Job details','काम का विवरण','تفاصيل العمل'], proj:['Project','प्रोजेक्ट','المشروع'], loc:['Location','स्थान','الموقع'], date:['Date','तारीख','التاريخ'], time:['Time','समय','الوقت'], job:['Job','काम','العمل'],
+    permit:['Permit number','परमिट नंबर','رقم التصريح'], task:['Daily task','दैनिक काम','المهمة اليومية'], leader:['TBT leader','टीबीटी लीडर','قائد الاجتماع'],
+    att:['Attendees','उपस्थित लोग','الحضور'], attNone:['Add your crew from the name list.','नाम सूची से अपनी टीम जोड़ें।','أضف فريقك من قائمة الأسماء.'], addAll:['Add all shown','दिखाए गए सभी जोड़ें','أضف كل المعروضين'],
+    musted:["Musta'ed — are you ready?",'मुस्तअद — क्या आप तैयार हैं?','مستعد — هل أنت جاهز؟'], mustedHint:['Tick each step when it is ready.','हर चरण तैयार होने पर टिक करें।','ضع علامة على كل خطوة عند جاهزيتها.'],
+    steps:['TBT discussion steps','टीबीटी चर्चा के चरण','خطوات النقاش'], lsr:['Life Saving Rules','जीवन रक्षक नियम','قواعد إنقاذ الحياة'], lsrHint:['Tick & discuss the rules that apply.','लागू नियमों पर टिक करें और चर्चा करें।','حدد وناقش القواعد المطبقة.'],
+    hz:['Hazards','खतरे','المخاطر'], hzHint:['Tick the hazards of this job.','इस काम के खतरों पर टिक करें।','حدد مخاطر هذا العمل.'],
+    hcs:['Hazards control sheet','खतरा नियंत्रण शीट','ورقة التحكم في المخاطر'], hcsHint:['For each hazard: control measure, responsible person, done Yes/No.','हर खतरे के लिए: नियंत्रण उपाय, ज़िम्मेदार व्यक्ति, हाँ/नहीं।','لكل خطر: إجراء التحكم، المسؤول، نعم/لا.'],
+    ctrl:['Control measure','नियंत्रण उपाय','إجراء التحكم'], resp:['Responsible','ज़िम्मेदार','المسؤول'], done:['Yes / No','हाँ / नहीं','نعم / لا'],
+    pause:['Pause & check — changes on the job','रुकें और जाँचें — काम में बदलाव','توقف وتحقق — تغييرات في العمل'], pauseHint:['Tick if anything changed. Add new risks below.','कुछ बदला हो तो टिक करें। नए जोखिम नीचे जोड़ें।','حدد إذا تغير شيء. أضف المخاطر الجديدة أدناه.'],
+    dra:['Dynamic risk assessment','डायनेमिक रिस्क असेसमेंट','تقييم المخاطر الديناميكي'], draOne:['Risk','जोखिम','خطر'], draHz:['Risk / hazard not in the Job HSE Plan','जोखिम जो जॉब HSE प्लान में नहीं है','خطر غير موجود في خطة السلامة'], draAdd:['Add a new risk','नया जोखिम जोड़ें','أضف خطراً جديداً'],
+    debrief:['Debrief — comments or new learning (optional)','डीब्रीफ — टिप्पणी या नई सीख (वैकल्पिक)','ملاحظات أو دروس جديدة (اختياري)'], toSign:['Next: signatures','आगे: हस्ताक्षर','التالي: التوقيعات'],
+    signAll:['Signatures','हस्ताक्षर','التوقيعات'], signHint:['Each attendee signs with a finger in his own box.','हर व्यक्ति अपने बॉक्स में उंगली से हस्ताक्षर करे।','يوقّع كل شخص بإصبعه في مربعه.'], leadSign:['TBT leader signature','टीबीटी लीडर हस्ताक्षर','توقيع قائد الاجتماع'],
+    tSend:['Send toolbox talk','टूलबॉक्स टॉक भेजें','إرسال الاجتماع'], tbtSent:['Toolbox talk sent','टूलबॉक्स टॉक भेज दिया','تم إرسال الاجتماع'], tbtSent2:['HSE will check and approve it.','एचएसई जाँच कर मंज़ूरी देगा।','سيراجعه قسم السلامة ويعتمده.'],
     st_confirm:['Issued to you — please confirm','आपको दिया गया — पुष्टि करें','صُرفت لك — يرجى التأكيد'], st_sent:['Sent — waiting','भेजा गया — प्रतीक्षा','أُرسل — قيد الانتظار'],
   };
   const tr=(k)=>{ const t=T[k]||[k,'','']; return `${esc(t[0])}<span class="tr">${esc(t[1])}${t[2]?` · <span class="ar" dir="rtl">${esc(t[2])}</span>`:''}</span>`; };
@@ -189,10 +210,12 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       const b=board(), nRec=b.filter(x=>x.st==='approved'||x.st==='confirm').length;
       app.innerHTML=`<div class="card"><div class="hello"><div>${tr('hello')}<b>${esc(me.name)}</b>${me.dv?`<span class="tr">${esc(me.dv)}</span>`:''}</div><button class="link" id="out">${tr('notme')}</button></div></div>
         <div class="big2" style="margin-bottom:14px;"><button class="btn" id="toReq">${svg('helmet')}${tr('req')}</button><button class="btn green" id="toRec">${svg('impact')}${tr('rec')}${nRec?` <span class="badge" style="background:#fff;color:var(--ok)">${nRec}</span>`:''}</button></div>
+        <button class="btn navy" id="toTbt" style="margin-bottom:14px;">${tr('tbt')}</button>
         <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span></div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
-      $('#out').onclick=()=>{ me=null; view='who'; render(); };
+      $('#out').onclick=()=>{ me=null; tric=null; view='who'; render(); };
       $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
       $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
+      $('#toTbt').onclick=()=>{ if(!tric) tricNew(); view='tric'; render(); window.scrollTo(0,0); };
       return;
     }
     if(view==='req'){
@@ -248,10 +271,122 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       if(wait.length) $('#conf').onclick=()=>sendRec(groups, key);
       return;
     }
+    if(view==='tric'){ renderTric(); return; }
+    if(view==='tric2'){ renderTric2(); return; }
+    if(view==='tricSent'){ app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr('tbtSent')}</h2><p class="note">${tr('tbtSent2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
     if(view==='sent' || view==='thanks'){
       app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr(view==='sent'?'sent':'thanks')}</h2>${view==='sent'?`<p class="note">${tr('sent2')}</p>`:''}<button class="btn navy" id="home">${tr('back')}</button></div>`;
       $('#home').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
     }
+  }
+
+  /* ===== Batch 77: Toolbox Talk Risk Identification Card (TRIC) ===== */
+  const TR_MUSTED=[['PLAN','Procedure / Work Instruction / Risk Assessment · Lift plan / Permit to work / Third party checklist · Barrier owners identified / Role · Verify understanding / Competency'],
+    ['CHECK EQUIPMENT','Certification (COC & COS) / Calibrated · Inspected / Tested / Fit for purpose / Backup available'],
+    ['PREPARE AREA','House keeping · Zone management (Red / No-Go) · SIMOPS (Above / Below / Beside) · Emergency preparedness'],
+    ['CONTROL ENERGY','Isolate (Lock out, Tag out & Test) · Line of fire: manage stored energy — pressurized equipment, tension lines, rotating equipment'],
+    ['COMMUNICATE','Toolbox talk (ask open questions) · Radios / Hand signals / Signage · LFI / Focus area — personal & process safety'],
+    ['FINAL CHECKS','100% ready to go / Complete permit to work · Emergency response plan in place · Walk the line with P&ID'],
+    ['START WORK','Comply – Intervene – Respect · Adhere to Life Saving Rules · Well barriers / DROPS / Hands off · STOP & re-assess risk when things change']];
+  const TR_STEPS=['Introduction, headcount, fitness check','Discuss activity / task scope','Share roles and responsibilities','Discuss hazard and risk of the activity','Check risk control, mitigation availability','Discuss best practice','Two-way communication, confirm understanding'];
+  const TR_CHANGES={pm:'People, methods, process', te:'Tools or equipment', nh:'New hazards identified', we:'Weather'};
+  const TR_LSR={bsc:'Bypassing safety controls', cs:'Confined space', drv:'Driving', ei:'Energy isolation', hw:'Hot work', lof:'Line-of-fire', sml:'Safe mechanical lifting', wa:'Work authorisation', wah:'Working at height'};
+  const TR_HZ={mv:'Moving vehicles or machinery', el:'Electrical equipment / installation', sl:'Uneven or slippery surfaces', hp:'High pressure / high temperature', ch:'Chemicals / radiation', gas:'Gas release / H2S / fire', dro:'Dropped objects', lh:'Lifting & handling', no:'Noise or other environmental hazards'};
+  const nowHM=()=>{ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  let tric=null, tpads={};
+  function tricNew(){ let pid=''; try{ pid=localStorage.getItem('ppeProj_'+token)||''; }catch(e){} const ps=link.projects||[]; if(!ps.some(p=>p.id===pid)) pid=ps.length===1?ps[0].id:'';
+    tric={pid, loc:'', date:today(), time:nowHM(), job:'', permit:'', task:'', att:[], musted:[], steps:[], changes:[], lsr:[], hz:[], ctrl:{}, dra:[], debrief:'', addOpen:false, sigs:{}, lead:''}; }
+  const tq=(k)=>app.querySelector(`[data-t="${k}"]`);
+  function tricRead(){ if(!tric) return; for(const k of ['pid','loc','date','time','job','permit','task','debrief']){ const el=tq(k); if(el) tric[k]=el.value; }
+    app.querySelectorAll('[data-tc]').forEach(el=>{ const [hz,f]=el.dataset.tc.split('|'); (tric.ctrl[hz]=tric.ctrl[hz]||{})[f]=el.value; });
+    app.querySelectorAll('[data-td]').forEach(el=>{ const [i,f]=el.dataset.td.split('|'); if(tric.dra[+i]) tric.dra[+i][f]=el.value; }); }
+  const respOpts=(sel)=>`<option value="">—</option>`+[{w:me.id, n:me.name}, ...tric.att].map(a=>`<option value="${esc(a.w)}" ${a.w===sel?'selected':''}>${esc(a.n)}</option>`).join('');
+  const chk=(grp,k,label,on,sub)=>`<label class="tk ${on?'on':''}"><input type="checkbox" data-tk="${grp}|${k}" ${on?'checked':''}><span><b>${esc(label)}</b>${sub?`<span class="tk-s">${esc(sub)}</span>`:''}</span></label>`;
+  function renderTric(){
+    const t=tric, ps=link.projects||[];
+    const ctrlRows=t.hz.map(hz=>{ const c=t.ctrl[hz]||{}; return `<div class="crow"><div class="crow-h">⚠ ${esc(TR_HZ[hz]||hz)}</div>
+        <label>${tr('ctrl')}<input data-tc="${hz}|m" value="${esc(c.m||'')}" maxlength="200" placeholder="e.g. barricade the area, banksman"></label>
+        <div class="row2"><label>${tr('resp')}<select data-tc="${hz}|r">${respOpts(c.r)}</select></label><label>${tr('done')}<select data-tc="${hz}|ok"><option value="">—</option>${['Yes','No'].map(v=>`<option ${c.ok===v?'selected':''}>${v}</option>`).join('')}</select></label></div></div>`; }).join('');
+    const draRows=t.dra.map((c,i)=>`<div class="crow"><div class="crow-h">${tr('draOne')} ${i+1} <button type="button" class="link" data-tdrx="${i}" style="float:right;">${T.remove[0]}</button></div>
+        <label>${tr('draHz')}<input data-td="${i}|hz" value="${esc(c.hz||'')}" maxlength="120"></label>
+        <label>${tr('ctrl')}<input data-td="${i}|m" value="${esc(c.m||'')}" maxlength="200"></label>
+        <div class="row2"><label>${tr('resp')}<select data-td="${i}|r">${respOpts(c.r)}</select></label><label>${tr('done')}<select data-td="${i}|ok"><option value="">—</option>${['Yes','No'].map(v=>`<option ${c.ok===v?'selected':''}>${v}</option>`).join('')}</select></label></div></div>`).join('');
+    app.innerHTML=`<div class="card tric-h"><h2>${tr('tbt')}</h2><p class="note">${tr('tbtHint')}</p></div>
+      <div class="card"><div class="sec">1 · ${tr('details')}</div>
+        <label>${tr('proj')}<select data-t="pid"><option value="">—</option>${ps.map(p=>`<option value="${esc(p.id)}" ${p.id===t.pid?'selected':''}>${esc(p.n)}</option>`).join('')}</select></label>
+        <label>${tr('loc')}<input data-t="loc" value="${esc(t.loc)}" maxlength="80" placeholder="e.g. Well NM-12 / Camp A"></label>
+        <div class="row2"><label>${tr('date')}<input type="date" data-t="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-t="time" value="${esc(t.time)}"></label></div>
+        <label>${tr('job')}<input data-t="job" value="${esc(t.job)}" maxlength="120" placeholder="e.g. Scaffold erection at Well NM-12"></label>
+        <div class="row2"><label>${tr('permit')}<input data-t="permit" value="${esc(t.permit)}" maxlength="40"></label><label>${tr('task')}<input data-t="task" value="${esc(t.task)}" maxlength="120"></label></div>
+        <div class="note">${tr('leader')}: <b>${esc(me.name)}</b></div></div>
+      <div class="card"><div class="sec">2 · ${tr('att')} (${t.att.length})</div>
+        ${t.att.length?`<div class="pchips">${t.att.map((a,i)=>`<span class="pchip-w"><span class="pchip">${esc(a.n)}</span><button type="button" class="pchip-x" data-tax="${i}" aria-label="Remove ${esc(a.n)}">✕</button></span>`).join('')}</div>`:`<p class="note">${tr('attNone')}</p>`}
+        ${t.addOpen?`<div class="addbox">${pickerHtml('t', me.dv||'')}<div id="terr" class="err hidden"></div><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" class="btn navy" id="tAdd" style="flex:1">${tr('add')}</button><button type="button" class="btn ghost" id="tAddAll" style="flex:1">${tr('addAll')}</button></div><button type="button" class="btn ghost" id="tAddNo" style="margin-top:8px;">${tr('back')}</button></div>`
+          :`<button type="button" class="pchip add" id="tAddOpen" style="margin-top:8px;">+ ${esc(T.addP[0])}</button>`}</div>
+      <div class="card"><div class="sec">3 · ${tr('musted')}</div><p class="note">${tr('mustedHint')}</p>${TR_MUSTED.map(([h,s],i)=>chk('m',i,`${i+1}. ${h}`,t.musted[i],s)).join('')}</div>
+      <div class="card"><div class="sec">4 · ${tr('steps')}</div>${TR_STEPS.map((s,i)=>chk('s',i,s,t.steps[i])).join('')}</div>
+      <div class="card"><div class="sec">5 · ${tr('lsr')}</div><p class="note">${tr('lsrHint')}</p><div class="tk-grid">${Object.entries(TR_LSR).map(([k,l])=>chk('l',k,l,t.lsr.includes(k))).join('')}</div></div>
+      <div class="card"><div class="sec">6 · ${tr('hz')}</div><p class="note">${tr('hzHint')}</p><div class="tk-grid">${Object.entries(TR_HZ).map(([k,l])=>chk('h',k,l,t.hz.includes(k))).join('')}</div></div>
+      ${t.hz.length?`<div class="card"><div class="sec">7 · ${tr('hcs')}</div><p class="note">${tr('hcsHint')}</p>${ctrlRows}</div>`:''}
+      <div class="card"><div class="sec">${t.hz.length?8:7} · ${tr('pause')}</div><p class="note">${tr('pauseHint')}</p><div class="tk-grid">${Object.entries(TR_CHANGES).map(([k,l])=>chk('c',k,l,t.changes.includes(k))).join('')}</div>
+        <div class="sec" style="margin-top:12px;">${tr('dra')}</div>${draRows}<button type="button" class="pchip add" id="tDraAdd">+ ${esc(T.draAdd[0])}</button></div>
+      <div class="card"><label>${tr('debrief')}<textarea data-t="debrief" maxlength="400">${esc(t.debrief)}</textarea></label>
+        <div id="err" class="err hidden"></div><button class="btn" id="tNext">${tr('toSign')}</button></div>
+      <button class="btn ghost" id="back">${tr('back')}</button>`;
+    app.querySelectorAll('[data-tk]').forEach(el=>el.onchange=()=>{ tricRead(); const [g,k]=el.dataset.tk.split('|'), on=el.checked;
+      if(g==='m') t.musted[+k]=on; else if(g==='s') t.steps[+k]=on;
+      else { const arr=g==='l'?t.lsr:g==='h'?t.hz:t.changes; const i=arr.indexOf(k); if(on && i<0) arr.push(k); if(!on && i>=0) arr.splice(i,1); if(g==='h'){ const order=Object.keys(TR_HZ); t.hz.sort((a,b)=>order.indexOf(a)-order.indexOf(b)); keepScroll(renderTric); return; } }
+      el.closest('.tk').classList.toggle('on', on); });
+    app.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{ tricRead(); const a=t.att.splice(+b.dataset.tax,1)[0]; if(a) delete t.sigs[a.w]; keepScroll(renderTric); });
+    app.querySelectorAll('[data-tdrx]').forEach(b=>b.onclick=()=>{ tricRead(); t.dra.splice(+b.dataset.tdrx,1); keepScroll(renderTric); });
+    $('#tDraAdd').onclick=()=>{ tricRead(); t.dra.push({hz:'', m:'', r:'', ok:''}); keepScroll(renderTric); };
+    const pid=tq('pid'); pid.onchange=()=>{ try{ localStorage.setItem('ppeProj_'+token, pid.value); }catch(e){} };
+    if(t.addOpen){ const ex=()=>new Set([me.id, ...t.att.map(a=>a.w)]); wirePicker('t', ex(), '');
+      $('#tAdd').onclick=()=>{ const w=wById($('#ts').value); if(!w){ const e=$('#terr'); e.textContent='Choose the name.'; e.classList.remove('hidden'); return; } tricRead(); if(t.att.length<40) t.att.push({w:w.id, n:w.name}); t.addOpen=true; keepScroll(renderTric); };
+      $('#tAddAll').onclick=()=>{ tricRead(); const opts=[...$('#ts').options].filter(o=>o.value); for(const o of opts){ const w=wById(o.value); if(w && t.att.length<40 && !t.att.some(a=>a.w===w.id)) t.att.push({w:w.id, n:w.name}); } t.addOpen=false; keepScroll(renderTric); };
+      $('#tAddNo').onclick=()=>{ tricRead(); t.addOpen=false; keepScroll(renderTric); }; }
+    else $('#tAddOpen').onclick=()=>{ tricRead(); t.addOpen=true; keepScroll(renderTric); };
+    $('#back').onclick=()=>{ tricRead(); view='home'; render(); window.scrollTo(0,0); };
+    $('#tNext').onclick=()=>{ tricRead(); const m=tricCheck(); if(m) return err(m); view='tric2'; render(); window.scrollTo(0,0); };
+  }
+  function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
+  function tricCheck(){ const t=tric;
+    if(!t.pid) return 'Choose the project.'; if(!t.loc.trim()) return 'Write the location.'; if(!t.date) return 'Choose the date.'; if(!t.job.trim()) return 'Write the job.';
+    if(!t.att.length) return 'Add the attendees (the crew).';
+    const m=TR_MUSTED.findIndex((x,i)=>!t.musted[i]); if(m>=0) return `Musta'ed step ${m+1} (${TR_MUSTED[m][0]}) is not ticked — if you are not ready, do not start the work.`;
+    const s=TR_STEPS.findIndex((x,i)=>!t.steps[i]); if(s>=0) return `TBT step not ticked: ${TR_STEPS[s]}.`;
+    if(!t.hz.length) return 'Tick at least one hazard.';
+    for(const hz of t.hz){ const c=t.ctrl[hz]||{}; if(!String(c.m||'').trim() || !c.r || !c.ok) return `Hazards control sheet: fill the control measure, responsible and Yes/No for "${TR_HZ[hz]}".`; }
+    for(const [i,c] of t.dra.entries()){ if(!String(c.hz||'').trim() || !String(c.m||'').trim() || !c.r || !c.ok) return `Dynamic risk ${i+1}: fill the risk, control measure, responsible and Yes/No — or remove it.`; }
+    return ''; }
+  function renderTric2(){
+    const t=tric;
+    app.innerHTML=`<div class="card"><h2>${tr('signAll')}</h2><p class="note">${tr('signHint')}</p>
+        ${t.att.map((a,i)=>`<div class="sgn"><div class="sgn-h">${i+1}. ${esc(a.n)} ${t.sigs[a.w]?'<span class="badge b-delivered">✓</span>':''}</div><div class="sigbox small"><canvas data-sp="${esc(a.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(a.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(a.w)}">${T.clear[0]}</button></div>`).join('')}
+        <div class="sgn lead"><div class="sgn-h">${tr('leadSign')}: ${esc(me.name)}</div><div class="sigbox small"><canvas data-sp="__lead" width="600" height="200"></canvas><div class="hint" data-sh="__lead">✍</div></div><button type="button" class="link" data-sc="__lead">${T.clear[0]}</button></div>
+        <div id="err" class="err hidden"></div><button class="btn green" id="tSend">${tr('tSend')}</button></div>
+      <button class="btn ghost" id="back">${tr('back')}</button>`;
+    tpads={};
+    app.querySelectorAll('[data-sp]').forEach(cv=>{ const k=cv.dataset.sp, p=makePad(cv, app.querySelector(`[data-sh="${CSS.escape(k)}"]`)); tpads[k]=p;
+      const old=k==='__lead'?t.lead:t.sigs[k]; if(old){ const im=new Image(); im.onload=()=>{ cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height); p.ink=true; const h=app.querySelector(`[data-sh="${CSS.escape(k)}"]`); if(h) h.classList.add('hidden'); }; im.src=old; }
+      p.onEnd=()=>{ if(k==='__lead') t.lead=p.image(300,100); else t.sigs[k]=p.image(300,100); }; });
+    app.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{ const k=b.dataset.sc; tpads[k].clear(); if(k==='__lead') t.lead=''; else delete t.sigs[k]; });
+    $('#back').onclick=()=>{ view='tric'; render(); window.scrollTo(0,0); };
+    $('#tSend').onclick=tricSend;
+  }
+  async function tricSend(){
+    const t=tric, miss=t.att.find(a=>!t.sigs[a.w]); if(miss) return err(miss.n+' has not signed yet.');
+    if(!t.lead) return err('TBT leader: please sign at the bottom.');
+    const nm=id=>id===me.id?me.name:((t.att.find(a=>a.w===id)||{}).n||'');
+    const data={name:me.name, projectId:t.pid, loc:t.loc.trim().slice(0,80), date:t.date, time:t.time, job:t.job.trim().slice(0,120), permit:t.permit.trim().slice(0,40), task:t.task.trim().slice(0,120),
+      musted:TR_MUSTED.map((x,i)=>!!t.musted[i]), steps:TR_STEPS.map((x,i)=>!!t.steps[i]), changes:t.changes.slice(), lsr:t.lsr.slice(), hz:t.hz.slice(),
+      ctrl:t.hz.map(hz=>{ const c=t.ctrl[hz]||{}; return {hz, m:String(c.m||'').trim().slice(0,200), r:c.r, rn:nm(c.r), ok:c.ok}; }),
+      dra:t.dra.map(c=>({hz:String(c.hz||'').trim().slice(0,120), m:String(c.m||'').trim().slice(0,200), r:c.r, rn:nm(c.r), ok:c.ok})),
+      att:t.att.map(a=>({w:a.w, n:a.n, sig:t.sigs[a.w]})), debrief:String(t.debrief||'').trim().slice(0,400), leadSig:t.lead};
+    const b=$('#tSend'); b.disabled=true;
+    try{ await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      tric=null; view='tricSent'; render(); window.scrollTo(0,0); }
+    catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Tell HSE.':'Not sent — check the internet and try again.'); }
   }
   function err(m){ const e=$('#err'); if(e){ e.textContent=m; e.classList.remove('hidden'); e.scrollIntoView({block:'center'}); } }
   async function sendReq(){
@@ -293,8 +428,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
     cv.addEventListener('pointerdown', e=>{ e.preventDefault(); on=true; const er=$('#err'); if(er) er.classList.add('hidden'); last=pos(e); try{ cv.setPointerCapture(e.pointerId); }catch(x){} });
     cv.addEventListener('pointermove', e=>{ if(!on) return; e.preventDefault(); const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; if(!p.ink){ p.ink=true; if(hint) hint.classList.add('hidden'); } });
-    const end=()=>{ on=false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
-    p.image=()=>{ const o=document.createElement('canvas'); o.width=480; o.height=170; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,480,170); c.drawImage(cv,0,0,480,170); return o.toDataURL('image/png'); };
+    const end=()=>{ if(on && p.ink && p.onEnd) p.onEnd(); on=false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
+    p.image=(W,H)=>{ W=W||480; H=H||170; const o=document.createElement('canvas'); o.width=W; o.height=H; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,W,H); c.drawImage(cv,0,0,W,H); return o.toDataURL('image/png'); };
     return p;
   }
 })();
