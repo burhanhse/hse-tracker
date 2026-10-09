@@ -63,6 +63,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
 .sgn{border-top:1px solid var(--line); padding:10px 0;} .sgn:first-of-type{border-top:0;} .sgn-h{font-weight:800;} .sgn.lead{border-top:2px solid var(--navy); margin-top:6px;} .sigbox.small canvas{height:110px;}
 @media (max-width:380px){ .tk-grid{grid-template-columns:1fr;} }
+.b-tbtnew{background:var(--warn-bg); color:var(--warn);} .b-tbtsign,.b-tbtsigned{background:var(--blue-bg); color:#1d4f91;} .b-tbtdone{background:var(--ok-bg); color:var(--ok);} .b-tbtrej{background:var(--red-bg); color:var(--red);}
+.signme{border:2px solid var(--ok); background:#f6fffa;}
 .hidden{display:none !important;}
 .center{text-align:center; padding:40px 16px; color:var(--muted);}
 footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 24px;}
@@ -128,6 +130,17 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     debrief:['Debrief — comments or new learning (optional)','डीब्रीफ — टिप्पणी या नई सीख (वैकल्पिक)','ملاحظات أو دروس جديدة (اختياري)'], toSign:['Next: signatures','आगे: हस्ताक्षर','التالي: التوقيعات'],
     signAll:['Signatures','हस्ताक्षर','التوقيعات'], signHint:['Each attendee signs with a finger in his own box.','हर व्यक्ति अपने बॉक्स में उंगली से हस्ताक्षर करे।','يوقّع كل شخص بإصبعه في مربعه.'], leadSign:['TBT leader signature','टीबीटी लीडर हस्ताक्षर','توقيع قائد الاجتماع'],
     tSend:['Send toolbox talk','टूलबॉक्स टॉक भेजें','إرسال الاجتماع'], tbtSent:['Toolbox talk sent','टूलबॉक्स टॉक भेज दिया','تم إرسال الاجتماع'], tbtSent2:['HSE will check and approve it.','एचएसई जाँच कर मंज़ूरी देगा।','سيراجعه قسم السلامة ويعتمده.'],
+    mine:['My requests','मेरे अनुरोध','طلباتي'],
+    tbtReq:['TBT request','टीबीटी अनुरोध','طلب اجتماع السلامة'], tbtReqHint:['Send before the work. HSE writes the topic, then everyone signs here.','काम से पहले भेजें। एचएसई विषय लिखेगा, फिर सभी यहाँ हस्ताक्षर करेंगे।','أرسله قبل العمل. يكتب قسم السلامة الموضوع ثم يوقّع الجميع هنا.'],
+    loc:['Location / Well No.','स्थान / वेल नंबर','الموقع / رقم البئر'], jp:['Journey plan number','जर्नी प्लान नंबर','رقم خطة الرحلة'], optional:['optional','वैकल्पिक','اختياري'],
+    crew:['People for this TBT','इस टीबीटी के लोग','الأشخاص في هذا الاجتماع'], tbtSend:['Send TBT request','टीबीटी अनुरोध भेजें','إرسال الطلب'],
+    tbtSent:['TBT request sent','टीबीटी अनुरोध भेज दिया','تم إرسال الطلب'], tbtSent2:['HSE will review it. Then you get "Sign now" here.','एचएसई जाँच करेगा। फिर यहाँ "अभी हस्ताक्षर करें" आएगा।','سيراجعه قسم السلامة، ثم يظهر «وقّع الآن» هنا.'],
+    tbtToSign:['TBT — waiting for your signature','टीबीटी — आपके हस्ताक्षर बाकी','بانتظار توقيعك'], signNow:['Sign now','अभी हस्ताक्षर करें','وقّع الآن'], open:['Open','खोलें','فتح'],
+    signHint:['Each person signs in his own box, then press Save.','हर व्यक्ति अपने बॉक्स में हस्ताक्षर करे, फिर सेव दबाएँ।','يوقّع كل شخص في مربعه ثم اضغط حفظ.'], signMine:['Sign in your box, then press Save.','अपने बॉक्स में हस्ताक्षर करें, फिर सेव दबाएँ।','وقّع في مربعك ثم اضغط حفظ.'],
+    saveSig:['Save signatures','हस्ताक्षर सेव करें','حفظ التوقيعات'], waitOthers:['You have signed. Waiting for the others.','आपने हस्ताक्षर कर दिए। बाकी लोगों का इंतज़ार।','وقّعت. بانتظار الآخرين.'],
+    pdf:['Download PDF','पीडीएफ डाउनलोड करें','تنزيل PDF'], tbtGone:['This TBT is no longer available.','यह टीबीटी अब उपलब्ध नहीं है।','هذا الاجتماع لم يعد متاحاً.'],
+    st_tbtnew:['TBT — waiting for HSE review','टीबीटी — एचएसई जाँच बाकी','بانتظار مراجعة السلامة'], st_tbtsign:['TBT — please sign','टीबीटी — कृपया हस्ताक्षर करें','يرجى التوقيع'],
+    st_tbtsigned:['TBT — signed, waiting for others','टीबीटी — हस्ताक्षर हो गए, बाकी का इंतज़ार','تم التوقيع، بانتظار الآخرين'], st_tbtdone:['TBT — complete','टीबीटी — पूरा','مكتمل'], st_tbtrej:['TBT — not accepted','टीबीटी — स्वीकार नहीं','غير مقبول'],
     st_confirm:['Issued to you — please confirm','आपको दिया गया — पुष्टि करें','صُرفت لك — يرجى التأكيد'], st_sent:['Sent — waiting','भेजा गया — प्रतीक्षा','أُرسل — قيد الانتظار'],
   };
   const tr=(k)=>{ const t=T[k]||[k,'','']; return `${esc(t[0])}<span class="tr">${esc(t[1])}${t[2]?` · <span class="ar" dir="rtl">${esc(t[2])}</span>`:''}</span>`; };
@@ -160,11 +173,11 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
 
   let link=null, me=null, view='who', people=[], ai=0, addOpen=false, need='', reason='', note='', sentLocal=[], recSel=new Set(), pads={};
   try{ sentLocal=JSON.parse(sessionStorage.getItem('ppeSent_'+token)||'[]'); }catch(e){}
-  function load(){ return db.collection('ppeLinks').doc(token).get().then(s=>{ if(!s.exists || (s.data()||{}).active===false){ bad(); return false; } link=s.data(); return true; }).catch(e=>{ console.warn(e); bad(e&&e.code==='permission-denied'?'This link has been switched off.':'Could not open the link — check the internet and try again.'); return false; }); }
+  function load(){ return db.collection('ppeLinks').doc(token).get().then(s=>{ if(!s.exists || (s.data()||{}).active===false){ bad(); return false; } link=s.data(); const t2=document.querySelector('header .t2'); if(t2 && link.projectName) t2.textContent=link.projectName+' · Burhan Oil & Trade Services'; return true; }).catch(e=>{ console.warn(e); bad(e&&e.code==='permission-denied'?'This link has been switched off.':'Could not open the link — check the internet and try again.'); return false; }); }
   load().then(ok=>{ if(!ok) return; let last=''; try{ last=localStorage.getItem('ppeWho_'+token)||''; }catch(e){} render(last); });
 
   async function sha(s){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16); }
-  const board=()=>{ const b=((link.board||{})[me.id]||[]).slice(); const ids=new Set(b.map(x=>x.id)); for(const s of sentLocal) if(s.w===me.id && !ids.has(s.id)) b.unshift({id:s.id, k:'req', st:'sent', d:s.d, t:s.t}); return b; };
+  const board=()=>{ const b=((link.board||{})[me.id]||[]).slice(); const ids=new Set(b.map(x=>x.id)); for(const s of sentLocal) if(s.w===me.id && !ids.has(s.id)) b.unshift({id:s.id, k:s.k||'req', st:s.k==='tbt'?'tbtnew':'sent', d:s.d, t:s.t}); return b; };
   const wById=id=>(link.workers||[]).find(x=>x.id===id);
 
   // division + search + name — used for "choose your name" and "add another person"
@@ -209,15 +222,17 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       return;
     }
     if(view==='home'){
-      const b=board(), nRec=b.filter(x=>x.st==='approved'||x.st==='confirm').length;
+      const b=board(), nRec=b.filter(x=>x.st==='approved'||x.st==='confirm').length, toSign=b.filter(x=>x.k==='tbt' && x.st==='tbtsign');
       app.innerHTML=`<div class="card"><div class="hello"><div>${tr('hello')}<b>${esc(me.name)}</b>${me.dv?`<span class="tr">${esc(me.dv)}</span>`:''}</div><button class="link" id="out">${tr('notme')}</button></div></div>
         <div class="big2" style="margin-bottom:14px;"><button class="btn" id="toReq">${svg('helmet')}${tr('req')}</button><button class="btn green" id="toRec">${svg('impact')}${tr('rec')}${nRec?` <span class="badge" style="background:#fff;color:var(--ok)">${nRec}</span>`:''}</button></div>
-        <button class="btn navy" id="toTbt" style="margin-bottom:14px;">${tr('tbt')}</button>
-        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span></div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
-      $('#out').onclick=()=>{ me=null; tric=null; view='who'; render(); };
+        <button class="btn navy" id="toTbt" style="margin-bottom:14px;">${tr('tbtReq')}</button>
+        ${toSign.length?`<div class="card signme"><h2>${esc(T.tbtToSign[0])} (${toSign.length})<span class="tr">${esc(T.tbtToSign[1])} · <span class="ar" dir="rtl">${esc(T.tbtToSign[2])}</span></span></h2>${toSign.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><button class="btn green" data-tbt-open="${esc(x.id)}" style="margin-top:6px; padding:11px;">${tr('signNow')}</button></div>`).join('')}</div>`:''}
+        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtnew'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
+      $('#out').onclick=()=>{ me=null; tbtF=null; view='who'; render(); };
+      app.querySelectorAll('[data-tbt-open]').forEach(bt=>bt.onclick=()=>openTbt(bt.dataset.tbtOpen));
       $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
       $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
-      $('#toTbt').onclick=()=>{ if(!tric) tricNew(); view='tric'; render(); window.scrollTo(0,0); };
+      $('#toTbt').onclick=()=>{ if(!tbtF) tbtNew(); view='tbtReq'; render(); window.scrollTo(0,0); };
       return;
     }
     if(view==='req'){
@@ -273,124 +288,144 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       if(wait.length) $('#conf').onclick=()=>sendRec(groups, key);
       return;
     }
-    if(view==='tric'){ renderTric(); return; }
-    if(view==='tric2'){ renderTric2(); return; }
-    if(view==='tricSent'){ app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr('tbtSent')}</h2><p class="note">${tr('tbtSent2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
+    if(view==='tbtReq'){ renderTbtReq(); return; }
+    if(view==='tbtSign'){ renderTbtSign(); return; }
+    if(view==='tbtSent'){ app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr('tbtSent')}</h2><p class="note">${tr('tbtSent2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
     if(view==='sent' || view==='thanks'){
       app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr(view==='sent'?'sent':'thanks')}</h2>${view==='sent'?`<p class="note">${tr('sent2')}</p>`:''}<button class="btn navy" id="home">${tr('back')}</button></div>`;
       $('#home').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
     }
   }
 
-  /* ===== Batch 77: Toolbox Talk Risk Identification Card (TRIC) ===== */
-  const TR_MUSTED=[['PLAN','Procedure / Work Instruction / Risk Assessment · Lift plan / Permit to work / Third party checklist · Barrier owners identified / Role · Verify understanding / Competency'],
-    ['CHECK EQUIPMENT','Certification (COC & COS) / Calibrated · Inspected / Tested / Fit for purpose / Backup available'],
-    ['PREPARE AREA','House keeping · Zone management (Red / No-Go) · SIMOPS (Above / Below / Beside) · Emergency preparedness'],
-    ['CONTROL ENERGY','Isolate (Lock out, Tag out & Test) · Line of fire: manage stored energy — pressurized equipment, tension lines, rotating equipment'],
-    ['COMMUNICATE','Toolbox talk (ask open questions) · Radios / Hand signals / Signage · LFI / Focus area — personal & process safety'],
-    ['FINAL CHECKS','100% ready to go / Complete permit to work · Emergency response plan in place · Walk the line with P&ID'],
-    ['START WORK','Comply – Intervene – Respect · Adhere to Life Saving Rules · Well barriers / DROPS / Hands off · STOP & re-assess risk when things change']];
-  const TR_STEPS=['Introduction, headcount, fitness check','Discuss activity / task scope','Share roles and responsibilities','Discuss hazard and risk of the activity','Check risk control, mitigation availability','Discuss best practice','Two-way communication, confirm understanding'];
-  const TR_CHANGES={pm:'People, methods, process', te:'Tools or equipment', nh:'New hazards identified', we:'Weather'};
-  const TR_LSR={bsc:'Bypassing safety controls', cs:'Confined space', drv:'Driving', ei:'Energy isolation', hw:'Hot work', lof:'Line-of-fire', sml:'Safe mechanical lifting', wa:'Work authorisation', wah:'Working at height'};
-  const TR_HZ={mv:'Moving vehicles or machinery', el:'Electrical equipment / installation', sl:'Uneven or slippery surfaces', hp:'High pressure / high temperature', ch:'Chemicals / radiation', gas:'Gas release / H2S / fire', dro:'Dropped objects', lh:'Lifting & handling', no:'Noise or other environmental hazards'};
+  /* ===== Batch 79: TBT request → HSE review → everyone signs → PDF ===== */
+  const TB_JOBS=[['Rig up','रिग अप','تركيب'],['Rig down','रिग डाउन','فك'],['Modification','बदलाव','تعديل'],['Inspection','निरीक्षण','فحص']];
+  const TB_MUSTED=[['PLAN','Procedure / work instruction / risk assessment · Lift plan / permit to work · Barrier owners identified · Verify understanding / competency'],
+    ['CHECK EQUIPMENT','Certification / calibrated · Inspected / tested / fit for purpose · Backup available'],
+    ['PREPARE AREA','Housekeeping · Zone management (red / no-go) · SIMOPS (above / below / beside) · Emergency preparedness'],
+    ['CONTROL ENERGY','Isolate (lock out, tag out & test) · Line of fire: stored energy, tension lines, rotating equipment'],
+    ['COMMUNICATE','Toolbox talk (ask open questions) · Radios / hand signals / signage · Personal & process safety focus'],
+    ['FINAL CHECKS','100% ready to go / permit complete · Emergency response plan in place'],
+    ['START WORK','Comply – Intervene – Respect · Adhere to Life Saving Rules · STOP & re-assess when things change']];
+  const TB_LSR={bsc:'Bypassing safety controls', cs:'Confined space', drv:'Driving', ei:'Energy isolation', hw:'Hot work', lof:'Line-of-fire', sml:'Safe mechanical lifting', wa:'Work authorisation', wah:'Working at height'};
   const nowHM=()=>{ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
-  let tric=null, tpads={};
-  function tricNew(){ let pid=''; try{ pid=localStorage.getItem('ppeProj_'+token)||''; }catch(e){} const ps=link.projects||[]; if(!ps.some(p=>p.id===pid)) pid=ps.length===1?ps[0].id:'';
-    tric={pid, loc:'', date:today(), time:nowHM(), job:'', permit:'', task:'', att:[], musted:[], steps:[], changes:[], lsr:[], hz:[], ctrl:{}, dra:[], debrief:'', addOpen:false, sigs:{}, lead:''}; }
-  const tq=(k)=>app.querySelector(`[data-t="${k}"]`);
-  function tricRead(){ if(!tric) return; for(const k of ['pid','pother','loc','date','time','job','permit','task','debrief']){ const el=tq(k); if(el) tric[k]=el.value; }
-    app.querySelectorAll('[data-tc]').forEach(el=>{ const [hz,f]=el.dataset.tc.split('|'); (tric.ctrl[hz]=tric.ctrl[hz]||{})[f]=el.value; });
-    app.querySelectorAll('[data-td]').forEach(el=>{ const [i,f]=el.dataset.td.split('|'); if(tric.dra[+i]) tric.dra[+i][f]=el.value; }); }
-  const respOpts=(sel)=>`<option value="">—</option>`+[{w:me.id, n:me.name}, ...tric.att].map(a=>`<option value="${esc(a.w)}" ${a.w===sel?'selected':''}>${esc(a.n)}</option>`).join('');
-  const chk=(grp,k,label,on,sub)=>`<label class="tk ${on?'on':''}"><input type="checkbox" data-tk="${grp}|${k}" ${on?'checked':''}><span><b>${esc(label)}</b>${sub?`<span class="tk-s">${esc(sub)}</span>`:''}</span></label>`;
-  function renderTric(){
-    const t=tric, ps=link.projects||[];
-    const ctrlRows=t.hz.map(hz=>{ const c=t.ctrl[hz]||{}; return `<div class="crow"><div class="crow-h">⚠ ${esc(TR_HZ[hz]||hz)}</div>
-        <label>${tr('ctrl')}<input data-tc="${hz}|m" value="${esc(c.m||'')}" maxlength="200" placeholder="e.g. barricade the area, banksman"></label>
-        <div class="row2"><label>${tr('resp')}<select data-tc="${hz}|r">${respOpts(c.r)}</select></label><label>${tr('done')}<select data-tc="${hz}|ok"><option value="">—</option>${['Yes','No'].map(v=>`<option ${c.ok===v?'selected':''}>${v}</option>`).join('')}</select></label></div></div>`; }).join('');
-    const draRows=t.dra.map((c,i)=>`<div class="crow"><div class="crow-h">${tr('draOne')} ${i+1} <button type="button" class="link" data-tdrx="${i}" style="float:right;">${T.remove[0]}</button></div>
-        <label>${tr('draHz')}<input data-td="${i}|hz" value="${esc(c.hz||'')}" maxlength="120"></label>
-        <label>${tr('ctrl')}<input data-td="${i}|m" value="${esc(c.m||'')}" maxlength="200"></label>
-        <div class="row2"><label>${tr('resp')}<select data-td="${i}|r">${respOpts(c.r)}</select></label><label>${tr('done')}<select data-td="${i}|ok"><option value="">—</option>${['Yes','No'].map(v=>`<option ${c.ok===v?'selected':''}>${v}</option>`).join('')}</select></label></div></div>`).join('');
-    app.innerHTML=`<div class="card tric-h"><h2>${tr('tbt')}</h2><p class="note">${tr('tbtHint')}</p></div>
-      <div class="card"><div class="sec">1 · ${tr('details')}</div>
-        <label>${tr('proj')}<select data-t="pid"><option value="">—</option>${ps.map(p=>`<option value="${esc(p.id)}" ${p.id===t.pid?'selected':''}>${esc(p.n)}</option>`).join('')}<option value="__other" ${t.pid==='__other'?'selected':''}>${esc(T.pOther[0])}</option></select></label>
-        ${!ps.length?`<p class="note" style="margin:-8px 0 12px;">${tr('pNone')}</p>`:''}
-        <label id="pOtherBox" class="${t.pid==='__other'?'':'hidden'}">${tr('pName')}<input data-t="pother" value="${esc(t.pother||'')}" maxlength="80" placeholder="e.g. PDO Qarn Alam scaffolding"></label>
-        <label>${tr('loc')}<input data-t="loc" value="${esc(t.loc)}" maxlength="80" placeholder="e.g. Well NM-12 / Camp A"></label>
-        <div class="row2"><label>${tr('date')}<input type="date" data-t="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-t="time" value="${esc(t.time)}"></label></div>
-        <label>${tr('job')}<input data-t="job" value="${esc(t.job)}" maxlength="120" placeholder="e.g. Scaffold erection at Well NM-12"></label>
-        <div class="row2"><label>${tr('permit')}<input data-t="permit" value="${esc(t.permit)}" maxlength="40"></label><label>${tr('task')}<input data-t="task" value="${esc(t.task)}" maxlength="120"></label></div>
-        <div class="note">${tr('leader')}: <b>${esc(me.name)}</b></div></div>
-      <div class="card"><div class="sec">2 · ${tr('att')} (${t.att.length})</div>
-        ${t.att.length?`<div class="pchips">${t.att.map((a,i)=>`<span class="pchip-w"><span class="pchip">${esc(a.n)}</span><button type="button" class="pchip-x" data-tax="${i}" aria-label="Remove ${esc(a.n)}">✕</button></span>`).join('')}</div>`:`<p class="note">${tr('attNone')}</p>`}
-        ${t.addOpen?`<div class="addbox">${pickerHtml('t', me.dv||'')}<div id="terr" class="err hidden"></div><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" class="btn navy" id="tAdd" style="flex:1">${tr('add')}</button><button type="button" class="btn ghost" id="tAddAll" style="flex:1">${tr('addAll')}</button></div><button type="button" class="btn ghost" id="tAddNo" style="margin-top:8px;">${tr('back')}</button></div>`
-          :`<button type="button" class="pchip add" id="tAddOpen" style="margin-top:8px;">+ ${esc(T.addP[0])}</button>`}</div>
-      <div class="card"><div class="sec">3 · ${tr('musted')}</div><p class="note">${tr('mustedHint')}</p>${TR_MUSTED.map(([h,s],i)=>chk('m',i,`${i+1}. ${h}`,t.musted[i],s)).join('')}</div>
-      <div class="card"><div class="sec">4 · ${tr('steps')}</div>${TR_STEPS.map((s,i)=>chk('s',i,s,t.steps[i])).join('')}</div>
-      <div class="card"><div class="sec">5 · ${tr('lsr')}</div><p class="note">${tr('lsrHint')}</p><div class="tk-grid">${Object.entries(TR_LSR).map(([k,l])=>chk('l',k,l,t.lsr.includes(k))).join('')}</div></div>
-      <div class="card"><div class="sec">6 · ${tr('hz')}</div><p class="note">${tr('hzHint')}</p><div class="tk-grid">${Object.entries(TR_HZ).map(([k,l])=>chk('h',k,l,t.hz.includes(k))).join('')}</div></div>
-      ${t.hz.length?`<div class="card"><div class="sec">7 · ${tr('hcs')}</div><p class="note">${tr('hcsHint')}</p>${ctrlRows}</div>`:''}
-      <div class="card"><div class="sec">${t.hz.length?8:7} · ${tr('pause')}</div><p class="note">${tr('pauseHint')}</p><div class="tk-grid">${Object.entries(TR_CHANGES).map(([k,l])=>chk('c',k,l,t.changes.includes(k))).join('')}</div>
-        <div class="sec" style="margin-top:12px;">${tr('dra')}</div>${draRows}<button type="button" class="pchip add" id="tDraAdd">+ ${esc(T.draAdd[0])}</button></div>
-      <div class="card"><label>${tr('debrief')}<textarea data-t="debrief" maxlength="400">${esc(t.debrief)}</textarea></label>
-        <div id="err" class="err hidden"></div><button class="btn" id="tNext">${tr('toSign')}</button></div>
-      <button class="btn ghost" id="back">${tr('back')}</button>`;
-    app.querySelectorAll('[data-tk]').forEach(el=>el.onchange=()=>{ tricRead(); const [g,k]=el.dataset.tk.split('|'), on=el.checked;
-      if(g==='m') t.musted[+k]=on; else if(g==='s') t.steps[+k]=on;
-      else { const arr=g==='l'?t.lsr:g==='h'?t.hz:t.changes; const i=arr.indexOf(k); if(on && i<0) arr.push(k); if(!on && i>=0) arr.splice(i,1); if(g==='h'){ const order=Object.keys(TR_HZ); t.hz.sort((a,b)=>order.indexOf(a)-order.indexOf(b)); keepScroll(renderTric); return; } }
-      el.closest('.tk').classList.toggle('on', on); });
-    app.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{ tricRead(); const a=t.att.splice(+b.dataset.tax,1)[0]; if(a) delete t.sigs[a.w]; keepScroll(renderTric); });
-    app.querySelectorAll('[data-tdrx]').forEach(b=>b.onclick=()=>{ tricRead(); t.dra.splice(+b.dataset.tdrx,1); keepScroll(renderTric); });
-    $('#tDraAdd').onclick=()=>{ tricRead(); t.dra.push({hz:'', m:'', r:'', ok:''}); keepScroll(renderTric); };
-    const pid=tq('pid'); pid.onchange=()=>{ $('#pOtherBox').classList.toggle('hidden', pid.value!=='__other'); try{ if(pid.value!=='__other') localStorage.setItem('ppeProj_'+token, pid.value); }catch(e){} };
-    if(t.addOpen){ const ex=()=>new Set([me.id, ...t.att.map(a=>a.w)]); wirePicker('t', ex(), '');
-      $('#tAdd').onclick=()=>{ const w=wById($('#ts').value); if(!w){ const e=$('#terr'); e.textContent='Choose the name.'; e.classList.remove('hidden'); return; } tricRead(); if(t.att.length<40) t.att.push({w:w.id, n:w.name}); t.addOpen=true; keepScroll(renderTric); };
-      $('#tAddAll').onclick=()=>{ tricRead(); const opts=[...$('#ts').options].filter(o=>o.value); for(const o of opts){ const w=wById(o.value); if(w && t.att.length<40 && !t.att.some(a=>a.w===w.id)) t.att.push({w:w.id, n:w.name}); } t.addOpen=false; keepScroll(renderTric); };
-      $('#tAddNo').onclick=()=>{ tricRead(); t.addOpen=false; keepScroll(renderTric); }; }
-    else $('#tAddOpen').onclick=()=>{ tricRead(); t.addOpen=true; keepScroll(renderTric); };
-    $('#back').onclick=()=>{ tricRead(); view='home'; render(); window.scrollTo(0,0); };
-    $('#tNext').onclick=()=>{ tricRead(); const m=tricCheck(); if(m) return err(m); view='tric2'; render(); window.scrollTo(0,0); };
-  }
+  let tbtF=null, tbtX=null, tpads={};
+  function tbtNew(){ tbtF={date:today(), time:nowHM(), loc:'', jp:'', job:'', att:[{w:me.id, n:me.name}], addOpen:false}; }
+  const tq=k=>app.querySelector(`[data-b="${k}"]`);
+  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp']){ const el=tq(k); if(el) tbtF[k]=el.value; } }
   function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
-  function tricCheck(){ const t=tric;
-    if(!t.pid) return 'Choose the project.'; if(t.pid==='__other' && !String(t.pother||'').trim()) return 'Write the project name.'; if(!t.loc.trim()) return 'Write the location.'; if(!t.date) return 'Choose the date.'; if(!t.job.trim()) return 'Write the job.';
-    if(!t.att.length) return 'Add the attendees (the crew).';
-    const m=TR_MUSTED.findIndex((x,i)=>!t.musted[i]); if(m>=0) return `Musta'ed step ${m+1} (${TR_MUSTED[m][0]}) is not ticked — if you are not ready, do not start the work.`;
-    const s=TR_STEPS.findIndex((x,i)=>!t.steps[i]); if(s>=0) return `TBT step not ticked: ${TR_STEPS[s]}.`;
-    if(!t.hz.length) return 'Tick at least one hazard.';
-    for(const hz of t.hz){ const c=t.ctrl[hz]||{}; if(!String(c.m||'').trim() || !c.r || !c.ok) return `Hazards control sheet: fill the control measure, responsible and Yes/No for "${TR_HZ[hz]}".`; }
-    for(const [i,c] of t.dra.entries()){ if(!String(c.hz||'').trim() || !String(c.m||'').trim() || !c.r || !c.ok) return `Dynamic risk ${i+1}: fill the risk, control measure, responsible and Yes/No — or remove it.`; }
-    return ''; }
-  function renderTric2(){
-    const t=tric;
-    app.innerHTML=`<div class="card"><h2>${tr('signAll')}</h2><p class="note">${tr('signHint')}</p>
-        ${t.att.map((a,i)=>`<div class="sgn"><div class="sgn-h">${i+1}. ${esc(a.n)} ${t.sigs[a.w]?'<span class="badge b-delivered">✓</span>':''}</div><div class="sigbox small"><canvas data-sp="${esc(a.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(a.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(a.w)}">${T.clear[0]}</button></div>`).join('')}
-        <div class="sgn lead"><div class="sgn-h">${tr('leadSign')}: ${esc(me.name)}</div><div class="sigbox small"><canvas data-sp="__lead" width="600" height="200"></canvas><div class="hint" data-sh="__lead">✍</div></div><button type="button" class="link" data-sc="__lead">${T.clear[0]}</button></div>
-        <div id="err" class="err hidden"></div><button class="btn green" id="tSend">${tr('tSend')}</button></div>
+  function renderTbtReq(){
+    const t=tbtF, locs=link.locs||[];
+    app.innerHTML=`<div class="card"><h2>${tr('tbtReq')}</h2><p class="note">${tr('tbtReqHint')}</p>
+        <div class="row2"><label>${tr('date')}<input type="date" data-b="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-b="time" value="${esc(t.time)}"></label></div>
+        <label>${tr('loc')}<input data-b="loc" list="tbLocs" value="${esc(t.loc)}" maxlength="80" placeholder="e.g. NM-12" autocomplete="off"><datalist id="tbLocs">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
+        <label>${tr('jp')}<input data-b="jp" value="${esc(t.jp)}" maxlength="40" placeholder="${esc(T.optional[0])}"></label>
+        <div style="font-weight:700; font-size:15px;">${tr('job')}</div>
+        <div class="reasons">${TB_JOBS.map(([j,h,a])=>`<button type="button" class="${t.job===j?'on':''}" data-job="${esc(j)}">${esc(j)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div></div>
+      <div class="card"><div class="sec">${tr('crew')} (${t.att.length})</div>
+        <div class="pchips">${t.att.map((a,i)=>`<span class="pchip-w"><span class="pchip ${i===0?'on':''}">${i===0?esc(T.me[0])+' · ':''}${esc(a.n)}</span>${i?`<button type="button" class="pchip-x" data-tax="${i}" aria-label="Remove ${esc(a.n)}">✕</button>`:''}</span>`).join('')}</div>
+        ${t.addOpen?`<div class="addbox">${pickerHtml('b', '')}<div id="berr" class="err hidden"></div><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" class="btn navy" id="bAdd" style="flex:1">${tr('add')}</button><button type="button" class="btn ghost" id="bAddAll" style="flex:1">${tr('addAll')}</button></div><button type="button" class="btn ghost" id="bAddNo" style="margin-top:8px;">${tr('back')}</button></div>`
+          :`<button type="button" class="pchip add" id="bAddOpen" style="margin-top:8px;">+ ${esc(T.addP[0])}</button>`}</div>
+      <div class="card"><div id="err" class="err hidden"></div><button class="btn" id="bSend">${tr('tbtSend')}</button></div>
       <button class="btn ghost" id="back">${tr('back')}</button>`;
-    tpads={};
-    app.querySelectorAll('[data-sp]').forEach(cv=>{ const k=cv.dataset.sp, p=makePad(cv, app.querySelector(`[data-sh="${CSS.escape(k)}"]`)); tpads[k]=p;
-      const old=k==='__lead'?t.lead:t.sigs[k]; if(old){ const im=new Image(); im.onload=()=>{ cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height); p.ink=true; const h=app.querySelector(`[data-sh="${CSS.escape(k)}"]`); if(h) h.classList.add('hidden'); }; im.src=old; }
-      p.onEnd=()=>{ if(k==='__lead') t.lead=p.image(300,100); else t.sigs[k]=p.image(300,100); }; });
-    app.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{ const k=b.dataset.sc; tpads[k].clear(); if(k==='__lead') t.lead=''; else delete t.sigs[k]; });
-    $('#back').onclick=()=>{ view='tric'; render(); window.scrollTo(0,0); };
-    $('#tSend').onclick=tricSend;
+    app.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{ tbtRead(); t.job=b.dataset.job; keepScroll(renderTbtReq); });
+    app.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{ tbtRead(); t.att.splice(+b.dataset.tax,1); keepScroll(renderTbtReq); });
+    if(t.addOpen){ wirePicker('b', new Set(t.att.map(a=>a.w)), '');
+      $('#bAdd').onclick=()=>{ const w=wById($('#bs').value); if(!w){ const e=$('#berr'); e.textContent='Choose the name.'; e.classList.remove('hidden'); return; } tbtRead(); if(t.att.length<40) t.att.push({w:w.id, n:w.name}); keepScroll(renderTbtReq); };
+      $('#bAddAll').onclick=()=>{ tbtRead(); for(const o of [...$('#bs').options].filter(o=>o.value)){ const w=wById(o.value); if(w && t.att.length<40 && !t.att.some(a=>a.w===w.id)) t.att.push({w:w.id, n:w.name}); } t.addOpen=false; keepScroll(renderTbtReq); };
+      $('#bAddNo').onclick=()=>{ tbtRead(); t.addOpen=false; keepScroll(renderTbtReq); }; }
+    else $('#bAddOpen').onclick=()=>{ tbtRead(); t.addOpen=true; keepScroll(renderTbtReq); };
+    $('#back').onclick=()=>{ tbtRead(); view='home'; render(); window.scrollTo(0,0); };
+    $('#bSend').onclick=sendTbt;
   }
-  async function tricSend(){
-    const t=tric, miss=t.att.find(a=>!t.sigs[a.w]); if(miss) return err(miss.n+' has not signed yet.');
-    if(!t.lead) return err('TBT leader: please sign at the bottom.');
-    const nm=id=>id===me.id?me.name:((t.att.find(a=>a.w===id)||{}).n||'');
-    const data={name:me.name, projectId:t.pid==='__other'?'':t.pid, ...(t.pid==='__other'?{projectName:String(t.pother||'').trim().slice(0,80)}:{}), loc:t.loc.trim().slice(0,80), date:t.date, time:t.time, job:t.job.trim().slice(0,120), permit:t.permit.trim().slice(0,40), task:t.task.trim().slice(0,120),
-      musted:TR_MUSTED.map((x,i)=>!!t.musted[i]), steps:TR_STEPS.map((x,i)=>!!t.steps[i]), changes:t.changes.slice(), lsr:t.lsr.slice(), hz:t.hz.slice(),
-      ctrl:t.hz.map(hz=>{ const c=t.ctrl[hz]||{}; return {hz, m:String(c.m||'').trim().slice(0,200), r:c.r, rn:nm(c.r), ok:c.ok}; }),
-      dra:t.dra.map(c=>({hz:String(c.hz||'').trim().slice(0,120), m:String(c.m||'').trim().slice(0,200), r:c.r, rn:nm(c.r), ok:c.ok})),
-      att:t.att.map(a=>({w:a.w, n:a.n, sig:t.sigs[a.w]})), debrief:String(t.debrief||'').trim().slice(0,400), leadSig:t.lead};
-    const b=$('#tSend'); b.disabled=true;
-    try{ await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
-      tric=null; view='tricSent'; render(); window.scrollTo(0,0); }
+  async function sendTbt(){
+    tbtRead(); const t=tbtF;
+    if(!t.date) return err('Choose the date.'); if(!t.loc.trim()) return err('Write the location / well number.'); if(!t.job) return err('Choose the job: Rig up, Rig down, Modification or Inspection.');
+    const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, loc:t.loc.trim().slice(0,80), jp:t.jp.trim().slice(0,40), job:t.job, att:t.att.map(a=>({w:a.w, n:a.n}))};
+    const b=$('#bSend'); b.disabled=true;
+    try{ const ref=await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      sentLocal.push({id:ref.id, w:me.id, d:t.date, t:`TBT · ${t.job} · ${data.loc}`, k:'tbt'}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
+      tbtF=null; view='tbtSent'; render(); window.scrollTo(0,0); }
     catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Tell HSE.':'Not sent — check the internet and try again.'); }
+  }
+  async function tbtFetch(id){ const s=await db.collection('tbtSubmissions').doc(id).get(); return s.exists?{id, ...(s.data()||{})}:null; }
+  const tbtAllSigned=x=>{ const a=((x.data||{}).att||[]), s=x.sigs||{}; return a.length>0 && a.every(p=>s[p.w]); };
+  async function openTbt(id){
+    app.innerHTML=`<div class="center">…</div>`;
+    try{ tbtX=await tbtFetch(id); }catch(e){ console.warn(e); tbtX=null; }
+    view='tbtSign'; render(); window.scrollTo(0,0);
+  }
+  function renderTbtSign(){
+    const x=tbtX;
+    if(!x){ app.innerHTML=`<div class="card"><h2>${tr('tbtGone')}</h2></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; render(); }; return; }
+    const d=x.data||{}, s=x.sigs||{}, att=d.att||[], mine=x.workerId===me.id, all=tbtAllSigned(x);
+    const head=`<div class="card"><h2>${esc(d.job)} · ${esc(d.loc||'')}</h2><p class="note">${esc(dmy(d.date))} ${esc(d.time||'')}${x.topic?' · '+esc(x.topic):''}</p>`;
+    if(x.status==='new'){ app.innerHTML=head+`<p class="note"><span class="badge b-tbtnew">${tr('st_tbtnew')}</span></p></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; render(); }; return; }
+    if(x.status==='rejected'){ app.innerHTML=head+`<p class="note"><span class="badge b-tbtrej">${tr('st_tbtrej')}</span>${x.rejectNote?' '+esc(x.rejectNote):''}</p></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; render(); }; return; }
+    const todo=att.filter(p=>!s[p.w] && (mine || p.w===me.id));
+    app.innerHTML=head+`<div class="note" style="margin-bottom:8px;">${att.map(p=>`${s[p.w]?'✅':'⬜'} ${esc(p.n)}`).join('<br>')}</div>
+        ${all?`<button class="btn green" id="tPdf">${tr('pdf')}</button>`:todo.length?`<p class="note">${tr(mine?'signHint':'signMine')}</p>`+todo.map(p=>`<div class="sgn"><div class="sgn-h">${esc(p.n)}</div><div class="sigbox small"><canvas data-sp="${esc(p.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(p.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(p.w)}">${T.clear[0]}</button></div>`).join('')
+          +`<div id="err" class="err hidden"></div><button class="btn green" id="tSave">${tr('saveSig')}</button>`:`<p class="note">${tr('waitOthers')}</p>`}
+      </div><button class="btn ghost" id="back">${tr('back')}</button>`;
+    $('#back').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
+    tpads={}; app.querySelectorAll('[data-sp]').forEach(cv=>{ const k=cv.dataset.sp; tpads[k]=makePad(cv, app.querySelector(`[data-sh="${CSS.escape(k)}"]`)); });
+    app.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>tpads[b.dataset.sc].clear());
+    const sv=$('#tSave'); if(sv) sv.onclick=saveTbtSigs;
+    const pd=$('#tPdf'); if(pd) pd.onclick=()=>tbtPhonePdf(x);
+  }
+  async function saveTbtSigs(){
+    const add={}; for(const [w,p] of Object.entries(tpads)) if(p.ink) add[w]=p.image(300,100);
+    if(!Object.keys(add).length) return err('Sign in at least one box.');
+    const b=$('#tSave'); b.disabled=true;
+    for(let attempt=0; attempt<3; attempt++){
+      try{ const fresh=await tbtFetch(tbtX.id); if(!fresh || fresh.status!=='sign'){ tbtX=fresh; render(); return; }
+        const sigs={...(fresh.sigs||{})}; for(const [w,v] of Object.entries(add)) if(!sigs[w]) sigs[w]=v;
+        await db.collection('tbtSubmissions').doc(tbtX.id).update({sigs});
+        tbtX={...fresh, sigs}; if(link.board && link.board[me.id]) link.board[me.id]=link.board[me.id].map(e=>e.id===tbtX.id?{...e, st:tbtAllSigned(tbtX)?'tbtdone':'tbtsigned'}:e);
+        render(); window.scrollTo(0,0); return;
+      }catch(e){ console.warn(e); if(attempt===2){ b.disabled=false; err('Not saved — check the internet and try again.'); } }
+    }
+  }
+  function loadJsPdf(){ if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve(); return new Promise((ok,no)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'; s.onload=()=>ok(); s.onerror=()=>no(new Error('jspdf')); document.head.appendChild(s); }); }
+  async function tbtPhonePdf(x){
+    const b=$('#tPdf'); if(b) b.disabled=true;
+    try{ await loadJsPdf(); }catch(e){ if(b) b.disabled=false; return alertBox('The PDF tool could not load — check the internet.'); }
+    let logo=null; try{ const r=await fetch('logo.png'); if(r.ok){ const bl=await r.blob(); logo=await new Promise(ok=>{ const f=new FileReader(); f.onload=()=>ok(f.result); f.onerror=()=>ok(null); f.readAsDataURL(bl); }); } }catch(e){}
+    const doc=new window.jspdf.jsPDF({unit:'pt', format:'a4'}), W=doc.internal.pageSize.getWidth(), dc=link.tbtDocCtl||{};
+    const header=()=>{ doc.setDrawColor(120,126,136); doc.setLineWidth(0.6); doc.rect(24,20,W-48,44); if(logo){ try{ doc.addImage(logo,'PNG',30,24,36,36); }catch(e){} }
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(179,18,26); doc.text('BURHAN OIL & TRADE SERVICES', W/2, 36, {align:'center'}); doc.setTextColor(20,22,28); doc.setFontSize(12); doc.text('Toolbox Talk Record (TBT)', W/2, 52, {align:'center'});
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text(`Doc. No. ${dc.no||'—'}  Rev. ${dc.rev||'—'}`, W-30, 34, {align:'right'}); doc.text(link.projectName||'', W-30, 46, {align:'right'}); };
+    header(); const add=doc.addPage.bind(doc); doc.addPage=(...a)=>{ const r=add(...a); header(); return r; };
+    const who=id=>{ const p=((x.data||{}).att||[]).find(a=>a.w===id); return p?p.n:((x.data||{}).name||'—'); };
+    tbtPdfBody(doc, x, {project:link.projectName||'—', who, top:76});
+    const d=x.data||{}; doc.save(`TBT_${String(d.job||'').replace(/[^A-Za-z0-9]+/g,'_')}_${String(d.loc||'').replace(/[^A-Za-z0-9]+/g,'_').slice(0,30)}_${d.date||''}.pdf`);
+    if(b) b.disabled=false;
+  }
+  function alertBox(m){ const e=$('#err'); if(e) return err(m); app.insertAdjacentHTML('afterbegin', `<div class="err">${esc(m)}</div>`); }
+  // same layout as the tracker's TBT PDF
+  function tbtPdfBody(doc, x, o){
+    const d=x.data||{}, s=x.sigs||{}, M=30, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, FS=8.6, LH=10, INK=[20,22,28], LBL=[244,246,248], GRN=[16,140,72], GREY=[226,229,234];
+    let y=o.top||32; const ensure=h=>{ if(y+h>H-26){ doc.addPage(); y=o.top||32; } };
+    const row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:c.img?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
+      const h=Math.max(minH||14, ...pc.map(c=>c.l.length*LH+5)); ensure(h); let xx=M;
+      for(const c of pc){ if(c.fill){ doc.setFillColor(...c.fill); doc.rect(xx,y,c.w,h,'F'); } doc.setDrawColor(120,126,136); doc.setLineWidth(0.5); doc.rect(xx,y,c.w,h);
+        if(c.img){ try{ let iw=c.w-8, ih=h-4; try{ const pr=doc.getImageProperties(c.img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(c.img, 'PNG', xx+(c.w-iw)/2, y+(h-ih)/2, iw, ih); }catch(e){} }
+        doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); doc.setTextColor(...(c.color||INK)); c.l.forEach((ln,i)=>doc.text(ln, xx+4, y+10+i*LH)); xx+=c.w; }
+      y+=h; doc.setTextColor(...INK); };
+    const head=t=>{ ensure(30); y+=5; row([{t, w:CW, bold:true, fill:GRN, color:[255,255,255]}]); };
+    const tick=b=>b?'[X]':'[  ]', K=100, hw=(CW-2*K)/2;
+    row([{t:'TOOLBOX TALK RECORD (TBT)', w:CW, bold:true, size:11, fill:GREY}]);
+    row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy(d.date)} ${d.time||''}`, w:hw}]);
+    row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
+    row([{t:'JOB', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'REQUESTED BY', w:K, bold:true, fill:LBL},{t:o.who(x.workerId), w:hw}]);
+    row([{t:'TOPIC', w:K, bold:true, fill:LBL},{t:x.topic, w:CW-K, bold:true}]);
+    head("MUSTA'ED — ARE YOU READY?");
+    TB_MUSTED.forEach(([t,sx],i)=>row([{t:`${i+1}. ${t}`, w:110, bold:true, fill:LBL},{t:sx.replace(/ · /g,'; '), w:CW-150},{t:tick((x.musted||[])[i]), w:40, bold:true}]));
+    head('LIFE SAVING RULES DISCUSSED');
+    const lsr=Object.entries(TB_LSR); for(let i=0;i<lsr.length;i+=3) row([0,1,2].flatMap(j=>lsr[i+j]?[{t:lsr[i+j][1], w:CW/3-34},{t:tick((x.lsr||[]).includes(lsr[i+j][0])), w:34, bold:true}]:[{t:'', w:CW/3, blank:true}]));
+    const att=d.att||[]; head(`ATTENDEES (${att.length}) — signed on the project link`);
+    for(let i=0;i<att.length;i+=2){ const c=[]; [0,1].forEach(j=>{ const p=att[i+j]; if(p) c.push({t:`${i+j+1}. ${o.who(p.w)}`, w:CW/2-120}, {img:s[p.w], t:s[p.w]?'':'not signed', w:120}); else c.push({t:'', w:CW/2, blank:true}); }); row(c, 36); }
+    y+=4; row([{t:`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?' · '+dmy(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?' · Complete':''}`, w:CW, size:7.5, color:[90,96,106]}]);
+    row([{t:'Remember 3 golden rules: 1) Comply 2) Intervene 3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.5, color:[150,20,20]}]);
   }
   function err(m){ const e=$('#err'); if(e){ e.textContent=m; e.classList.remove('hidden'); e.scrollIntoView({block:'center'}); } }
   async function sendReq(){
