@@ -65,6 +65,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 @media (max-width:380px){ .tk-grid{grid-template-columns:1fr;} }
 .b-tbtnew,.b-tbtpend{background:var(--warn-bg); color:var(--warn);} .b-tbtsign,.b-tbtsigned{background:var(--blue-bg); color:#1d4f91;} .b-tbtdone{background:var(--ok-bg); color:var(--ok);} .b-tbtrej{background:var(--red-bg); color:var(--red);}
 .signme{border:2px solid var(--ok); background:#f6fffa;}
+.inc-btn{background:#fff; color:var(--red); border:2px solid var(--red);} .inc-card{border:2px solid var(--red);}
+.inc-types{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 14px;} .inc-types button{padding:12px 8px; border:2px solid var(--line); border-radius:12px; background:#fff; font:inherit; font-weight:800; font-size:15px;} .inc-types button.on{border-color:var(--red); background:var(--red); color:#fff;}
 .pds{display:block; font-size:11.5px; font-weight:600; opacity:.75;} .pchip .pds{display:block;}
 .dra{border:2px solid var(--red); background:var(--red-bg); border-radius:12px; padding:10px; margin-bottom:10px;} .dra-r{padding:4px 0; border-top:1px solid #f3c4c6;} .dra-r:first-of-type{border-top:0;} .dra-r b{display:block;} .dra-r span{font-size:14px;}
 .hidden{display:none !important;}
@@ -139,6 +141,13 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     pauseChk:['Pause & check — anything changed?','रुकें और जाँचें — कुछ बदला?','توقف وتحقق — هل تغيّر شيء؟'], pauseHint2:['Tick only what changed. Brief the crew before you start.','सिर्फ़ जो बदला उस पर टिक करें। शुरू करने से पहले टीम को बताएँ।','حدد فقط ما تغيّر. أبلغ الفريق قبل البدء.'],
     jobSign:['I briefed the crew','मैंने टीम को बताया','أبلغت الفريق'], jobSave:['Save job','काम सेव करें','حفظ العمل'],
     work:['Work / task','काम / कार्य','العمل / المهمة'],
+    veh:['Vehicle number','वाहन नंबर','رقم المركبة'], allSigned:['Everyone has signed.','सभी ने हस्ताक्षर कर दिए।','وقّع الجميع.'],
+    pdfAfter:['The PDF can be downloaded here after the HSE review and signature.','एचएसई की जाँच और हस्ताक्षर के बाद पीडीएफ यहाँ मिलेगी।','يمكن تنزيل الملف هنا بعد مراجعة وتوقيع السلامة.'],
+    incRep:['Report an incident','घटना की रिपोर्ट करें','الإبلاغ عن حادث'], incHint:['Only the main details — HSE will call you.','सिर्फ़ मुख्य जानकारी — एचएसई आपको फ़ोन करेगा।','التفاصيل الأساسية فقط — سيتصل بك قسم السلامة.'],
+    incType:['Type of incident','घटना का प्रकार','نوع الحادث'], injured:['Injured person','घायल व्यक्ति','الشخص المصاب'], noInj:['No one injured','कोई घायल नहीं','لا يوجد مصاب'], injOther:['Other person (not in the list)','अन्य व्यक्ति (सूची में नहीं)','شخص آخر (غير موجود)'],
+    injName:['Injured person\'s name','घायल का नाम','اسم المصاب'], mobile:['Mobile number to call','संपर्क मोबाइल नंबर','رقم الجوال للاتصال'], incWhat:['What happened','क्या हुआ','ماذا حدث'],
+    repBy:['Reported by','रिपोर्ट करने वाला','المبلّغ'], incSend:['Send report','रिपोर्ट भेजें','إرسال البلاغ'], incSent:['Incident reported','घटना की रिपोर्ट हो गई','تم الإبلاغ عن الحادث'],
+    incSent2:['HSE has been informed. If someone is hurt, call the emergency number now.','एचएसई को सूचना दे दी गई। अगर कोई घायल है तो अभी इमरजेंसी नंबर पर कॉल करें।','تم إبلاغ قسم السلامة. إذا كان هناك مصاب اتصل برقم الطوارئ الآن.'],
     tbtNext:['Next: everyone signs','आगे: सभी हस्ताक्षर करें','التالي: يوقّع الجميع'], pdfPend:['Download PDF (pending HSE review)','पीडीएफ डाउनलोड करें (एचएसई जाँच बाकी)','تنزيل PDF (بانتظار المراجعة)'],
     pdfPendHint:['After the HSE review the final PDF is here.','एचएसई जाँच के बाद अंतिम पीडीएफ यहीं मिलेगी।','بعد مراجعة السلامة يكون الملف النهائي هنا.'],
     st_tbtpend:['TBT — signed, waiting for HSE review','टीबीटी — हस्ताक्षर हो गए, एचएसई जाँच बाकी','تم التوقيع، بانتظار مراجعة السلامة'],
@@ -237,6 +246,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       app.innerHTML=`<div class="card"><div class="hello"><div>${tr('hello')}<b>${esc(me.name)}</b>${me.dv?`<span class="tr">${esc(me.dv)}</span>`:''}</div><button class="link" id="out">${tr('notme')}</button></div></div>
         <div class="big2" style="margin-bottom:14px;"><button class="btn" id="toReq">${svg('helmet')}${tr('req')}</button><button class="btn green" id="toRec">${svg('impact')}${tr('rec')}${nRec?` <span class="badge" style="background:#fff;color:var(--ok)">${nRec}</span>`:''}</button></div>
         <button class="btn navy" id="toTbt" style="margin-bottom:14px;">${tr('tbtReq')}</button>
+        <button class="btn inc-btn" id="toInc" style="margin-bottom:14px;">🚨 ${tr('incRep')}</button>
         ${toSign.length?`<div class="card signme"><h2>${esc(T.tbtToSign[0])} (${toSign.length})<span class="tr">${esc(T.tbtToSign[1])} · <span class="ar" dir="rtl">${esc(T.tbtToSign[2])}</span></span></h2>${toSign.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><button class="btn green" data-tbt-open="${esc(x.id)}" style="margin-top:6px; padding:11px;">${tr('signNow')}</button></div>`).join('')}</div>`:''}
         <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
       $('#out').onclick=()=>{ me=null; tbtF=null; view='who'; render(); };
@@ -244,6 +254,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
       $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
       $('#toTbt').onclick=()=>{ if(!tbtF) tbtNew(); view='tbtReq'; render(); window.scrollTo(0,0); };
+      $('#toInc').onclick=()=>{ if(!incF) incNew(); view='inc'; render(); window.scrollTo(0,0); };
       return;
     }
     if(view==='req'){
@@ -302,6 +313,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     if(view==='tbtReq'){ renderTbtReq(); return; }
     if(view==='tbtSign'){ renderTbtSign(); return; }
     if(view==='tbtJob'){ renderTbtJob(); return; }
+    if(view==='inc'){ renderInc(); return; }
+    if(view==='incSent'){ app.innerHTML=`<div class="card done"><div class="tick" style="background:var(--red-bg); color:var(--red);">✓</div><h2>${tr('incSent')}</h2><p class="note">${tr('incSent2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
     if(view==='tbtSent'){ app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr('tbtSent')}</h2><p class="note">${tr('tbtSent2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
     if(view==='sent' || view==='thanks'){
       app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr(view==='sent'?'sent':'thanks')}</h2>${view==='sent'?`<p class="note">${tr('sent2')}</p>`:''}<button class="btn navy" id="home">${tr('back')}</button></div>`;
@@ -329,9 +342,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     :`<label>${tr('work')}<textarea ${attr}="job" maxlength="120" placeholder="e.g. Block work — ground floor, Building A">${esc(v)}</textarea></label>`;
   const TB_SHIFT=[['Day','दिन','نهاري'],['Night','रात','ليلي']];
   const TB_CHG={pm:['People changed','लोग बदले','تغيّر الأشخاص'], te:['Tools / equipment changed','औज़ार / उपकरण बदले','تغيّرت الأدوات'], nh:['New hazards','नए खतरे','مخاطر جديدة'], we:['Weather','मौसम','الطقس']};
-  function tbtNew(){ const cl=link.clients||[]; tbtF={date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(link.clientName)?link.clientName:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
+  function tbtNew(){ const cl=link.clients||[]; tbtF={veh:'', date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(link.clientName)?link.clientName:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
   const tq=k=>app.querySelector(`[data-b="${k}"]`);
-  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
+  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother','veh']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
   function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
   function renderTbtReq(){
     const t=tbtF, locs=link.locs||[];
@@ -343,6 +356,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <label>${tr('client')}<select data-b="client"><option value="">—</option>${(link.clients||[]).map(c=>`<option ${c===t.client?'selected':''}>${esc(c)}</option>`).join('')}<option value="__other" ${t.client==='__other'?'selected':''}>${esc(T.pOther[0])}</option></select></label>
         <label id="cOtherBox" class="${t.client==='__other'?'':'hidden'}">${tr('clientName')}<input data-b="cother" value="${esc(t.cother||'')}" maxlength="60"></label>
         ${jpField('data-b', t.jp)}
+        ${vehField('data-b', t.veh, true)}
         ${jobField('data-b','data-job',t.job)}</div>
       <div class="card"><div class="sec">${tr('crew')} (${t.att.length})</div>
         <div class="pchips">${t.att.map((a,i)=>`<span class="pchip-w"><span class="pchip ${i===0?'on':''}">${i===0?esc(T.me[0])+' · ':''}${esc(a.n)}${dsOf(a.w)?`<span class="pds">${esc(dsOf(a.w))}</span>`:''}</span>${i?`<button type="button" class="pchip-x" data-tax="${i}" aria-label="Remove ${esc(a.n)}">✕</button>`:''}</span>`).join('')}</div>
@@ -366,7 +380,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     tbtRead(); const t=tbtF;
     if(!t.date) return err('Choose the date.'); if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job: Rig up, Rig down, Modification or Inspection.':'Write the work you will do.');
     if(!t.shift) return err('Choose Day or Night job.'); if(!t.client) return err('Choose the client.'); if(t.client==='__other' && !String(t.cother||'').trim()) return err('Write the client name.');
-    const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), job:String(t.job).trim().slice(0,120), att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
+    if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.');
+    const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', job:String(t.job).trim().slice(0,120), att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
     const b=$('#bSend'); b.disabled=true;
     try{ const ref=await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
       sentLocal.push({id:ref.id, w:me.id, d:t.date, t:`TBT · ${t.job} · ${data.loc}`, k:'tbt'}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
@@ -391,7 +406,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     app.innerHTML=head+pend+`${dra.length?`<div class="dra"><div class="sec" style="color:var(--red);">⚠ ${tr('dra')}</div>${dra.map(q=>`<div class="dra-r"><b>${esc(q.hz)}</b><span>${esc(q.m)}${q.rn?' — '+esc(q.rn):''}</span></div>`).join('')}</div>`:''}
         <div class="note" style="margin-bottom:8px;">${att.map(p=>`${s[p.w]?'✅':'⬜'} ${esc(p.n)}${p.ds?` <span class="pds">${esc(p.ds)}</span>`:''}`).join('<br>')}</div>
         ${jobs.length?`<div class="note" style="margin-bottom:8px;"><b>${jobs.length+1} ${esc(T.jobsN[0])}</b><br>1. ${esc(d.job)} · ${esc(d.loc||'')}${jobs.map((q,i)=>`<br>${i+2}. ${esc(q.time||'')} ${esc(q.job)} · ${esc(q.loc||'')}`).join('')}</div>`:''}
-        ${all?`<button class="btn green" id="tPdf">${tr(x.status==='new'?'pdfPend':'pdf')}</button>${x.status==='new'?`<p class="note">${tr('pdfPendHint')}</p>`:''}`:todo.length?`<p class="note">${tr(mine?'signHint':'signMine')}</p>`+todo.map(p=>`<div class="sgn"><div class="sgn-h">${esc(p.n)}</div><div class="sigbox small"><canvas data-sp="${esc(p.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(p.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(p.w)}">${T.clear[0]}</button></div>`).join('')
+        ${all?(x.status==='new'?`<p class="note"><b>${tr('allSigned')}</b><br>${tr('pdfAfter')}</p>`:`<button class="btn green" id="tPdf">${tr('pdf')}</button>`):todo.length?`<p class="note">${tr(mine?'signHint':'signMine')}</p>`+todo.map(p=>`<div class="sgn"><div class="sgn-h">${esc(p.n)}</div><div class="sigbox small"><canvas data-sp="${esc(p.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(p.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(p.w)}">${T.clear[0]}</button></div>`).join('')
           +`<div id="err" class="err hidden"></div><button class="btn green" id="tSave">${tr('saveSig')}</button>`:`<p class="note">${tr('waitOthers')}</p>`}
         ${mine && ['new','sign','done'].includes(x.status) && jobs.length<9?`<button class="btn navy" id="tJob" style="margin-top:10px;">+ ${tr('addJob')}</button>`:''}
       </div><button class="btn ghost" id="back">${tr('back')}</button>`;
@@ -400,17 +415,18 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     app.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>tpads[b.dataset.sc].clear());
     const sv=$('#tSave'); if(sv) sv.onclick=saveTbtSigs;
     const pd=$('#tPdf'); if(pd) pd.onclick=()=>tbtPhonePdf(x);
-    const jb=$('#tJob'); if(jb) jb.onclick=()=>{ const d0=x.data||{}; jobF={time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', loc:'', jp:'', job:'', chg:[]}; view='tbtJob'; render(); window.scrollTo(0,0); };
+    const jb=$('#tJob'); if(jb) jb.onclick=()=>{ const d0=x.data||{}; jobF={veh:(x.data||{}).veh||'', time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', loc:'', jp:'', job:'', chg:[]}; view='tbtJob'; render(); window.scrollTo(0,0); };
   }
   let jobF=null;
   function renderTbtJob(){
     const t=jobF, x=tbtX, d=x.data||{}, locs=link.locs||[];
-    const read=()=>{ for(const k of ['time','loc','jp']){ const el=app.querySelector(`[data-j="${k}"]`); if(el) t[k]=el.value; } if(!isScaf()){ const j=app.querySelector('[data-j="job"]'); if(j) t.job=j.value; } };
+    const read=()=>{ for(const k of ['time','loc','jp','veh']){ const el=app.querySelector(`[data-j="${k}"]`); if(el) t[k]=el.value; } if(!isScaf()){ const j=app.querySelector('[data-j="job"]'); if(j) t.job=j.value; } };
     app.innerHTML=`<div class="card"><h2>${tr('addJob')}</h2><p class="note">${tr('addJobHint')}: <b>${esc(x.topic||d.job)}</b> (${esc(dmy(d.date))})</p>
         <div class="row2"><label>${tr('time')}<input type="time" data-j="time" value="${esc(t.time)}"></label><div></div></div>
         <div style="font-weight:700; font-size:15px;">${tr('shift')}</div><div class="reasons">${TB_SHIFT.map(([v,h,a])=>`<button type="button" class="${t.shift===v?'on':''}" data-jshift="${esc(v)}">${v==='Day'?'☀ ':'☾ '}${esc(v)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>
         <label>${tr(isScaf()?'loc':'locX')}<input data-j="loc" list="tbLocs2" value="${esc(t.loc)}" maxlength="80" autocomplete="off"><datalist id="tbLocs2">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
         ${jpField('data-j', t.jp)}
+        ${vehField('data-j', t.veh, true)}
         ${jobField('data-j','data-jjob',t.job)}
         <div style="font-weight:700; font-size:15px;">${tr('pauseChk')}</div><p class="note" style="margin:0 0 6px;">${tr('pauseHint2')}</p>
         <div class="tk-grid">${Object.entries(TB_CHG).map(([k,[l,h,a]])=>`<label class="tk ${t.chg.includes(k)?'on':''}"><input type="checkbox" data-jchg="${k}" ${t.chg.includes(k)?'checked':''}><span><b>${esc(l)}</b><span class="tk-s">${esc(h)} · ${esc(a)}</span></span></label>`).join('')}</div>
@@ -423,8 +439,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     app.querySelectorAll('[data-jchg]').forEach(c=>c.onchange=()=>{ const k=c.dataset.jchg, i=t.chg.indexOf(k); if(c.checked && i<0) t.chg.push(k); if(!c.checked && i>=0) t.chg.splice(i,1); c.closest('.tk').classList.toggle('on', c.checked); });
     $('#back').onclick=()=>{ view='tbtSign'; render(); };
     $('#jSave').onclick=async()=>{ read();
-      if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job.':'Write the work you will do.'); if(!pad.ink) return err('Please sign to confirm the crew was briefed.');
-      const job={time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), job:String(t.job).trim().slice(0,120), chg:t.chg.map(k=>TB_CHG[k][0]), by:me.id, sig:pad.image(300,100), at:new Date().toISOString()};
+      if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job.':'Write the work you will do.');
+      if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.'); if(!pad.ink) return err('Please sign to confirm the crew was briefed.');
+      const job={time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', job:String(t.job).trim().slice(0,120), chg:t.chg.map(k=>TB_CHG[k][0]), by:me.id, sig:pad.image(300,100), at:new Date().toISOString()};
       const b=$('#jSave'); b.disabled=true;
       try{ const fresh=await tbtFetch(x.id); if(!fresh){ tbtX=null; view='tbtSign'; render(); return; }
         const jobs=[...(fresh.jobs||[]), job]; await db.collection('tbtSubmissions').doc(x.id).update({jobs});
@@ -485,7 +502,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     if(x.status==='new') row([{t:'PENDING HSE REVIEW — topic, Musta\'ed and Life Saving Rules are completed by HSE. Download the final PDF from the link after the review.', w:CW, bold:true, color:[255,255,255], fill:RED}]);
     row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy2(d.date)} ${d.time||''}`, w:hw}]);
     row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
-    row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
+    row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'VEHICLE NO.', w:K, bold:true, fill:LBL},{t:d.veh||'N/A', w:hw}]);
     row([{t:'REQUESTED BY', w:K, bold:true, fill:LBL},{t:who(x.workerId), sub:ds(x.workerId), w:hw},{t:'CLIENT', w:K, bold:true, fill:LBL},{t:d.client||'—', w:hw}]);
     row([{t:'TOPIC', w:K, bold:true, fill:LBL},{t:x.topic, w:CW-K, bold:true}], 18);
     head("MUSTA'ED — ARE YOU READY?");
@@ -502,10 +519,50 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const jobs=[{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, first:true}, ...(x.jobs||[])];
     head(`JOBS CARRIED OUT UNDER THIS TBT (${jobs.length})`);
     row([{t:'#', w:22, bold:true, fill:LBL},{t:'Time / shift', w:70, bold:true, fill:LBL},{t:'Location / well', w:100, bold:true, fill:LBL},{t:'Journey plan', w:70, bold:true, fill:LBL},{t:'Job', w:70, bold:true, fill:LBL},{t:'Pause & check — changes', w:CW-22-70-100-70-70-90, bold:true, fill:LBL},{t:'Confirmed by', w:90, bold:true, fill:LBL}]);
-    jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job, w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
+    jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job+(j.veh?' ('+j.veh+')':''), w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
       j.first?{t:'All attendees', w:90, color:SUB}:{img:j.sig, t:j.sig?'':who(j.by), w:90}], j.first?15:26));
-    y+=6; row([{t:x.status==='new'?'Reviewed by HSE: PENDING':`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?'  ·  '+dmy2(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?'  ·  Complete — all attendees signed':''}`, w:CW, size:7.6, color:SUB}]);
+    y+=6; const hs=x.hseSig||{};
+    if(x.status==='new') row([{t:'HSE REVIEW: PENDING', w:CW, bold:true, color:RED}]);
+    else { ensure(52); row([{t:'REVIEWED BY HSE', w:K, bold:true, fill:LBL},{t:hs.name||x.reviewedBy||'—', sub:[hs.role, x.reviewedAt?dmy2(String(x.reviewedAt).slice(0,10)):''].filter(Boolean).join('  ·  '), w:CW-K-150, bold:true},{img:hs.img, t:hs.img?'':'—', w:150, color:SUB}], 40); }
     row([{t:'Remember the 3 golden rules: 1) Comply  2) Intervene  3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.6, bold:true, color:RED}]);
+  }
+  /* ===== Batch 83: report an incident (few fields — HSE completes the rest) ===== */
+  let incF=null;
+  const needVeh=()=>link.division==='Scaffolding' || link.division==='Rental' || !link.division;
+  const vehField=(attr,v,req)=>needVeh()?`<label>${tr('veh')}${req?'':` <span class="note">(${esc(T.optional[0])})</span>`}<input ${attr}="veh" list="tbVehs" value="${esc(v||'')}" maxlength="20" autocomplete="off" placeholder="e.g. 12345 AB"><datalist id="tbVehs">${(link.vehs||[]).map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>`:'';
+  function incNew(){ const h=new Date().getHours(); incF={date:today(), time:nowHM(), shift:(h>=6&&h<18)?'Day':'Night', loc:'', type:'', inj:'', injO:'', mobile:'', veh:'', desc:''}; }
+  function renderInc(){
+    const t=incF, types=link.incTypes||['Injury','Near miss','Equipment / property damage','Vehicle incident','Spill / environment'], ws=(link.workers||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));
+    const read=()=>{ for(const k of ['date','time','loc','injO','mobile','veh','desc']){ const el=app.querySelector(`[data-i="${k}"]`); if(el) t[k]=el.value; } const s=app.querySelector('[data-i="inj"]'); if(s) t.inj=s.value; };
+    app.innerHTML=`<div class="card inc-card"><h2>🚨 ${tr('incRep')}</h2><p class="note">${tr('incHint')}</p>
+        <div class="row2"><label>${tr('date')}<input type="date" data-i="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-i="time" value="${esc(t.time)}"></label></div>
+        <div class="reasons">${TB_SHIFT.map(([v,h,a])=>`<button type="button" class="${t.shift===v?'on':''}" data-ishift="${esc(v)}">${v==='Day'?'☀ ':'☾ '}${esc(v)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>
+        <label>${tr(isScaf()?'loc':'locX')}<input data-i="loc" list="incLocs" value="${esc(t.loc)}" maxlength="80" autocomplete="off"><datalist id="incLocs">${(link.locs||[]).map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
+        <div style="font-weight:700; font-size:15px;">${tr('incType')}</div>
+        <div class="inc-types">${types.map(ty=>`<button type="button" class="${t.type===ty?'on':''}" data-itype="${esc(ty)}">${esc(ty)}</button>`).join('')}</div>
+        <label>${tr('injured')}<select data-i="inj"><option value="">${esc(T.noInj[0])}</option>${ws.map(w=>`<option value="${esc(w.id)}" ${t.inj===w.id?'selected':''}>${esc(w.name)}</option>`).join('')}<option value="__other" ${t.inj==='__other'?'selected':''}>${esc(T.injOther[0])}</option></select></label>
+        <label id="injOBox" class="${t.inj==='__other'?'':'hidden'}">${tr('injName')}<input data-i="injO" value="${esc(t.injO)}" maxlength="60"></label>
+        <label>${tr('mobile')}<input type="tel" data-i="mobile" value="${esc(t.mobile)}" maxlength="20" inputmode="tel" placeholder="+968 9xxx xxxx"></label>
+        ${vehField('data-i', t.veh, false)}
+        <label>${tr('incWhat')} <span class="note">(${esc(T.optional[0])})</span><textarea data-i="desc" maxlength="200">${esc(t.desc)}</textarea></label>
+        <div class="note">${tr('repBy')}: <b>${esc(me.name)}</b></div>
+        <div id="err" class="err hidden"></div><button class="btn" id="iSend">${tr('incSend')}</button></div>
+      <button class="btn ghost" id="back">${tr('back')}</button>`;
+    app.querySelectorAll('[data-ishift]').forEach(b=>b.onclick=()=>{ read(); t.shift=b.dataset.ishift; keepScroll(renderInc); });
+    app.querySelectorAll('[data-itype]').forEach(b=>b.onclick=()=>{ read(); t.type=b.dataset.itype; keepScroll(renderInc); });
+    const sel=app.querySelector('[data-i="inj"]'); sel.onchange=()=>$('#injOBox').classList.toggle('hidden', sel.value!=='__other');
+    $('#back').onclick=()=>{ read(); view='home'; render(); window.scrollTo(0,0); };
+    $('#iSend').onclick=async()=>{ read();
+      if(!t.loc.trim()) return err('Write the location.'); if(!t.type) return err('Choose the type of incident.');
+      if(t.inj==='__other' && !t.injO.trim()) return err('Write the injured person\'s name.');
+      if(String(t.mobile).replace(/\D/g,'').length<7) return err('Write a mobile number we can call.');
+      const iw=t.inj && t.inj!=='__other' ? wById(t.inj) : null;
+      const data={name:me.name, projectId:link.projectId||'', projectName:link.projectName||'', date:t.date, time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), type:t.type,
+        injW:iw?iw.id:'', injN:iw?iw.name:(t.inj==='__other'?t.injO.trim().slice(0,60):''), mobile:String(t.mobile).trim().slice(0,20), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', desc:String(t.desc||'').trim().slice(0,200)};
+      const b=$('#iSend'); b.disabled=true;
+      try{ await db.collection('incidentReports').add({token, workerId:me.id, status:'new', data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        incF=null; view='incSent'; render(); window.scrollTo(0,0); }
+      catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Call HSE now.':'Not sent — check the internet and try again, or call HSE now.'); } };
   }
   function err(m){ const e=$('#err'); if(e){ e.textContent=m; e.classList.remove('hidden'); e.scrollIntoView({block:'center'}); } }
   async function sendReq(){

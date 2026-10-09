@@ -1056,7 +1056,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ppe-rq{margin-bottom:8px;} .ppe-rq.busy{opacity:.6;} .ppe-rq .table-wrap{margin:6px 0;} .ppe-rq-t td,.ppe-rq-t th{padding:4px 8px;}
 .ppe-rq-in{width:90px; padding:4px 6px; min-height:0;} .ppe-rq-in.num{width:64px;} .ppe-rq-note{width:100%; margin-top:6px;} .ppe-rq-person{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; margin:8px 0 2px; font-weight:600;} .ppe-out{margin-left:auto; font-weight:600;} .ppe-rq-t tr.ppe-off td{text-decoration:line-through; opacity:.6;}
 .ppe-alert{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--warn); border-left:4px solid var(--warn); border-radius:9px; padding:8px 12px; margin-bottom:12px; font-size:13px;}
-.tric-panel{border-left:3px solid var(--accent);} .tbt-card{margin-bottom:8px;} .tbt-card.busy{opacity:.6;} .tbt-crew{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0;} .tbt-addsel{max-width:260px; min-height:0; padding:4px 8px;} .tbt-topic{display:block; margin:6px 0; font-weight:600;} .tbt-topic input{width:100%;} .tbt-ticks{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0 18px;} .tbt-chk{display:flex; gap:6px; align-items:center; margin:2px 0;} .tbt-dra{display:grid; grid-template-columns:1fr 1.4fr 180px auto; gap:6px; margin-bottom:6px;} .tbt-dra input,.tbt-dra select{min-height:0; padding:5px 8px;} .tbt-jobs{margin-top:6px; padding:6px 8px; border-left:3px solid var(--warn); font-size:12.5px; background:var(--surface-2);} @media (max-width:700px){ .tbt-dra{grid-template-columns:1fr;} } .tric-card{margin-bottom:8px;} .tric-card.busy{opacity:.6;} .tric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:4px 14px; margin:6px 0; font-size:12.5px;} .tric-grid .rf-k{display:block;} .tric-pick{display:block; margin-top:6px; font-weight:600;} .tric-pick select{max-width:340px;}
+.tric-panel{border-left:3px solid var(--accent);} .tbt-card{margin-bottom:8px;} .hse-sig-pad canvas{width:100%; max-width:420px; height:140px; background:#fff; border:1px dashed var(--line); border-radius:8px; touch-action:none; display:block;} .inc-alert{border-color:var(--danger,#d33); border-left-color:var(--danger,#d33);} .inc-rep-panel{border-left:3px solid var(--danger,#d33);} .inc-rep{margin-bottom:8px;} .tbt-card.busy{opacity:.6;} .tbt-crew{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0;} .tbt-addsel{max-width:260px; min-height:0; padding:4px 8px;} .tbt-topic{display:block; margin:6px 0; font-weight:600;} .tbt-topic input{width:100%;} .tbt-ticks{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0 18px;} .tbt-chk{display:flex; gap:6px; align-items:center; margin:2px 0;} .tbt-dra{display:grid; grid-template-columns:1fr 1.4fr 180px auto; gap:6px; margin-bottom:6px;} .tbt-dra input,.tbt-dra select{min-height:0; padding:5px 8px;} .tbt-jobs{margin-top:6px; padding:6px 8px; border-left:3px solid var(--warn); font-size:12.5px; background:var(--surface-2);} @media (max-width:700px){ .tbt-dra{grid-template-columns:1fr;} } .tric-card{margin-bottom:8px;} .tric-card.busy{opacity:.6;} .tric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:4px 14px; margin:6px 0; font-size:12.5px;} .tric-grid .rf-k{display:block;} .tric-pick{display:block; margin-top:6px; font-weight:600;} .tric-pick select{max-width:340px;}
 .ppe-img-prev{width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--line); vertical-align:middle; margin-left:6px;}
 @media (max-width:900px){ .ppe-grid{grid-template-columns:1fr;} }
 
@@ -1129,6 +1129,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 
     <div class="ppe-alert" id="ppeReqAlert" hidden></div>
     <div class="ppe-alert" id="tricAlert" hidden></div>
+    <div class="ppe-alert inc-alert" id="incRepAlert" hidden></div>
     <div class="sample-banner" id="dbUnavailableBanner" hidden>
       Could not reach the database. Check the Firebase config at the top of the script and your internet connection.
     </div>
@@ -1591,6 +1592,7 @@ details.icam-grp .cause-list{margin:6px 0;}
           <button class="btn btn-primary" id="addIncBtn" type="button">+ Report incident</button>
         </div>
       </div>
+      <div id="incRepBox"></div>
       <div class="tiles tiles-4" id="incTiles"></div>
       <div class="panel" id="addIncPanel" hidden>
         <h3>Report an incident</h3>
@@ -2849,7 +2851,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b82';
+const APP_BUILD='b83';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -8268,7 +8270,8 @@ async function ppeLinkPayload(token, pid){
   const locs=div==='Scaffolding' ? [...new Set([...scaffWellOptions(), ...scaffLocations()])].sort((a,b)=>a.localeCompare(b)).slice(0,300)
     : [...new Set([site&&site.location, ...prevLocs].filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,100);
   const clients=[...new Set([site&&site.clientName, ...(div==='Scaffolding'?scaffClientList():[])].filter(Boolean))].slice(0,60);
-  return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
+  const vs=vehicles.filter(v=>!v.deleted && v.vehicleNumber), vehs=[...new Set([...vs.filter(v=>v.projectId===pid), ...vs.filter(v=>v.projectId!==pid)].map(v=>String(v.vehicleNumber).trim()))].slice(0,300);
+  return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, vehs, incTypes:INC_SITE_TYPES[div]||INC_SITE_TYPES.Civil, workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
 }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
@@ -8412,6 +8415,78 @@ async function sitePpeXlsx(pid){
     ...recs.map(r=>[r.date||'', r.w.fullName||'', r.w.civilId||'', r.w.designation||'', r.item||'', r.size||'', Math.max(1, Number(r.quantity)||1), r.condition||'', r.issuedBy||'', r.expiry||'', r.sigId?'Signed on link':(/paper/i.test(r.notes||'')?'Paper':(r.needConfirm&&!r.receivedAt?'Worker to confirm':'')), r.notes||''])]);
   sh['!cols']=[{wch:11},{wch:26},{wch:16},{wch:18},{wch:22},{wch:8},{wch:5},{wch:22},{wch:16},{wch:11},{wch:14},{wch:40}];
   XLSX.utils.book_append_sheet(wb, sh, 'PPE issued'); XLSX.writeFile(wb, `PPE_issued_${String(s.siteName||'project').replace(/[^A-Za-z0-9]+/g,'_')}_${localToday()}.xlsx`);
+}
+
+
+/* ---- Batch 83: HSE reviewer's saved signature (one per HSE login) ---- */
+function hseSigOf(email){ return (((settingsDocs.hseSignatures||{}).sigs||{})[String(email||'').toLowerCase()])||null; }
+let hseSigPad=null;
+function hseSigBoxHtml(){
+  const u=auth.currentUser, me=hseSigOf(u&&u.email)||{};
+  return `<div class="panel hse-sig-box" id="hseSigBox"><div class="section-head"><h3>My signature for the TBT PDFs</h3><button type="button" class="btn btn-sm" data-hsesig-close="1">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Saved once for <strong>${esc((u&&u.email)||'')}</strong>. It is added automatically to every TBT you mark <strong>Reviewed</strong>, with your name and the date.</p>
+    <div class="form-grid"><label>Name on the PDF<input id="hseSigName" value="${esc(me.name||'')}" maxlength="60" placeholder="e.g. Radhakrishnan N"></label><label>Position<input id="hseSigRole" value="${esc(me.role||'HSE Engineer')}" maxlength="60"></label></div>
+    ${me.img?`<div class="wsub" style="margin:6px 0;">Current signature: <img src="${esc(me.img)}" alt="" style="height:40px; vertical-align:middle; background:#fff; border-radius:4px;"></div>`:''}
+    <div class="hse-sig-pad"><canvas id="hseSigCanvas" width="600" height="200"></canvas></div>
+    <div class="form-actions"><button type="button" class="btn btn-sm" data-hsesig-clear="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-hsesig-save="1">Save signature</button></div></div>`;
+}
+function hseSigWire(){
+  const cv=document.getElementById('hseSigCanvas'); if(!cv) return; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height);
+  const p={ink:false}; let on=false, last=null; const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
+  cv.addEventListener('pointerdown', e=>{ e.preventDefault(); on=true; last=pos(e); try{ cv.setPointerCapture(e.pointerId); }catch(x){} });
+  cv.addEventListener('pointermove', e=>{ if(!on) return; const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; p.ink=true; });
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t, ()=>{ on=false; }));
+  p.clear=()=>{ g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); p.ink=false; };
+  p.image=()=>{ const o=document.createElement('canvas'); o.width=300; o.height=100; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,300,100); c.drawImage(cv,0,0,300,100); return o.toDataURL('image/png'); };
+  hseSigPad=p;
+}
+async function hseSigSave(){
+  const u=auth.currentUser; if(!u || !canEdit()) return; const em=String(u.email||'').toLowerCase(), old=hseSigOf(em)||{};
+  const name=String((document.getElementById('hseSigName')||{}).value||'').trim(), role=String((document.getElementById('hseSigRole')||{}).value||'').trim();
+  if(!name){ toast('Write your name'); return; }
+  const img=hseSigPad&&hseSigPad.ink?hseSigPad.image():old.img; if(!img){ toast('Sign in the box first'); return; }
+  const sigs={...(((settingsDocs.hseSignatures||{}).sigs)||{}), [em]:{name:name.slice(0,60), role:role.slice(0,60), img, savedAt:new Date().toISOString()}};
+  if(await saveSettings('hseSignatures', {sigs}, settingsStamp('hseSignatures'))){ settingsDocs.hseSignatures={...(settingsDocs.hseSignatures||{}), sigs}; hseSigPad=null; tricUi.sigOpen=false; toast('Signature saved — it is added to every TBT you review'); renderTricPanel(); }
+}
+
+/* ---- Batch 83: incidents reported on the project links ---- */
+const INC_SITE_TYPES={Scaffolding:['Injury','Near miss','Dropped object','Equipment / property damage','Vehicle incident'], Civil:['Injury','Near miss','Equipment / property damage','Spill / environment','Fire'], Rental:['Vehicle accident','Injury','Near miss','Equipment / property damage','Spill / environment']};
+const INC_SITE_MAP={'Injury':'Injury','Near miss':'Near miss','Dropped object':'Dangerous occurrence','Equipment / property damage':'Property / equipment damage','Vehicle incident':'Vehicle incident (RTA)','Vehicle accident':'Vehicle incident (RTA)','Spill / environment':'Environmental (spill / release)','Fire':'Fire / explosion'};
+let incReps=[], unsubIncReps=null, incFromReport=null;
+function startIncRepData(){
+  stopIncRepData(); if(!canEdit()) return;
+  try{ unsubIncReps=db.collection('incidentReports').where('status','==','new').onSnapshot(snap=>{ incReps=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); incRepChanged(); }, err=>{ console.warn('incidentReports', err); incReps=[]; incRepChanged(); }); }
+  catch(e){ console.warn('incident reports', e); }
+}
+function stopIncRepData(){ if(unsubIncReps){ try{ unsubIncReps(); }catch(e){} unsubIncReps=null; } incReps=[]; incRepChanged(); }
+function incRepChanged(){
+  const el=document.getElementById('incRepAlert'), n=canEdit()?incReps.length:0;
+  if(el){ if(!n){ el.hidden=true; el.innerHTML=''; } else { el.hidden=false; el.innerHTML=`<span>🚨 <strong>${n}</strong> incident${n===1?'':'s'} reported from site — ${incReps.slice(0,2).map(r=>esc(`${(r.data||{}).type||''} · ${(r.data||{}).projectName||''}`)).join(' · ')}</span><button type="button" class="btn btn-sm btn-primary" data-increp-goto="1">Open</button>`; } }
+  const box=document.getElementById('incRepBox'); if(!box) return;
+  if(!n){ box.innerHTML=''; return; }
+  box.innerHTML=`<div class="panel inc-rep-panel"><div class="section-head"><h3>🚨 Reported from site — not yet in the register (${n})</h3></div>${incReps.slice().sort((a,b)=>String((b.data||{}).date||'').localeCompare(String((a.data||{}).date||''))).map(r=>{ const d=r.data||{}, rw=workers.find(w=>w.id===r.workerId), iw=d.injW?workers.find(w=>w.id===d.injW):null;
+    return `<div class="record-card inc-rep"><div class="record-card-top"><div class="record-card-title"><span class="badge danger">${esc(d.type||'Incident')}</span> ${esc(d.loc||'—')} · <strong>${esc(d.projectName||projectName(d.projectId)||'—')}</strong></div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-increp-open="${esc(r.id)}">Create incident record</button><button type="button" class="btn btn-sm" data-increp-close="${esc(r.id)}" data-armed="0">Close — no record</button></div></div>
+      <div class="wsub">${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · ${esc(d.shift||'')} · reported by <strong>${esc(rw?rw.fullName:(d.name||'—'))}</strong>${rw&&rw.designation?' ('+esc(rw.designation)+')':''} · mobile <strong>${esc(d.mobile||'—')}</strong></div>
+      <div class="wsub">Injured person: <strong>${esc(d.injN||'No one injured')}</strong>${iw&&iw.mobileNumber?' · record mobile '+esc(iw.mobileNumber):''}${d.veh?' · vehicle '+esc(d.veh):''}</div>
+      ${d.desc?`<div class="wsub">What happened: ${esc(d.desc)}</div>`:''}</div>`; }).join('')}</div>`;
+}
+function incRepGoto(){ const b=document.querySelector('.sidenav-btn[data-section="incidents"]'); if(b) b.click(); const p=document.getElementById('incRepBox'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); }
+function incRepOpen(id){
+  const r=incReps.find(x=>x.id===id); if(!r) return; const d=r.data||{}, rw=workers.find(w=>w.id===r.workerId);
+  incRepGoto(); openAddIncForm(); incFromReport=id;
+  const set=(k,v)=>{ const el=document.querySelector(`#addIncForm [data-ifield="${k}"]`); if(el && v!==undefined && v!==null) el.value=v; };
+  set('projectId', d.projectId||''); set('date', d.date||localToday()); set('time', d.time||''); set('location', d.loc||''); set('type', INC_SITE_MAP[d.type]||'Near miss');
+  if(!d.injN) set('injuryClass', 'Not applicable (no injury)');
+  set('reportedBy', rw?rw.fullName:(d.name||''));
+  set('description', [`Reported on the project link (${d.shift||''} shift) by ${rw?rw.fullName:(d.name||'—')}, mobile ${d.mobile||'—'}.`, d.injN?`Injured person: ${d.injN}.`:'No one injured.', d.veh?`Vehicle: ${d.veh}.`:'', d.desc||''].filter(Boolean).join(' '));
+  const p=document.getElementById('addIncPanel'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'});
+  toast('Check the details, fill the severity fields and save');
+}
+async function incRepClose(id){
+  const u=auth.currentUser;
+  try{ await db.collection('incidentReports').doc(id).update({status:'closed', closedBy:(u&&u.email)||'', closedAt:new Date().toISOString()}); toast('Closed — no incident record'); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
 
 /* ---- Batch 76: delete (test) entries — editors only ---- */
@@ -8659,7 +8734,7 @@ function tricReviewCard(x){
   const crew=activeWorkers().filter(w=>(w.status||'active')==='active' && site && w.projectId===site.id && !r.att.some(p=>p.w===w.id)).sort((a,b)=>String(a.fullName).localeCompare(String(b.fullName)));
   return `<div class="record-card tbt-card${busy?' busy':''}" data-tbt-card="${esc(x.id)}"><div class="record-card-top"><div class="record-card-title">TBT request — <strong>${esc(d.job)}</strong> · ${esc(d.loc||'—')} <span class="badge muted">${r.att.length} people</span></div>
       <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-tbt-send="${esc(x.id)}">✓ Reviewed</button><button type="button" class="btn btn-sm" data-tbt-no="${esc(x.id)}" data-armed="0">Reject</button></div></div>
-    <div class="wsub">Requested by <strong>${esc(tbtWho(x.workerId, d.name))}</strong> · ${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(d.shift||'—')} job</strong> · <strong>${esc(site?site.siteName:'Project not found')}</strong>${d.client?' · client '+esc(d.client):''}${d.jp?' · Journey plan '+esc(d.jp):''}</div>
+    <div class="wsub">Requested by <strong>${esc(tbtWho(x.workerId, d.name))}</strong> · ${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(d.shift||'—')} job</strong> · <strong>${esc(site?site.siteName:'Project not found')}</strong>${d.client?' · client '+esc(d.client):''}${d.jp?' · Journey plan '+esc(d.jp):''}${d.veh?' · vehicle <strong>'+esc(d.veh)+'</strong>':''}</div>
     <div class="wsub" style="margin-top:4px;">Signed on the link: <strong>${r.att.filter(p=>(x.sigs||{})[p.w]).length} of ${r.att.length}</strong>${r.att.every(p=>(x.sigs||{})[p.w])?' — everyone signed':''}</div>
     <div class="tbt-crew">${r.att.map(p=>`<span class="site-chip">${(x.sigs||{})[p.w]?'✓ ':''}${esc(tbtWho(p.w, p.n))}${(()=>{ const w=workers.find(y=>y.id===p.w); return w&&w.designation?` <span class="wsub">${esc(w.designation)}</span>`:''; })()}${p.w===x.workerId?' <span class="wsub">(requester)</span>':` <button type="button" class="site-chip-x" data-tbt-rm="${esc(x.id+'|'+p.w)}" aria-label="Remove">×</button>`}</span>`).join('')}
       ${crew.length?`<select data-tbt-addsel="${esc(x.id)}" class="tbt-addsel"><option value="">+ add from the project crew</option>${crew.map(w=>`<option value="${esc(w.id)}" ${r.add===w.id?'selected':''}>${esc(w.fullName||'—')}</option>`).join('')}</select>`:''}</div>
@@ -8690,27 +8765,31 @@ function tricDoneCard(x){
 function renderTricPanel(){
   const box=document.getElementById('tricBox'); if(!box) return;
   if(!canEdit()){ box.innerHTML=''; return; }
+  if(tricUi.sigOpen && hseSigPad && hseSigPad.ink && document.getElementById('hseSigCanvas')) return;   // don't wipe a signature being drawn
   if(document.activeElement && box.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName) && document.activeElement.type!=='checkbox' && document.activeElement.id!=='tricMonth') return;
   const all=tricAll(), byDate=(a,b)=>String((a.data||{}).date||'').localeCompare(String((b.data||{}).date||''));
   const nw=all.filter(x=>x.status==='new').sort(byDate), sg=all.filter(x=>x.status==='sign').sort(byDate), dn=all.filter(x=>x.status==='done'||x.status==='rejected').sort((a,b)=>String(b.closedAt||'').localeCompare(String(a.closedAt||'')));
   const ym=tricUi.month||localToday().slice(0,7);
   box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} TBT requests from the project links</h3>
-      <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><input type="month" id="tricMonth" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx">${ic('download')} Month Excel</button></span></div>
-    <p class="wsub" style="margin:-4px 0 8px;">The crew fill the TBT on their project link and <strong>everyone signs straight away</strong> (they can download it marked “pending HSE review”) → you write the <strong>topic</strong>, tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong>, add dynamic risks → <strong>✓ Reviewed</strong> → the final PDF is on their link and the TBT is counted in the project's toolbox talks. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month.</p>
+      <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><button type="button" class="btn btn-sm ${hseSigOf((auth.currentUser||{}).email)?'':'btn-primary'}" data-hsesig-open="1">${hseSigOf((auth.currentUser||{}).email)?'✓ My signature':'Add my signature'}</button><input type="month" id="tricMonth" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx">${ic('download')} Month Excel</button></span></div>
+    <p class="wsub" style="margin:-4px 0 8px;">The crew fill the TBT on their project link and <strong>everyone signs straight away</strong> → you write the <strong>topic</strong>, tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong>, add dynamic risks → <strong>✓ Reviewed</strong> (your saved signature is added) → the PDF can be downloaded on their link and the TBT is counted in the project's toolbox talks. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month.</p>
     ${(()=>{ const t=localToday(), ej=all.flatMap(x=>(x.jobs||[]).filter(q=>String(q.at||'').slice(0,10)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
+    ${tricUi.sigOpen?hseSigBoxHtml():''}
     <div class="subhead">Waiting for your review (${nw.length})</div>${nw.length?nw.map(tricReviewCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing to review.</p>'}
     <div class="subhead">Reviewed — waiting for signatures (${sg.length})</div>${sg.length?sg.map(tricSignCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing waiting.</p>'}
     <div class="subhead">Complete / rejected — last 7 days (${dn.length})</div>${dn.length?dn.map(tricDoneCard).join(''):'<p class="wsub" style="margin:0;">Nothing yet.</p>'}
   </div>`;
+  if(tricUi.sigOpen) hseSigWire();
 }
 async function tricSend(id){
   const x=tricSubs.find(s=>s.id===id); if(!x || !canEdit()) return; const r=tricRv(x), d=x.data||{};
   if(!r.topic.trim()){ toast('Write the topic first'); const el=document.querySelector(`[data-tbt-topic="${CSS.escape(id)}"]`); if(el) el.focus(); return; }
   if(!r.att.length){ toast('No people left on this TBT'); return; }
-  const u=auth.currentUser;
+  const u=auth.currentUser, hs=hseSigOf(u&&u.email);
+  if(!hs || !hs.img){ toast('Save your signature first — it is added to the TBT PDF'); tricUi.sigOpen=true; renderTricPanel(); const b=document.getElementById('hseSigBox'); if(b) b.scrollIntoView({block:'center'}); return; }
   try{ await db.collection('tbtSubmissions').doc(id).update({status:'sign', topic:r.topic.trim().slice(0,120), musted:TRIC_MUSTED.map((m,i)=>r.m.has(i)), lsr:Object.keys(TRIC_LSR).filter(k=>r.l.has(k)),
       data:{...d, att:r.att.map(p=>{ const w=workers.find(y=>y.id===p.w); return {w:p.w, n:tbtWho(p.w, p.n), ds:String((w&&w.designation)||p.ds||'').slice(0,40)}; })},
-      dra:r.dra.filter(q=>String(q.hz||'').trim()||String(q.m||'').trim()).map(q=>({hz:String(q.hz||'').trim().slice(0,120), m:String(q.m||'').trim().slice(0,200), r:q.r||'', rn:q.r?tbtWho(q.r,''):''})), sigs:Object.fromEntries(Object.entries(x.sigs||{}).filter(([w])=>r.att.some(p=>p.w===w))), reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString()});
+      dra:r.dra.filter(q=>String(q.hz||'').trim()||String(q.m||'').trim()).map(q=>({hz:String(q.hz||'').trim().slice(0,120), m:String(q.m||'').trim().slice(0,200), r:q.r||'', rn:q.r?tbtWho(q.r,''):''})), sigs:Object.fromEntries(Object.entries(x.sigs||{}).filter(([w])=>r.att.some(p=>p.w===w))), reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString(), hseSig:{name:hs.name||'', role:hs.role||'', img:hs.img, email:String(u.email||'').toLowerCase()}});
     delete tricUi.rv[id]; toast(r.att.every(p=>(x.sigs||{})[p.w])?'Reviewed — the final PDF is ready on their link':'Reviewed — waiting for the people who have not signed yet'); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
@@ -8755,12 +8834,12 @@ async function tricDownload(kind){
 }
 async function tricXlsx(list, ym){
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
-  const rows=list.map(x=>{ const d=x.data||{}, site=tbtSite(x); return [d.date||'', d.time||'', d.shift||'', site?site.siteName:'', d.client||'', d.loc||'', d.jp||'', d.job||'', x.topic||'', tbtWho(x.workerId, d.name), tbtAtt(x).length, tbtAtt(x).map(p=>tbtWho(p.w, p.n)).join(', '),
+  const rows=list.map(x=>{ const d=x.data||{}, site=tbtSite(x); return [d.date||'', d.time||'', d.shift||'', site?site.siteName:'', d.client||'', d.loc||'', d.jp||'', d.veh||'', d.job||'', x.topic||'', tbtWho(x.workerId, d.name), tbtAtt(x).length, tbtAtt(x).map(p=>tbtWho(p.w, p.n)).join(', '),
     (x.musted||[]).filter(Boolean).length+'/7', (x.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), (x.dra||[]).length, 1+(x.jobs||[]).length, x.reviewedBy||'']; });
-  const jobs=[]; for(const x of list){ const d=x.data||{}, site=tbtSite(x); [{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, main:true}, ...(x.jobs||[])].forEach((q,i)=>jobs.push([d.date||'', site?site.siteName:'', x.topic||'', i+1, q.time||'', q.shift||'', q.loc||'', q.jp||'', q.job||'', q.main?'Main TBT':(q.chg&&q.chg.length?q.chg.join(', '):'No changes'), q.main?tbtWho(x.workerId, d.name):tbtWho(q.by, d.name)])); }
+  const jobs=[]; for(const x of list){ const d=x.data||{}, site=tbtSite(x); [{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, main:true}, ...(x.jobs||[])].forEach((q,i)=>jobs.push([d.date||'', site?site.siteName:'', x.topic||'', i+1, q.time||'', q.shift||'', q.loc||'', q.jp||'', (q.job||'')+((q.veh||(q.main&&d.veh))?' ('+(q.veh||d.veh)+')':''), q.main?'Main TBT':(q.chg&&q.chg.length?q.chg.join(', '):'No changes'), q.main?tbtWho(x.workerId, d.name):tbtWho(q.by, d.name)])); }
   const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — Toolbox talks (TBT) '+monthLabel(ym)],['Exported '+localToday()],[],
-    ['Date','Time','Shift','Project','Client','Location / well no.','Journey plan no.','Job','Topic','Requested by','People','Names',"Musta'ed",'Life Saving Rules','Dynamic risks','Jobs','Reviewed by'], ...rows]);
-  sh['!cols']=[{wch:11},{wch:7},{wch:7},{wch:24},{wch:16},{wch:20},{wch:14},{wch:13},{wch:40},{wch:22},{wch:7},{wch:60},{wch:9},{wch:40},{wch:8},{wch:6},{wch:26}];
+    ['Date','Time','Shift','Project','Client','Location / well no.','Journey plan no.','Vehicle no.','Job','Topic','Requested by','People','Names',"Musta'ed",'Life Saving Rules','Dynamic risks','Jobs','Reviewed by'], ...rows]);
+  sh['!cols']=[{wch:11},{wch:7},{wch:7},{wch:24},{wch:16},{wch:20},{wch:14},{wch:12},{wch:13},{wch:40},{wch:22},{wch:7},{wch:60},{wch:9},{wch:40},{wch:8},{wch:6},{wch:26}];
   const sj=XLSX.utils.aoa_to_sheet([['Date','Project','TBT topic','Job no.','Time','Shift','Location / well no.','Journey plan no.','Job','Pause & check','Confirmed by'], ...jobs]);
   sj['!cols']=[{wch:11},{wch:24},{wch:36},{wch:7},{wch:7},{wch:7},{wch:20},{wch:14},{wch:13},{wch:30},{wch:22}];
   XLSX.utils.book_append_sheet(wb, sh, 'Toolbox talks'); XLSX.utils.book_append_sheet(wb, sj, 'Jobs'); XLSX.writeFile(wb, `TBT_records_${ym}.xlsx`);
@@ -8798,7 +8877,7 @@ function tbtPdfBody(doc, x, o){
   if(x.status==='new') row([{t:'PENDING HSE REVIEW — topic, Musta\'ed and Life Saving Rules are completed by HSE. Download the final PDF from the link after the review.', w:CW, bold:true, color:[255,255,255], fill:RED}]);
   row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:o.project, w:hw},{t:'DATE / TIME', w:K, bold:true, fill:LBL},{t:`${dmy2(d.date)} ${d.time||''}`, w:hw}]);
   row([{t:'LOCATION / WELL NO.', w:K, bold:true, fill:LBL},{t:d.loc, w:hw},{t:'JOURNEY PLAN NO.', w:K, bold:true, fill:LBL},{t:d.jp||'N/A', w:hw}]);
-  row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'SHIFT', w:K, bold:true, fill:LBL},{t:d.shift?d.shift+' job':'—', w:hw}]);
+  row([{t:'JOB / WORK', w:K, bold:true, fill:LBL},{t:d.job, w:hw},{t:'VEHICLE NO.', w:K, bold:true, fill:LBL},{t:d.veh||'N/A', w:hw}]);
   row([{t:'REQUESTED BY', w:K, bold:true, fill:LBL},{t:who(x.workerId), sub:ds(x.workerId), w:hw},{t:'CLIENT', w:K, bold:true, fill:LBL},{t:d.client||'—', w:hw}]);
   row([{t:'TOPIC', w:K, bold:true, fill:LBL},{t:x.topic, w:CW-K, bold:true}], 18);
   head("MUSTA'ED — ARE YOU READY?");
@@ -8815,9 +8894,11 @@ function tbtPdfBody(doc, x, o){
   const jobs=[{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, first:true}, ...(x.jobs||[])];
   head(`JOBS CARRIED OUT UNDER THIS TBT (${jobs.length})`);
   row([{t:'#', w:22, bold:true, fill:LBL},{t:'Time / shift', w:70, bold:true, fill:LBL},{t:'Location / well', w:100, bold:true, fill:LBL},{t:'Journey plan', w:70, bold:true, fill:LBL},{t:'Job', w:70, bold:true, fill:LBL},{t:'Pause & check — changes', w:CW-22-70-100-70-70-90, bold:true, fill:LBL},{t:'Confirmed by', w:90, bold:true, fill:LBL}]);
-  jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job, w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
+  jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job+(j.veh?' ('+j.veh+')':''), w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
     j.first?{t:'All attendees', w:90, color:SUB}:{img:j.sig, t:j.sig?'':who(j.by), w:90}], j.first?15:26));
-  y+=6; row([{t:x.status==='new'?'Reviewed by HSE: PENDING':`Reviewed by HSE: ${x.reviewedBy||'—'}${x.reviewedAt?'  ·  '+dmy2(String(x.reviewedAt).slice(0,10)):''}${x.status==='done'?'  ·  Complete — all attendees signed':''}`, w:CW, size:7.6, color:SUB}]);
+  y+=6; const hs=x.hseSig||{};
+  if(x.status==='new') row([{t:'HSE REVIEW: PENDING', w:CW, bold:true, color:RED}]);
+  else { ensure(52); row([{t:'REVIEWED BY HSE', w:K, bold:true, fill:LBL},{t:hs.name||x.reviewedBy||'—', sub:[hs.role, x.reviewedAt?dmy2(String(x.reviewedAt).slice(0,10)):''].filter(Boolean).join('  ·  '), w:CW-K-150, bold:true},{img:hs.img, t:hs.img?'':'—', w:150, color:SUB}], 40); }
   row([{t:'Remember the 3 golden rules: 1) Comply  2) Intervene  3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.6, bold:true, color:RED}]);
 }
 async function tricOnePdf(id){
@@ -11158,6 +11239,7 @@ function stopDataListeners(){
   stopSiteLinkData();
   stopPpeReqData();
   stopTricData();
+  stopIncRepData();
   if(unsubscribeWorkers){ unsubscribeWorkers(); unsubscribeWorkers=null; }
   if(unsubscribeVehicles){ unsubscribeVehicles(); unsubscribeVehicles=null; }
   if(unsubscribeSiteEquipment){ unsubscribeSiteEquipment(); unsubscribeSiteEquipment=null; }
@@ -11194,6 +11276,7 @@ auth.onAuthStateChanged(user=>{
     startSiteLinkData();
     startPpeReqData();   // Batch 73
     startTricData();   // Batch 77
+    startIncRepData();   // Batch 83
   } else {
     stopDataListeners();
     document.getElementById('dbUnavailableBanner').hidden=true;
@@ -15834,6 +15917,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(await saveSettings('ppeStandards', {kitExempt:list, kitFix58:true}, ppeUi.exemptBase)){ ppeUi.exemptOpen=false; toast(list.length?`${list.length} role${list.length===1?'':'s'} left out of the basic kit check`:'All roles need the basic kit'); renderPpe(); } });
   document.getElementById('ppePane').addEventListener('submit', e=>{ if(e.target.id!=='ppeItemForm') return; e.preventDefault(); ppeSaveItem(e.target); });
   document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-site-ppe-xlsx]'); if(b) sitePpeXlsx(b.dataset.sitePpeXlsx); });   // Batch 81
+  // Batch 83: HSE signature + incident reports
+  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-hsesig-open],[data-hsesig-close],[data-hsesig-clear],[data-hsesig-save],[data-increp-goto],[data-increp-open],[data-increp-close]'); if(!b) return; const D=b.dataset;
+    if(D.hsesigOpen){ tricUi.sigOpen=!tricUi.sigOpen; hseSigPad=null; renderTricPanel(); return; }
+    if(D.hsesigClose){ tricUi.sigOpen=false; hseSigPad=null; renderTricPanel(); return; }
+    if(D.hsesigClear){ if(hseSigPad) hseSigPad.clear(); return; }
+    if(D.hsesigSave){ await hseSigSave(); return; }
+    if(D.increpGoto){ incRepGoto(); return; }
+    if(D.increpOpen){ incRepOpen(D.increpOpen); return; }
+    if(D.increpClose){ if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent='Tap again to close'; return; } b.disabled=true; await incRepClose(D.increpClose); } });
   // Batch 79: TBT requests in Project Details
   document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-dl],[data-tbt-send],[data-tbt-no],[data-tbt-cancel],[data-tbt-rm],[data-tbt-allm],[data-tbt-draadd],[data-tbt-drax]'); if(!b) return; const D=b.dataset;
     if(D.tbtDraadd){ const x=tricSubs.find(s=>s.id===D.tbtDraadd); if(x){ tricRv(x).dra.push({hz:'', m:'', r:''}); renderTricPanel(); } return; }
@@ -16127,7 +16219,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   $('incTypeFilter').innerHTML='<option value="all">All types</option>'+INCIDENT_TYPES.map(t=>`<option>${esc(t)}</option>`).join('');
   $('addIncBtn').addEventListener('click', ()=>{ if($('addIncPanel').hidden) openAddIncForm(); else closeAddIncForm(); });
-  $('cancelAddInc').addEventListener('click', closeAddIncForm);
+  $('cancelAddInc').addEventListener('click', ()=>{ incFromReport=null; closeAddIncForm(); });
   $('addIncForm').addEventListener('submit', async e=>{
     e.preventDefault(); if(incBusy) return;
     const d=readF(e.target,'data-ifield');
@@ -16140,6 +16232,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     try{
       const ref=await db.collection('incidents').add(stamp(data));
       await syncIncidentToReport({...data, id:ref.id});
+      if(incFromReport){ try{ await db.collection('incidentReports').doc(incFromReport).update({status:'done', incidentId:ref.id, incNo:data.incNo, closedAt:new Date().toISOString()}); }catch(e2){ console.warn(e2); } incFromReport=null; }
       toast(`${data.incNo} recorded — add the people involved and start the investigation`);
       closeAddIncForm();
       incBusy=false;
