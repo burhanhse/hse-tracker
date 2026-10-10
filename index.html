@@ -1070,6 +1070,41 @@ details.icam-grp .cause-list{margin:6px 0;}
 .lang-chip{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:3px 10px; font-size:12px; cursor:pointer;} .lang-chip b{font-family:var(--font-num); margin-left:3px;}
 .lang-chip.active{border-color:var(--accent); background:var(--accent); color:var(--accent-ink);}
 @media (max-width:900px){ .th-wrap{grid-template-columns:1fr;} .th-kpis{grid-template-columns:repeat(2,minmax(0,1fr));} }
+
+/* Batch 84: competency assessment */
+.badge.info{background:color-mix(in srgb, #8b5cf6 18%, transparent); color:#a78bfa;}
+:root[data-theme="light"] .badge.info{color:#6d28d9;}
+.t-danger{color:var(--danger);} .t-warn{color:var(--warn);}
+.comp-tiles{grid-template-columns:repeat(5,1fr) !important;} @media (max-width:1000px){ .comp-tiles{grid-template-columns:repeat(2,1fr) !important;} }
+.comp-table td{vertical-align:middle;} .comp-table tbody tr{cursor:default;} .comp-acts{white-space:nowrap; text-align:right;}
+.comp-role{font-weight:600;} .comp-roles-row td{background:var(--surface-2);} .comp-roles-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:4px 12px; margin-top:8px;}
+.comp-live{border-left:3px solid #8b5cf6;} .comp-live-row{padding:6px 0; border-top:1px solid var(--line);} .comp-live-row:first-of-type{border-top:0;}
+.comp-ed{border-left:3px solid #8b5cf6;} .comp-ed.done{border-left-color:var(--ok);}
+.comp-step{border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:12px; background:var(--surface-2);}
+.comp-step-h{font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;} .comp-step-h small{font-weight:400; color:var(--ink-muted); font-size:11.5px;}
+.comp-step-h .n{display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%; background:#8b5cf6; color:#fff; font-size:12px;}
+.comp-papers{display:grid; gap:4px;} .comp-paper{display:flex; align-items:center; gap:10px; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;} .comp-paper > span:first-child{flex:1; min-width:200px;}
+.comp-seen{font-size:12px; margin:0;} .comp-okmark{color:var(--ok); font-weight:700; width:16px;}
+.comp-seg{display:inline-flex; flex-wrap:wrap; gap:4px;} .comp-seg button{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:4px 10px; font:inherit; font-size:12px; cursor:pointer;}
+.comp-seg button.on.ok{background:var(--ok-bg); color:var(--ok); border-color:var(--ok); font-weight:700;} .comp-seg button.on.ni{background:var(--warn-bg); color:var(--warn); border-color:var(--warn); font-weight:700;}
+.comp-seg button.on.no{background:var(--danger-bg); color:var(--danger); border-color:var(--danger); font-weight:700;} .comp-seg button.on.na{background:var(--muted-bg); color:var(--muted); border-color:var(--muted); font-weight:700;}
+.comp-seg button:disabled{cursor:default; opacity:.85;} .comp-mode{margin-bottom:8px;}
+.comp-pi{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;} .comp-pi-t{flex:1; min-width:240px; font-size:13px;}
+.comp-pg{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-muted); font-weight:700; margin:10px 0 2px;}
+.comp-crit{color:var(--danger); font-weight:700;} .comp-note{margin-top:8px;}
+.comp-score{padding:8px 10px; border-radius:8px; margin-bottom:8px;} .comp-score.pass{background:var(--ok-bg); color:var(--ok);} .comp-score.fail{background:var(--danger-bg); color:var(--danger);}
+.comp-open{padding:8px 10px; border-radius:8px; background:color-mix(in srgb, #8b5cf6 14%, transparent);}
+.comp-ansgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:6px; margin-top:8px;} .comp-ansq{display:flex; gap:3px; align-items:center;} .comp-qn{width:22px; font-weight:700; font-size:12px;}
+.comp-ansq button{width:28px; height:28px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); font:inherit; font-size:12px; font-weight:700; cursor:pointer;} .comp-ansq button.on{background:#8b5cf6; color:#fff; border-color:#8b5cf6;}
+.comp-qlist{margin:8px 0 0 18px; padding:0; font-size:13px;} .comp-qlist li{margin-bottom:6px;} .comp-qlist li.bad{color:var(--danger);} .comp-qlist li.bad .wsub strong{color:var(--ok);}
+.comp-suggest{padding:8px 10px; border-radius:8px; background:var(--muted-bg); margin-bottom:8px;} .comp-suggest.ok{background:var(--ok-bg);} .comp-suggest.bad{background:var(--danger-bg);} .comp-suggest.mid{background:var(--warn-bg);}
+.comp-sigs{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px;} @media (max-width:760px){ .comp-sigs{grid-template-columns:1fr;} }
+.comp-sig-h{font-weight:700; font-size:12.5px; margin-bottom:4px;} .comp-sigimg{display:block; max-width:260px; max-height:90px; background:#fff; border-radius:6px; padding:4px; border:1px solid var(--line);}
+.comp-bank-list{list-style:none; margin:10px 0 0; padding:0;} .comp-bank-list li{display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-top:1px solid var(--line);} .comp-bank-list li > div{flex:1;} .comp-bank-list li.off{opacity:.5;}
+.comp-right{color:var(--ok);} .comp-qform{border:1px dashed var(--line); border-radius:10px; padding:10px; margin:10px 0;}
+.cc-comp .cc-g{position:relative;} .cc-comp-n{display:flex; flex-wrap:wrap; gap:4px 8px; justify-content:center; font-size:11px; margin-top:2px;} .cc-comp-panel .cc-title .btn{margin-left:auto;}
+.hse-sig-up{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px; border:1px dashed var(--line); border-radius:8px; margin:6px 0;} .hse-sig-up > div:first-child{flex-basis:100%;}
+.hse-sig-file{cursor:pointer;} .hse-sig-prev,.hse-sig-cur{height:56px; max-width:260px; vertical-align:middle; background:#fff; border-radius:4px; padding:3px; border:1px solid var(--line);}
 </style>
 </head>
 <body class="auth-open">
@@ -1097,6 +1132,7 @@ details.icam-grp .cause-list{margin:6px 0;}
     <button type="button" class="sidenav-btn" data-section="report">Monthly Report</button>
     <div class="nav-group">Operations</div>
     <button type="button" class="sidenav-btn active" data-section="workforce">Workforce</button>
+    <button type="button" class="sidenav-btn" data-section="comp">Competency</button>
     <button type="button" class="sidenav-btn" data-section="vehicles">Plant &amp; Equipment</button>
     <button type="button" class="sidenav-btn" data-section="site">Project Details</button>
     <button type="button" class="sidenav-btn" data-section="scaff">Scaffolding Jobs</button>
@@ -1396,6 +1432,31 @@ details.icam-grp .cause-list{margin:6px 0;}
       </div><!-- /registerPane -->
     </main>
 
+
+    <main class="app-main" id="compSection" hidden>
+      <div class="topbar">
+        <div>
+          <h1>Competency Assessment</h1>
+          <p class="page-tagline"><span class="pt-co">Burhan Oil &amp; Trade Services</span><span class="pt-sep" aria-hidden="true"></span><span class="pt-slogan">Competent people, safe work</span></p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-sm" type="button" data-comp-panel="blank"><svg class="ic" aria-hidden="true"><use href="#i-printer"/></svg> Blank forms &amp; settings</button>
+          <button class="btn btn-sm" type="button" data-comp-panel="bank"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> Question bank</button>
+          <button class="btn btn-sm" type="button" data-comp-regpdf="filter"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Register PDF</button>
+          <button class="btn btn-sm" type="button" data-comp-xlsx="1"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Excel</button>
+        </div>
+      </div>
+      <div id="compTop"></div>
+      <div class="tiles comp-tiles" id="compTiles"></div>
+      <div class="toolbar">
+        <input type="search" id="compSearch" placeholder="Search name or designation…">
+        <select id="compDiv"><option value="all">All divisions</option><option value="Scaffolding">Scaffolding Division</option><option value="Civil">Civil Division</option><option value="Rental">Logistics &amp; Rental Division</option><option value="Office staff">Office Staff</option></select>
+        <select id="compProject" style="max-width:220px;"><option value="all">All projects</option></select>
+        <select id="compStatus"><option value="all">Every status</option><option value="bad">Needs action (not assessed / expired / not yet)</option><option value="none">Not assessed</option><option value="ok">Competent</option><option value="sup">Under supervision</option><option value="nyc">Not yet competent</option><option value="expired">Expired</option><option value="due">Due within 30 days</option><option value="open">In progress</option></select>
+      </div>
+      <div id="compBody"></div>
+    </main>
+
     <main class="app-main" id="siteSection" hidden>
       <div class="topbar">
         <div>
@@ -1408,7 +1469,6 @@ details.icam-grp .cause-list{margin:6px 0;}
         </div>
       </div>
 
-      <div id="tricBox"></div>
       <div class="tiles tiles-4" id="siteTiles"></div>
 
       <div class="panel" id="addSitePanel" hidden>
@@ -1469,12 +1529,16 @@ details.icam-grp .cause-list{margin:6px 0;}
           <p class="page-tagline"><span class="pt-co">Burhan Oil &amp; Trade Services</span><span class="pt-sep" aria-hidden="true"></span><span class="pt-slogan">Think safe, work safe, home safe</span></p>
         </div>
         <div class="topbar-actions">
+          <button class="btn btn-sm" id="tricAllBtn" type="button" data-tric-allbtn="1"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg> TBT records</button>
           <button class="btn btn-sm" id="clientPackBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg> Client report pack</button>
           <button class="btn btn-sm" id="downloadReportPdfBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> PDF report</button>
           <button class="btn btn-primary" id="addReportEntryBtn" type="button">+ Log an entry</button>
         </div>
       </div>
 
+      <div class="panel" id="tricAllPanel" hidden><div class="section-head"><h3><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg> TBT records from the project links — all projects</h3><button type="button" class="btn btn-sm" data-tric-allbtn="1">Close</button></div>
+        <p class="wsub" style="margin:-4px 0 8px;">Every completed TBT of the month, all projects in one file. The full records (signatures) are deleted 60 days after the request — download each month. One project only: Project Details → the project → Toolbox talks.</p>
+        <div class="toolbar"><input type="month" id="tricMonthAll" style="max-width:170px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf" data-tric-site="all"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx" data-tric-site="all"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Month Excel</button></div></div>
       <div class="division-tabs" id="reportDivisionTabs">
         <button type="button" class="division-tab active" data-rdiv="all">All divisions</button>
         <button type="button" class="division-tab" data-rdiv="Civil">Civil Division</button>
@@ -1533,6 +1597,7 @@ details.icam-grp .cause-list{margin:6px 0;}
             <div class="cc-title">Training compliance — PDO training <small>required trainings in date — Client and Burhan internal shown under each dial</small></div>
             <div class="cc-gauges" id="ccGauges"></div>
           </div>
+          <div class="cc-panel cc-comp-panel" id="ccComp"></div>
           <div class="cc-panel" id="ccTrainHours"></div>
           <div class="cc-panel">
             <div class="cc-title">HSE targets <small id="ccTargetsYear"></small><button type="button" class="btn btn-sm" id="ccTargetsEdit" hidden><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg> Set targets</button></div>
@@ -2152,7 +2217,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2449,7 +2514,7 @@ const RECORD_TYPES = {
     title:'Competency assessments', addLabel:'+ Add assessment', hasExpiry:true, hasAttachment:true, attachLabel:'assessment record',
     fields:[
       {key:'skill', label:'Skill / competency assessed', type:'text', required:true, placeholder:'e.g. Scaffolding erection'},
-      {key:'result', label:'Result', type:'select', options:['Competent','Not yet competent','Conditional'], required:true},
+      {key:'result', label:'Result', type:'select', options:['Competent','Competent under supervision','Not yet competent','Conditional'], required:true},
       {key:'assessor', label:'Assessed by', type:'text'},
       {key:'date', label:'Assessment date', type:'date', required:true},
       {key:'expiry', label:'Valid until', type:'date'},
@@ -2635,6 +2700,7 @@ const SITE_TABS = [
   {key:'hseStats', label:'HSE statistics'},
   {key:'toolboxTalks', label:'Toolbox talks'},
   {key:'ppe', label:'PPE'},
+  {key:'comp', label:'Competency'},
   {key:'permits', label:'Permits to work'},
   {key:'actions', label:'Corrective actions'},
   {key:'complaints', label:'Client complaints'},
@@ -2840,6 +2906,7 @@ function startSettingsData(){
       renderStarStrip(); renderRecognition(); renderCalendar(); renderCcExtras();   // Batch 42
       renderPpe(true);   // Batch 49
       if(canEdit()) ppeLinkSyncSoon();   // Batch 73: approved PPE list / photos → worker link
+      renderComp(); if(compUi.panel) compRenderTop(); renderCcComp();   // Batch 84
       preloadPdfLogo();   // Batch 51
     }, err=>{
       console.error(err); if(!auth.currentUser) return;
@@ -2851,7 +2918,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b83';
+const APP_BUILD='b84';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4380,7 +4447,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -8271,7 +8338,7 @@ async function ppeLinkPayload(token, pid){
     : [...new Set([site&&site.location, ...prevLocs].filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,100);
   const clients=[...new Set([site&&site.clientName, ...(div==='Scaffolding'?scaffClientList():[])].filter(Boolean))].slice(0,60);
   const vs=vehicles.filter(v=>!v.deleted && v.vehicleNumber), vehs=[...new Set([...vs.filter(v=>v.projectId===pid), ...vs.filter(v=>v.projectId!==pid)].map(v=>String(v.vehicleNumber).trim()))].slice(0,300);
-  return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, vehs, incTypes:INC_SITE_TYPES[div]||INC_SITE_TYPES.Civil, workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
+  return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, vehs, incTypes:INC_SITE_TYPES[div]||INC_SITE_TYPES.Civil, comp:compLinkPayload(pid), workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
 }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
@@ -8418,17 +8485,21 @@ async function sitePpeXlsx(pid){
 }
 
 
-/* ---- Batch 83: HSE reviewer's saved signature (one per HSE login) ---- */
+/* ---- Batch 83: HSE reviewer's saved signature (one per HSE login) — Batch 84: upload a scanned / photographed signature too ---- */
 function hseSigOf(email){ return (((settingsDocs.hseSignatures||{}).sigs||{})[String(email||'').toLowerCase()])||null; }
-let hseSigPad=null;
+let hseSigPad=null, hseSigUp=null;
 function hseSigBoxHtml(){
   const u=auth.currentUser, me=hseSigOf(u&&u.email)||{};
-  return `<div class="panel hse-sig-box" id="hseSigBox"><div class="section-head"><h3>My signature for the TBT PDFs</h3><button type="button" class="btn btn-sm" data-hsesig-close="1">Close</button></div>
-    <p class="wsub" style="margin:-4px 0 8px;">Saved once for <strong>${esc((u&&u.email)||'')}</strong>. It is added automatically to every TBT you mark <strong>Reviewed</strong>, with your name and the date.</p>
+  return `<div class="panel hse-sig-box" id="hseSigBox"><div class="section-head"><h3>My signature for the PDFs</h3><button type="button" class="btn btn-sm" data-hsesig-close="1">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Saved once for <strong>${esc((u&&u.email)||'')}</strong>. It is added automatically to every TBT you mark <strong>Reviewed</strong> and every competency assessment you complete, with your name and the date.</p>
     <div class="form-grid"><label>Name on the PDF<input id="hseSigName" value="${esc(me.name||'')}" maxlength="60" placeholder="e.g. Radhakrishnan N"></label><label>Position<input id="hseSigRole" value="${esc(me.role||'HSE Engineer')}" maxlength="60"></label></div>
-    ${me.img?`<div class="wsub" style="margin:6px 0;">Current signature: <img src="${esc(me.img)}" alt="" style="height:40px; vertical-align:middle; background:#fff; border-radius:4px;"></div>`:''}
+    ${me.img?`<div class="wsub" style="margin:6px 0;">Current signature: <img src="${esc(me.img)}" alt="" class="hse-sig-cur"></div>`:''}
+    <div class="hse-sig-up"><div><strong>Upload your signature</strong> <span class="wsub">— sign in black or blue pen on plain white paper, take a clear photo or scan (JPG / PNG). The white background is removed and the signature is cropped.</span></div>
+      <label class="btn btn-sm hse-sig-file">${ic('upload')} Choose image<input type="file" id="hseSigFile" accept="image/png,image/jpeg,image/webp" hidden></label>
+      <div id="hseSigPrev">${hseSigUp?`<img src="${esc(hseSigUp)}" alt="Uploaded signature" class="hse-sig-prev"> <button type="button" class="att-link" data-hsesig-unup="1">Remove</button>`:''}</div></div>
+    <div class="wsub" style="margin:8px 0 4px;"><strong>Or draw it</strong> with the mouse / finger:</div>
     <div class="hse-sig-pad"><canvas id="hseSigCanvas" width="600" height="200"></canvas></div>
-    <div class="form-actions"><button type="button" class="btn btn-sm" data-hsesig-clear="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-hsesig-save="1">Save signature</button></div></div>`;
+    <div class="form-actions"><button type="button" class="btn btn-sm" data-hsesig-clear="1">Clear drawing</button><button type="button" class="btn btn-sm btn-primary" data-hsesig-save="1">Save signature</button></div></div>`;
 }
 function hseSigWire(){
   const cv=document.getElementById('hseSigCanvas'); if(!cv) return; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height);
@@ -8439,14 +8510,47 @@ function hseSigWire(){
   p.clear=()=>{ g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); p.ink=false; };
   p.image=()=>{ const o=document.createElement('canvas'); o.width=300; o.height=100; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,300,100); c.drawImage(cv,0,0,300,100); return o.toDataURL('image/png'); };
   hseSigPad=p;
+  const f=document.getElementById('hseSigFile'); if(f) f.addEventListener('change', async ()=>{ const file=f.files&&f.files[0]; if(!file) return;
+    try{ hseSigUp=await hseSigFromImage(file); const pv=document.getElementById('hseSigPrev'); if(pv) pv.innerHTML=`<img src="${esc(hseSigUp)}" alt="Uploaded signature" class="hse-sig-prev"> <button type="button" class="att-link" data-hsesig-unup="1">Remove</button> <span class="wsub">— check it, then press Save signature</span>`; }
+    catch(e){ console.warn(e); toast(e&&e.message?e.message:'Could not read this image — try a JPG or PNG'); } });
+}
+// photo / scan → transparent PNG: paper removed, ink kept, cropped, max 600 × 200
+function hseSigFromImage(file){
+  return new Promise((resolve, reject)=>{
+    if(!/^image\//.test(file.type||'')) return reject(new Error('Choose an image file (JPG or PNG)'));
+    if(file.size>15*1024*1024) return reject(new Error('The image is too big — max 15 MB'));
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('Could not open this image — try a JPG or PNG')); };
+    img.onload=()=>{ try{
+      const k=Math.min(1, 1400/Math.max(img.naturalWidth, img.naturalHeight)), W=Math.max(1, Math.round(img.naturalWidth*k)), H=Math.max(1, Math.round(img.naturalHeight*k));
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d', {willReadFrequently:true}); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(img,0,0,W,H); URL.revokeObjectURL(url);
+      const d=g.getImageData(0,0,W,H), px=d.data, n=W*H, lum=new Float32Array(n), hist=new Uint32Array(256);
+      for(let i=0;i<n;i++){ const L=0.299*px[i*4]+0.587*px[i*4+1]+0.114*px[i*4+2]; lum[i]=L; hist[Math.min(255, L|0)]++; }
+      let acc=0, paper=255; for(let v=255; v>=0; v--){ acc+=hist[v]; if(acc>=n*0.5){ paper=v; break; } }   // the paper is the brighter half
+      const hi=paper*0.82, lo=paper*0.45; let x0=W, y0=H, x1=-1, y1=-1;
+      for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=y*W+x, L=lum[i]; let a=L>=hi?0:L<=lo?255:Math.round(255*(hi-L)/(hi-lo));
+        if(a<40) a=0; px[i*4+3]=a; if(a){ // darken the ink a little so it prints crisp
+          px[i*4]=Math.round(px[i*4]*0.6); px[i*4+1]=Math.round(px[i*4+1]*0.6); px[i*4+2]=Math.round(px[i*4+2]*0.7);
+          if(a>120){ if(x<x0) x0=x; if(x>x1) x1=x; if(y<y0) y0=y; if(y>y1) y1=y; } } }
+      if(x1<0 || (x1-x0)<10 || (y1-y0)<5) return reject(new Error('No signature found in the image — use dark ink on white paper'));
+      if((x1-x0)*(y1-y0) > W*H*0.85) return reject(new Error('The background is not plain white — take the photo again on white paper, in good light'));
+      g.putImageData(d,0,0);
+      const pad=Math.round(Math.max(x1-x0, y1-y0)*0.04)+4; x0=Math.max(0,x0-pad); y0=Math.max(0,y0-pad); x1=Math.min(W-1,x1+pad); y1=Math.min(H-1,y1+pad);
+      const cw=x1-x0+1, ch=y1-y0+1, s=Math.min(600/cw, 200/ch, 1), ow=Math.max(1,Math.round(cw*s)), oh=Math.max(1,Math.round(ch*s));
+      const o=document.createElement('canvas'); o.width=ow; o.height=oh; o.getContext('2d').drawImage(cv, x0, y0, cw, ch, 0, 0, ow, oh);
+      resolve(o.toDataURL('image/png'));
+    }catch(e){ reject(e); } };
+    img.src=url;
+  });
 }
 async function hseSigSave(){
   const u=auth.currentUser; if(!u || !canEdit()) return; const em=String(u.email||'').toLowerCase(), old=hseSigOf(em)||{};
   const name=String((document.getElementById('hseSigName')||{}).value||'').trim(), role=String((document.getElementById('hseSigRole')||{}).value||'').trim();
   if(!name){ toast('Write your name'); return; }
-  const img=hseSigPad&&hseSigPad.ink?hseSigPad.image():old.img; if(!img){ toast('Sign in the box first'); return; }
-  const sigs={...(((settingsDocs.hseSignatures||{}).sigs)||{}), [em]:{name:name.slice(0,60), role:role.slice(0,60), img, savedAt:new Date().toISOString()}};
-  if(await saveSettings('hseSignatures', {sigs}, settingsStamp('hseSignatures'))){ settingsDocs.hseSignatures={...(settingsDocs.hseSignatures||{}), sigs}; hseSigPad=null; tricUi.sigOpen=false; toast('Signature saved — it is added to every TBT you review'); renderTricPanel(); }
+  const img=hseSigUp || (hseSigPad&&hseSigPad.ink?hseSigPad.image():old.img); if(!img){ toast('Upload your signature image or sign in the box first'); return; }
+  const sigs={...(((settingsDocs.hseSignatures||{}).sigs)||{}), [em]:{name:name.slice(0,60), role:role.slice(0,60), img, savedAt:new Date().toISOString(), ...(hseSigUp?{uploaded:true}:{})}};
+  if(await saveSettings('hseSignatures', {sigs}, settingsStamp('hseSignatures'))){ settingsDocs.hseSignatures={...(settingsDocs.hseSignatures||{}), sigs}; hseSigUp=null; tricUi.sigOpen=false; if(typeof compUi!=='undefined') compUi.sigOpen=false;
+    toast('Signature saved — it is added to every TBT you review and every assessment you complete'); renderTricPanel(); if(typeof compRenderTop==='function') compRenderTop(); }
 }
 
 /* ---- Batch 83: incidents reported on the project links ---- */
@@ -8706,18 +8810,26 @@ function startTricData(){
   }catch(e){ console.warn('TBT', e); }
 }
 function stopTricData(){ for(const u of [unsubTric, unsubTricDone]) if(u){ try{ u(); }catch(e){} } unsubTric=unsubTricDone=null; tricSubs=[]; tricDone=[]; tricAlertRender(); }
-function tricChanged(){ renderTricPanel(); tricAlertRender(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(tricAutoComplete, 1000); } }
+function tricChanged(){ renderTricPanel(); tricAlertRender(); siteTabsRefresh(); if(document.getElementById('siteSection') && !document.getElementById('siteSection').hidden) renderSiteTable(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(tricAutoComplete, 1000); } }
 function tricAll(){ const seen=new Set(), out=[]; for(const x of [...tricSubs, ...tricDone]) if(!seen.has(x.id) && (x.data||{}).job){ seen.add(x.id); out.push(x); } return out; }
 const tbtAtt=x=>(x.data||{}).att||[];
 function tbtSignedAll(x){ const s=x.sigs||{}, a=tbtAtt(x); return a.length>0 && a.every(p=>s[p.w]); }
 function tbtWho(id, fb){ const w=workers.find(x=>x.id===id); return w?(w.fullName||'—'):(fb||'—'); }
 function tbtSite(x){ const d=x.data||{}; return activeSites().find(s=>s.id===(x.projectId||d.projectId)); }
 function tricAlertRender(){
-  const el=document.getElementById('tricAlert'); if(!el) return; const n=canEdit()?tricSubs.filter(x=>x.status==='new' && (x.data||{}).job).length:0;
-  if(!n){ el.hidden=true; el.innerHTML=''; return; }
-  el.hidden=false; el.innerHTML=`<span>${ic('clipboard')} <strong>${n}</strong> TBT request${n===1?'':'s'} waiting for HSE review</span><button type="button" class="btn btn-sm btn-primary" data-tric-goto="1">Open</button>`;
+  const el=document.getElementById('tricAlert'); if(!el) return; const list=canEdit()?tricSubs.filter(x=>x.status==='new' && (x.data||{}).job):[];
+  if(!list.length){ el.hidden=true; el.innerHTML=''; return; }
+  const by=new Map(); for(const x of list){ const k=tricSiteId(x); by.set(k, (by.get(k)||0)+1); }
+  el.hidden=false; el.innerHTML=`<span>${ic('clipboard')} <strong>${list.length}</strong> TBT request${list.length===1?'':'s'} waiting for HSE review</span>${[...by].map(([pid,n])=>{ const s=activeSites().find(y=>y.id===pid); return s?`<button type="button" class="btn btn-sm btn-primary" data-tric-goto="${esc(pid)}">${esc(s.siteName)} (${n})</button>`:`<span class="wsub">${n} for a project that is no longer in the list</span>`; }).join(' ')}`;
 }
-function tricGoto(){ const b=document.querySelector('.sidenav-btn[data-section="site"]'); if(b) b.click(); renderTricPanel(); const p=document.getElementById('tricBox'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); }
+function tricGoto(pid){
+  if(!pid){ const x=tricSubs.find(y=>y.status==='new' && (y.data||{}).job && activeSites().some(s=>s.id===tricSiteId(y))); pid=x?tricSiteId(x):''; }
+  const b=document.querySelector('.sidenav-btn[data-section="site"]'); if(b) b.click();
+  if(!pid || !activeSites().some(s=>s.id===pid)) return;
+  openSiteDrawer(pid); activeSiteTab='toolboxTalks'; renderSiteDrawer();
+}
+function siteTabsRefresh(){ const s=currentSite(), el=document.getElementById('siteDrawerTabs'); if(!s || !el || document.getElementById('siteDrawer').hidden) return;
+  el.innerHTML=SITE_TABS.map(t=>{ const c=siteTabCount(s, t.key); return `<button type="button" class="tab-btn ${t.key===activeSiteTab?'active':''}" data-stab="${t.key}">${t.label}${c?` <span class="pill-count ${c.cls}">${c.n}</span>`:''}</button>`; }).join(''); }
 // board entries for the link (who sees what on his phone)
 function tbtBoardEntries(add){
   for(const x of tricAll()){ const d=x.data||{}, s=x.sigs||{}, t=`TBT · ${d.job} · ${d.loc||'—'}`;
@@ -8762,17 +8874,19 @@ function tricDoneCard(x){
       <div class="record-card-actions">${done?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button>`:''}</div></div>
     <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(d.shift||'')} · ${esc(site?site.siteName:'—')} · ${tbtAtt(x).length} people${x.rejectNote?' · '+esc(x.rejectNote):''}</div>${tricJobsHtml(x)}</div>`;
 }
+function tricSiteId(x){ return x.projectId||(x.data||{}).projectId||''; }
+function tricPendingFor(pid){ return tricSubs.filter(x=>x.status==='new' && (x.data||{}).job && tricSiteId(x)===pid).length; }
 function renderTricPanel(){
-  const box=document.getElementById('tricBox'); if(!box) return;
+  const box=document.getElementById('tricBox'); if(!box) return; const sid=box.dataset.site||'';
   if(!canEdit()){ box.innerHTML=''; return; }
   if(tricUi.sigOpen && hseSigPad && hseSigPad.ink && document.getElementById('hseSigCanvas')) return;   // don't wipe a signature being drawn
-  if(document.activeElement && box.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName) && document.activeElement.type!=='checkbox' && document.activeElement.id!=='tricMonth') return;
-  const all=tricAll(), byDate=(a,b)=>String((a.data||{}).date||'').localeCompare(String((b.data||{}).date||''));
+  if(document.activeElement && box.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName) && document.activeElement.type!=='checkbox' && document.activeElement.id!=='tricMonthP') return;
+  const all=tricAll().filter(x=>tricSiteId(x)===sid), byDate=(a,b)=>String((a.data||{}).date||'').localeCompare(String((b.data||{}).date||''));
   const nw=all.filter(x=>x.status==='new').sort(byDate), sg=all.filter(x=>x.status==='sign').sort(byDate), dn=all.filter(x=>x.status==='done'||x.status==='rejected').sort((a,b)=>String(b.closedAt||'').localeCompare(String(a.closedAt||'')));
-  const ym=tricUi.month||localToday().slice(0,7);
-  box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} TBT requests from the project links</h3>
-      <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><button type="button" class="btn btn-sm ${hseSigOf((auth.currentUser||{}).email)?'':'btn-primary'}" data-hsesig-open="1">${hseSigOf((auth.currentUser||{}).email)?'✓ My signature':'Add my signature'}</button><input type="month" id="tricMonth" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx">${ic('download')} Month Excel</button></span></div>
-    <p class="wsub" style="margin:-4px 0 8px;">The crew fill the TBT on their project link and <strong>everyone signs straight away</strong> → you write the <strong>topic</strong>, tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong>, add dynamic risks → <strong>✓ Reviewed</strong> (your saved signature is added) → the PDF can be downloaded on their link and the TBT is counted in the project's toolbox talks. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month.</p>
+  const ym=tricUi.month||localToday().slice(0,7), link=ppeLinkOf(sid);
+  box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} TBT requests from the project link${nw.length?` <span class="badge danger">${nw.length} to review</span>`:''}</h3>
+      <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><button type="button" class="btn btn-sm ${hseSigOf((auth.currentUser||{}).email)?'':'btn-primary'}" data-hsesig-open="1">${hseSigOf((auth.currentUser||{}).email)?'✓ My signature':'Add my signature'}</button><input type="month" id="tricMonthP" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf" data-tric-site="${esc(sid)}">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx" data-tric-site="${esc(sid)}">${ic('download')} Month Excel</button></span></div>
+    <p class="wsub" style="margin:-4px 0 8px;">${link?'':'<strong>This project has no project link yet</strong> (Workforce → PPE → project links). '}The crew fill the TBT on the project link and <strong>everyone signs straight away</strong> → you write the <strong>topic</strong>, tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong>, add dynamic risks → <strong>✓ Reviewed</strong> (your saved signature is added) → the PDF can be downloaded on their link and the TBT is added to the list below. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month (all projects together: Monthly Report → TBT records).</p>
     ${(()=>{ const t=localToday(), ej=all.flatMap(x=>(x.jobs||[]).filter(q=>String(q.at||'').slice(0,10)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
     ${tricUi.sigOpen?hseSigBoxHtml():''}
     <div class="subhead">Waiting for your review (${nw.length})</div>${nw.length?nw.map(tricReviewCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing to review.</p>'}
@@ -8825,14 +8939,16 @@ async function tricMonthList(ym){
   const snap=await db.collection('tbtSubmissions').where('tbtDate','>=',ym+'-01').get();
   return snap.docs.map(d=>({id:d.id, ...(d.data()||{})})).filter(x=>x.status==='done' && String(x.tbtDate||'')<next).sort((a,b)=>String(a.tbtDate).localeCompare(String(b.tbtDate)) || String((a.data||{}).time||'').localeCompare(String((b.data||{}).time||'')));
 }
-async function tricDownload(kind){
-  const ym=(document.getElementById('tricMonth')||{}).value || localToday().slice(0,7);
+async function tricDownload(kind, site){
+  const one=site && site!=='all', ym=(document.getElementById(one?'tricMonthP':'tricMonthAll')||{}).value || tricUi.month || localToday().slice(0,7);
   let list; try{ list=await tricMonthList(ym); }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not load the TBTs'); return; }
-  if(!list.length){ toast('No complete TBTs in '+monthLabel(ym)+' (or they were already deleted after '+TRIC_KEEP_DAYS+' days)'); return; }
-  if(kind==='xlsx') return tricXlsx(list, ym);
-  return tricPdf(list, `TBT_records_${ym}.pdf`, monthLabel(ym));
+  const pn=one?(projectName(site)||'project'):''; if(one) list=list.filter(x=>tricSiteId(x)===site);
+  if(!list.length){ toast('No complete TBTs'+(one?' for '+pn:'')+' in '+monthLabel(ym)+' (or they were already deleted after '+TRIC_KEEP_DAYS+' days)'); return; }
+  const tag=one?'_'+String(pn).replace(/[^A-Za-z0-9]+/g,'_').slice(0,30):'';
+  if(kind==='xlsx') return tricXlsx(list, ym, tag);
+  return tricPdf(list, `TBT_records${tag}_${ym}.pdf`, (one?pn+' · ':'')+monthLabel(ym));
 }
-async function tricXlsx(list, ym){
+async function tricXlsx(list, ym, tag){
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
   const rows=list.map(x=>{ const d=x.data||{}, site=tbtSite(x); return [d.date||'', d.time||'', d.shift||'', site?site.siteName:'', d.client||'', d.loc||'', d.jp||'', d.veh||'', d.job||'', x.topic||'', tbtWho(x.workerId, d.name), tbtAtt(x).length, tbtAtt(x).map(p=>tbtWho(p.w, p.n)).join(', '),
     (x.musted||[]).filter(Boolean).length+'/7', (x.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), (x.dra||[]).length, 1+(x.jobs||[]).length, x.reviewedBy||'']; });
@@ -8842,7 +8958,7 @@ async function tricXlsx(list, ym){
   sh['!cols']=[{wch:11},{wch:7},{wch:7},{wch:24},{wch:16},{wch:20},{wch:14},{wch:12},{wch:13},{wch:40},{wch:22},{wch:7},{wch:60},{wch:9},{wch:40},{wch:8},{wch:6},{wch:26}];
   const sj=XLSX.utils.aoa_to_sheet([['Date','Project','TBT topic','Job no.','Time','Shift','Location / well no.','Journey plan no.','Job','Pause & check','Confirmed by'], ...jobs]);
   sj['!cols']=[{wch:11},{wch:24},{wch:36},{wch:7},{wch:7},{wch:7},{wch:20},{wch:14},{wch:13},{wch:30},{wch:22}];
-  XLSX.utils.book_append_sheet(wb, sh, 'Toolbox talks'); XLSX.utils.book_append_sheet(wb, sj, 'Jobs'); XLSX.writeFile(wb, `TBT_records_${ym}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, sh, 'Toolbox talks'); XLSX.utils.book_append_sheet(wb, sj, 'Jobs'); XLSX.writeFile(wb, `TBT_records${tag||''}_${ym}.xlsx`);
 }
 async function tricPdf(list, fileName, sub){
   if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
@@ -8906,6 +9022,822 @@ async function tricOnePdf(id){
   if(!x){ toast(`This TBT record was deleted ${TRIC_KEEP_DAYS} days after the request — use your monthly download`); return; }
   const d=x.data||{}; await tricPdf([x], `TBT_${String(d.job||'').replace(/[^A-Za-z0-9]+/g,'_')}_${String(d.loc||'').replace(/[^A-Za-z0-9]+/g,'_').slice(0,30)}_${d.date||''}.pdf`, [d.date?isoToDmy(d.date):'', d.loc||''].filter(Boolean).join(' · '));
 }
+
+
+/* ================= Batch 84: COMPETENCY ASSESSMENT ================= */
+// Question bank — every question is [id, module, topic, [English, Hindi, Arabic], [[option EN, HI, AR] ×4]]. The FIRST option is the correct one
+// (the options are shuffled for every test). Client core = Musta'ed, Life Saving Rules, H2S, zone management, stop work / reporting.
+const COMP_QB=[
+  ['c1','core','mus',["How many Musta'ed steps must be checked before starting work?",'काम शुरू करने से पहले मुस्तअद के कितने चरण जाँचने होते हैं?','كم عدد خطوات «مستعد» التي يجب التحقق منها قبل بدء العمل؟'],
+    [['7 steps','7 चरण','7 خطوات'],['3 steps','3 चरण','3 خطوات'],['5 steps','5 चरण','5 خطوات'],['10 steps','10 चरण','10 خطوات']]],
+  ['c2','core','mus',["Under Musta'ed 'Prepare area', what must be done?","मुस्तअद के 'क्षेत्र तैयार करें' चरण में क्या करना होता है?",'في خطوة «تجهيز المنطقة» من «مستعد»، ماذا يجب أن تفعل؟'],
+    [['Housekeeping, zone management (red / no-go zones) and SIMOPS check','साफ़-सफ़ाई, ज़ोन मैनेजमेंट (रेड / नो-गो ज़ोन) और SIMOPS जाँच','التنظيف والترتيب، إدارة المناطق (الحمراء / الممنوعة) وفحص العمليات المتزامنة'],
+     ['Only park the vehicle','सिर्फ़ गाड़ी पार्क करना','ركن المركبة فقط'],['Nothing — the supervisor does it','कुछ नहीं — सुपरवाइज़र करेगा','لا شيء — المشرف يقوم بذلك'],['Start work and clean later','काम शुरू करें, सफ़ाई बाद में','ابدأ العمل ونظّف لاحقاً']]],
+  ['c3','core','mus',["The last Musta'ed step 'Start work' means:","मुस्तअद का आखिरी चरण 'काम शुरू करें' का मतलब है:",'آخر خطوة في «مستعد» «ابدأ العمل» تعني:'],
+    [['Comply, Intervene, Respect — STOP and re-assess if anything changes','पालन करें, हस्तक्षेप करें, सम्मान करें — कुछ बदले तो रुकें और दोबारा जाँचें','التزم، تدخّل، احترم — توقف وأعد التقييم إذا تغيّر أي شيء'],
+     ['Work fast to finish early','जल्दी खत्म करने के लिए तेज़ काम करें','اعمل بسرعة لتنتهي مبكراً'],['Start even if the permit is not complete','परमिट पूरा न हो तब भी शुरू करें','ابدأ حتى لو لم يكتمل التصريح'],['Wait for the client to tell you what to do','क्लाइंट के बताने का इंतज़ार करें','انتظر العميل ليخبرك ماذا تفعل']]],
+  ['c4','core','mus',["Under Musta'ed 'Check equipment', you make sure that:","मुस्तअद के 'उपकरण जाँचें' चरण में आप सुनिश्चित करते हैं कि:",'في خطوة «فحص المعدات» من «مستعد»، تتأكد من أن:'],
+    [['Equipment is inspected, certified and fit for the job','उपकरण की जाँच हुई है, सर्टिफ़िकेट है और काम के लायक है','المعدات مفحوصة ومعتمدة وصالحة للعمل'],
+     ['Equipment is new','उपकरण नया है','المعدات جديدة'],['Equipment is clean only','उपकरण सिर्फ़ साफ़ है','المعدات نظيفة فقط'],['Equipment belongs to the client','उपकरण क्लाइंट का है','المعدات ملك العميل']]],
+  ['c5','core','lsr',['How many Life Saving Rules are there?','जीवन रक्षक नियम कितने हैं?','كم عدد قواعد إنقاذ الحياة؟'],
+    [['9','9','9'],['5','5','5'],['7','7','7'],['12','12','12']]],
+  ['c6','core','lsr',['Working at Height rule: when there is a risk of falling and no guardrail, you must:','ऊँचाई पर काम का नियम: गिरने का खतरा हो और रेलिंग न हो तो आपको:','قاعدة العمل على ارتفاع: عند وجود خطر السقوط وعدم وجود حاجز، يجب عليك:'],
+    [['Wear a full-body harness and stay 100% tied off','फुल-बॉडी हार्नेस पहनें और हमेशा 100% बंधे रहें','ارتداء حزام الأمان الكامل والبقاء مربوطاً 100%'],
+     ['Work carefully without a harness','बिना हार्नेस के ध्यान से काम करें','العمل بحذر بدون حزام'],['Hold the scaffold with one hand','एक हाथ से स्कैफ़ोल्ड पकड़कर रखें','الإمساك بالسقالة بيد واحدة'],['Ask a colleague to watch you','साथी से कहें कि आपको देखता रहे','اطلب من زميل أن يراقبك']]],
+  ['c7','core','lsr',['The Line of Fire rule means:','लाइन ऑफ़ फ़ायर नियम का मतलब है:','قاعدة «خط النار» تعني:'],
+    [['Keep out of the path of moving objects, vehicles, suspended loads and stored energy','चलती चीज़ों, वाहनों, लटकते भार और जमा ऊर्जा के रास्ते से दूर रहें','ابقَ بعيداً عن مسار الأجسام المتحركة والمركبات والأحمال المعلقة والطاقة المخزنة'],
+     ['Stay near fire extinguishers','अग्निशामक के पास रहें','ابقَ بالقرب من طفايات الحريق'],['Work only during the day','सिर्फ़ दिन में काम करें','اعمل فقط في النهار'],['Stand under the load to guide it','भार को गाइड करने के लिए उसके नीचे खड़े हों','قف تحت الحمل لتوجيهه']]],
+  ['c8','core','lsr',['Work Authorisation rule: you must:','कार्य अनुमति नियम: आपको:','قاعدة تصريح العمل: يجب عليك:'],
+    [['Work with a valid permit when one is required','जब ज़रूरी हो, वैध परमिट के साथ ही काम करें','العمل بتصريح ساري المفعول عندما يكون مطلوباً'],
+     ['Start first and get the permit later','पहले काम शुरू करें, परमिट बाद में लें','ابدأ أولاً واحصل على التصريح لاحقاً'],['Use the permit of another crew','दूसरी टीम का परमिट इस्तेमाल करें','استخدم تصريح فريق آخر'],['Permits are only for the supervisor','परमिट सिर्फ़ सुपरवाइज़र के लिए होते हैं','التصاريح للمشرف فقط']]],
+  ['c9','core','lsr',['Bypassing Safety Controls rule: you must:','सुरक्षा नियंत्रण बाईपास नियम: आपको:','قاعدة تجاوز ضوابط السلامة: يجب عليك:'],
+    [['Get authorisation before overriding or switching off any safety device','किसी भी सुरक्षा उपकरण को बंद या बाईपास करने से पहले अनुमति लें','الحصول على إذن قبل تجاوز أو إيقاف أي جهاز سلامة'],
+     ['Switch off an alarm if it is noisy','अलार्म शोर करे तो बंद कर दें','أوقف الإنذار إذا كان مزعجاً'],['Remove guards to work faster','तेज़ काम के लिए गार्ड हटा दें','أزل الواقيات لتعمل أسرع'],['Bypass only at night','सिर्फ़ रात में बाईपास करें','تجاوز فقط في الليل']]],
+  ['c10','core','lsr',['Safe Mechanical Lifting rule: during a lift you must:','सुरक्षित मैकेनिकल लिफ़्टिंग नियम: लिफ़्ट के दौरान आपको:','قاعدة الرفع الميكانيكي الآمن: أثناء الرفع يجب عليك:'],
+    [['Never walk or stand under a suspended load','लटकते भार के नीचे कभी न चलें, न खड़े हों','عدم المشي أو الوقوف تحت حمل معلّق أبداً'],
+     ['Stand under the load to catch it','भार पकड़ने के लिए उसके नीचे खड़े हों','قف تحت الحمل لتلتقطه'],['Ride on the hook','हुक पर सवारी करें','اركب على الخطاف'],['Lift without a banksman','बिना बैंकमैन के लिफ़्ट करें','ارفع بدون مُوجّه']]],
+  ['c11','core','h2s',['What does H2S gas smell like at low levels?','कम मात्रा में H2S गैस की गंध कैसी होती है?','ما رائحة غاز H2S بتركيز منخفض؟'],
+    [['Rotten eggs','सड़े अंडे जैसी','البيض الفاسد'],['Flowers','फूलों जैसी','الزهور'],['Petrol','पेट्रोल जैसी','البنزين'],['It has no smell at all','बिल्कुल गंध नहीं होती','ليس له أي رائحة']]],
+  ['c12','core','h2s',["Why can't you trust your nose to detect H2S?",'H2S पहचानने के लिए नाक पर भरोसा क्यों नहीं कर सकते?','لماذا لا يمكنك الاعتماد على أنفك لاكتشاف H2S؟'],
+    [['High levels quickly kill your sense of smell','ज़्यादा मात्रा जल्दी ही सूंघने की शक्ति खत्म कर देती है','التركيز العالي يُفقدك حاسة الشم بسرعة'],
+     ['H2S smells nice','H2S की गंध अच्छी होती है','رائحة H2S جميلة'],['H2S is only found in offices','H2S सिर्फ़ ऑफ़िस में होती है','يوجد H2S في المكاتب فقط'],['The nose always works, you can trust it','नाक हमेशा काम करती है, भरोसा कर सकते हैं','الأنف يعمل دائماً ويمكن الاعتماد عليه']]],
+  ['c13','core','h2s',['When the H2S alarm sounds, you must:','H2S अलार्म बजने पर आपको:','عندما يرنّ إنذار H2S يجب عليك:'],
+    [['Stop work, wear the escape set if trained, and go upwind / crosswind to the muster point','काम रोकें, प्रशिक्षित हों तो एस्केप सेट पहनें, और हवा के विपरीत / आड़ी दिशा में असेंबली पॉइंट जाएँ','أوقف العمل، والبس جهاز الهروب إذا كنت مدرباً، واتجه عكس الريح / عرضياً إلى نقطة التجمع'],
+     ['Run downwind','हवा की दिशा में भागें','اركض مع اتجاه الريح'],['Go and look for the leak','रिसाव ढूँढने जाएँ','اذهب وابحث عن التسرب'],['Finish the job first','पहले काम पूरा करें','أنهِ العمل أولاً']]],
+  ['c14','core','h2s',['How do you know which way to escape from an H2S release?','H2S रिसाव से बचने के लिए किस दिशा में जाना है, यह कैसे पता चलता है?','كيف تعرف اتجاه الهروب من تسرب H2S؟'],
+    [['Look at the windsock and move upwind or crosswind','विंडसॉक देखें और हवा के विपरीत या आड़ी दिशा में जाएँ','انظر إلى كيس الريح واتجه عكس الريح أو عرضياً'],
+     ['Follow the smell','गंध के पीछे जाएँ','اتبع الرائحة'],['Go to the lowest place','सबसे नीची जगह पर जाएँ','اذهب إلى أدنى مكان'],['Stay inside the pit','गड्ढे के अंदर रहें','ابقَ داخل الحفرة']]],
+  ['c15','core','h2s',['H2S is heavier than air. Where does it collect?','H2S हवा से भारी है। यह कहाँ जमा होती है?','غاز H2S أثقل من الهواء. أين يتجمع؟'],
+    [['In low places — pits, cellars, trenches','नीची जगहों में — गड्ढे, सेलर, खाई','في الأماكن المنخفضة — الحفر والأقبية والخنادق'],
+     ['On top of the scaffold','स्कैफ़ोल्ड के ऊपर','أعلى السقالة'],['Only inside vehicles','सिर्फ़ वाहनों के अंदर','داخل المركبات فقط'],['It disappears immediately','यह तुरंत गायब हो जाती है','يختفي فوراً']]],
+  ['c16','core','zone',['A red zone / no-go zone on site means:','साइट पर रेड ज़ोन / नो-गो ज़ोन का मतलब है:','المنطقة الحمراء / المنطقة الممنوعة في الموقع تعني:'],
+    [['Only authorised people may enter, with permission of the person in charge','सिर्फ़ अधिकृत लोग, इंचार्ज की अनुमति से ही प्रवेश कर सकते हैं','يدخلها الأشخاص المصرّح لهم فقط وبإذن المسؤول'],
+     ['Anyone can enter if they are quick','जल्दी हो तो कोई भी जा सकता है','يمكن لأي شخص الدخول إذا كان سريعاً'],['It is a smoking area','यह धूम्रपान क्षेत्र है','إنها منطقة تدخين'],['It is the rest area','यह आराम करने की जगह है','إنها منطقة الاستراحة']]],
+  ['c17','core','zone',['Before entering a barricaded area you must:','बैरिकेड वाले क्षेत्र में जाने से पहले आपको:','قبل دخول منطقة محاطة بحواجز يجب عليك:'],
+    [['Get permission from the person in charge and know why it is barricaded','इंचार्ज से अनुमति लें और जानें कि बैरिकेड क्यों है','الحصول على إذن من المسؤول ومعرفة سبب وضع الحواجز'],
+     ['Move the barricade and go in','बैरिकेड हटाकर अंदर जाएँ','أزح الحاجز وادخل'],['Jump over it','उसके ऊपर से कूदें','اقفز فوقه'],['Enter if nobody is watching','कोई न देख रहा हो तो अंदर जाएँ','ادخل إذا لم يكن أحد يراقب']]],
+  ['c18','core','zone',['When other crews work above, below or beside you (SIMOPS), you must:','जब दूसरी टीमें आपके ऊपर, नीचे या बगल में काम कर रही हों (SIMOPS), तो आपको:','عندما تعمل فرق أخرى فوقك أو تحتك أو بجانبك (عمليات متزامنة)، يجب عليك:'],
+    [['Agree the work with them and the person in charge before starting','शुरू करने से पहले उनसे और इंचार्ज से काम तय करें','تنسيق العمل معهم ومع المسؤول قبل البدء'],
+     ['Ignore them','उन्हें नज़रअंदाज़ करें','تجاهلهم'],['Work faster than them','उनसे तेज़ काम करें','اعمل أسرع منهم'],['Ask them to leave the site','उन्हें साइट छोड़ने को कहें','اطلب منهم مغادرة الموقع']]],
+  ['c19','core','stop',['If you see an unsafe act or condition, you:','अगर आप कोई असुरक्षित काम या स्थिति देखें, तो आप:','إذا رأيت تصرفاً أو وضعاً غير آمن، فإنك:'],
+    [['Stop the work (intervene) and report it','काम रोकें (हस्तक्षेप करें) और रिपोर्ट करें','توقف العمل (تدخّل) وأبلغ عنه'],
+     ['Say nothing, it is not your job','कुछ न कहें, यह आपका काम नहीं है','لا تقل شيئاً، ليس من شأنك'],['Take a photo and leave','फ़ोटो लेकर चले जाएँ','التقط صورة وغادر'],['Wait until someone is hurt','किसी के घायल होने तक इंतज़ार करें','انتظر حتى يُصاب أحد']]],
+  ['c20','core','stop',['Who can stop a job that is unsafe?','असुरक्षित काम को कौन रोक सकता है?','من يستطيع إيقاف عمل غير آمن؟'],
+    [['Anyone on site','साइट पर कोई भी','أي شخص في الموقع'],['Only the manager','सिर्फ़ मैनेजर','المدير فقط'],['Only the client','सिर्फ़ क्लाइंट','العميل فقط'],['Nobody','कोई नहीं','لا أحد']]],
+  ['c21','core','stop',['A near miss (nobody hurt) must be:','नियर मिस (कोई घायल नहीं) को:','الحادث الوشيك (لم يُصب أحد) يجب أن:'],
+    [['Reported to the supervisor / HSE the same day','उसी दिन सुपरवाइज़र / एचएसई को रिपोर्ट करना चाहिए','يُبلَّغ عنه للمشرف / السلامة في نفس اليوم'],
+     ['Forgotten because nobody was hurt','भूल जाना चाहिए क्योंकि कोई घायल नहीं हुआ','يُنسى لأن أحداً لم يُصب'],['Reported only at the end of the month','सिर्फ़ महीने के अंत में रिपोर्ट करना चाहिए','يُبلَّغ عنه في نهاية الشهر فقط'],['Hidden from the client','क्लाइंट से छिपाना चाहिए','يُخفى عن العميل']]],
+  // scaffolder
+  ['s1','scaff','',['A green scaffold tag means:','स्कैफ़ोल्ड पर हरे टैग का मतलब है:','البطاقة الخضراء على السقالة تعني:'],
+    [['Inspected and safe to use','जाँच हो चुकी है और इस्तेमाल के लिए सुरक्षित है','تم فحصها وآمنة للاستخدام'],['Under construction','बन रहा है','قيد الإنشاء'],['Do not use','इस्तेमाल न करें','لا تستخدم'],['Ready to dismantle','खोलने के लिए तैयार','جاهزة للفك']]],
+  ['s2','scaff','',['A red tag — or no tag — on a scaffold means:','स्कैफ़ोल्ड पर लाल टैग — या कोई टैग न होने — का मतलब है:','البطاقة الحمراء — أو عدم وجود بطاقة — على السقالة تعني:'],
+    [['Do not use — it is unsafe or not finished','इस्तेमाल न करें — असुरक्षित है या पूरा नहीं है','لا تستخدمها — غير آمنة أو غير مكتملة'],['Safe for light work','हल्के काम के लिए सुरक्षित','آمنة للأعمال الخفيفة'],['Use it with a harness','हार्नेस के साथ इस्तेमाल करें','استخدمها مع حزام الأمان'],['Only the supervisor may use it','सिर्फ़ सुपरवाइज़र इस्तेमाल कर सकता है','يستخدمها المشرف فقط']]],
+  ['s3','scaff','',['How often must a scaffold in use be inspected?','इस्तेमाल हो रहे स्कैफ़ोल्ड की जाँच कितनी बार होनी चाहिए?','كم مرة يجب فحص السقالة المستخدمة؟'],
+    [['At least every 7 days, and after bad weather, damage or any change','कम से कम हर 7 दिन में, और खराब मौसम, नुकसान या किसी बदलाव के बाद','كل 7 أيام على الأقل، وبعد سوء الطقس أو التلف أو أي تعديل'],['Once a year','साल में एक बार','مرة في السنة'],['Only when it is built','सिर्फ़ बनने के समय','عند تركيبها فقط'],['Never, if it looks fine','कभी नहीं, अगर ठीक दिखे','أبداً إذا بدت جيدة']]],
+  ['s4','scaff','',['Who may alter (change) a scaffold?','स्कैफ़ोल्ड में बदलाव कौन कर सकता है?','من يُسمح له بتعديل السقالة؟'],
+    [['Only a competent scaffolder — then it is re-inspected and re-tagged','सिर्फ़ सक्षम स्कैफ़ोल्डर — फिर दोबारा जाँच और टैग होता है','السقّال الكفء فقط — ثم يُعاد فحصها ووضع البطاقة'],['Any worker who needs it','कोई भी मज़दूर जिसे ज़रूरत हो','أي عامل يحتاج ذلك'],['The painter','पेंटर','الدهّان'],['The driver','ड्राइवर','السائق']]],
+  ['s5','scaff','',['On soft ground, what goes under each base plate?','नरम ज़मीन पर हर बेस प्लेट के नीचे क्या लगाते हैं?','على الأرض اللينة، ماذا يوضع تحت كل قاعدة؟'],
+    [['A sole board','सोल बोर्ड','لوح قاعدي (Sole board)'],['A brick','ईंट','طوبة'],['Nothing','कुछ नहीं','لا شيء'],['A bucket','बाल्टी','دلو']]],
+  ['s6','scaff','',['Toe boards are fitted to:','टो बोर्ड किसलिए लगाए जाते हैं?','تُركَّب ألواح الحافة (Toe boards) من أجل:'],
+    [['Stop tools and materials falling off the platform','प्लेटफ़ॉर्म से औज़ार और सामान गिरने से रोकने के लिए','منع سقوط الأدوات والمواد من المنصة'],['Sit on during breaks','आराम के समय बैठने के लिए','للجلوس أثناء الاستراحة'],['Make the scaffold look nice','स्कैफ़ोल्ड को सुंदर बनाने के लिए','لتجميل السقالة'],['Hold the ladder','सीढ़ी पकड़ने के लिए','لتثبيت السلم']]],
+  ['s7','scaff','',['The top guardrail on a working platform is about:','काम के प्लेटफ़ॉर्म पर ऊपरी गार्डरेल की ऊँचाई लगभग:','ارتفاع الحاجز العلوي على منصة العمل حوالي:'],
+    [['1 metre high','1 मीटर','متر واحد'],['30 cm','30 सेमी','30 سم'],['2.5 metres','2.5 मीटर','2.5 متر'],['No guardrail is needed','गार्डरेल की ज़रूरत नहीं','لا حاجة لحاجز']]],
+  ['s8','scaff','',['Scaffold ties are used to:','स्कैफ़ोल्ड टाई किसलिए होती है?','تُستخدم روابط السقالة (Ties) من أجل:'],
+    [['Fix the scaffold to the structure so it cannot fall or move','स्कैफ़ोल्ड को ढाँचे से बाँधने के लिए ताकि गिरे या हिले नहीं','تثبيت السقالة بالمنشأة حتى لا تسقط أو تتحرك'],['Hang tools','औज़ार टाँगने के लिए','تعليق الأدوات'],['Tie the harness','हार्नेस बाँधने के लिए','ربط حزام الأمان'],['Decoration','सजावट के लिए','للزينة']]],
+  ['s9','scaff','',['Before using a tube or fitting you must:','ट्यूब या फ़िटिंग इस्तेमाल करने से पहले आपको:','قبل استخدام أنبوب أو وصلة يجب عليك:'],
+    [['Check it — reject bent, cracked or rusted parts','उसे जाँचें — मुड़े, टूटे या जंग लगे पार्ट वापस करें','فحصه — ورفض القطع المنحنية أو المتشققة أو الصدئة'],['Paint it','उसे पेंट करें','طلاؤه'],['Use it even if it is bent','मुड़ा हो तब भी इस्तेमाल करें','استخدامه حتى لو كان منحنياً'],['Weld it','उसे वेल्ड करें','لحامه']]],
+  ['s10','scaff','',['While erecting a scaffold above ground, you must be:','ज़मीन से ऊपर स्कैफ़ोल्ड खड़ा करते समय आपको:','أثناء تركيب السقالة فوق الأرض، يجب أن تكون:'],
+    [['100% tied off with a double lanyard','डबल लैनयार्ड के साथ 100% बंधे रहना','مربوطاً 100% بحبل مزدوج'],['Tied off only at the top level','सिर्फ़ सबसे ऊपर बंधे रहना','مربوطاً في المستوى العلوي فقط'],['Not tied off — it is faster','बिना बंधे — यह तेज़ है','غير مربوط — هذا أسرع'],['Holding a colleague','साथी को पकड़े रहना','ممسكاً بزميل']]],
+  ['s11','scaff','',['The area below scaffolding work must be:','स्कैफ़ोल्डिंग के काम के नीचे का क्षेत्र:','المنطقة تحت أعمال السقالات يجب أن تكون:'],
+    [['Barricaded with signs so nobody walks under','बैरिकेड और साइन के साथ बंद हो ताकि कोई नीचे से न गुज़रे','محاطة بحواجز ولافتات حتى لا يمر أحد تحتها'],['Open for everyone','सबके लिए खुला','مفتوحة للجميع'],['Used for parking','पार्किंग के लिए','تُستخدم للوقوف'],['Used to store other crews\' materials','दूसरी टीमों का सामान रखने के लिए','لتخزين مواد الفرق الأخرى']]],
+  ['s12','scaff','',['If strong wind starts while erecting a scaffold:','स्कैफ़ोल्ड खड़ा करते समय तेज़ हवा चलने लगे तो:','إذا بدأت رياح قوية أثناء تركيب السقالة:'],
+    [['Stop work and make the scaffold secure','काम रोकें और स्कैफ़ोल्ड को सुरक्षित करें','أوقف العمل وثبّت السقالة'],['Work faster to finish','खत्म करने के लिए तेज़ काम करें','اعمل أسرع لتنتهي'],['Remove your harness','हार्नेस उतार दें','انزع حزام الأمان'],['Carry boards to the top','ऊपर बोर्ड ले जाएँ','احمل الألواح إلى الأعلى']]],
+  // scaffolding helper
+  ['h1','helper','',['As a scaffolding helper you may:','स्कैफ़ोल्डिंग हेल्पर के रूप में आप:','بصفتك مساعد سقّال، يمكنك:'],
+    [["Carry and pass materials as the scaffolder directs",'स्कैफ़ोल्डर के निर्देश पर सामान ढो और पकड़ा सकते हैं','حمل المواد وتمريرها حسب توجيه السقّال'],['Alter the scaffold alone','अकेले स्कैफ़ोल्ड बदल सकते हैं','تعديل السقالة وحدك'],['Remove ties','टाई खोल सकते हैं','إزالة الروابط'],['Sign the scaffold tag','स्कैफ़ोल्ड टैग पर साइन कर सकते हैं','التوقيع على بطاقة السقالة']]],
+  ['h2','helper','',['Passing materials up to a higher level, you must:','सामान ऊपर पहुँचाते समय आपको:','عند رفع المواد إلى مستوى أعلى يجب عليك:'],
+    [['Use a rope / gin wheel or pass hand to hand — never throw','रस्सी / जिन व्हील से या हाथ से हाथ दें — कभी न फेंकें','استخدام حبل / بكرة أو التمرير يداً بيد — لا ترمِ أبداً'],['Throw them up','ऊपर फेंकें','ارمها للأعلى'],['Climb the ladder with them on your shoulder','कंधे पर रखकर सीढ़ी से चढ़ें','اصعد السلم وهي على كتفك'],['Tie them to your harness','हार्नेस से बाँध लें','اربطها بحزام الأمان']]],
+  ['h3','helper','',['Lifting long or heavy tubes, you should:','लंबे या भारी ट्यूब उठाते समय आपको:','عند رفع أنابيب طويلة أو ثقيلة يجب:'],
+    [['Bend your knees, keep your back straight and get help','घुटने मोड़ें, पीठ सीधी रखें और मदद लें','ثنِ ركبتيك وحافظ على ظهرك مستقيماً واطلب المساعدة'],['Bend your back and lift fast','पीठ झुकाकर जल्दी उठाएँ','اثنِ ظهرك وارفع بسرعة'],['Drag them on the ground','ज़मीन पर घसीटें','اسحبها على الأرض'],['Lift alone to save time','समय बचाने के लिए अकेले उठाएँ','ارفعها وحدك لتوفير الوقت']]],
+  ['h4','helper','',['Hand tools used at height must be:','ऊँचाई पर इस्तेमाल होने वाले हाथ के औज़ार:','أدوات اليد المستخدمة على ارتفاع يجب أن تكون:'],
+    [['Tied (tethered) so they cannot fall','बंधे (टेदर) हों ताकि गिरें नहीं','مربوطة حتى لا تسقط'],['Kept in your pocket','जेब में रखें','في جيبك'],['Thrown down after use','इस्तेमाल के बाद नीचे फेंक दें','تُرمى للأسفل بعد الاستخدام'],['Left on the platform edge','प्लेटफ़ॉर्म के किनारे छोड़ दें','تُترك على حافة المنصة']]],
+  ['h5','helper','',['Scaffold materials on the ground must be:','ज़मीन पर रखा स्कैफ़ोल्ड का सामान:','مواد السقالات على الأرض يجب أن:'],
+    [['Stacked neatly away from walkways','रास्ते से दूर सही से लगाकर रखा जाए','تُرتّب بشكل منظم بعيداً عن الممرات'],['Left across the walkway','रास्ते में पड़ा रहे','تُترك في الممر'],['Thrown in one pile','एक ढेर में फेंक दिया जाए','تُرمى في كومة واحدة'],['Leaned against vehicles','गाड़ियों से टिकाकर रखा जाए','تُسند إلى المركبات']]],
+  ['h6','helper','',['If you see a scaffold with a red tag you:','अगर लाल टैग वाला स्कैफ़ोल्ड देखें तो आप:','إذا رأيت سقالة عليها بطاقة حمراء فإنك:'],
+    [['Do not climb it and tell the scaffolder / supervisor','उस पर न चढ़ें और स्कैफ़ोल्डर / सुपरवाइज़र को बताएँ','لا تصعدها وتُبلغ السقّال / المشرف'],['Climb carefully','ध्यान से चढ़ें','تصعدها بحذر'],['Remove the red tag','लाल टैग हटा दें','تنزع البطاقة الحمراء'],['Change it to green','उसे हरा कर दें','تغيّرها إلى خضراء']]],
+  // inspection / supervision (advanced scaffolder, foreman, inspector)
+  ['i1','insp','',['Who may sign a scaffold tag as inspected?',"स्कैफ़ोल्ड टैग पर 'जाँचा गया' साइन कौन कर सकता है?",'من يُسمح له بالتوقيع على بطاقة السقالة بأنها مفحوصة؟'],
+    [['Only a competent, authorised scaffold inspector','सिर्फ़ सक्षम और अधिकृत स्कैफ़ोल्ड इंस्पेक्टर','مفتش السقالات الكفء والمعتمد فقط'],['Any scaffolder','कोई भी स्कैफ़ोल्डर','أي سقّال'],['The user of the scaffold','स्कैफ़ोल्ड इस्तेमाल करने वाला','مستخدم السقالة'],['The storekeeper','स्टोरकीपर','أمين المخزن']]],
+  ['i2','insp','',['If an inspection finds a defect, you must:','जाँच में कमी मिले तो आपको:','إذا وُجد عيب أثناء الفحص يجب عليك:'],
+    [['Remove the green tag / put a red tag, stop use and get it fixed','हरा टैग हटाएँ / लाल टैग लगाएँ, इस्तेमाल रोकें और ठीक करवाएँ','إزالة البطاقة الخضراء / وضع بطاقة حمراء، وإيقاف الاستخدام وإصلاحه'],['Write it down and keep the green tag','लिख लें और हरा टैग रहने दें','تسجيله وإبقاء البطاقة الخضراء'],['Tell the users to be careful','इस्तेमाल करने वालों से सावधान रहने को कहें','إخبار المستخدمين بالحذر'],['Fix it next month','अगले महीने ठीक करें','إصلاحه الشهر القادم']]],
+  ['i3','insp','',['Each scaffold inspection must be recorded:','हर स्कैफ़ोल्ड जाँच दर्ज होनी चाहिए:','يجب تسجيل كل فحص للسقالة:'],
+    [['On the tag and in the inspection register','टैग पर और इंस्पेक्शन रजिस्टर में','على البطاقة وفي سجل الفحص'],['Nowhere','कहीं नहीं','لا مكان'],['Only by phone call','सिर्फ़ फ़ोन पर बताकर','بمكالمة هاتفية فقط'],['On the wall with chalk','दीवार पर चॉक से','على الجدار بالطباشير']]],
+  ['i4','insp','',['A loading bay or heavy-duty scaffold must:','लोडिंग बे या हैवी-ड्यूटी स्कैफ़ोल्ड:','منصة التحميل أو السقالة الثقيلة يجب أن:'],
+    [['Be designed for the load and show the safe working load','भार के हिसाब से डिज़ाइन हो और सुरक्षित भार (SWL) लिखा हो','تُصمَّم للحمل وتُظهر حمل العمل الآمن'],['Carry any load','कोई भी भार उठाए','تحمل أي حمل'],['Have no guardrails','बिना गार्डरेल हो','بدون حواجز'],['Be built without ties','बिना टाई के बने','تُبنى بدون روابط']]],
+  ['i5','insp','',['Before handing over a scaffold to the users you must:','स्कैफ़ोल्ड इस्तेमाल करने वालों को सौंपने से पहले आपको:','قبل تسليم السقالة للمستخدمين يجب عليك:'],
+    [['Inspect it, tag it and explain any limits (load, access)','जाँच करें, टैग लगाएँ और सीमाएँ (भार, रास्ता) बताएँ','فحصها ووضع البطاقة وشرح أي قيود (الحمل، الوصول)'],['Just leave the site','बस साइट छोड़ दें','مغادرة الموقع فقط'],['Remove the guardrails for them','उनके लिए गार्डरेल हटा दें','إزالة الحواجز لهم'],['Ask them to inspect it','उनसे जाँच करवाएँ','الطلب منهم فحصها']]],
+  ['i6','insp','',['Bracing on a scaffold is checked to make sure:','स्कैफ़ोल्ड की ब्रेसिंग इसलिए जाँचते हैं ताकि:','يُفحص التدعيم (Bracing) في السقالة للتأكد من أن:'],
+    [['The scaffold is stable and cannot sway or collapse','स्कैफ़ोल्ड स्थिर रहे, हिले या गिरे नहीं','السقالة ثابتة ولا تتمايل أو تنهار'],['It looks good for the client','क्लाइंट को अच्छा लगे','تبدو جيدة للعميل'],['Workers can sit on it','मज़दूर उस पर बैठ सकें','يستطيع العمال الجلوس عليه'],['Tools can hang on it','औज़ार टाँगे जा सकें','يمكن تعليق الأدوات عليه']]],
+  ['i7','insp','',['Mobile tower wheels must be:','मोबाइल टावर के पहिए:','عجلات البرج المتنقل يجب أن:'],
+    [['Locked when anyone is on it — and nobody on it while moving','जब कोई ऊपर हो तब लॉक रहें — और खिसकाते समय कोई ऊपर न हो','تُقفل عندما يكون أحد عليه — ولا أحد عليه أثناء التحريك'],['Unlocked so it can move easily','अनलॉक रहें ताकि आसानी से चले','غير مقفلة ليتحرك بسهولة'],['Removed','हटा दिए जाएँ','تُزال'],['Moved with people on top','ऊपर लोगों के साथ खिसकाए जाएँ','يُحرَّك والناس فوقه']]],
+  ['i8','insp','',['Before the crew starts scaffolding work, the supervisor must make sure:','टीम के स्कैफ़ोल्डिंग काम शुरू करने से पहले सुपरवाइज़र को सुनिश्चित करना है कि:','قبل أن يبدأ الفريق أعمال السقالات، يجب على المشرف التأكد من أن:'],
+    [["The permit, TBT and Musta'ed are done and the crew is competent",'परमिट, टीबीटी और मुस्तअद हो चुके हैं और टीम सक्षम है','التصريح واجتماع السلامة و«مستعد» مكتملة والفريق كفء'],['The crew works fast','टीम तेज़ काम करे','الفريق يعمل بسرعة'],['Only that the materials arrived','सिर्फ़ सामान पहुँच गया हो','وصول المواد فقط'],['The client has left','क्लाइंट चला गया हो','غادر العميل']]],
+  // driver / operator
+  ['d1','drv','',['Seat belts must be worn by:','सीट बेल्ट किसे पहननी है?','من يجب أن يربط حزام الأمان؟'],
+    [['The driver and all passengers, at all times','ड्राइवर और सभी यात्री, हर समय','السائق وجميع الركاب في جميع الأوقات'],['Only the driver','सिर्फ़ ड्राइवर','السائق فقط'],['Only on the highway','सिर्फ़ हाईवे पर','على الطريق السريع فقط'],['Only the front passenger','सिर्फ़ आगे बैठा यात्री','الراكب الأمامي فقط']]],
+  ['d2','drv','',['Using a mobile phone while driving is:','गाड़ी चलाते समय मोबाइल फ़ोन इस्तेमाल करना:','استخدام الهاتف المحمول أثناء القيادة:'],
+    [['Not allowed — stop in a safe place first','मना है — पहले सुरक्षित जगह रुकें','غير مسموح — توقف في مكان آمن أولاً'],['Allowed for short calls','छोटी कॉल के लिए ठीक है','مسموح للمكالمات القصيرة'],['Allowed on graded roads','कच्ची सड़क पर ठीक है','مسموح على الطرق الترابية'],['Allowed for messages only','सिर्फ़ मैसेज के लिए ठीक है','مسموح للرسائل فقط']]],
+  ['d3','drv','',['Before every trip you must:','हर यात्रा से पहले आपको:','قبل كل رحلة يجب عليك:'],
+    [['Do a pre-trip check — tyres, lights, brakes, fluids, emergency kit','यात्रा-पूर्व जाँच करें — टायर, लाइट, ब्रेक, तेल-पानी, इमरजेंसी किट','إجراء فحص ما قبل الرحلة — الإطارات والأضواء والفرامل والسوائل وحقيبة الطوارئ'],['Only fill fuel','सिर्फ़ ईंधन भरें','تعبئة الوقود فقط'],['Wash the vehicle','गाड़ी धोएँ','غسل المركبة'],['Nothing — the mechanic checks it','कुछ नहीं — मैकेनिक जाँचता है','لا شيء — الميكانيكي يفحصها']]],
+  ['d4','drv','',['If you feel sleepy while driving you must:','गाड़ी चलाते समय नींद आए तो आपको:','إذا شعرت بالنعاس أثناء القيادة يجب عليك:'],
+    [['Stop in a safe place and rest','सुरक्षित जगह रुककर आराम करें','التوقف في مكان آمن والاستراحة'],['Drive faster to arrive sooner','जल्दी पहुँचने के लिए तेज़ चलाएँ','القيادة أسرع للوصول مبكراً'],['Open the window and continue','खिड़की खोलकर चलते रहें','فتح النافذة والاستمرار'],['Play loud music','तेज़ गाना बजाएँ','تشغيل موسيقى عالية']]],
+  ['d5','drv','',['When reversing on site you must:','साइट पर गाड़ी पीछे करते समय आपको:','عند الرجوع للخلف في الموقع يجب عليك:'],
+    [['Use a banksman and reverse only when the area is clear','बैंकमैन की मदद लें और रास्ता साफ़ होने पर ही पीछे करें','الاستعانة بمُوجّه والرجوع فقط عندما تكون المنطقة خالية'],['Reverse fast','तेज़ी से पीछे करें','الرجوع بسرعة'],['Use only the horn','सिर्फ़ हॉर्न बजाएँ','استخدام البوق فقط'],['Never check the mirrors','शीशे कभी न देखें','عدم النظر في المرايا']]],
+  ['d6','drv','',['Scaffold tubes carried on a vehicle must be:','गाड़ी पर ले जाए जा रहे स्कैफ़ोल्ड ट्यूब:','أنابيب السقالات المحمولة على المركبة يجب أن:'],
+    [['Tied down with straps, with a red flag on any overhang','पट्टों से बँधे हों, और बाहर निकले हिस्से पर लाल झंडा हो','تُربط بأحزمة، مع علم أحمر على أي جزء بارز'],['Loose so they are quick to unload','खुले हों ताकि जल्दी उतरें','غير مربوطة لتفريغها بسرعة'],['Held by a passenger','यात्री पकड़कर रखे','يمسكها راكب'],['Stacked higher than the cab without ties','बिना बाँधे केबिन से ऊँचे लगे हों','مكدسة أعلى من الكابينة بدون ربط']]],
+  ['d7','drv','',['The IVMS (vehicle monitoring) in your vehicle:','आपकी गाड़ी में लगा IVMS (वाहन निगरानी):','نظام مراقبة المركبة (IVMS) في مركبتك:'],
+    [['Records speed and driving — never tamper with it','रफ़्तार और ड्राइविंग रिकॉर्ड करता है — कभी छेड़छाड़ न करें','يسجّل السرعة والقيادة — لا تعبث به أبداً'],['Can be switched off on long trips','लंबी यात्रा में बंद कर सकते हैं','يمكن إيقافه في الرحلات الطويلة'],['Is only a radio','सिर्फ़ एक रेडियो है','مجرد راديو'],['Is not important','ज़रूरी नहीं है','غير مهم']]],
+  ['d8','drv','',['After a road accident you must first:','सड़क दुर्घटना के बाद सबसे पहले आपको:','بعد حادث مروري يجب عليك أولاً:'],
+    [['Stop, make the area safe, help the injured, call emergency and report to HSE','रुकें, जगह सुरक्षित करें, घायल की मदद करें, इमरजेंसी कॉल करें और एचएसई को बताएँ','التوقف، وتأمين المكان، ومساعدة المصاب، والاتصال بالطوارئ وإبلاغ السلامة'],['Drive away quickly','जल्दी से चले जाएँ','المغادرة بسرعة'],['Move the vehicles before anyone sees','किसी के देखने से पहले गाड़ियाँ हटा दें','تحريك المركبات قبل أن يراها أحد'],['Call only your friend','सिर्फ़ अपने दोस्त को फ़ोन करें','الاتصال بصديقك فقط']]],
+  ['d9','drv','',['Safe following distance behind another vehicle is at least:','आगे वाली गाड़ी से सुरक्षित दूरी कम से कम:','مسافة الأمان خلف مركبة أخرى على الأقل:'],
+    [['3 seconds — more at night, in dust or rain','3 सेकंड — रात, धूल या बारिश में और ज़्यादा','3 ثوانٍ — وأكثر في الليل أو الغبار أو المطر'],['Half a second','आधा सेकंड','نصف ثانية'],['As close as possible','जितना हो सके उतना पास','أقرب ما يمكن'],['1 metre','1 मीटर','متر واحد']]],
+  ['d10','drv','',['On graded (desert) roads you must:','कच्ची (रेगिस्तानी) सड़कों पर आपको:','على الطرق الترابية (الصحراوية) يجب عليك:'],
+    [["Keep to the client's speed limits and slow down for dust and bends",'क्लाइंट की गति सीमा का पालन करें और धूल व मोड़ पर धीमे चलें','الالتزام بحدود سرعة العميل والتخفيف عند الغبار والمنعطفات'],['Drive as fast as the vehicle can','गाड़ी जितनी तेज़ चल सके चलाएँ','القيادة بأقصى سرعة للمركبة'],['Overtake in dust clouds','धूल के गुबार में ओवरटेक करें','التجاوز داخل سحب الغبار'],['Switch off the headlights','हेडलाइट बंद कर दें','إطفاء الأضواء الأمامية']]],
+  // general worker (civil, rental crew)
+  ['g1','gen','',['The PPE you must wear on site is:','साइट पर आपको कौन-सा पीपीई पहनना है?','معدات الوقاية التي يجب ارتداؤها في الموقع هي:'],
+    [['What the job needs — at least helmet, safety shoes, coverall, glasses and gloves','जो काम के लिए ज़रूरी हो — कम से कम हेलमेट, सेफ़्टी शूज़, कवरऑल, चश्मा और दस्ताने','ما يتطلبه العمل — على الأقل الخوذة وحذاء السلامة والأفرول والنظارة والقفازات'],['Only a helmet','सिर्फ़ हेलमेट','الخوذة فقط'],['Nothing if it is hot','गर्मी में कुछ नहीं','لا شيء إذا كان الجو حاراً'],['Sandals and a cap','चप्पल और टोपी','صندل وقبعة']]],
+  ['g2','gen','',['Before digging or excavation you must check:','खुदाई से पहले आपको जाँचना है:','قبل الحفر يجب أن تتحقق من:'],
+    [['A valid permit, and that underground cables / pipes are found and marked','वैध परमिट है और ज़मीन के नीचे केबल / पाइप ढूँढकर निशान लगाए गए हैं','وجود تصريح ساري وأن الكابلات / الأنابيب تحت الأرض تم تحديدها ووضع علامات عليها'],['Only the weather','सिर्फ़ मौसम','الطقس فقط'],['Nothing — just dig','कुछ नहीं — बस खोदें','لا شيء — احفر فقط'],['That the client is not watching','कि क्लाइंट देख नहीं रहा','أن العميل لا يراقب']]],
+  ['g3','gen','',['Before using a power tool you check:','पावर टूल इस्तेमाल करने से पहले आप जाँचते हैं:','قبل استخدام أداة كهربائية تتحقق من:'],
+    [['The tool, cable and guard are in good condition and it has a valid inspection tag','टूल, केबल और गार्ड ठीक हैं और जाँच का वैध टैग लगा है','أن الأداة والكابل والواقي بحالة جيدة وعليها بطاقة فحص سارية'],['Only that it switches on','सिर्फ़ यह कि चालू होता है','أنها تعمل فقط'],['Its colour','उसका रंग','لونها'],['Nothing','कुछ नहीं','لا شيء']]],
+  ['g4','gen','',['In hot weather, to avoid heat stress you must:','गर्मी में हीट स्ट्रेस से बचने के लिए आपको:','في الطقس الحار، لتجنب الإجهاد الحراري يجب عليك:'],
+    [['Drink water often, rest in the shade and report dizziness','बार-बार पानी पिएँ, छाँव में आराम करें और चक्कर आए तो बताएँ','شرب الماء باستمرار والراحة في الظل والإبلاغ عن الدوخة'],['Drink water only at lunch','सिर्फ़ खाने के समय पानी पिएँ','شرب الماء وقت الغداء فقط'],['Remove your PPE','पीपीई उतार दें','خلع معدات الوقاية'],['Work faster to finish early','जल्दी खत्म करने के लिए तेज़ काम करें','العمل أسرع لتنتهي مبكراً']]],
+  ['g5','gen','',['Good housekeeping on site means:','साइट पर अच्छी साफ़-सफ़ाई का मतलब है:','الترتيب الجيد في الموقع يعني:'],
+    [['Keep walkways clear and put waste and materials in their place','रास्ते साफ़ रखें और कचरा व सामान अपनी जगह रखें','إبقاء الممرات خالية ووضع النفايات والمواد في أماكنها'],['Clean only at the end of the project','सिर्फ़ प्रोजेक्ट के अंत में सफ़ाई करें','التنظيف في نهاية المشروع فقط'],['Leave waste for the client','कचरा क्लाइंट के लिए छोड़ दें','ترك النفايات للعميل'],['Burn the waste on site','कचरा साइट पर जला दें','حرق النفايات في الموقع']]],
+];
+const COMP_MODS={core:"Client core — Musta'ed, Life Saving Rules, H2S, zone management, stop work", scaff:'Scaffolder', helper:'Scaffolding helper', insp:'Inspection & supervision', drv:'Driver / operator', gen:'General worker'};
+const COMP_CORE_TOPICS={mus:["Musta'ed",2], lsr:['Life Saving Rules',3], h2s:['H2S awareness',3], zone:['Zone management',1], stop:['Stop work & reporting',1]};
+// Practical checklists — ★ critical: a "Not OK" on a critical point means Not yet competent
+const COMP_PRAC={
+  helper:[['hp1','Wears the correct PPE (helmet with chin strap, gloves, glasses, safety shoes)'],['hp2','Stays out of the area below the work and respects barricades',1],['hp3','Checks tubes, fittings and boards before passing them; sets damaged ones aside'],
+    ['hp4','Passes materials safely — rope / gin wheel or hand to hand, never throws',1],['hp5','Correct manual handling — bends the knees, gets help with long tubes'],['hp6','Keeps materials stacked neatly and walkways clear'],
+    ['hp7','Does not climb or use red-tagged / untagged scaffolds',1],['hp8',"Follows the scaffolder's instructions and communicates clearly"]],
+  scaff:[['sp1',"Attends the TBT; knows the permit and Musta'ed for the job"],['sp2','Checks components before use and rejects damaged ones',1],['sp3','Firm base — sole boards and base plates correctly placed',1],
+    ['sp4','Standards plumb, ledgers level, correct lift heights'],['sp5','Bracing and ties fitted correctly and in time',1],['sp6','Platform fully boarded and secured — no gaps or traps',1],
+    ['sp7','Guardrails, mid-rails and toe boards at every working level',1],['sp8','Safe access — ladder secured and about 1 m above the landing'],['sp9','Harness worn correctly — 100% tie-off with a double lanyard',1],
+    ['sp10','Tools tethered; nothing dropped'],['sp11','Area below barricaded with signs',1],['sp12','Couplers of the right type and tightened correctly'],
+    ['sp13','Housekeeping — off-cuts and spare fittings removed'],['sp14','Hands over for inspection — never leaves an untagged scaffold in use']],
+  adv:[['ap1','Builds complex structures (cantilever, bridging, loading bay) to the drawing'],['ap2','Reads the scaffold drawing / design and follows it'],['ap3','Knows the load class and never overloads a platform',1]],
+  sup:[['fp1',"Plans the job and the crew; checks permit, TBT and Musta'ed before the start",1],['fp2','Supervises the crew and corrects unsafe acts on the spot',1],['fp3','Hands over to the inspector and keeps the scaffold register up to date']],
+  insp:[['ip1','Checks the base — ground, sole boards and base plates',1],['ip2','Checks standards, ledgers, transoms and couplers (type and tightness)',1],['ip3','Checks bracing and ties against the design',1],
+    ['ip4','Checks platforms — full boarding, no gaps, boards secured',1],['ip5','Checks guardrails, mid-rails and toe boards on every working level',1],['ip6','Checks access — ladders secured, gates, openings'],
+    ['ip7','Checks the load class / safe working load is shown and suitable'],['ip8','Tags correctly (green / red) with date and signature',1],['ip9','Records the inspection in the register'],['ip10','Explains the limits to the users at handover']],
+  driver:[['dp1','Valid licence for this vehicle type, carried with him',1],['dp2','Pre-trip check done — tyres, lights, brakes, fluids, mirrors, emergency kit',1],['dp3','Seat belt worn by the driver and every passenger',1],
+    ['dp4','No phone use while driving',1],['dp5','Keeps to the speed limits (no IVMS violations)'],['dp6','Keeps a safe following distance (3 seconds or more)'],
+    ['dp7','Reversing — uses a banksman / checks the area is clear',1],['dp8','Parks safely — handbrake, wheel chocks, nose-out where required'],['dp9','Load secured with straps; red flag on overhang; not overloaded',1],
+    ['dp10','Drives to the conditions on graded roads (dust, bends, soft sand)'],['dp11','Takes rest breaks — no signs of fatigue'],['dp12','Knows what to do after a breakdown or an accident']],
+  general:[['gp1','Wears the correct PPE for the job'],['gp2','Attends the TBT and knows the hazards of the job'],['gp3','Works with a valid permit when one is needed',1],
+    ['gp4','Stays out of the line of fire and respects barricades',1],['gp5','Checks tools and equipment before use and uses them correctly'],['gp6','Correct manual handling'],['gp7','Keeps the work area tidy'],['gp8','Knows the muster point and the emergency number']],
+};
+// Verbal questions — asked face to face, the assessor marks the answer OK / Not OK
+const COMP_SCEN={
+  core:[['q1','The H2S alarm sounds while you are working — what do you do?','Stop work, escape set if trained, go upwind / crosswind to the muster point, report.'],
+        ['q2','You see a colleague working at height without being tied off — what do you do?','Stop him (intervene), make it safe, report it.']],
+  scaff:[['q3','The scaffold has a red tag but you need to reach the top quickly — what do you do?','Do not use it, report it, wait for a competent scaffolder and the inspection.'],
+         ['q4','Strong wind starts while you are erecting — what do you do?','Stop, secure the scaffold and the materials, come down safely.']],
+  helper:[['q5','A tube you are passing is bent — what do you do?','Do not use it, put it aside (quarantine), tell the scaffolder.']],
+  insp:[['q6','You find a missing tie on a green-tagged scaffold — what do you do?','Remove the green tag / put a red tag, stop use, get it fixed, re-inspect.']],
+  drv:[['q7','Your supervisor asks you to drive faster to reach the site on time — what do you do?','Refuse — keep to the speed limits; arrive late but safe.'],
+       ['q8','You start to feel sleepy on a long trip — what do you do?','Stop in a safe place and rest; inform the supervisor.']],
+  gen:[['q9','You are asked to start work but the permit is not signed — what do you do?','Do not start; wait for the permit to be issued.']],
+};
+// roles: questions per module (n), practical checklists, verbal question groups
+const COMP_ROLES={
+  general:{name:'General worker', q:{core:10, gen:5}, p:['general'], s:['core','gen']},
+  helper:{name:'Scaffolding helper', q:{core:10, helper:6}, p:['helper'], s:['core','helper']},
+  scaffolder:{name:'Scaffolder', q:{core:10, scaff:8}, p:['scaff'], s:['core','scaff']},
+  advanced:{name:'Advanced scaffolder', q:{core:10, scaff:6, insp:4}, p:['scaff','adv'], s:['core','scaff']},
+  foreman:{name:'Scaffolding foreman / supervisor', q:{core:10, scaff:5, insp:5}, p:['scaff','adv','sup'], s:['core','scaff','insp']},
+  inspector:{name:'Scaffold inspector', q:{core:10, insp:8}, p:['insp'], s:['core','insp']},
+  driver:{name:'Driver / operator', q:{core:10, drv:8}, p:['driver'], s:['core','drv']},
+};
+const COMP_RESULTS=['Competent','Competent under supervision','Not yet competent'];
+
+/* ---- Batch 84: competency assessment — data, coverage, page, editor ---- */
+const COMP_PURPLE='#8b5cf6';
+const COMP_ST={ok:['Competent','ok'], sup:['Under supervision','warn'], nyc:['Not yet competent','danger'], expired:['Expired','danger'], due:['Due — re-assess soon','warn'], none:['Not assessed','danger']};
+const COMP_TEST_MIN=30;   // minutes a phone test stays open
+let compList=[], compTests=[], unsubComp=null, unsubCompTests=null, compLoaded=false, compProcessing=new Set(), compIdx=new Map();
+let compUi={div:'all', project:'all', status:'all', q:'', ed:null, panel:'', bankMod:'core', qf:null, rolesFor:'', sigOpen:false, blankRole:'scaffolder', t:null};
+const compSet=()=>settingsDocs.compSettings||{};
+const compMonths=()=>Math.max(1, Math.min(60, Number(compSet().months)||24));
+const compPass=()=>Math.max(1, Math.min(100, Number(compSet().pass)||80));
+const compL=(a,i)=>Array.isArray(a)?(a[i]||a[0]||''):(a&&typeof a==='object'?(a[['e','h','a'][i]]||a.e||''):String(a||''));
+const compRoleName=r=>(COMP_ROLES[r]||{}).name||r||'—';
+const compKey=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,60);
+function compShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function compAddMonths(d, n){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||''); if(!m) return ''; const x=new Date(+m[1], +m[2]-1+n, 1), last=new Date(x.getFullYear(), x.getMonth()+1, 0).getDate(); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(Math.min(+m[3], last)).padStart(2,'0')}`; }
+
+/* question bank: built-in + custom (settings/compBank: {custom:[{id,m,tp,q,qh,qa,o:[..],a}], off:[ids]}) */
+function compBankAll(){
+  const cfg=settingsDocs.compBank||{};
+  const base=COMP_QB.map(([id,m,tp,q,o])=>({id, m, tp, q, o, a:0}));
+  const cus=(cfg.custom||[]).filter(x=>x && x.id && COMP_MODS[x.m] && Array.isArray(x.o) && x.o.length>=2).map(x=>({id:x.id, m:x.m, tp:x.tp||'', q:[x.q||'', x.qh||'', x.qa||''], o:x.o.map(s=>[String(s||'')]), a:Math.min(x.o.length-1, Math.max(0, Number(x.a)||0)), custom:true}));
+  return [...base, ...cus];
+}
+function compBankOn(){ const off=new Set((settingsDocs.compBank||{}).off||[]); return compBankAll().filter(q=>!off.has(q.id)); }
+function compPick(role){
+  const R=COMP_ROLES[role]||COMP_ROLES.general, all=compBankOn(), out=[];
+  for(const [m,n] of Object.entries(R.q)){
+    const pool=all.filter(q=>q.m===m), got=[];
+    if(m==='core'){ for(const [tp,[,k]] of Object.entries(COMP_CORE_TOPICS)) got.push(...compShuffle(pool.filter(q=>q.tp===tp)).slice(0,k)); }
+    const have=new Set(got.map(q=>q.id)); got.push(...compShuffle(pool.filter(q=>!have.has(q.id))).slice(0, Math.max(0, n-got.length)));
+    out.push(...got.slice(0,n));
+  }
+  return out.map(q=>{ const ord=compShuffle(q.o.map((_,i)=>i)); return {id:q.id, m:q.m, q:compL(q.q,0), o:ord.map(i=>compL(q.o[i],0)), a:ord.indexOf(q.a), ord}; });
+}
+function compScore(qs, ans){ const total=(qs||[]).length; let score=0; (qs||[]).forEach((q,i)=>{ if(Number.isInteger(ans[i]) && ans[i]===q.a) score++; }); return {score, total, pct:total?Math.round(score*100/total):0}; }
+
+/* who needs which assessment */
+function compRoleGuess(w){
+  const d=(String(w.designation||'')+' '+String(w.mainRole||'')).toLowerCase(), div=workerDivKey(w), sc=div==='Scaffolding' || /scaff/.test(d);
+  if(div==='Office staff' && !/driver|scaff|operator/.test(d)) return '';
+  if(/inspector/.test(d) && sc) return 'inspector';
+  if(/foreman|supervisor|charge ?hand|leading hand/.test(d)) return sc?'foreman':'general';
+  if(/advanced|adv\.|senior scaff/.test(d)) return 'advanced';
+  if(/driver|operator/.test(d)) return 'driver';
+  if(/helper|labou?r|assistant|trainee/.test(d)) return sc?'helper':'general';
+  if(sc) return 'scaffolder';
+  return 'general';
+}
+function compNeeds(w){ const r=((compSet().roles)||{})[w.id]; if(Array.isArray(r)) return r.filter(k=>COMP_ROLES[k]); const g=compRoleGuess(w); return g?[g]:[]; }
+function compState(wid, role){
+  const list=(compIdx.get(wid)||[]).filter(a=>a.role===role), open=list.find(a=>a.status==='open');
+  const a=list.filter(x=>x.status==='done').sort((x,y)=>String(y.date||'').localeCompare(String(x.date||'')) || String(y.doneAt||'').localeCompare(String(x.doneAt||'')))[0];
+  if(!a) return {st:'none', open};
+  const ex=statusFor(a.expiry), st=a.result==='Not yet competent' ? 'nyc' : ex==='expired' ? 'expired' : ex==='expiring' ? 'due' : (a.result==='Competent'?'ok':'sup');
+  return {st, a, open};
+}
+function compPairs(ws){ const out=[]; for(const w of ws){ if(w.deleted || (w.status||'active')!=='active') continue; for(const r of compNeeds(w)) out.push({w, role:r, ...compState(w.id, r)}); } return out; }
+function compCoverage(ws){
+  const c={workers:0, compW:0, need:0, ok:0, sup:0, nyc:0, none:0, expired:0, due:0};
+  for(const w of ws){ if(w.deleted || (w.status||'active')!=='active') continue; const roles=compNeeds(w); if(!roles.length) continue; c.workers++; let all=true;
+    for(const r of roles){ const s=compState(w.id, r), res=s.a&&s.a.result; c.need++;
+      if(s.st==='none'){ c.none++; all=false; } else if(s.st==='nyc'){ c.nyc++; all=false; } else if(s.st==='expired'){ c.expired++; all=false; }
+      else { if(s.st==='due') c.due++; if(res==='Competent') c.ok++; else { c.sup++; all=false; } } }
+    if(all) c.compW++; }
+  c.pct=c.workers?Math.round(c.compW*100/c.workers):null; return c;
+}
+function compBadge(st){ const x=COMP_ST[st]||[st,'muted']; return `<span class="badge ${x[1]}">${esc(x[0])}</span>`; }
+
+/* documents & training check — from the worker's records */
+function compTrainBy(w, re){
+  const recs=currentRecs(w.trainings||[], 'trainings').filter(r=>re.test(String(r.name||''))); if(!recs.length) return 'missing';
+  const st=recs.map(r=>statusFor(r.expiry)); return st.includes('valid')?'ok':st.includes('expiring')?'expiring':'expired';
+}
+function compPapers(w, role){
+  const out=[], add=(k,label,st,sub)=>out.push({k:compKey(k), label, st, sub:sub||''});
+  const ind=aggFor(w,'inductions'); add('ind','Induction', ind.status==='missing'?'missing':'ok');
+  const med=medicalStatus(w); add('med','Medical fitness', med.status==='none'?'missing':med.status==='valid'?'ok':med.status);
+  const cells=workerTrainingCompliance(w).cells;
+  for(const c of cells){ const s=c.st.status; add('t_'+c.name, c.name, s==='valid'?'ok':s, `Training matrix — ${trainingCatInfo(c.cat).short}`); }
+  const want=[['H2S Awareness',/h2s/i]];
+  if(['helper','scaffolder','advanced','foreman','inspector'].includes(role)) want.push(['Working at Height',/height|\bwah\b/i]);
+  if(['scaffolder','advanced','foreman'].includes(role)) want.push(['Scaffolding training / certificate',/scaffold/i]);
+  if(['inspector','foreman'].includes(role)) want.push(['Scaffold inspection training',/inspect/i]);
+  if(role==='driver') want.push(['Defensive Driving',/defensive/i]);
+  for(const [name, re] of want){ if(cells.some(c=>re.test(c.name))) continue; add('t_'+name, name, compTrainBy(w, re), 'Needed for this assessment'); }
+  if(role==='driver'){ const lic=currentRecs(w.licenses||[], 'licenses').filter(r=>/driv/i.test(String(r.type||''))); add('lic','Driving licence', !lic.length?'missing':(()=>{ const s=worstStatusOf(lic); return s==='valid'?'ok':s; })()); }
+  if(!workerRoles(w).length) out.push({k:'norole', label:'No role set in the Training matrix — check his certificates by hand', st:'info', sub:''});
+  return out;
+}
+const compPaperOk=(it, seen)=>it.st==='ok' || it.st==='expiring' || it.st==='info' || !!(seen||{})[it.k];
+const COMP_PAPER_LBL={ok:['Valid','ok'], expiring:['Expiring soon','warn'], expired:['Expired','danger'], missing:['Missing','danger'], unfit:['Unfit','danger'], info:['Check','muted']};
+
+/* practical + verbal lists for a role */
+function compPracList(role){ const R=COMP_ROLES[role]||COMP_ROLES.general; return R.p.flatMap(k=>(COMP_PRAC[k]||[]).map(([id,t,c])=>({id, t, c:!!c, g:k}))); }
+function compScenList(role){ const R=COMP_ROLES[role]||COMP_ROLES.general; return R.s.flatMap(k=>(COMP_SCEN[k]||[]).map(([id,q,x])=>({id, q, x}))); }
+const COMP_PRAC_GROUP={helper:'Scaffolding helper', scaff:'Scaffolder', adv:'Advanced scaffolding', sup:'Supervision', insp:'Inspection', driver:'Driving', general:'General work'};
+
+/* suggested result */
+function compSuggest(ed){
+  const w=workers.find(x=>x.id===ed.workerId), why=[], t=ed.test||{};
+  const papers=w?compPapers(w, ed.role):[], badP=papers.filter(p=>!compPaperOk(p, (ed.papers||{}).seen));
+  const pl=compPracList(ed.role), pr=ed.prac||{}, sl=compScenList(ed.role), sc=ed.scen||{};
+  const testDone=Array.isArray(t.ans) && (t.qs||[]).length>0, pracDone=pl.every(p=>pr[p.id]), scenDone=sl.every(s=>sc[s.id]);
+  if(!testDone) why.push('knowledge test not done yet'); if(!pracDone) why.push(`${pl.filter(p=>!pr[p.id]).length} practical point(s) not marked`); if(!scenDone) why.push(`${sl.filter(s=>!sc[s.id]).length} verbal question(s) not marked`);
+  if(!testDone || !pracDone || !scenDone) return {res:'', why, done:false};
+  const pct=compScore(t.qs, t.ans).pct, crit=pl.filter(p=>p.c && pr[p.id]==='no'), no=pl.filter(p=>!p.c && pr[p.id]==='no'), ni=pl.filter(p=>pr[p.id]==='ni'), sno=sl.filter(s=>sc[s.id]==='no');
+  if(pct<compPass()) why.push(`test ${pct}% — below the pass mark of ${compPass()}%`);
+  if(crit.length) why.push(`${crit.length} critical practical point(s) Not OK`);
+  if(pct<compPass() || crit.length) return {res:'Not yet competent', why, done:true};
+  if(badP.length) why.push(`documents: ${badP.map(p=>p.label).join(', ')}`);
+  if(no.length) why.push(`${no.length} practical point(s) Not OK`); if(ni.length) why.push(`${ni.length} practical point(s) need improvement`); if(sno.length) why.push(`${sno.length} verbal answer(s) not OK`);
+  if(badP.length || no.length || ni.length || sno.length) return {res:'Competent under supervision', why, done:true};
+  return {res:'Competent', why:[`test ${pct}%, all practical points OK, documents in date`], done:true};
+}
+function compAutoExpiry(ed){ const d=ed.date||localToday(); return ed.result==='Competent' ? compAddMonths(d, compMonths()) : ed.result==='Competent under supervision' ? compAddMonths(d, 3) : ed.result==='Not yet competent' ? d : ''; }
+
+/* ---- live data ---- */
+function startCompData(){
+  stopCompData(); if(!auth.currentUser) return;
+  try{
+    unsubComp=db.collection('compAssess').onSnapshot(snap=>{ compList=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); compLoaded=true; compChanged(); }, err=>{ console.warn('compAssess', err); compList=[]; compLoaded=false; compChanged(); });
+    if(canEdit()) unsubCompTests=db.collection('compTests').onSnapshot(snap=>{ compTests=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); compProcessTests(); }, err=>console.warn('compTests', err));
+  }catch(e){ console.warn('competency', e); }
+}
+function stopCompData(){ for(const u of [unsubComp, unsubCompTests]) if(u){ try{ u(); }catch(e){} } unsubComp=unsubCompTests=null; compList=[]; compTests=[]; compLoaded=false; compIdx=new Map(); }
+function compChanged(){
+  compIdx=new Map(); for(const a of compList){ if(!compIdx.has(a.workerId)) compIdx.set(a.workerId, []); compIdx.get(a.workerId).push(a); }
+  const ed=compUi.ed; if(ed && ed.id){ const s=compList.find(a=>a.id===ed.id); if(s && s.test && Array.isArray(s.test.ans) && !(ed.test && Array.isArray(ed.test.ans))){ ed.test={...s.test}; if(s.wSig && !ed.wSig) ed.wSig=s.wSig; compRenderTop(); } }
+  renderComp(); renderCcComp(); if(typeof activeSiteTab!=='undefined' && activeSiteTab==='comp' && currentSite()) renderSiteDrawerBody();
+  compProcessTests(); if(canEdit()) ppeLinkSyncSoon();
+}
+// answers sent from the project link → scored and saved on the assessment
+async function compProcessTests(){
+  if(!canEdit() || !compLoaded) return;
+  for(const t of compTests){ if(compProcessing.has(t.id)) continue; compProcessing.add(t.id);
+    const a=compList.find(x=>x.id===t.id);
+    try{
+      if(a && a.status==='open' && a.test && Array.isArray(a.test.qs) && !Array.isArray(a.test.ans)){
+        const ans=a.test.qs.map((q,i)=>{ const n=(t.answers||[])[i]; return Number.isInteger(n) && n>=0 && n<q.o.length ? n : -1; }), sc=compScore(a.test.qs, ans);
+        const test={...a.test, ans, score:sc.score, total:sc.total, pct:sc.pct, at:new Date().toISOString(), open:null, by:'phone'}, upd={test};
+        if(typeof t.sig==='string' && t.sig.startsWith('data:image/') && !a.wSig) upd.wSig=t.sig;
+        await db.collection('compAssess').doc(a.id).update(upd);
+        if(compUi.ed && compUi.ed.id===a.id){ compUi.ed.test=test; if(upd.wSig) compUi.ed.wSig=upd.wSig; compRenderTop(); }
+        const w=workers.find(x=>x.id===a.workerId); toast(`Competency test received — ${w?w.fullName:'worker'}: ${sc.score}/${sc.total} (${sc.pct}%)`);
+      }
+      await db.collection('compTests').doc(t.id).delete();
+    }catch(e){ console.warn('competency test', e); compProcessing.delete(t.id); }
+  }
+}
+// open tests for the workers of one project → the project link (questions in English / Hindi / Arabic — never the answers)
+function compLinkPayload(pid){
+  const out={}, now=Date.now(), bank=new Map(compBankAll().map(q=>[q.id,q]));
+  for(const a of compList){ const t=a.test||{}; if(a.status!=='open' || t.mode!=='phone' || !t.open || !(Number(t.open.until)>now) || Array.isArray(t.ans) || !Array.isArray(t.qs)) continue;
+    const w=workers.find(x=>x.id===a.workerId); if(!w || w.projectId!==pid) continue;
+    out[a.workerId]={aid:a.id, until:Number(t.open.until), role:compRoleName(a.role), qs:t.qs.map(q=>{ const b=bank.get(q.id), tri=x=>({e:compL(x,0), h:Array.isArray(x)?(x[1]||''):'', a:Array.isArray(x)?(x[2]||''):''});
+      return {q:b?tri(b.q):{e:q.q, h:'', a:''}, o:(q.ord||[]).map((oi,j)=>b&&b.o[oi]?tri(b.o[oi]):{e:q.o[j]||'', h:'', a:''})}; })}; }
+  return out;
+}
+async function compLinkSyncNow(){ clearTimeout(ppeLinkTimer); for(let i=0;i<6 && ppeLinkBusy;i++) await new Promise(r=>setTimeout(r, 500)); await ppeLinkSync(); }
+
+/* ---- save / complete / delete ---- */
+function compData(ed){ const o={...ed}; delete o.id; delete o._showQ; delete o._expEdited; delete o._armed; return JSON.parse(JSON.stringify(o)); }
+async function compSave(ed, quiet){
+  if(!canEdit()) return false; const u=auth.currentUser, now=new Date().toISOString();
+  const srv=ed.id?compList.find(a=>a.id===ed.id):null;
+  if(srv && srv.test && Array.isArray(srv.test.ans) && !(ed.test && Array.isArray(ed.test.ans))){ ed.test={...srv.test}; if(srv.wSig && !ed.wSig) ed.wSig=srv.wSig; }
+  const data={...compData(ed), updatedAt:now, updatedBy:(u&&u.email)||''};
+  try{ if(ed.id) await db.collection('compAssess').doc(ed.id).set(data);
+    else { data.createdAt=now; data.createdBy=(u&&u.email)||''; const r=await db.collection('compAssess').add(data); ed.id=r.id; ed.createdAt=now; ed.createdBy=data.createdBy; }
+    if(!quiet) toast('Saved'); return true; }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); return false; }
+}
+function compRecNote(a){ const t=a.test||{}; return [`Burhan competency assessment (${compRoleName(a.role)})`, Array.isArray(t.ans)?`test ${t.score}/${t.total} (${t.pct}%)${t.by==='phone'?' on the project link':' on paper'}`:'', a.result==='Not yet competent'?`re-assess by ${isoToDmy(a.reassess||compAddMonths(a.date,1))}`:'', a.notes||''].filter(Boolean).join(' · ').slice(0,400); }
+async function compWriteRecord(a){
+  const w=workers.find(x=>x.id===a.workerId); if(!w) return;
+  const rid='ca_'+a.id, skill=compRoleName(a.role)+' — competency assessment';
+  const rec={id:rid, skill, result:a.result, assessor:(a.hse&&a.hse.name)||a.assessor||'', date:a.date, expiry:a.expiry||'', notes:compRecNote(a), assessId:a.id, createdAt:new Date().toISOString()};
+  // a newer assessment of the same kind replaces the older one, also when the new result is "Not yet competent"
+  const list=(w.competency||[]).filter(r=>r.id!==rid).map(r=>(String(r.id||'').startsWith('ca_') && r.skill===skill && r.expiry && rec.expiry && r.expiry>rec.expiry && String(r.date||'')<=String(rec.date||'')) ? {...r, expiry:rec.expiry, notes:String(r.notes||'')+' · replaced by the assessment of '+isoToDmy(rec.date)} : r);
+  list.push(rec);
+  await db.collection('workers').doc(w.id).update(stamp({competency:list}));
+}
+async function compComplete(){
+  const ed=compUi.ed; if(!ed || !canEdit()) return;
+  const w=workers.find(x=>x.id===ed.workerId); if(!w){ toast('Worker not found'); return; }
+  const sg=compSuggest(ed);
+  if(!sg.done){ toast('Not finished — '+sg.why.join('; ')); return; }
+  if(!ed.result){ toast('Choose the result'); return; }
+  if(!ed.expiry) ed.expiry=compAutoExpiry(ed);
+  if(!ed.wSig && !ed.wPaper){ toast('The worker signs in his box (or tick "signed on paper")'); return; }
+  const u=auth.currentUser, hs=hseSigOf(u&&u.email);
+  if(!hs || !hs.img){ toast('Save your signature first — it goes on the assessment PDF'); compUi.sigOpen=true; compRenderTop(); return; }
+  const papers=compPapers(w, ed.role), seen=(ed.papers||{}).seen||{};
+  Object.assign(ed, {status:'done', doneAt:new Date().toISOString(), suggested:sg.res, why:sg.why, papers:{seen, items:papers.map(p=>({...p, seen:!!seen[p.k]}))},
+    hse:{name:hs.name||'', role:hs.role||'', img:hs.img, email:(u&&u.email)||''}, assessor:ed.assessor||hs.name||'', wName:w.fullName||'', wDes:w.designation||'', projectName:projectName(ed.projectId)||''});
+  if(!(await compSave(ed, true))){ ed.status='open'; return; }
+  try{ await compWriteRecord(ed); }catch(e){ console.error(e); toast('Assessment saved, but the worker record could not be updated'); }
+  toast(`Completed — ${w.fullName}: ${ed.result}. Download the PDF below.`); compRenderTop(); renderComp();
+}
+async function compDelete(id){
+  const a=compList.find(x=>x.id===id)||(compUi.ed&&compUi.ed.id===id?compUi.ed:null); if(!canEdit()) return;
+  try{ if(id) await db.collection('compAssess').doc(id).delete();
+    const w=a&&workers.find(x=>x.id===a.workerId); if(w && (w.competency||[]).some(r=>r.id==='ca_'+id)) await db.collection('workers').doc(w.id).update(stamp({competency:(w.competency||[]).filter(r=>r.id!=='ca_'+id)}));
+    toast('Assessment deleted'); if(compUi.ed && compUi.ed.id===id) compUi.ed=null; compRenderTop(); if(canEdit()) ppeLinkSyncSoon(); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not delete'); }
+}
+
+/* ---- open an assessment ---- */
+function compStart(wid, role){
+  const w=workers.find(x=>x.id===wid); if(!w) return;
+  const s=compState(wid, role), u=auth.currentUser, hs=hseSigOf(u&&u.email)||{};
+  if(s.open){ compEdit(s.open.id); return; }
+  if(!canEdit()){ toast('View only'); return; }
+  compUi.ed={workerId:wid, role, projectId:w.projectId||'', date:localToday(), status:'open', test:{mode:ppeLinkOf(w.projectId)?'phone':'paper'}, papers:{seen:{}}, prac:{}, scen:{}, result:'', expiry:'', notes:'', pracNote:'', wSig:'', wPaper:false, assessor:hs.name||''};
+  compUi.panel=''; compUi.sigOpen=false; compGotoPage(); compRenderTop(); const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'});
+}
+function compEdit(id){ const a=compList.find(x=>x.id===id); if(!a) return; compUi.ed=JSON.parse(JSON.stringify(a)); compUi.panel=''; compUi.sigOpen=false; compGotoPage(); compRenderTop(); const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); }
+function compGotoPage(pid){
+  const sec=document.getElementById('compSection'); if(sec && sec.hidden){ const b=document.querySelector('.sidenav-btn[data-section="comp"]'); if(b) b.click(); }
+  if(pid!==undefined){ compUi.project=pid||'all'; const sel=document.getElementById('compProject'); if(sel) sel.value=compUi.project; renderComp(); }
+  if(typeof closeSiteDrawer==='function' && document.getElementById('siteDrawer') && !document.getElementById('siteDrawer').hidden) closeSiteDrawer();
+}
+
+/* ---- the page ---- */
+function compFilterWs(){
+  return activeWorkers().filter(w=>(w.status||'active')==='active' && (compUi.div==='all' || workerDivKey(w)===compUi.div) && (compUi.project==='all' || (compUi.project==='none' ? !w.projectId : w.projectId===compUi.project)));
+}
+function compRowHtml(p, noProject){
+  const w=p.w, a=p.a, site=w.projectId?activeSites().find(s=>s.id===w.projectId):null, t=(a&&a.test)||{}, ro=!canEdit();
+  return `<tr data-comp-row="${esc(w.id+'|'+p.role)}">
+    <td><div class="wname">${esc(w.fullName||'—')}</div><div class="wsub">${esc(w.designation||'—')} · ${esc(divLabel(workerDivKey(w)||'')||'—')}</div></td>
+    ${noProject?'':`<td>${esc(site?site.siteName:'—')}</td>`}
+    <td><span class="comp-role">${esc(compRoleName(p.role))}</span>${ro?'':` <button type="button" class="att-link" data-comp-roles="${esc(w.id)}" title="Change the assessments this worker needs">✎</button>`}</td>
+    <td>${compBadge(p.st)}${p.open?` <span class="badge info">In progress</span>`:''}</td>
+    <td>${a?`${esc(isoToDmy(a.date||''))} · ${esc(a.result||'')}${Array.isArray(t.ans)?` · test ${t.pct}%`:''}`:'<span class="wsub">—</span>'}</td>
+    <td>${a&&a.expiry?esc(isoToDmy(a.expiry)):'—'}</td>
+    <td class="comp-acts">${ro?'':`<button type="button" class="btn btn-sm ${p.open||p.st==='none'||p.st==='expired'||p.st==='nyc'?'btn-primary':''}" data-comp-new="${esc(w.id+'|'+p.role)}">${p.open?'Continue':p.st==='none'?'Assess':'Re-assess'}</button>`}${a?` <button type="button" class="btn btn-sm" data-comp-pdf="${esc(a.id)}">${ic('download')} PDF</button>`:''}</td></tr>
+    ${compUi.rolesFor===w.id && !ro?`<tr class="comp-roles-row"><td colspan="${noProject?6:7}">${compRolesEditHtml(w)}</td></tr>`:''}`;
+}
+function compRolesEditHtml(w){
+  const cur=new Set(compNeeds(w));
+  return `<div class="comp-roles-ed"><strong>Assessments for ${esc(w.fullName||'')}</strong> <span class="wsub">(guessed from his designation: ${esc(compRoleName(compRoleGuess(w))||'none')}) — tick every job he does, e.g. Driver + Scaffolder</span>
+    <div class="comp-roles-grid">${Object.entries(COMP_ROLES).map(([k,r])=>`<label class="chk"><input type="checkbox" data-comp-rolechk="${esc(k)}" ${cur.has(k)?'checked':''}> ${esc(r.name)}</label>`).join('')}</div>
+    <div class="form-actions" style="margin-top:6px;"><button type="button" class="btn btn-sm" data-comp-roles="">Cancel</button><button type="button" class="btn btn-sm" data-comp-rolesave="${esc(w.id)}" data-reset="1">Back to the guess</button><button type="button" class="btn btn-sm btn-primary" data-comp-rolesave="${esc(w.id)}">Save</button></div></div>`;
+}
+function compTilesHtml(c){
+  const t=[['Competent workers', c.compW, `${c.pct===null?'—':c.pct+'%'} of ${c.workers} who need an assessment`, 'ok', '--cat-4'],
+    ['Not assessed', c.none, 'assessments still to do', c.none?'danger':'', '--cat-9'],
+    ['Under supervision', c.sup, 'competent with a supervisor only', c.sup?'warn':'', '--cat-2'],
+    ['Not yet competent / expired', c.nyc+c.expired, `${c.nyc} not yet competent · ${c.expired} expired`, (c.nyc+c.expired)?'danger':'', '--cat-7'],
+    ['Due within 30 days', c.due, 're-assess before the date', c.due?'warn':'', '--cat-3']];
+  return t.map(([l,n,s,cls,cat])=>`<div class="tile" style="--tile-accent:var(${cat})"><div class="tile-head"><div class="tile-icon">${ic('badge')}</div><div class="tile-label">${esc(l)}</div></div><div class="tile-num ${cls}">${n}</div><div class="tile-sub">${esc(s)}</div></div>`).join('');
+}
+function renderComp(){
+  const body=document.getElementById('compBody'), sec=document.getElementById('compSection'); if(!body || !auth.currentUser || !sec || sec.hidden) return;
+  const ps=document.getElementById('compProject'), sites=activeSites().slice().sort((a,b)=>String(a.siteName).localeCompare(String(b.siteName)));
+  if(ps){ const want=`<option value="all">All projects</option><option value="none">No project</option>`+sites.map(s=>`<option value="${esc(s.id)}">${esc(s.siteName)}</option>`).join(''); if(ps.dataset.sig!==want){ ps.innerHTML=want; ps.dataset.sig=want; } ps.value=compUi.project; if(ps.value!==compUi.project){ compUi.project='all'; ps.value='all'; } }
+  const ws=compFilterWs(), cov=compCoverage(ws), q=compUi.q.trim().toLowerCase();
+  document.getElementById('compTiles').innerHTML=compTilesHtml(cov);
+  let pairs=compPairs(ws).filter(p=>!q || String(p.w.fullName||'').toLowerCase().includes(q) || String(p.w.designation||'').toLowerCase().includes(q));
+  if(compUi.status!=='all') pairs=pairs.filter(p=>compUi.status==='open' ? !!p.open : compUi.status==='bad' ? ['none','nyc','expired'].includes(p.st) : p.st===compUi.status);
+  const order={none:0, expired:1, nyc:2, due:3, sup:4, ok:5}; pairs.sort((a,b)=>(order[a.st]-order[b.st]) || String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
+  const open=compList.filter(a=>a.status==='open' && a.test && a.test.mode==='phone' && a.test.open && Number(a.test.open.until)>Date.now() && !Array.isArray(a.test.ans));
+  body.innerHTML=`${open.length?`<div class="panel comp-live"><div class="subhead" style="margin-top:0;">📱 Tests open on the phones (${open.length})</div>${open.map(a=>{ const w=workers.find(x=>x.id===a.workerId); return `<div class="comp-live-row"><strong>${esc(w?w.fullName:'—')}</strong> · ${esc(compRoleName(a.role))} · ${a.test.qs.length} questions · open until <strong>${esc(new Date(Number(a.test.open.until)).toLocaleTimeString('en-GB',{hour:'2-digit', minute:'2-digit'}))}</strong> — waiting for his answers <button type="button" class="btn btn-sm" data-comp-open="${esc(a.id)}">Open</button></div>`; }).join('')}</div>`:''}
+    <div class="table-wrap"><table class="comp-table"><thead><tr><th>Worker</th><th>Project</th><th>Assessment</th><th>Status</th><th>Last assessment</th><th>Valid until</th><th></th></tr></thead>
+    <tbody>${pairs.length?pairs.map(p=>compRowHtml(p)).join(''):`<tr><td colspan="7" class="empty-state">${ws.length?'Nobody matches the filters.':'No active workers in this view.'}</td></tr>`}</tbody></table></div>
+    <p class="wsub" style="margin-top:8px;">The assessment each worker needs is guessed from his <strong>designation</strong> (helper, scaffolder, foreman, inspector, driver…). Office staff are not included. Click ✎ to change it — a driver who also works as a scaffolder can need both. Pass mark ${compPass()}% · valid ${compMonths()} months.</p>`;
+}
+
+/* ---- editor ---- */
+function compPadWire(cv, onEnd){
+  if(!cv) return null; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height);
+  const p={ink:false}; let on=false, last=null; const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
+  cv.addEventListener('pointerdown', e=>{ e.preventDefault(); on=true; last=pos(e); try{ cv.setPointerCapture(e.pointerId); }catch(x){} });
+  cv.addEventListener('pointermove', e=>{ if(!on) return; const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; p.ink=true; });
+  const end=()=>{ if(on && p.ink && onEnd){ const o=document.createElement('canvas'); o.width=300; o.height=100; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,300,100); c.drawImage(cv,0,0,300,100); onEnd(o.toDataURL('image/png')); } on=false; };
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t, end));
+  return p;
+}
+function compRenderTop(){
+  const top=document.getElementById('compTop'); if(!top) return;
+  if(compUi.panel==='bank'){ top.innerHTML=compBankHtml(); return; }
+  if(compUi.panel==='blank'){ top.innerHTML=compBlankHtml(); return; }
+  const ed=compUi.ed; if(!ed){ top.innerHTML=''; return; }
+  const w=workers.find(x=>x.id===ed.workerId); if(!w){ top.innerHTML=`<div class="panel"><p>Worker not found.</p><button type="button" class="btn btn-sm" data-comp-close="1">Close</button></div>`; return; }
+  const done=ed.status==='done', ro=done || !canEdit(), dis=ro?'disabled':'', t=ed.test||{}, link=ppeLinkOf(w.projectId), sg=compSuggest(ed), u=auth.currentUser, hs=hseSigOf(u&&u.email);
+  const papers=done&&ed.papers&&Array.isArray(ed.papers.items)?ed.papers.items:compPapers(w, ed.role), seen=(ed.papers||{}).seen||{};
+  const qs=t.qs||[], hasAns=Array.isArray(t.ans), sc=hasAns?compScore(qs, t.ans):null, isOpen=t.open && Number(t.open.until)>Date.now();
+  const pl=compPracList(ed.role), pr=ed.prac||{}, sl=compScenList(ed.role), scn=ed.scen||{};
+  let lastG='';
+  const pracRows=pl.map(p=>{ const h=p.g!==lastG?`<div class="comp-pg">${esc(COMP_PRAC_GROUP[p.g]||p.g)}</div>`:''; lastG=p.g;
+    return h+`<div class="comp-pi"><div class="comp-pi-t">${p.c?'<span class="comp-crit" title="Critical point">★</span> ':''}${esc(p.t)}</div><div class="comp-seg">${[['ok','OK'],['ni','Needs improvement'],['no','Not OK'],['na','N/A']].map(([v,l])=>`<button type="button" class="${pr[p.id]===v?'on '+v:''}" data-comp-pr="${esc(p.id+'|'+v)}" ${dis}>${l}</button>`).join('')}</div></div>`; }).join('');
+  top.innerHTML=`<div class="panel comp-ed${done?' done':''}"><div class="section-head"><h3>${ic('badge')} Competency assessment — ${esc(w.fullName||'')}</h3>
+      <span style="display:flex; gap:6px; flex-wrap:wrap;">${done?`<span class="badge ${ed.result==='Competent'?'ok':ed.result==='Not yet competent'?'danger':'warn'}">${esc(ed.result)}</span><button type="button" class="btn btn-sm btn-primary" data-comp-pdf="${esc(ed.id)}">${ic('download')} PDF</button>`:''}<button type="button" class="btn btn-sm" data-comp-close="1">Close</button></span></div>
+    <div class="form-grid comp-meta">
+      <label>Assessment<select data-ci="role" ${ed.id||ro?'disabled':''}>${Object.entries(COMP_ROLES).map(([k,r])=>`<option value="${esc(k)}" ${ed.role===k?'selected':''}>${esc(r.name)}</option>`).join('')}</select></label>
+      <label>Date<input type="date" data-ci="date" value="${esc(ed.date||'')}" ${dis}></label>
+      <label>Assessed by<input data-ci="assessor" value="${esc(ed.assessor||'')}" maxlength="60" ${dis}></label>
+      <div class="span-all wsub">${esc(w.designation||'—')} · ${esc(divLabel(workerDivKey(w)||'')||'—')} · project <strong>${esc(projectName(w.projectId)||'none')}</strong>${w.civilId?' · Civil ID …'+esc(String(w.civilId).replace(/\D/g,'').slice(-4)):''}</div></div>
+    ${compUi.sigOpen?hseSigBoxHtml():''}
+    <div class="comp-step"><div class="comp-step-h"><span class="n">1</span>Documents &amp; training <small>from his records in the tracker</small></div>
+      <div class="comp-papers">${papers.map(p=>{ const L=COMP_PAPER_LBL[p.st]||[p.st,'muted'], ok=compPaperOk(p, seen); return `<div class="comp-paper"><span>${esc(p.label)}${p.sub?` <span class="wsub">${esc(p.sub)}</span>`:''}</span><span class="badge ${L[1]}">${esc(L[0])}</span>${!['ok','expiring','info'].includes(p.st)?`<label class="chk comp-seen"><input type="checkbox" data-comp-seen="${esc(p.k)}" ${seen[p.k]||p.seen?'checked':''} ${dis}> seen a valid copy</label>`:`<span class="comp-okmark">${ok?'✓':''}</span>`}</div>`; }).join('')}</div>
+      ${papers.some(p=>!compPaperOk(p, seen))?`<p class="wsub" style="margin:6px 0 0;">Missing or expired documents → he cannot be <strong>Competent</strong> (only "under supervision") until they are added in his worker record.</p>`:''}</div>
+    <div class="comp-step"><div class="comp-step-h"><span class="n">2</span>Knowledge test <small>pass mark ${compPass()}% · ${qs.length||Object.values((COMP_ROLES[ed.role]||{}).q||{}).reduce((a,b)=>a+b,0)} questions</small></div>
+      ${hasAns?`<div class="comp-score ${sc.pct>=compPass()?'pass':'fail'}">Score <strong>${sc.score} / ${sc.total}</strong> = <strong>${sc.pct}%</strong> — ${sc.pct>=compPass()?'PASS':'FAIL'} <span class="wsub">(${t.by==='phone'?'answered on his phone':'paper test'}${t.at?' · '+esc(isoToDmy(String(t.at).slice(0,10))):''})</span> <button type="button" class="att-link" data-comp-showq="1">${ed._showQ?'Hide':'Show'} the answers</button></div>`:''}
+      ${!hasAns && !ro?`<div class="comp-seg comp-mode">${[['phone','📱 On his phone (project link)'],['paper','📄 On paper / read out to him']].map(([v,l])=>`<button type="button" class="${t.mode===v?'on ok':''}" data-comp-mode="${v}">${l}</button>`).join('')}</div>
+        ${t.mode==='phone'?(!link?`<p class="wsub">His project has no project link${w.projectId?'':' (he is not assigned to a project)'} — use the paper test, or create the link in Workforce → PPE.</p>`
+          : isOpen?`<div class="comp-open">Open on his phone until <strong>${esc(new Date(Number(t.open.until)).toLocaleTimeString('en-GB',{hour:'2-digit', minute:'2-digit'}))}</strong> — he opens the project link, logs in, taps <strong>🎓 Competency test</strong>. The score appears here by itself. <button type="button" class="btn btn-sm" data-comp-testclose="1">Close the test</button></div>`
+          : `<p class="wsub">${qs.length&&t.open?'The time is over and no answers came. ':''}The test opens for ${COMP_TEST_MIN} minutes on the <strong>${esc(projectName(w.projectId)||'')}</strong> link. He answers in English, Hindi or Arabic and signs. Stay with him while he answers.</p><button type="button" class="btn btn-sm btn-primary" data-comp-testopen="1">Open the test on his phone</button>`)
+        : `<p class="wsub">Print the question paper (English), he ticks his answers and signs it — then tap his answers below. The last page is the HSE answer key.</p><button type="button" class="btn btn-sm" data-comp-paperpdf="1">${ic('printer')} Print question paper</button>
+          ${qs.length?`<div class="comp-ansgrid">${qs.map((q,i)=>`<div class="comp-ansq"><span class="comp-qn">${i+1}</span>${q.o.map((o,j)=>`<button type="button" class="${(t.pans||[])[i]===j?'on':''}" data-comp-ans="${i}|${j}" title="${esc(o)}">${'ABCD'[j]}</button>`).join('')}</div>`).join('')}</div>
+            <div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm btn-primary" data-comp-paperdone="1">Mark the paper — ${(t.pans||[]).filter(x=>Number.isInteger(x)).length} of ${qs.length} answered</button></div>`:''}`}`:''}
+      ${hasAns && ed._showQ?`<ol class="comp-qlist">${qs.map((q,i)=>{ const a=t.ans[i], ok=a===q.a; return `<li class="${ok?'ok':'bad'}">${esc(q.q)}<div class="wsub">${ok?'✓':'✗'} ${a>=0?esc(q.o[a]):'no answer'}${ok?'':` — correct: <strong>${esc(q.o[q.a])}</strong>`}</div></li>`; }).join('')}</ol>`:''}
+      ${hasAns && !ro?`<button type="button" class="att-link" data-comp-retest="1" data-armed="0">Cancel this test and do a new one</button>`:''}</div>
+    <div class="comp-step"><div class="comp-step-h"><span class="n">3</span>Practical — watch him work <small>★ critical point: Not OK = Not yet competent</small></div>${pracRows}
+      <label class="comp-note">Notes from the observation<textarea data-ci="pracNote" maxlength="600" ${dis}>${esc(ed.pracNote||'')}</textarea></label></div>
+    <div class="comp-step"><div class="comp-step-h"><span class="n">4</span>Verbal questions <small>ask him — mark his answer</small></div>
+      ${sl.map(s=>`<div class="comp-pi"><div class="comp-pi-t">${esc(s.q)}<div class="wsub">Expected: ${esc(s.x)}</div></div><div class="comp-seg">${[['ok','OK'],['no','Not OK']].map(([v,l])=>`<button type="button" class="${scn[s.id]===v?'on '+v:''}" data-comp-sc="${esc(s.id+'|'+v)}" ${dis}>${l}</button>`).join('')}</div></div>`).join('')}</div>
+    <div class="comp-step"><div class="comp-step-h"><span class="n">5</span>Result &amp; signatures</div>
+      <div class="comp-suggest ${sg.res==='Competent'?'ok':sg.res==='Not yet competent'?'bad':sg.res?'mid':''}">${sg.done?`Suggested: <strong>${esc(sg.res)}</strong>`:'Not finished yet'}${sg.why.length?` <span class="wsub">— ${esc(sg.why.join('; '))}</span>`:''}</div>
+      <div class="form-grid"><label>Result<select data-ci="result" ${dis}><option value="">Choose…</option>${COMP_RESULTS.map(r=>`<option ${ed.result===r?'selected':''}>${esc(r)}</option>`).join('')}</select></label>
+        <label>${ed.result==='Not yet competent'?'Re-assess by':'Valid until'}<input type="date" data-ci="expiry" value="${esc(ed.result==='Not yet competent'?(ed.reassess||compAddMonths(ed.date||localToday(),1)):(ed.expiry||''))}" ${dis}></label>
+        <label class="span-all">Remarks / training needed<textarea data-ci="notes" maxlength="600" ${dis}>${esc(ed.notes||'')}</textarea></label></div>
+      <div class="comp-sigs"><div><div class="comp-sig-h">Worker — ${esc(w.fullName||'')}</div>
+          ${ed.wSig?`<img src="${esc(ed.wSig)}" alt="Worker signature" class="comp-sigimg">${ro?'':`<button type="button" class="att-link" data-comp-wsigclr="1">Sign again</button>`}`:ed.wPaper?'<p class="wsub">Signed on the paper copy.</p>':ro?'<p class="wsub">—</p>':`<div class="hse-sig-pad"><canvas id="compWSig" width="600" height="200"></canvas></div><div class="wsub">He signs here with his finger (or he signed at the end of his phone test).</div>`}
+          ${ro?'':`<label class="chk" style="margin-top:6px;"><input type="checkbox" data-ci="wPaper" ${ed.wPaper?'checked':''}> Signed on paper instead</label>`}</div>
+        <div><div class="comp-sig-h">Assessor (HSE)</div>${done&&ed.hse?`<img src="${esc(ed.hse.img)}" alt="" class="comp-sigimg"><div class="wsub">${esc(ed.hse.name||'')} · ${esc(ed.hse.role||'')}</div>`
+          : hs&&hs.img?`<img src="${esc(hs.img)}" alt="" class="comp-sigimg"><div class="wsub">${esc(hs.name||'')} · added when you complete</div>`:`<p class="wsub">Your saved signature is added when you complete.</p><button type="button" class="btn btn-sm btn-primary" data-hsesig-open="comp">Add my signature</button>`}</div></div></div>
+    ${ro?(done&&canEdit()?`<div class="form-actions"><button type="button" class="btn btn-sm btn-ghost" data-comp-del="${esc(ed.id)}" data-armed="0">Delete this assessment</button></div>`:'')
+      :`<div class="form-actions">${ed.id?`<button type="button" class="btn btn-sm btn-ghost" data-comp-del="${esc(ed.id)}" data-armed="0">Delete</button>`:''}<button type="button" class="btn btn-sm" data-comp-save="1">Save and finish later</button><button type="button" class="btn btn-sm btn-primary" data-comp-done="1">✓ Complete assessment</button></div>`}
+  </div>`;
+  if(compUi.sigOpen) hseSigWire();
+  if(!ed.wSig && !ro) compPadWire(document.getElementById('compWSig'), img=>{ ed.wSig=img; });
+}
+
+/* ---- question bank editor ---- */
+function compBankHtml(){
+  const cfg=settingsDocs.compBank||{}, off=new Set(cfg.off||[]), m=compUi.bankMod, list=compBankAll().filter(q=>q.m===m), f=compUi.qf, ro=!canEdit();
+  return `<div class="panel comp-bank"><div class="section-head"><h3>${ic('books')} Question bank</h3><span style="display:flex; gap:6px;">${ro?'':`<button type="button" class="btn btn-sm btn-primary" data-comp-qadd="1">+ Add a question</button>`}<button type="button" class="btn btn-sm" data-comp-panel="">Close</button></span></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Each test picks questions at random from the bank: client core ${Object.values(COMP_CORE_TOPICS).map(([l,n])=>`${n} ${l}`).join(', ')} + the job questions. Untick a question to stop using it. Add the client's own questions (e.g. their zone management rules) — Hindi and Arabic are optional; the phone shows English when they are blank.</p>
+    <div class="division-tabs">${Object.entries(COMP_MODS).map(([k,l])=>`<button type="button" class="division-tab ${k===m?'active':''}" data-comp-bankmod="${esc(k)}">${esc(k==='core'?'Client core':l)} (${compBankAll().filter(q=>q.m===k && !off.has(q.id)).length})</button>`).join('')}</div>
+    ${f?`<div class="comp-qform"><div class="form-grid"><label>Part<select data-cq="m">${Object.entries(COMP_MODS).map(([k,l])=>`<option value="${esc(k)}" ${f.m===k?'selected':''}>${esc(l)}</option>`).join('')}</select></label>
+        <label>Topic (client core)<select data-cq="tp"><option value="">—</option>${Object.entries(COMP_CORE_TOPICS).map(([k,[l]])=>`<option value="${esc(k)}" ${f.tp===k?'selected':''}>${esc(l)}</option>`).join('')}</select></label><span></span>
+        <label class="span-all">Question (English) *<input data-cq="q" value="${esc(f.q||'')}" maxlength="200"></label>
+        <label>Hindi (optional)<input data-cq="qh" value="${esc(f.qh||'')}" maxlength="200"></label><label>Arabic (optional)<input data-cq="qa" value="${esc(f.qa||'')}" maxlength="200" dir="rtl"></label><span></span>
+        ${[0,1,2,3].map(i=>`<label>${'ABCD'[i]}${i<2?' *':''}<input data-cq="o${i}" value="${esc((f.o||[])[i]||'')}" maxlength="140"></label>`).join('')}
+        <label>Correct answer<select data-cq="a">${[0,1,2,3].map(i=>`<option value="${i}" ${Number(f.a)===i?'selected':''}>${'ABCD'[i]}</option>`).join('')}</select></label></div>
+      <div class="form-actions"><button type="button" class="btn btn-sm" data-comp-qadd="">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-comp-qsave="1">Save question</button></div></div>`:''}
+    <ol class="comp-bank-list">${list.map(q=>`<li class="${off.has(q.id)?'off':''}"><label class="chk"><input type="checkbox" data-comp-qoff="${esc(q.id)}" ${off.has(q.id)?'':'checked'} ${ro?'disabled':''}></label><div><strong>${esc(compL(q.q,0))}</strong>${q.tp&&COMP_CORE_TOPICS[q.tp]?` <span class="badge muted">${esc(COMP_CORE_TOPICS[q.tp][0])}</span>`:''}${q.custom?' <span class="badge info">added</span>':''}
+      <div class="wsub">${q.o.map((o,i)=>i===q.a?`<strong class="comp-right">✓ ${esc(compL(o,0))}</strong>`:esc(compL(o,0))).join(' · ')}</div>${compL(q.q,1)?`<div class="wsub">${esc(compL(q.q,1))}</div>`:''}</div>${q.custom&&!ro?`<button type="button" class="icon-btn danger" data-comp-qdel="${esc(q.id)}" data-armed="0" aria-label="Delete">${ic('trash')}</button>`:''}</li>`).join('')}</ol></div>`;
+}
+async function compBankSave(patch){ const cfg=settingsDocs.compBank||{}; return saveSettings('compBank', {custom:cfg.custom||[], off:cfg.off||[], ...patch}, settingsStamp('compBank')); }
+
+/* ---- blank forms panel ---- */
+function compBlankHtml(){
+  return `<div class="panel"><div class="section-head"><h3>${ic('printer')} Blank forms — for paper assessments</h3><button type="button" class="btn btn-sm" data-comp-panel="">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">For a client who wants hard copies. The question paper has new random questions each time, with the HSE answer key on the last page. Fill the paper forms on site, then enter them in the tracker so the result is saved and counted.</p>
+    <div class="toolbar"><select id="compBlankRole">${Object.entries(COMP_ROLES).map(([k,r])=>`<option value="${esc(k)}" ${compUi.blankRole===k?'selected':''}>${esc(r.name)}</option>`).join('')}</select>
+      <button type="button" class="btn btn-sm" data-comp-blank="q">${ic('download')} Question paper + answer key</button><button type="button" class="btn btn-sm" data-comp-blank="p">${ic('download')} Practical checklist &amp; result form</button></div>
+    <div class="form-grid" style="max-width:520px;"><label>Pass mark (%)<input type="number" id="compPassIn" min="50" max="100" value="${compPass()}" ${canEdit()?'':'disabled'}></label><label>Valid for (months)<input type="number" id="compMonthsIn" min="1" max="60" value="${compMonths()}" ${canEdit()?'':'disabled'}></label>
+      ${canEdit()?`<div style="align-self:end;"><button type="button" class="btn btn-sm btn-primary" data-comp-setsave="1">Save</button></div>`:''}</div></div>`;
+}
+
+/* ---- project tab + dashboard ---- */
+function siteCompTabHtml(s){
+  const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===s.id), c=compCoverage(ws), pairs=compPairs(ws);
+  const order={none:0, expired:1, nyc:2, due:3, sup:4, ok:5}; pairs.sort((a,b)=>(order[a.st]-order[b.st]) || String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
+  return `<div class="section-head"><h3>Competency of the crew (${c.workers})</h3><span style="display:flex; gap:6px;"><button type="button" class="btn btn-sm" data-comp-regpdf="${esc(s.id)}">${ic('download')} Register PDF</button><button type="button" class="btn btn-sm btn-primary" data-comp-goto="${esc(s.id)}">Open in Competency page</button></span></div>
+    <p class="wsub" style="margin:-4px 0 10px;"><strong>${c.compW}</strong> of ${c.workers} competent${c.none?` · <strong class="t-danger">${c.none} not assessed</strong>`:''}${c.nyc?` · ${c.nyc} not yet competent`:''}${c.expired?` · ${c.expired} expired`:''}${c.sup?` · ${c.sup} under supervision`:''}${c.due?` · ${c.due} due within 30 days`:''}</p>
+    ${pairs.length?`<div class="table-wrap"><table class="comp-table"><thead><tr><th>Worker</th><th>Assessment</th><th>Status</th><th>Last assessment</th><th>Valid until</th><th></th></tr></thead><tbody>${pairs.map(p=>compRowHtml(p, true)).join('')}</tbody></table></div>`:'<p class="wsub">No crew assigned to this project (Workforce → worker → Project).</p>'}`;
+}
+function renderCcComp(){
+  const el=document.getElementById('ccComp'); if(!el || !auth.currentUser) return;
+  const division=typeof reportDivision!=='undefined'?reportDivision:'all', project=typeof reportProject!=='undefined'?reportProject:'all';
+  const scopeWs=activeWorkers().filter(w=>(w.status||'active')==='active' && workerInScope(w, division, project));
+  const g=(label, ws)=>{ const c=compCoverage(ws); return c.workers?{d:label, c}:null; };
+  let rows=division==='all' ? [g('Company-wide', scopeWs), ...DIVISIONS.map(d=>g(divLabel(d), scopeWs.filter(w=>workerDivKey(w)===d)))].filter(Boolean) : [g(divLabel(division), scopeWs)].filter(Boolean);
+  if(division==='all' && rows.length===2) rows=[rows[0]];
+  el.innerHTML=`<div class="cc-title">Competency assessment <small>workers assessed competent and in date — helpers, scaffolders, foremen, inspectors, drivers</small><button type="button" class="btn btn-sm" data-comp-goto="">${ic('badge')} Open</button></div>
+    <div class="cc-gauges cc-comp">${rows.length?rows.map(r=>{ const c=r.c; return `<div class="cc-g">${ccDial(c.pct,120,10,r.d,{color:COMP_PURPLE})}<div class="cc-gv" style="color:${COMP_PURPLE}">${c.pct}%</div><div class="cc-gl">${esc(r.d)}</div><div class="cc-gs">${c.compW} of ${c.workers} competent</div>
+      <div class="cc-comp-n">${c.none?`<span class="t-danger">${c.none} not assessed</span>`:''}${c.expired||c.nyc?`<span class="t-danger">${c.expired+c.nyc} expired / not yet</span>`:''}${c.due?`<span class="t-warn">${c.due} due ≤30 d</span>`:''}${c.sup?`<span>${c.sup} supervised</span>`:''}</div></div>`; }).join('')
+      : `<p class="wsub" style="grid-column:1/-1; margin:6px 4px;">No workers in this view need a competency assessment.</p>`}</div>`;
+  el.querySelectorAll('.cc-arc').forEach(a=>{ a.style.transition='none'; a.style.strokeDashoffset=a.dataset.to; });
+}
+
+/* ---- competency: PDFs and Excel ---- */
+function compGrid(doc, top){
+  const M=30, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, FS=8.6, LH=10;
+  const INK=[20,22,28], LBL=[246,247,249], RED=[179,18,26], SUB=[90,96,106];
+  const g={M, W, H, CW, INK, LBL, RED, SUB, y:top||32};
+  g.ensure=h=>{ if(g.y+h>H-28){ doc.addPage(); g.y=top||32; return true; } return false; };
+  const tick=(cx,cy,on,cross)=>{ doc.setDrawColor(110,116,126); doc.setLineWidth(0.6); doc.rect(cx-5,cy-5,10,10);
+    if(on){ doc.setDrawColor(...(cross?RED:INK)); doc.setLineWidth(1.6); if(cross){ doc.line(cx-3,cy-3,cx+3,cy+3); doc.line(cx+3,cy-3,cx-3,cy+3); } else { doc.line(cx-3.2,cy+0.2,cx-0.8,cy+2.8); doc.line(cx-0.8,cy+2.8,cx+3.8,cy-3.2); } } doc.setLineWidth(0.5); };
+  g.row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:(c.img||c.check!==undefined)?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
+    const h=Math.max(minH||15, ...pc.map(c=>c.l.length*LH+5+(c.sub?LH:0))); g.ensure(h); let xx=M;
+    for(const c of pc){ if(c.fill){ doc.setFillColor(...c.fill); doc.rect(xx,g.y,c.w,h,'F'); } doc.setDrawColor(150,156,166); doc.setLineWidth(0.5); doc.rect(xx,g.y,c.w,h);
+      if(c.img){ try{ let iw=c.w-10, ih=h-6; try{ const pr=doc.getImageProperties(c.img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(c.img, 'PNG', xx+(c.w-iw)/2, g.y+(h-ih)/2, iw, ih); }catch(e){} }
+      if(c.check!==undefined) tick(xx+c.w/2, g.y+h/2, !!c.check, c.cross);
+      doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); doc.setTextColor(...(c.color||INK));
+      c.l.forEach((ln,i)=>c.center?doc.text(ln, xx+c.w/2, g.y+10.5+i*LH, {align:'center'}):doc.text(ln, xx+5, g.y+10.5+i*LH));
+      if(c.sub){ doc.setFont('helvetica','normal'); doc.setFontSize(7.4); doc.setTextColor(...SUB); doc.text(String(c.sub), xx+5, g.y+10.5+c.l.length*LH); }
+      xx+=c.w; }
+    g.y+=h; doc.setTextColor(...INK); };
+  g.head=t=>{ g.ensure(40); g.y+=7; g.row([{t, w:CW, bold:true, fill:RED, color:[255,255,255], size:8.8}], 16); };
+  g.title=(t, right, rc)=>{ doc.setFillColor(...RED); doc.rect(M,g.y,CW,3,'F'); g.y+=3; g.row([{t, w:CW-190, bold:true, size:11.5},{t:right, w:190, bold:true, color:rc||RED}], 22); };
+  return g;
+}
+const compSafeName=s=>String(s||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,40);
+function compPdfReady(){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return false; } preloadPdfLogo(); return true; }
+function compPdfBody(doc, a, w){
+  const g=compGrid(doc, 32), CW=g.CW, K=96, hw=(CW-2*K)/2, LBL=g.LBL, t=a.test||{}, qs=t.qs||[], hasAns=Array.isArray(t.ans);
+  const resCol=a.result==='Competent'?[15,118,80]:a.result==='Not yet competent'?g.RED:[180,83,9];
+  g.title('COMPETENCY ASSESSMENT', a.status==='done'?String(a.result||'').toUpperCase():'DRAFT — NOT COMPLETED', a.status==='done'?resCol:g.RED);
+  const div=divLabel(workerDivKey(w)||'')||'—', nyc=a.result==='Not yet competent';
+  g.row([{t:'NAME', w:K, bold:true, fill:LBL},{t:w.fullName||a.wName, w:hw, bold:true},{t:'DESIGNATION', w:K, bold:true, fill:LBL},{t:w.designation||a.wDes||'—', w:hw}]);
+  g.row([{t:'PROJECT', w:K, bold:true, fill:LBL},{t:a.projectName||projectName(a.projectId)||'—', w:hw},{t:'DIVISION', w:K, bold:true, fill:LBL},{t:div, w:hw}]);
+  g.row([{t:'ASSESSMENT', w:K, bold:true, fill:LBL},{t:compRoleName(a.role), w:hw, bold:true},{t:'DATE', w:K, bold:true, fill:LBL},{t:isoToDmy(a.date||''), w:hw}]);
+  g.row([{t:'ASSESSED BY', w:K, bold:true, fill:LBL},{t:(a.hse&&a.hse.name)||a.assessor||'—', w:hw},{t:nyc?'RE-ASSESS BY':'VALID UNTIL', w:K, bold:true, fill:LBL},{t:nyc?isoToDmy(a.reassess||compAddMonths(a.date,1)):(a.expiry?isoToDmy(a.expiry):'—'), w:hw, bold:true}]);
+  // 1 documents
+  const papers=(a.papers&&Array.isArray(a.papers.items))?a.papers.items:compPapers(w, a.role), seen=(a.papers||{}).seen||{};
+  g.head('1. DOCUMENTS & TRAINING — FROM THE WORKER RECORDS');
+  g.row([{t:'Document / training', w:CW-200, bold:true, fill:LBL},{t:'Status in the tracker', w:120, bold:true, fill:LBL},{t:'Valid copy seen', w:80, bold:true, fill:LBL}]);
+  papers.forEach(p=>{ const L=COMP_PAPER_LBL[p.st]||[p.st]; g.row([{t:p.label, sub:p.sub, w:CW-200},{t:L[0], w:120, bold:true, color:['ok','expiring','info'].includes(p.st)?g.INK:g.RED},{check:['ok','expiring'].includes(p.st)||!!(p.seen||seen[p.k]), w:80}], p.sub?24:15); });
+  // 2 test
+  g.head(`2. KNOWLEDGE TEST — pass mark ${compPass()}%`);
+  if(hasAns){ const sc=compScore(qs, t.ans), pass=sc.pct>=compPass();
+    g.row([{t:'SCORE', w:K, bold:true, fill:LBL},{t:`${sc.score} / ${sc.total}  =  ${sc.pct}%  —  ${pass?'PASS':'FAIL'}`, w:hw, bold:true, color:pass?[15,118,80]:g.RED},{t:'HOW', w:K, bold:true, fill:LBL},{t:t.by==='phone'?'On the project link (own phone)':'On paper', w:hw}]);
+    g.row([{t:'#', w:22, bold:true, fill:LBL},{t:'Question', w:CW-22-170-40, bold:true, fill:LBL},{t:'Answer given', w:170, bold:true, fill:LBL},{t:'', w:40, bold:true, fill:LBL}]);
+    qs.forEach((q,i)=>{ const an=t.ans[i], ok=an===q.a; g.row([{t:String(i+1), w:22},{t:q.q, w:CW-22-170-40},{t:an>=0?q.o[an]:'no answer', w:170, color:ok?g.INK:g.RED},{check:true, cross:!ok, w:40}]); });
+  } else g.row([{t:'Not done yet.', w:CW, color:g.SUB}]);
+  // 3 practical
+  const pl=compPracList(a.role), pr=a.prac||{};
+  g.head('3. PRACTICAL OBSERVATION  (* critical point)');
+  const pw=CW-4*46; g.row([{t:'Observed', w:pw, bold:true, fill:LBL},...['OK','Needs impr.','Not OK','N/A'].map(x=>({t:x, w:46, bold:true, fill:LBL, size:7.4, center:true}))]);
+  let lastG=''; pl.forEach(p=>{ if(p.g!==lastG){ lastG=p.g; g.row([{t:COMP_PRAC_GROUP[p.g]||p.g, w:CW, bold:true, size:7.8, color:g.SUB}], 13); }
+    g.row([{t:(p.c?'* ':'')+p.t, w:pw, bold:p.c},...['ok','ni','no','na'].map(v=>({check:pr[p.id]===v, cross:v==='no', w:46}))]); });
+  if(a.pracNote) g.row([{t:'NOTES', w:K, bold:true, fill:LBL},{t:a.pracNote, w:CW-K}]);
+  // 4 verbal
+  const sl=compScenList(a.role), sc=a.scen||{};
+  g.head('4. VERBAL QUESTIONS');
+  g.row([{t:'Question — expected answer', w:CW-92, bold:true, fill:LBL},{t:'OK', w:46, bold:true, fill:LBL, center:true},{t:'Not OK', w:46, bold:true, fill:LBL, center:true}]);
+  sl.forEach(s=>g.row([{t:s.q, sub:'Expected: '+s.x, w:CW-92},{check:sc[s.id]==='ok', w:46},{check:sc[s.id]==='no', cross:true, w:46}], 26));
+  // 5 result
+  g.head('5. RESULT');
+  g.row([{t:'RESULT', w:K, bold:true, fill:LBL},{t:a.result||'—', w:hw, bold:true, color:resCol},{t:'SUGGESTED', w:K, bold:true, fill:LBL},{t:a.suggested||compSuggest(a).res||'—', w:hw, size:8}]);
+  if(a.notes) g.row([{t:'REMARKS / TRAINING NEEDED', w:K, bold:true, fill:LBL, size:7.6},{t:a.notes, w:CW-K}]);
+  g.ensure(70); const hs=a.hse||{};
+  g.row([{t:'ASSESSOR (HSE)', w:K, bold:true, fill:LBL},{t:hs.name||a.assessor||'—', sub:[hs.role, a.doneAt?isoToDmy(String(a.doneAt).slice(0,10)):''].filter(Boolean).join('  ·  '), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},{img:hs.img, t:hs.img?'':'', blank:true, w:hw}], 46);
+  g.row([{t:'WORKER', w:K, bold:true, fill:LBL},{t:w.fullName||a.wName||'—', sub:'Result explained to me', w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},a.wSig?{img:a.wSig, w:hw}:{t:a.wPaper?'Signed on the paper copy':'', blank:true, w:hw, color:g.SUB}], 46);
+  g.y+=6; g.row([{t:'Competent = can do the tasks assessed without supervision.  Competent under supervision = works only with a competent person / supervisor until re-assessed.  Not yet competent = must not do these tasks — retrain and re-assess.', w:CW, size:7.4, color:g.SUB}]);
+}
+async function compPdf(id){
+  const a=(compUi.ed&&compUi.ed.id===id)?compUi.ed:compList.find(x=>x.id===id); if(!a){ toast('Assessment not found'); return; }
+  if(!compPdfReady()) return;
+  const w=workers.find(x=>x.id===a.workerId)||{fullName:a.wName||'', designation:a.wDes||''};
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'comp', docSub:`${w.fullName||''} · ${compRoleName(a.role)}`});
+  compPdfBody(doc, a, w);
+  doc.save(`Competency_${compSafeName(w.fullName)}_${compSafeName(compRoleName(a.role))}_${a.date||''}.pdf`);
+}
+// question paper (English) + HSE answer key on the last page
+async function compPaperPdf(role, qs, a){
+  if(!compPdfReady()) return; const w=a?workers.find(x=>x.id===a.workerId):null;
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'comp', docSub:'Question paper — '+compRoleName(role)}), g=compGrid(doc, 32), CW=g.CW, K=96, hw=(CW-2*K)/2;
+  g.title('COMPETENCY TEST — QUESTION PAPER', compRoleName(role).toUpperCase());
+  g.row([{t:'NAME', w:K, bold:true, fill:g.LBL},{t:w?w.fullName:'', blank:true, w:hw},{t:'DATE', w:K, bold:true, fill:g.LBL},{t:a?isoToDmy(a.date||''):'', blank:true, w:hw}], 20);
+  g.row([{t:'PROJECT', w:K, bold:true, fill:g.LBL},{t:w?projectName(w.projectId)||'':'', blank:true, w:hw},{t:'DESIGNATION', w:K, bold:true, fill:g.LBL},{t:w?w.designation||'':'', blank:true, w:hw}], 20);
+  g.row([{t:`Tick ONE answer for each question (${qs.length} questions). Pass mark ${compPass()}%. Ask the assessor if you do not understand a word.`, w:CW, bold:true, color:g.RED}]);
+  const hw2=CW/2-20;
+  qs.forEach((q,i)=>{ g.ensure(15+2*24); g.y+=3; g.row([{t:`${i+1}. ${q.q}`, w:CW, bold:true, fill:g.LBL}]);
+    for(let j=0;j<q.o.length;j+=2) g.row([{check:false, w:20},{t:`${'ABCD'[j]})  ${q.o[j]}`, w:hw2},...(q.o[j+1]!==undefined?[{check:false, w:20},{t:`${'ABCD'[j+1]})  ${q.o[j+1]}`, w:hw2}]:[{t:'', blank:true, w:hw2+20}])], 18); });
+  g.ensure(60); g.y+=8;
+  g.row([{t:'WORKER SIGNATURE', w:K, bold:true, fill:g.LBL},{t:'', blank:true, w:hw},{t:'SCORE (HSE)', w:K, bold:true, fill:g.LBL},{t:`        /  ${qs.length}   =        %`, w:hw, bold:true}], 40);
+  g.row([{t:'ASSESSOR', w:K, bold:true, fill:g.LBL},{t:'', blank:true, w:hw},{t:'SIGNATURE', w:K, bold:true, fill:g.LBL},{t:'', blank:true, w:hw}], 34);
+  doc.addPage(); g.y=32;
+  g.title('HSE COPY — ANSWER KEY', 'DO NOT GIVE TO THE WORKER');
+  g.row([{t:'#', w:22, bold:true, fill:g.LBL},{t:'Answer', w:50, bold:true, fill:g.LBL},{t:'Correct answer', w:CW-72, bold:true, fill:g.LBL}]);
+  qs.forEach((q,i)=>g.row([{t:String(i+1), w:22},{t:'ABCD'[q.a], w:50, bold:true},{t:q.o[q.a], w:CW-72}]));
+  g.row([{t:`${compRoleName(role)} — ${qs.length} questions — ${a?'saved on the assessment in the tracker (tap his answers there to mark it)':'blank paper: count the right answers by hand'}`, w:CW, size:7.4, color:g.SUB}]);
+  doc.save(`Competency_question_paper_${compSafeName(compRoleName(role))}${w?'_'+compSafeName(w.fullName):''}.pdf`);
+}
+// blank practical checklist + result form (for paper assessments)
+async function compBlankPracPdf(role){
+  if(!compPdfReady()) return;
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'comp', docSub:'Practical checklist — '+compRoleName(role)}), g=compGrid(doc, 32), CW=g.CW, K=96, hw=(CW-2*K)/2, L=g.LBL;
+  g.title('COMPETENCY ASSESSMENT — PRACTICAL & RESULT', compRoleName(role).toUpperCase());
+  for(const [a1,b1] of [['NAME','DESIGNATION'],['PROJECT','DATE'],['ASSESSED BY','CIVIL ID (last 4)']]) g.row([{t:a1, w:K, bold:true, fill:L},{t:'', blank:true, w:hw},{t:b1, w:K, bold:true, fill:L},{t:'', blank:true, w:hw}], 20);
+  g.head('1. DOCUMENTS & TRAINING — valid copy seen');
+  const docs=['Induction','Medical fitness','H2S Awareness', ...(['helper','scaffolder','advanced','foreman','inspector'].includes(role)?['Working at Height']:[]), ...(['scaffolder','advanced','foreman'].includes(role)?['Scaffolding training / certificate']:[]), ...(['inspector','foreman'].includes(role)?['Scaffold inspection training']:[]), ...(role==='driver'?['Driving licence (right class)','Defensive Driving']:[])];
+  for(let i=0;i<docs.length;i+=2) g.row([{t:docs[i], w:CW/2-40},{check:false, w:40},...(docs[i+1]?[{t:docs[i+1], w:CW/2-40},{check:false, w:40}]:[{t:'', blank:true, w:CW/2}])], 18);
+  g.head(`2. KNOWLEDGE TEST — pass mark ${compPass()}%`);
+  g.row([{t:'SCORE', w:K, bold:true, fill:L},{t:'        /            =          %', w:hw},{t:'PASS / FAIL', w:K, bold:true, fill:L},{t:'', blank:true, w:hw}], 20);
+  g.head('3. PRACTICAL OBSERVATION  (* critical point — Not OK = Not yet competent)');
+  const pw=CW-4*46; g.row([{t:'Observed', w:pw, bold:true, fill:L},...['OK','Needs impr.','Not OK','N/A'].map(x=>({t:x, w:46, bold:true, fill:L, size:7.4, center:true}))]);
+  let lastG=''; compPracList(role).forEach(p=>{ if(p.g!==lastG){ lastG=p.g; g.row([{t:COMP_PRAC_GROUP[p.g]||p.g, w:CW, bold:true, size:7.8, color:g.SUB}], 13); } g.row([{t:(p.c?'* ':'')+p.t, w:pw, bold:p.c},{check:false, w:46},{check:false, w:46},{check:false, w:46},{check:false, w:46}], 17); });
+  g.row([{t:'NOTES', w:K, bold:true, fill:L},{t:'', blank:true, w:CW-K}], 40);
+  g.head('4. VERBAL QUESTIONS');
+  g.row([{t:'Question — expected answer', w:CW-92, bold:true, fill:L},{t:'OK', w:46, bold:true, fill:L, center:true},{t:'Not OK', w:46, bold:true, fill:L, center:true}]);
+  compScenList(role).forEach(s=>g.row([{t:s.q, sub:'Expected: '+s.x, w:CW-92},{check:false, w:46},{check:false, w:46}], 26));
+  g.head('5. RESULT');
+  g.row(COMP_RESULTS.flatMap(r=>[{check:false, w:24},{t:r, w:CW/3-24, bold:true}]), 20);
+  g.row([{t:'VALID UNTIL / RE-ASSESS BY', w:K+30, bold:true, fill:L, size:7.6},{t:'', blank:true, w:CW-K-30}], 20);
+  g.row([{t:'REMARKS / TRAINING NEEDED', w:K+30, bold:true, fill:L, size:7.6},{t:'', blank:true, w:CW-K-30}], 34);
+  g.ensure(60); g.row([{t:'ASSESSOR SIGNATURE', w:K, bold:true, fill:L, size:7.6},{t:'', blank:true, w:hw},{t:'WORKER SIGNATURE', w:K, bold:true, fill:L, size:7.6},{t:'', blank:true, w:hw}], 44);
+  g.y+=6; g.row([{t:'After the assessment enter it in the tracker (Competency → Assess → On paper) so the result is saved on the worker record and counted.', w:CW, size:7.4, color:g.SUB}]);
+  doc.save(`Competency_practical_form_${compSafeName(compRoleName(role))}.pdf`);
+}
+function compRegisterPairs(pid){
+  if(pid){ const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===pid); return compPairs(ws); }
+  const q=compUi.q.trim().toLowerCase(); let pairs=compPairs(compFilterWs()).filter(p=>!q || String(p.w.fullName||'').toLowerCase().includes(q));
+  if(compUi.status!=='all') pairs=pairs.filter(p=>compUi.status==='open' ? !!p.open : compUi.status==='bad' ? ['none','nyc','expired'].includes(p.st) : p.st===compUi.status);
+  return pairs.sort((a,b)=>String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
+}
+async function compRegisterPdf(pid){
+  if(!compPdfReady()) return;
+  const pairs=compRegisterPairs(pid).sort((a,b)=>String(a.w.fullName||'').localeCompare(String(b.w.fullName||''))), scope=pid?(projectName(pid)||'Project'):(compUi.project!=='all'?(projectName(compUi.project)||'No project'):(compUi.div!=='all'?divLabel(compUi.div):'All projects'));
+  if(!pairs.length){ toast('Nobody in this view needs an assessment'); return; }
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'comp', docSub:'Team register — '+scope}), g=compGrid(doc, 32), CW=g.CW, cov=compCoverage([...new Set(pairs.map(p=>p.w))]);
+  g.title('COMPETENCY REGISTER — '+scope.toUpperCase(), `${cov.compW} of ${cov.workers} competent · ${isoToDmy(localToday())}`);
+  const cols=[['#',24],['Name',150],['Designation',110],['Project',120],['Assessment',120],['Status',90],['Date',58],['Test',40],['Valid until',62]], rest=CW-cols.reduce((n,c)=>n+c[1],0);
+  cols[1][1]+=rest;
+  g.row(cols.map(([t,w])=>({t, w, bold:true, fill:g.LBL})));
+  pairs.forEach((p,i)=>{ const a=p.a, t=(a&&a.test)||{}, col=['none','nyc','expired'].includes(p.st)?g.RED:p.st==='ok'?[15,118,80]:[180,83,9];
+    g.row([{t:String(i+1), w:cols[0][1]},{t:p.w.fullName||'—', w:cols[1][1], bold:true},{t:p.w.designation||'—', w:cols[2][1]},{t:projectName(p.w.projectId)||'—', w:cols[3][1]},{t:compRoleName(p.role), w:cols[4][1]},
+      {t:(COMP_ST[p.st]||[p.st])[0], w:cols[5][1], bold:true, color:col},{t:a?isoToDmy(a.date||''):'—', w:cols[6][1]},{t:Array.isArray(t.ans)?t.pct+'%':'—', w:cols[7][1]},{t:a&&a.expiry&&a.result!=='Not yet competent'?isoToDmy(a.expiry):'—', w:cols[8][1]}]); });
+  g.y+=6; g.row([{t:`Competent ${cov.ok} · under supervision ${cov.sup} · not yet competent ${cov.nyc} · expired ${cov.expired} · not assessed ${cov.none} · due within 30 days ${cov.due}. Pass mark ${compPass()}%, valid ${compMonths()} months.`, w:CW, size:7.6, color:g.SUB}]);
+  doc.save(`Competency_register_${compSafeName(scope)}_${localToday()}.pdf`);
+}
+async function compXlsx(){
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
+  const pairs=compRegisterPairs(null);
+  const reg=pairs.map(p=>{ const a=p.a, t=(a&&a.test)||{}; return [p.w.fullName||'', p.w.designation||'', divLabel(workerDivKey(p.w)||'')||'', projectName(p.w.projectId)||'', compRoleName(p.role), (COMP_ST[p.st]||[p.st])[0], a?a.date||'':'', a?a.result||'':'', Array.isArray(t.ans)?t.pct:'', a&&a.result!=='Not yet competent'?a.expiry||'':'', a?((a.hse&&a.hse.name)||a.assessor||''):'', p.open?'yes':'']; });
+  const all=compList.filter(a=>a.status==='done').sort((x,y)=>String(y.date||'').localeCompare(String(x.date||''))).map(a=>{ const w=workers.find(x=>x.id===a.workerId)||{}, t=a.test||{}, pr=Object.values(a.prac||{});
+    return [a.date||'', w.fullName||a.wName||'', w.designation||a.wDes||'', a.projectName||projectName(a.projectId)||'', compRoleName(a.role), a.result||'', Array.isArray(t.ans)?t.score:'', Array.isArray(t.ans)?t.total:'', Array.isArray(t.ans)?t.pct:'', t.by==='phone'?'Phone':'Paper',
+      pr.filter(x=>x==='ok').length, pr.filter(x=>x==='ni').length, pr.filter(x=>x==='no').length, a.result==='Not yet competent'?'':(a.expiry||''), a.result==='Not yet competent'?(a.reassess||''):'', (a.hse&&a.hse.name)||a.assessor||'', a.notes||'']; });
+  const wb=XLSX.utils.book_new();
+  const s1=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — Competency register'],['Exported '+localToday()+` · pass mark ${compPass()}% · valid ${compMonths()} months`],[],['Name','Designation','Division','Project','Assessment','Status','Last date','Result','Test %','Valid until','Assessor','In progress'], ...reg]);
+  s1['!cols']=[{wch:26},{wch:22},{wch:22},{wch:24},{wch:30},{wch:20},{wch:11},{wch:26},{wch:7},{wch:11},{wch:22},{wch:10}];
+  const s2=XLSX.utils.aoa_to_sheet([['Date','Name','Designation','Project','Assessment','Result','Score','Questions','Test %','Test on','Practical OK','Needs improvement','Not OK','Valid until','Re-assess by','Assessor','Remarks'], ...all]);
+  s2['!cols']=[{wch:11},{wch:26},{wch:22},{wch:24},{wch:30},{wch:26},{wch:7},{wch:9},{wch:7},{wch:8},{wch:10},{wch:10},{wch:8},{wch:11},{wch:11},{wch:22},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, s1, 'Register'); XLSX.utils.book_append_sheet(wb, s2, 'All assessments'); XLSX.writeFile(wb, `Competency_register_${localToday()}.xlsx`);
+}
+
+/* ---- competency: clicks and typing ---- */
+function compArm(b, txt){ if(b.dataset.armed==='1') return true; b.dataset.armed='1'; b.textContent=txt; return false; }
+function compKeep(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('[data-comp-new],[data-comp-open],[data-comp-pdf],[data-comp-roles],[data-comp-rolesave],[data-comp-close],[data-comp-mode],[data-comp-testopen],[data-comp-testclose],[data-comp-paperpdf],[data-comp-ans],[data-comp-paperdone],[data-comp-retest],[data-comp-showq],[data-comp-pr],[data-comp-sc],[data-comp-save],[data-comp-done],[data-comp-del],[data-comp-wsigclr],[data-comp-goto],[data-comp-panel],[data-comp-blank],[data-comp-setsave],[data-comp-bankmod],[data-comp-qadd],[data-comp-qsave],[data-comp-qdel],[data-comp-regpdf],[data-comp-xlsx]');
+  if(!b || b.disabled) return; const D=b.dataset, ed=compUi.ed, t=ed&&(ed.test=ed.test||{});
+  if('compGoto' in D){ compGotoPage(D.compGoto||'all'); window.scrollTo(0,0); return; }
+  if(D.compNew){ const [w,r]=D.compNew.split('|'); compStart(w, r); return; }
+  if(D.compOpen){ compEdit(D.compOpen); return; }
+  if(D.compPdf){ await compPdf(D.compPdf); return; }
+  if(D.compRegpdf){ await compRegisterPdf(D.compRegpdf==='filter'?null:D.compRegpdf); return; }
+  if(D.compXlsx){ await compXlsx(); return; }
+  if('compRoles' in D){ compUi.rolesFor=compUi.rolesFor===D.compRoles?'':D.compRoles; compKeep(()=>{ renderComp(); if(activeSiteTab==='comp' && currentSite()) renderSiteDrawerBody(); }); return; }
+  if(D.compRolesave){ const wid=D.compRolesave, box=b.closest('.comp-roles-ed'); if(!box) return;
+    const val=D.reset ? firebase.firestore.FieldValue.delete() : [...box.querySelectorAll('[data-comp-rolechk]')].filter(c=>c.checked).map(c=>c.dataset.compRolechk);
+    if(await saveSettings('compSettings', {roles:{[wid]:val}}, settingsStamp('compSettings'))) compUi.rolesFor=''; return; }
+  if('compPanel' in D){ compUi.panel=compUi.panel===D.compPanel?'':D.compPanel; compUi.qf=null; compRenderTop(); if(compUi.panel){ const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); } return; }
+  if(D.compBlank){ const r=(document.getElementById('compBlankRole')||{}).value||compUi.blankRole; compUi.blankRole=r; if(D.compBlank==='q') await compPaperPdf(r, compPick(r), null); else await compBlankPracPdf(r); return; }
+  if(D.compSetsave){ const pass=Number((document.getElementById('compPassIn')||{}).value), months=Number((document.getElementById('compMonthsIn')||{}).value);
+    if(!(pass>=50 && pass<=100) || !(months>=1 && months<=60)){ toast('Pass mark 50–100 %, valid 1–60 months'); return; }
+    await saveSettings('compSettings', {pass, months}, settingsStamp('compSettings')); return; }
+  if(D.compBankmod){ compUi.bankMod=D.compBankmod; compRenderTop(); return; }
+  if('compQadd' in D){ compUi.qf=D.compQadd===''?null:{m:compUi.bankMod, tp:'', q:'', qh:'', qa:'', o:['','','',''], a:0}; compRenderTop(); return; }
+  if(D.compQsave){ const f=compUi.qf; if(!f) return; const o=(f.o||[]).map(x=>String(x||'').trim()).filter(Boolean);
+    if(!String(f.q||'').trim()){ toast('Write the question'); return; } if(o.length<2){ toast('Write at least answers A and B'); return; }
+    const a=Math.min(o.length-1, Number(f.a)||0); if(!String((f.o||[])[Number(f.a)||0]||'').trim()){ toast('The correct answer is empty'); return; }
+    const q={id:'x'+Date.now().toString(36), m:f.m, tp:f.m==='core'?(f.tp||''):'', q:String(f.q).trim().slice(0,200), qh:String(f.qh||'').trim().slice(0,200), qa:String(f.qa||'').trim().slice(0,200), o:o.map(x=>x.slice(0,140)), a};
+    if(await compBankSave({custom:[...((settingsDocs.compBank||{}).custom||[]), q]})){ compUi.qf=null; compUi.bankMod=f.m; } return; }
+  if(D.compQdel){ if(!compArm(b,'Tap again')) return; await compBankSave({custom:((settingsDocs.compBank||{}).custom||[]).filter(x=>x.id!==D.compQdel)}); return; }
+  if(!ed) return;
+  if('compClose' in D){ compUi.ed=null; compUi.sigOpen=false; compRenderTop(); return; }
+  if(D.compShowq){ ed._showQ=!ed._showQ; compKeep(compRenderTop); return; }
+  if(ed.status==='done' && !D.compDel) return;
+  if(D.compPr){ const [id,v]=D.compPr.split('|'); ed.prac=ed.prac||{}; ed.prac[id]=ed.prac[id]===v?'':v; compKeep(compRenderTop); return; }
+  if(D.compSc){ const [id,v]=D.compSc.split('|'); ed.scen=ed.scen||{}; ed.scen[id]=ed.scen[id]===v?'':v; compKeep(compRenderTop); return; }
+  if(D.compWsigclr){ ed.wSig=''; compKeep(compRenderTop); return; }
+  if(D.compMode){ if(Array.isArray(t.ans)) return; t.mode=D.compMode; if(t.open && D.compMode==='paper'){ t.open=null; if(ed.id){ await compSave(ed, true); compLinkSyncNow(); } } compKeep(compRenderTop); return; }
+  if(D.compAns){ const [i,j]=D.compAns.split('|').map(Number); t.pans=(t.pans||[]).slice(); while(t.pans.length<(t.qs||[]).length) t.pans.push(null); t.pans[i]=t.pans[i]===j?null:j; compKeep(compRenderTop); return; }
+  if(D.compPaperdone){ const qs=t.qs||[], pans=t.pans||[]; const n=qs.filter((q,i)=>Number.isInteger(pans[i])).length;
+    if(n<qs.length && !compArm(b, `${qs.length-n} not answered — tap again to mark them wrong`)) return;
+    const ans=qs.map((q,i)=>Number.isInteger(pans[i])?pans[i]:-1), sc=compScore(qs, ans); Object.assign(t, {ans, score:sc.score, total:sc.total, pct:sc.pct, at:new Date().toISOString(), by:'paper', open:null});
+    await compSave(ed, true); toast(`Paper marked — ${sc.score}/${sc.total} (${sc.pct}%)`); compKeep(compRenderTop); return; }
+  if(D.compRetest){ if(!compArm(b,'Tap again — the answers are removed')) return; ed.test={mode:t.mode||'paper'}; await compSave(ed, true); compLinkSyncNow(); compKeep(compRenderTop); return; }
+  if(D.compPaperpdf){ if(!(t.qs||[]).length){ t.qs=compPick(ed.role); t.pans=[]; } t.mode='paper'; t.open=null; if(await compSave(ed, true)) await compPaperPdf(ed.role, t.qs, ed); compKeep(compRenderTop); return; }
+  if(D.compTestopen){ const w=workers.find(x=>x.id===ed.workerId); if(!w || !ppeLinkOf(w.projectId)){ toast('His project has no project link — use the paper test'); return; }
+    if(!(t.qs||[]).length) t.qs=compPick(ed.role); t.mode='phone'; t.open={at:new Date().toISOString(), until:Date.now()+COMP_TEST_MIN*60000}; delete t.pans;
+    b.disabled=true; try{ if(await compSave(ed, true)){ await compLinkSyncNow(); toast('Test open — he taps 🎓 Competency test on the project link'); } } finally{ compKeep(compRenderTop); } return; }
+  if(D.compTestclose){ t.open=null; if(await compSave(ed, true)) await compLinkSyncNow(); toast('Test closed'); compKeep(compRenderTop); return; }
+  if(D.compSave){ b.disabled=true; try{ if(await compSave(ed)) compKeep(compRenderTop); } finally{ b.disabled=false; } return; }
+  if(D.compDone){ b.disabled=true; try{ await compComplete(); } finally{ b.disabled=false; } return; }
+  if(D.compDel){ if(!compArm(b,'Tap again to delete')) return; await compDelete(D.compDel); return; }
+});
+document.addEventListener('input', e=>{ const el=e.target; if(!el || !el.dataset) return;
+  if(el.dataset.cq && compUi.qf){ const k=el.dataset.cq; if(/^o\d$/.test(k)){ compUi.qf.o=compUi.qf.o||[]; compUi.qf.o[+k[1]]=el.value; } else compUi.qf[k]=el.value; return; }
+  const k=el.dataset.ci, ed=compUi.ed; if(!k || !ed || ed.status==='done') return;
+  if(k==='expiry'){ if(ed.result==='Not yet competent') ed.reassess=el.value; else { ed.expiry=el.value; ed._expEdited=true; } return; }
+  if(['assessor','notes','pracNote','date'].includes(k)) ed[k]=el.value;
+});
+document.addEventListener('change', e=>{ const el=e.target; if(!el || !el.dataset) return;
+  if(el.id==='compDiv'){ compUi.div=el.value; renderComp(); return; }
+  if(el.id==='compProject'){ compUi.project=el.value; renderComp(); return; }
+  if(el.id==='compStatus'){ compUi.status=el.value; renderComp(); return; }
+  if(el.id==='compBlankRole'){ compUi.blankRole=el.value; return; }
+  if(el.dataset.cq && compUi.qf){ const k=el.dataset.cq; if(k==='m'||k==='a'||k==='tp'){ compUi.qf[k]=el.value; if(k==='m') compKeep(compRenderTop); } return; }
+  if(el.dataset.compQoff){ const off=new Set((settingsDocs.compBank||{}).off||[]); if(el.checked) off.delete(el.dataset.compQoff); else off.add(el.dataset.compQoff); compBankSave({off:[...off]}); return; }
+  const ed=compUi.ed; if(!ed || ed.status==='done') return;
+  if(el.dataset.compSeen){ ed.papers=ed.papers||{}; ed.papers.seen={...(ed.papers.seen||{}), [el.dataset.compSeen]:el.checked}; compKeep(compRenderTop); return; }
+  const k=el.dataset.ci; if(!k) return;
+  if(k==='role'){ if(ed.id) return; ed.role=el.value; ed.prac={}; ed.scen={}; ed.test={mode:(ed.test||{}).mode||'paper'}; compKeep(compRenderTop); return; }
+  if(k==='wPaper'){ ed.wPaper=el.checked; compKeep(compRenderTop); return; }
+  if(k==='result'){ ed.result=el.value; if(ed.result==='Not yet competent'){ ed.expiry=ed.date||localToday(); ed.reassess=ed.reassess||compAddMonths(ed.date||localToday(),1); } else if(!ed._expEdited || !ed.expiry || ed.expiry===ed.date) ed.expiry=compAutoExpiry(ed); compKeep(compRenderTop); return; }
+  if(k==='date'){ ed.date=el.value; if(ed.result && !ed._expEdited) ed.expiry=compAutoExpiry(ed); compKeep(compRenderTop); return; }
+});
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='compSearch'){ compUi.q=e.target.value; renderComp(); } });
 
 /* ---- action tracker: extra sources ---- */
 const B12_ACT_SOURCES=[{key:'obs',label:'Observations'},{key:'insp',label:'Inspections'},{key:'hira',label:'Risk register'},{key:'moc',label:'Change (MOC)'},{key:'heat',label:'Heat stress'}];
@@ -11240,6 +12172,7 @@ function stopDataListeners(){
   stopPpeReqData();
   stopTricData();
   stopIncRepData();
+  stopCompData();
   if(unsubscribeWorkers){ unsubscribeWorkers(); unsubscribeWorkers=null; }
   if(unsubscribeVehicles){ unsubscribeVehicles(); unsubscribeVehicles=null; }
   if(unsubscribeSiteEquipment){ unsubscribeSiteEquipment(); unsubscribeSiteEquipment=null; }
@@ -11277,6 +12210,7 @@ auth.onAuthStateChanged(user=>{
     startPpeReqData();   // Batch 73
     startTricData();   // Batch 77
     startIncRepData();   // Batch 83
+    startCompData();   // Batch 84
   } else {
     stopDataListeners();
     document.getElementById('dbUnavailableBanner').hidden=true;
@@ -12082,7 +13016,7 @@ function renderSiteTable(){
     const dur=projectDurationText(s);
     const dates = (s.startDate||s.endDate||s.actualEnd) ? `<div class="wsub mono">${s.startDate?esc(s.startDate):'?'} → ${s.actualEnd?esc(s.actualEnd):s.endDate?esc(s.endDate)+' (planned)':'open'}</div>${dur?`<div class="wsub">${esc(dur)}${(s.extensions||[]).length?` · extended ${(s.extensions||[]).length}×`:''}</div>`:''}` : '';
     return `<tr data-id="${s.id}">
-      <td><div class="wname">${esc(s.siteName)}</div>${dates}</td>
+      <td><div class="wname">${esc(s.siteName)}</div>${dates}${(()=>{ const n=tricPendingFor(s.id); return n?`<div><span class="badge danger" title="Open the project → Toolbox talks">${n} TBT to review</span></div>`:''; })()}</td>
       <td>${esc(divLabel(s.division||'Civil'))}</td>
       <td>${esc(s.clientName||'—')}</td>
       <td>${projectStatusBadge(s)}</td>
@@ -12296,7 +13230,8 @@ function siteTabCount(s, key){
   if(key==='complaints'){ const n=(s.complaints||[]).filter(r=>(r.status||'Open')!=='Closed').length; return n ? {n, cls:'danger'} : null; }
   if(key==='actions'){ const l=(s.actions||[]).filter(r=>(r.status||'Open')!=='Closed'); return l.length ? {n:l.length, cls:l.some(r=>complaintOverdueDays(r))?'danger':'warn'} : null; }
   if(key==='permits'){ const l=(s.permits||[]).filter(r=>(r.status||'Open')==='Open'); return l.length ? {n:l.length, cls:l.some(r=>permitOverdueDays(r))?'danger':'warn'} : null; }
-  if(key==='toolboxTalks'){ const n=(s.toolboxTalks||[]).length; return n ? {n, cls:''} : null; }
+  if(key==='toolboxTalks'){ const p=tricPendingFor(s.id); if(p) return {n:p, cls:'danger'}; const n=(s.toolboxTalks||[]).length; return n ? {n, cls:''} : null; }
+  if(key==='comp'){ const c=compCoverage(activeWorkers().filter(w=>w.projectId===s.id)), n=c.none+c.nyc+c.expired; return n ? {n, cls:'danger'} : null; }
   if(key==='ppe'){ const n=ppeReqs.filter(r=>r.kind==='request' && ppeReqProject(r, workers.find(w=>w.id===r.workerId))===s.id).length; return n ? {n, cls:'warn'} : null; }
   if(key==='emergency'){ const n=emergencyGaps(s).length; return n ? {n, cls:'warn'} : null; }
   return null;
@@ -12392,6 +13327,8 @@ function overdueNotice(text){ return `<div class="notice" style="background:var(
 function renderSiteDrawerBody(){
   const s=currentSite(); if(!s) return;
   if(formDirtyIn('siteDrawerBody')) return;
+  { const tb=document.getElementById('tricBox'), ae=document.activeElement;   // Batch 84: don't wipe a TBT review being typed / a signature being drawn
+    if(activeSiteTab==='toolboxTalks' && tb && ((ae && tb.contains(ae) && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && ae.type!=='checkbox') || (tricUi.sigOpen && hseSigPad && hseSigPad.ink))) return; }
   const body=document.getElementById('siteDrawerBody');
   if(activeSiteTab==='profile'){ body.innerHTML=siteProfileTabHtml(s); return; }
   if(activeSiteTab==='equipment'){ body.innerHTML=siteEquipmentTabHtml(s); return; }
@@ -12400,6 +13337,7 @@ function renderSiteDrawerBody(){
   if(activeSiteTab==='vehicles'){ body.innerHTML=siteVehiclesTabHtml(s); return; }
   if(activeSiteTab==='emergency'){ body.innerHTML=siteEmergencyTabHtml(s); return; }
   if(activeSiteTab==='ppe'){ body.innerHTML=sitePpeTabHtml(s); return; }
+  if(activeSiteTab==='comp'){ body.innerHTML=siteCompTabHtml(s); return; }   // Batch 84
   const cfg=SITE_RECORD_TYPES[activeSiteTab];
   const savedActiveTab=activeTab, savedEditing=editingRecordId, savedAddOpen=addFormOpen;
   activeTab=activeSiteTab; editingRecordId=editingSiteRecordId; addFormOpen=siteAddFormOpen;
@@ -12434,11 +13372,13 @@ function renderSiteDrawerBody(){
   }
   if(activeSiteTab==='toolboxTalks'){
     const list=s.toolboxTalks||[];
+    pre = `<div id="tricBox" data-site="${esc(s.id)}"></div>`;
     const people=list.reduce((n,r)=>n+tbtAttendeeCount(r),0);
-    pre = `<p class="wsub" style="margin:0 0 12px;">${list.length ? `${list.length} talk${list.length===1?'':'s'} · ${people} attendances in total. ` : ''}Each talk is counted automatically in the Monthly Report (Toolbox talks) for this project — no need to log it twice. It also shows on every attendee's Training tab.</p>`;
+    pre += `<p class=\"wsub\" style=\"margin:0 0 12px;\">${list.length ? `${list.length} talk${list.length===1?'':'s'} · ${people} attendances in total. ` : ''}Each talk is counted automatically in the Monthly Report (Toolbox talks) for this project — no need to log it twice. It also shows on every attendee's Training tab.</p>`;
   }
   body.innerHTML=pre+recordTabHtml(s, activeSiteTab, cfg);
   activeTab=savedActiveTab; editingRecordId=savedEditing; addFormOpen=savedAddOpen;
+  if(activeSiteTab==='toolboxTalks') renderTricPanel();   // Batch 84: TBT requests of this project
 }
 
 function siteEquipmentTabHtml(s){
@@ -13055,7 +13995,7 @@ function bandBlend(p){
 }
 let _dialId=0;
 function ccDial(v, size, stroke, label, opts){
-  const r=(size-stroke)/2-2, c=size/2, C=2*Math.PI*r, arc=C*0.75, col=opts&&opts.bands ? bandColor(v) : ccStatusColor(v), to=v===null?arc:arc*(1-v/100);
+  const r=(size-stroke)/2-2, c=size/2, C=2*Math.PI*r, arc=C*0.75, col=opts&&opts.bands ? bandColor(v) : (opts&&opts.color) || ccStatusColor(v), to=v===null?arc:arc*(1-v/100);
   if(opts && opts.bands){
     const id='dm'+(++_dialId), N=60, pt=p=>{ const a=(135+p*270)*Math.PI/180; return `${(c+r*Math.cos(a)).toFixed(2)} ${(c+r*Math.sin(a)).toFixed(2)}`; };
     const segs=[...Array(N)].map((_,i)=>{ const p0=i? i/N-0.004 : -0.03, p1=i===N-1 ? 1.03 : (i+1)/N+0.004; return `<path d="M${pt(p0)} A${r.toFixed(2)} ${r.toFixed(2)} 0 0 1 ${pt(p1)}" fill="none" stroke-width="${stroke}" style="stroke:${bandBlend((i+0.5)*100/N)}"/>`; }).join('');
@@ -13241,6 +14181,7 @@ function renderCommandCentre(entries, m, key){
       + `<div class="cc-band-key"><span><i style="background:var(--band-red)"></i>below 50%</span><span><i style="background:var(--band-orange)"></i>50–79%</span><span><i style="background:var(--band-yellow)"></i>80–89%</span><span><i style="background:var(--band-green)"></i>90% and above</span></div>`
       + (noRoleN ? `<p class="wsub" style="grid-column:1/-1; margin:6px 4px;">${noRoleN} worker${noRoleN===1?'':'s'} in this view ${noRoleN===1?'has':'have'} no role yet and ${noRoleN===1?'is':'are'} not counted — set roles in each worker's Profile.</p>` : '')
     : `<p class="wsub" style="grid-column:1/-1; margin:6px 4px;">${!trainingRoles().length ? (canEdit()?'Set the roles and their required trainings in <strong>Workforce → Training matrix → Roles &amp; required trainings</strong>, then give each worker their role(s).':'The HSE team has not set the required trainings yet.') : (scopeWs.length ? 'No worker in this view has a role with required trainings yet — set roles in each worker\'s Profile.' : 'No active workers in this view.')}</p>`;
+  renderCcComp();   // Batch 84: competency dials
   // compliance right now — for the division / project in view (QHSE documents are company-wide)
   const pct=(a,b)=> b ? Math.round(a*100/b) : null;
   const aw=scopeWs;
@@ -14046,7 +14987,8 @@ function recordTabHtml(w,key,cfg){
         </div>
       </div>
       <div class="record-fields">${fieldsHtml}</div>
-      ${key==='toolboxTalks'&&r.tricId?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(r.tricId)}" style="margin-top:6px;">${ic('download')} TRIC card (PDF)</button>`:''}
+      ${key==='toolboxTalks'&&r.tricId?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(r.tricId)}" style="margin-top:6px;">${ic('download')} TBT record (PDF)</button>`:''}
+      ${key==='competency'&&r.assessId?`<button type="button" class="btn btn-sm" data-comp-pdf="${esc(r.assessId)}" style="margin-top:6px;">${ic('download')} Assessment (PDF)</button>`:''}
       ${key==='ppeIssued'&&r.sigId?`<button type="button" class="btn btn-sm" data-ppe-rcpt="${esc(r.sigId)}" style="margin-top:6px;">${ic('download')} Signed receipt (PDF)</button>`:''}
       ${attach}
     </div>`;
@@ -15114,9 +16056,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     btn.addEventListener('click', ()=>{
       const section=btn.dataset.section;
       document.querySelectorAll('.sidenav-btn[data-section]').forEach(b=>b.classList.toggle('active', b===btn));
-      const SECTIONS={workforce:'workforceSection', vehicles:'vehiclesSection', site:'siteSection', report:'reportSection', incidents:'incidentsSection', library:'librarySection', audits:'auditsSection', assurance:'assuranceSection', actions:'actionsSection', calendar:'calendarSection', activity:'activitySection', ...Object.fromEntries(Object.keys(REG).map(k=>[k, k+'Section']))};
+      const SECTIONS={workforce:'workforceSection', vehicles:'vehiclesSection', site:'siteSection', comp:'compSection', report:'reportSection', incidents:'incidentsSection', library:'librarySection', audits:'auditsSection', assurance:'assuranceSection', actions:'actionsSection', calendar:'calendarSection', activity:'activitySection', ...Object.fromEntries(Object.keys(REG).map(k=>[k, k+'Section']))};
       for(const [k,id] of Object.entries(SECTIONS)) document.getElementById(id).hidden = section!==k;
       if(section==='objectives' || section==='assurance') refreshLinkedPanels();
+      if(section==='comp'){ renderComp(); compRenderTop(); }   // Batch 84
     });
   });
 
@@ -15918,28 +16861,31 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('ppePane').addEventListener('submit', e=>{ if(e.target.id!=='ppeItemForm') return; e.preventDefault(); ppeSaveItem(e.target); });
   document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-site-ppe-xlsx]'); if(b) sitePpeXlsx(b.dataset.sitePpeXlsx); });   // Batch 81
   // Batch 83: HSE signature + incident reports
-  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-hsesig-open],[data-hsesig-close],[data-hsesig-clear],[data-hsesig-save],[data-increp-goto],[data-increp-open],[data-increp-close]'); if(!b) return; const D=b.dataset;
-    if(D.hsesigOpen){ tricUi.sigOpen=!tricUi.sigOpen; hseSigPad=null; renderTricPanel(); return; }
-    if(D.hsesigClose){ tricUi.sigOpen=false; hseSigPad=null; renderTricPanel(); return; }
+  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-hsesig-open],[data-hsesig-close],[data-hsesig-clear],[data-hsesig-save],[data-hsesig-unup],[data-increp-goto],[data-increp-open],[data-increp-close]'); if(!b) return; const D=b.dataset;
+    if(D.hsesigOpen){ hseSigPad=null; hseSigUp=null; if(D.hsesigOpen==='comp'){ compUi.sigOpen=!compUi.sigOpen; compRenderTop(); } else { tricUi.sigOpen=!tricUi.sigOpen; renderTricPanel(); } return; }
+    if(D.hsesigClose){ tricUi.sigOpen=false; compUi.sigOpen=false; hseSigPad=null; hseSigUp=null; renderTricPanel(); compRenderTop(); return; }
+    if(D.hsesigUnup){ hseSigUp=null; const pv=document.getElementById('hseSigPrev'); if(pv) pv.innerHTML=''; return; }
     if(D.hsesigClear){ if(hseSigPad) hseSigPad.clear(); return; }
     if(D.hsesigSave){ await hseSigSave(); return; }
     if(D.increpGoto){ incRepGoto(); return; }
     if(D.increpOpen){ incRepOpen(D.increpOpen); return; }
     if(D.increpClose){ if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent='Tap again to close'; return; } b.disabled=true; await incRepClose(D.increpClose); } });
+  // Batch 84: Monthly Report → TBT records (all projects)
+  document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-tric-allbtn]'); if(!b) return; const p=document.getElementById('tricAllPanel'); if(!p) return; p.hidden=!p.hidden; if(!p.hidden){ const m=document.getElementById('tricMonthAll'); if(m && !m.value) m.value=tricUi.month||localToday().slice(0,7); } });
   // Batch 79: TBT requests in Project Details
   document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-dl],[data-tbt-send],[data-tbt-no],[data-tbt-cancel],[data-tbt-rm],[data-tbt-allm],[data-tbt-draadd],[data-tbt-drax]'); if(!b) return; const D=b.dataset;
     if(D.tbtDraadd){ const x=tricSubs.find(s=>s.id===D.tbtDraadd); if(x){ tricRv(x).dra.push({hz:'', m:'', r:''}); renderTricPanel(); } return; }
     if(D.tbtDrax){ const [id,i]=D.tbtDrax.split('|'), x=tricSubs.find(s=>s.id===id); if(x){ tricRv(x).dra.splice(+i,1); renderTricPanel(); } return; }
-    if(D.tricGoto){ tricGoto(); return; }
+    if('tricGoto' in D){ tricGoto(D.tricGoto); return; }
     if(D.tricPdf){ await tricOnePdf(D.tricPdf); return; }
-    if(D.tricDl){ await tricDownload(D.tricDl); return; }
+    if(D.tricDl){ await tricDownload(D.tricDl, D.tricSite); return; }
     if(D.tbtRm){ const [id,w]=D.tbtRm.split('|'), x=tricSubs.find(s=>s.id===id); if(x){ const r=tricRv(x); r.att=r.att.filter(p=>p.w!==w); renderTricPanel(); } return; }
     if(D.tbtAllm){ const x=tricSubs.find(s=>s.id===D.tbtAllm); if(x){ const r=tricRv(x); TRIC_MUSTED.forEach((m,i)=>r.m.add(i)); renderTricPanel(); } return; }
     if((D.tbtNo||D.tbtCancel) && b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent='Tap again to '+(D.tbtNo?'reject':'cancel'); return; }
     const id=D.tbtSend||D.tbtNo||D.tbtCancel; tricUi.busy=id; b.disabled=true;
     try{ if(D.tbtSend) await tricSend(id); else await tricReject(id, !!D.tbtCancel); } finally{ tricUi.busy=''; b.disabled=false; if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); renderTricPanel(); } });
   document.addEventListener('change', e=>{ const t=e.target; if(!t || !t.dataset) return;
-    if(t.id==='tricMonth'){ tricUi.month=t.value; return; }
+    if(t.id==='tricMonthP' || t.id==='tricMonthAll'){ tricUi.month=t.value; return; }
     const m=t.dataset.tbtM, l=t.dataset.tbtL, add=t.dataset.tbtAddsel;
     if(m||l){ const [id,k]=(m||l).split('|'), x=tricSubs.find(s=>s.id===id); if(!x) return; const r=tricRv(x), set=m?r.m:r.l, key=m?Number(k):k; t.checked?set.add(key):set.delete(key); return; }
     if(add){ const x=tricSubs.find(s=>s.id===add); if(!x || !t.value) return; const r=tricRv(x), w=workers.find(y=>y.id===t.value); if(w && !r.att.some(p=>p.w===w.id)) r.att.push({w:w.id, n:w.fullName||'—'}); t.blur(); renderTricPanel(); } });
