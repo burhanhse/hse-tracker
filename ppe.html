@@ -181,6 +181,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     compSend:['Send my answers','मेरे जवाब भेजें','إرسال إجاباتي'], compSent:['Answers sent','जवाब भेज दिए','تم إرسال الإجابات'], compSent2:['HSE will tell you the result after the practical check.','प्रैक्टिकल जाँच के बाद एचएसई आपको परिणाम बताएगा।','سيخبرك قسم السلامة بالنتيجة بعد التقييم العملي.'],
     compNone2:['HSE opens the test for you when you are ready — then tap this button again.','जब आप तैयार हों, एचएसई आपके लिए परीक्षा खोलेगा — फिर यह बटन दोबारा दबाएँ।','يفتح قسم السلامة الاختبار لك عندما تكون جاهزاً — ثم اضغط هذا الزر مرة أخرى.'],
     compOver:['Time is over','समय खत्म','انتهى الوقت'],
+    engOnly:['Please write location and work in English letters — the TBT PDF prints English only.','कृपया स्थान और काम अंग्रेज़ी अक्षरों में लिखें — टीबीटी पीडीएफ सिर्फ़ अंग्रेज़ी छापती है।','يرجى كتابة الموقع والعمل بالأحرف الإنجليزية — ملف PDF يطبع الإنجليزية فقط.'],
+    oldLink:['This is the old link — TBT, incident and competency test are on your project link. Ask HSE for it.','यह पुराना लिंक है — टीबीटी, घटना और परीक्षा आपके प्रोजेक्ट लिंक पर हैं। एचएसई से माँगें।','هذا الرابط القديم — اجتماع السلامة والحوادث والاختبار في رابط مشروعك. اطلبه من قسم السلامة.'],
     st_confirm:['Issued to you — please confirm','आपको दिया गया — पुष्टि करें','صُرفت لك — يرجى التأكيد'], st_sent:['Sent — waiting','भेजा गया — प्रतीक्षा','أُرسل — قيد الانتظار'],
   };
   const tr=(k)=>{ const t=T[k]||[k,'','']; return `${esc(t[0])}<span class="tr">${esc(t[1])}${t[2]?` · <span class="ar" dir="rtl">${esc(t[2])}</span>`:''}</span>`; };
@@ -220,7 +222,13 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   load().then(ok=>{ if(!ok) return; let last=''; try{ last=localStorage.getItem('ppeWho_'+token)||''; }catch(e){} render(last); });
 
   async function sha(s){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16); }
-  const board=()=>{ const b=((link.board||{})[me.id]||[]).slice(); const ids=new Set(b.map(x=>x.id)); for(const s of sentLocal) if(s.w===me.id && !ids.has(s.id)) b.unshift({id:s.id, k:s.k||'req', st:s.k==='tbt'?'tbtnew':'sent', d:s.d, t:s.t}); return b; };
+  // Batch 85: what this phone just did (received PPE, signed a TBT) stays shown until the tracker updates the link
+  let boardOv={}; try{ boardOv=JSON.parse(sessionStorage.getItem('ppeOv_'+token)||'{}'); }catch(e){}
+  const OV_RANK={delivered:9, tbtdone:9, tbtsigned:5, tbtpend:5};
+  const ovKey=(w,x)=>w+'|'+x.id+'|'+(x.li||0);
+  function setOv(w, x, st){ boardOv[ovKey(w,x)]={st, at:Date.now()}; try{ sessionStorage.setItem('ppeOv_'+token, JSON.stringify(boardOv)); }catch(e){} }
+  const applyOv=(w,x)=>{ const o=boardOv[ovKey(w,x)]; return (o && Date.now()-o.at<12*3600e3 && (OV_RANK[o.st]||0)>(OV_RANK[x.st]||0)) ? {...x, st:o.st} : x; };
+  const board=()=>{ const b=((link.board||{})[me.id]||[]).map(x=>applyOv(me.id,x)); const ids=new Set(b.map(x=>x.id)); for(const s of sentLocal) if(s.w===me.id && !ids.has(s.id)) b.unshift({id:s.id, k:s.k||'req', st:s.k==='tbt'?'tbtnew':'sent', d:s.d, t:s.t}); return b; };
   const wById=id=>(link.workers||[]).find(x=>x.id===id);
 
   // division + search + name — used for "choose your name" and "add another person"
@@ -270,18 +278,18 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       app.innerHTML=`<div class="card"><div class="hello"><div>${tr('hello')}<b>${esc(me.name)}</b>${me.dv?`<span class="tr">${esc(me.dv)}</span>`:''}</div><button class="link" id="out">${tr('notme')}</button></div></div>
         <div class="hboxes"><button type="button" class="hbox hb-blue" id="toReq">${svg('helmet')}<span class="hbl">${tr('req')}</span></button>
           <button type="button" class="hbox hb-green" id="toRec">${svg('impact')}<span class="hbl">${tr('rec')}</span>${nRec?`<span class="badge" style="color:var(--ok)">${nRec}</span>`:''}</button>
-          <button type="button" class="hbox hb-navy" id="toTbt">${svg('clip')}<span class="hbl">${tr('tbtReq')}</span></button>
+          ${!link.projectId?`<div class="card note" style="margin:0;">${tr('oldLink')}</div>`:`<button type="button" class="hbox hb-navy" id="toTbt">${svg('clip')}<span class="hbl">${tr('tbtReq')}</span></button>
           <button type="button" class="hbox hb-red" id="toInc">${svg('siren')}<span class="hbl">${tr('incRep')}</span></button>
-          <button type="button" class="hbox hb-purple ${compOf()&&!compWasSent(compOf().aid)?'live':''}" id="toComp">${svg('cap')}<span class="hbl">${tr('comp')}<span class="hsub">${compOf()&&!compWasSent(compOf().aid)?esc(T.compOpen[0]):esc(T.compNone[0])}</span></span></button></div>
+          <button type="button" class="hbox hb-purple ${compOf()&&!compWasSent(compOf().aid)?'live':''}" id="toComp">${svg('cap')}<span class="hbl">${tr('comp')}<span class="hsub">${compOf()&&!compWasSent(compOf().aid)?esc(T.compOpen[0]):esc(T.compNone[0])}</span></span></button>`}</div>
         ${toSign.length?`<div class="card signme"><h2>${esc(T.tbtToSign[0])} (${toSign.length})<span class="tr">${esc(T.tbtToSign[1])} · <span class="ar" dir="rtl">${esc(T.tbtToSign[2])}</span></span></h2>${toSign.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><button class="btn green" data-tbt-open="${esc(x.id)}" style="margin-top:6px; padding:11px;">${tr('signNow')}</button></div>`).join('')}</div>`:''}
         <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
-      $('#out').onclick=()=>{ me=null; tbtF=null; view='who'; render(); };
+      $('#out').onclick=()=>{ me=null; tbtF=null; incF=null; compA=null; jobF=null; people=[]; recSel=new Set(); need=''; reason=''; note=''; view='who'; render(); };
       app.querySelectorAll('[data-tbt-open]').forEach(bt=>bt.onclick=()=>openTbt(bt.dataset.tbtOpen));
       $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
       $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
-      $('#toTbt').onclick=()=>{ if(!tbtF) tbtNew(); view='tbtReq'; render(); window.scrollTo(0,0); };
+      if(link.projectId){ $('#toTbt').onclick=()=>{ if(!tbtF) tbtNew(); view='tbtReq'; render(); window.scrollTo(0,0); };
       $('#toInc').onclick=()=>{ if(!incF) incNew(); view='inc'; render(); window.scrollTo(0,0); };
-      $('#toComp').onclick=()=>openComp();
+      $('#toComp').onclick=()=>openComp(); }
       return;
     }
     if(view==='req'){
@@ -310,7 +318,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ keep(); const [pi,ci]=pc(b.dataset.q), c=cartOf(pi)[ci]; c.qty=Math.max(1, Math.min(20, c.qty+Number(b.dataset.d))); render(); });
       app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ keep(); reason=b.dataset.r; render(); });
       app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ keep(); ai=+b.dataset.p; render(); });
-      app.querySelectorAll('[data-px]').forEach(b=>b.onclick=()=>{ keep(); const i=+b.dataset.px; people.splice(i,1); if(ai>=people.length || ai===i) ai=0; else if(ai>i) ai--; render(); });
+      app.querySelectorAll('[data-px]').forEach(b=>b.onclick=()=>{ keep(); const i=+b.dataset.px; people.splice(i,1); if(ai===i) ai=0; else if(ai>i) ai--; if(ai>=people.length) ai=0; render(); });
       $('#addP').onclick=()=>{ keep(); addOpen=true; render(); const q=$('#aq'); if(q) q.focus(); };
       if(addOpen){ wirePicker('a', new Set(people.map(p=>p.id)), '');
         $('#addNo').onclick=()=>{ keep(); addOpen=false; render(); };
@@ -361,6 +369,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     ['FINAL CHECKS','100% ready to go / permit complete · Emergency response plan in place'],
     ['START WORK','Comply – Intervene – Respect · Adhere to Life Saving Rules · STOP & re-assess when things change']];
   const TB_LSR={bsc:'Bypassing safety controls', cs:'Confined space', drv:'Driving', ei:'Energy isolation', hw:'Hot work', lof:'Line-of-fire', sml:'Safe mechanical lifting', wa:'Work authorisation', wah:'Working at height'};
+  const nonLatin=(...v)=>v.some(x=>/[^\u0000-\u024F\u2010-\u2027\u20AC]/.test(String(x||'')));   // Batch 85: the PDF font prints English letters only
   const nowHM=()=>{ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
   let tbtF=null, tbtX=null, tpads={};
   const dsOf=id=>(wById(id)||{}).ds||'';
@@ -410,6 +419,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     if(!t.date) return err('Choose the date.'); if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job: Rig up, Rig down, Modification or Inspection.':'Write the work you will do.');
     if(!t.shift) return err('Choose Day or Night job.'); if(!t.client) return err('Choose the client.'); if(t.client==='__other' && !String(t.cother||'').trim()) return err('Write the client name.');
     if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.');
+    if(nonLatin(t.loc, t.job, t.jp, t.cother, t.veh)) return err(T.engOnly[0]+' / '+T.engOnly[1]);
     const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', job:String(t.job).trim().slice(0,120), att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
     const b=$('#bSend'); b.disabled=true;
     try{ const ref=await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
@@ -462,14 +472,15 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <div class="sgn"><div class="sgn-h">${tr('jobSign')}: ${esc(me.name)}</div><div class="sigbox small"><canvas data-sp="job" width="600" height="200"></canvas><div class="hint" data-sh="job">✍</div></div></div>
         <div id="err" class="err hidden"></div><button class="btn green" id="jSave">${tr('jobSave')}</button></div>
       <button class="btn ghost" id="back">${tr('back')}</button>`;
-    const pad=makePad(app.querySelector('[data-sp="job"]'), app.querySelector('[data-sh="job"]'));
-    app.querySelectorAll('[data-jshift]').forEach(b=>b.onclick=()=>{ read(); t.shift=b.dataset.jshift; keepScroll(renderTbtJob); });
-    app.querySelectorAll('[data-jjob]').forEach(b=>b.onclick=()=>{ read(); t.job=b.dataset.jjob; keepScroll(renderTbtJob); });
+    const pad=makePad(app.querySelector('[data-sp="job"]'), app.querySelector('[data-sh="job"]')); pad.restore(t._sig);
+    const keepSig=()=>{ t._sig=pad.ink?pad.raw():null; };
+    app.querySelectorAll('[data-jshift]').forEach(b=>b.onclick=()=>{ read(); keepSig(); t.shift=b.dataset.jshift; keepScroll(renderTbtJob); });
+    app.querySelectorAll('[data-jjob]').forEach(b=>b.onclick=()=>{ read(); keepSig(); t.job=b.dataset.jjob; keepScroll(renderTbtJob); });
     app.querySelectorAll('[data-jchg]').forEach(c=>c.onchange=()=>{ const k=c.dataset.jchg, i=t.chg.indexOf(k); if(c.checked && i<0) t.chg.push(k); if(!c.checked && i>=0) t.chg.splice(i,1); c.closest('.tk').classList.toggle('on', c.checked); });
     $('#back').onclick=()=>{ view='tbtSign'; render(); };
     $('#jSave').onclick=async()=>{ read();
       if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job.':'Write the work you will do.');
-      if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.'); if(!pad.ink) return err('Please sign to confirm the crew was briefed.');
+      if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.'); if(nonLatin(t.loc, t.job, t.jp, t.veh)) return err(T.engOnly[0]+' / '+T.engOnly[1]); if(!pad.ink) return err('Please sign to confirm the crew was briefed.');
       const job={time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', job:String(t.job).trim().slice(0,120), chg:t.chg.map(k=>TB_CHG[k][0]), by:me.id, sig:pad.image(300,100), at:new Date().toISOString()};
       const b=$('#jSave'); b.disabled=true;
       try{ const fresh=await tbtFetch(x.id); if(!fresh){ tbtX=null; view='tbtSign'; render(); return; }
@@ -485,7 +496,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       try{ const fresh=await tbtFetch(tbtX.id); if(!fresh || !['new','sign'].includes(fresh.status)){ tbtX=fresh; render(); return; }
         const sigs={...(fresh.sigs||{})}; for(const [w,v] of Object.entries(add)) if(!sigs[w]) sigs[w]=v;
         await db.collection('tbtSubmissions').doc(tbtX.id).update({sigs});
-        tbtX={...fresh, sigs}; if(link.board && link.board[me.id]) link.board[me.id]=link.board[me.id].map(e=>e.id===tbtX.id?{...e, st:tbtAllSigned(tbtX)?'tbtdone':'tbtsigned'}:e);
+        tbtX={...fresh, sigs}; setOv(me.id, {id:tbtX.id}, fresh.status==='new'?'tbtpend':(tbtAllSigned(tbtX)?'tbtdone':'tbtsigned'));
         render(); window.scrollTo(0,0); return;
       }catch(e){ console.warn(e); if(attempt===2){ b.disabled=false; err('Not saved — check the internet and try again.'); } }
     }
@@ -512,6 +523,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const INK=[20,22,28], LBL=[246,247,249], RED=[179,18,26], SUB=[90,96,106];
     let y=o.top||32; const ensure=h=>{ if(y+h>H-28){ doc.addPage(); y=o.top||32; } };
     const dmy2=v=>{ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v||''); return m?`${m[3]}-${m[2]}-${m[1]}`:(v||''); };
+  const isoLoc=v=>{ const t=new Date(v); return isNaN(t) ? String(v||'').slice(0,10) : `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; };   // Batch 85: Oman date, not UTC
     const drawTick=(cx,cy,on)=>{ doc.setDrawColor(110,116,126); doc.setLineWidth(0.6); doc.rect(cx-5,cy-5,10,10);
       if(on){ doc.setDrawColor(...INK); doc.setLineWidth(1.6); doc.line(cx-3.2,cy+0.2,cx-0.8,cy+2.8); doc.line(cx-0.8,cy+2.8,cx+3.8,cy-3.2); } doc.setLineWidth(0.5); };
     const row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:(c.img||c.check!==undefined)?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
@@ -552,13 +564,15 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       j.first?{t:'All attendees', w:90, color:SUB}:{img:j.sig, t:j.sig?'':who(j.by), w:90}], j.first?15:26));
     y+=6; const hs=x.hseSig||{};
     if(x.status==='new') row([{t:'HSE REVIEW: PENDING', w:CW, bold:true, color:RED}]);
-    else { ensure(52); row([{t:'REVIEWED BY HSE', w:K, bold:true, fill:LBL},{t:hs.name||x.reviewedBy||'—', sub:[hs.role, x.reviewedAt?dmy2(String(x.reviewedAt).slice(0,10)):''].filter(Boolean).join('  ·  '), w:CW-K-150, bold:true},{img:hs.img, t:hs.img?'':'—', w:150, color:SUB}], 40); }
+    else { ensure(52); row([{t:'REVIEWED BY HSE', w:K, bold:true, fill:LBL},{t:hs.name||x.reviewedBy||'—', sub:[hs.role, x.reviewedAt?dmy2(isoLoc(x.reviewedAt)):''].filter(Boolean).join('  ·  '), w:CW-K-150, bold:true},{img:hs.img, t:hs.img?'':'—', w:150, color:SUB}], 40); }
     row([{t:'Remember the 3 golden rules: 1) Comply  2) Intervene  3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.6, bold:true, color:RED}]);
   }
 
   /* ===== Batch 84: competency test — opened by HSE for one person, answered here, scored in the tracker ===== */
   let compA=null, compTimer=null, compPad=null;
-  const compOf=()=>{ const c=((link&&link.comp)||{})[me&&me.id]; return c && Number(c.until)>Date.now()-10*60000 ? c : null; };
+  // Batch 85: the link lists open tests by assessment id — the first one for me that I have not sent yet
+  const compOf=()=>{ if(!me) return null; const all=Object.entries((link&&link.comp)||{}).map(([k,c])=>({...c, aid:c.aid||k})).filter(c=>c.w===me.id && Number(c.until)>Date.now()-10*60000 && Array.isArray(c.qs));
+    return all.find(c=>!compWasSent(c.aid)) || all[0] || null; };
   const compSentKey=aid=>'compSent_'+aid;
   const compWasSent=aid=>{ try{ return !!localStorage.getItem(compSentKey(aid)); }catch(e){ return false; } };
   const mmss=ms=>{ const s=Math.max(0, Math.round(ms/1000)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
@@ -605,7 +619,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   function compTick(c){ clearInterval(compTimer); compTimer=setInterval(()=>{ const el=$('#cTime'); if(!el || (view!=='comp')){ clearInterval(compTimer); compTimer=null; return; } const left=Number(c.until)-Date.now(); el.textContent=left>0?mmss(left):T.compOver[0]; if(left<=0) el.classList.add('late'); }, 1000); }
   async function compSend(c){
     const miss=compA.ans.map((x,i)=>Number.isInteger(x)?-1:i).filter(i=>i>=0);
-    if(miss.length){ miss.forEach(i=>$('#cq'+i).classList.add('miss')); $('#cq'+miss[0]).scrollIntoView({block:'center'}); return err(`Answer every question first — ${miss.length} not answered (marked red).`); }
+    if(miss.length){ miss.forEach(i=>$('#cq'+i).classList.add('miss')); err(`Answer every question first — ${miss.length} not answered (marked red).`); $('#cq'+miss[0]).scrollIntoView({block:'center'}); return; }
     if(!compPad || !compPad.ink) return err('Sign in the box first.');
     if(Date.now()>Number(c.until)+10*60000) return err('The time is over — tell HSE.');
     const b=$('#cSend'); b.disabled=true;
@@ -681,20 +695,23 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         const data={name:t.g.name, refs, sig:pads[t.gi].image(), date:today()}; if(t.g.wid!==me.id) data.by=me.id;
         await db.collection('ppeRequests').add({token, kind:'receipt', workerId:t.g.wid, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
         for(const x of t.sel) recSel.delete(key(x));
-        if(link.board && link.board[me.id]) link.board[me.id]=link.board[me.id].map(x=>t.sel.includes(x)?{...x, st:'delivered'}:x);
+        for(const x of t.sel) setOv(me.id, x, 'delivered');
       }
       view='thanks'; render(); window.scrollTo(0,0);
     }catch(e){ console.warn(e); b.disabled=false; err('Not saved — check the internet and try again.'); }
   }
   function makePad(cv, hint){
     const g=cv.getContext('2d'), p={ink:false};
+    { const cw=cv.clientWidth, ch=cv.clientHeight; if(cw>0 && ch>0) cv.height=Math.round(cv.width*ch/cw); }   // Batch 85: bitmap shape = shape on screen (no stretched signatures)
     const clear=()=>{ g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); p.ink=false; if(hint) hint.classList.remove('hidden'); };
     p.clear=clear; clear(); let on=false, last=null;
     const pos=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; };
     cv.addEventListener('pointerdown', e=>{ e.preventDefault(); on=true; const er=$('#err'); if(er) er.classList.add('hidden'); last=pos(e); try{ cv.setPointerCapture(e.pointerId); }catch(x){} });
     cv.addEventListener('pointermove', e=>{ if(!on) return; e.preventDefault(); const q=pos(e); g.strokeStyle='#0b1a33'; g.lineWidth=3.2; g.lineCap='round'; g.beginPath(); g.moveTo(last.x,last.y); g.lineTo(q.x,q.y); g.stroke(); last=q; if(!p.ink){ p.ink=true; if(hint) hint.classList.add('hidden'); } });
     const end=()=>{ if(on && p.ink && p.onEnd) p.onEnd(); on=false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
-    p.image=(W,H)=>{ W=W||480; H=H||170; const o=document.createElement('canvas'); o.width=W; o.height=H; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,W,H); c.drawImage(cv,0,0,W,H); return o.toDataURL('image/png'); };
+    p.raw=()=>cv.toDataURL('image/png');
+    p.restore=u=>{ if(!u) return; const im=new Image(); im.onload=()=>{ g.drawImage(im,0,0,cv.width,cv.height); p.ink=true; if(hint) hint.classList.add('hidden'); }; im.src=u; };
+    p.image=(W)=>{ W=W||480; const H=Math.max(40, Math.round(W*cv.height/cv.width)); const o=document.createElement('canvas'); o.width=W; o.height=H; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,W,H); c.drawImage(cv,0,0,W,H); return o.toDataURL('image/png'); };
     return p;
   }
 })();

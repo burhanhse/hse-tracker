@@ -2918,7 +2918,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b84';
+const APP_BUILD='b85';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -5110,11 +5110,12 @@ const INC_QUICK_FIELDS = [
   {key:'immediateActions', label:'Immediate actions taken', type:'textarea', wide:true, placeholder:'e.g. area barricaded, first aid given, work stopped'},
 ];
 function openAddIncForm(){
+  incFromReport=null;   // Batch 85: set again by incRepOpen when the form is for a site report
   const f=document.getElementById('addIncFields');
   f.innerHTML = `<label>Project<select data-ifield="projectId">${projectOptionsHtml('')}</select></label>` + INC_QUICK_FIELDS.map(x=>incFieldHtml(x, x.key==='date'?localToday():x.key==='injuryClass'?'':'')).join('');
   document.getElementById('addIncPanel').hidden=false;
 }
-function closeAddIncForm(){ document.getElementById('addIncPanel').hidden=true; document.getElementById('addIncForm').reset(); }
+function closeAddIncForm(){ incFromReport=null; document.getElementById('addIncPanel').hidden=true; document.getElementById('addIncForm').reset(); }
 
 /* ---------- incident drawer ---------- */
 const INC_TABS=[{key:'overview',label:'Overview'},{key:'people',label:'People'},{key:'investigation',label:'Investigation'},{key:'findings',label:'Findings & learning'},{key:'actions',label:'Actions'},{key:'closeout',label:'Close-out'},{key:'files',label:'Photos & files'}];
@@ -8200,7 +8201,8 @@ const PPE_REASONS={'New':'New issue', 'Lost':'Replacement (lost)', 'Damaged':'Re
 const PPE_REQ_ST={new:'Waiting for HSE review', md:'Waiting for MD approval', approved:'Approved — to collect', delivered:'Delivered', rejected:'Not approved'};
 const PPE_MAIN=[['helmet','Safety helmet'],['impact','Impact gloves'],['coverall','Coverall'],['shoes','Safety shoes'],['leather','Leather gloves']];
 const PPE_SIZE_ORDER=['XS','S','M','L','XL','XXL','3XL','4XL','5XL'];
-let ppeLinks=[], ppeReqs=[], ppeReqsDone=[], unsubPpeLinks=null, unsubPpeOpen=null, unsubPpeDone=null, ppeLinkTimer=null, ppeProcTimer=null, ppeLinkBusy=false;
+let workersLoaded=false, sitesLoaded=false;   // Batch 85: first data has arrived after sign-in
+let ppeLinks=[], ppeReqs=[], ppeReqsDone=[], unsubPpeLinks=null, unsubPpeOpen=null, unsubPpeDone=null, ppeLinkTimer=null, ppeProcTimer=null, ppeLinkBusy=false, ppeLinkAgain=false, ppeLinkMaking=new Set(), ppeTabId=Math.random().toString(36).slice(2);
 const ppeRcptBusy=new Set(), ppeHashCache=new Map(), ppeSigCache=new Map();
 let ppeReqUi={qr:false, done:false, busy:'', out:new Set()};
 function isMD(){ const u=auth.currentUser; return !!u && String(u.email||'').toLowerCase()===PPE_MD_EMAIL; }
@@ -8342,18 +8344,19 @@ async function ppeLinkPayload(token, pid){
 }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
-  if(!canEdit() || !workers.length || ppeLinkBusy) return; ppeLinkBusy=true;
+  if(!canEdit() || !workersLoaded || !sitesLoaded || !workers.length){ return; } if(ppeLinkBusy){ ppeLinkAgain=true; return; } ppeLinkBusy=true;
   try{ for(const l of ppeLinks.filter(x=>x.active && x.projectId)){ const p=await ppeLinkPayload(l.id, l.projectId), sig=siteHash(JSON.stringify(p)); if(l.sig===sig) continue;
       await db.collection('ppeLinks').doc(l.id).update({...p, sig, syncedAt:new Date().toISOString()}); l.sig=sig; } }
   catch(e){ console.warn('PPE link sync', e); }
-  finally{ ppeLinkBusy=false; }
+  finally{ ppeLinkBusy=false; if(ppeLinkAgain){ ppeLinkAgain=false; ppeLinkSyncSoon(); } }
 }
 async function ppeLinkCreate(pid){
-  if(!canEdit() || !pid) return; if(ppeLinkOf(pid)){ toast('This project already has a link'); return; }
+  if(!canEdit() || !pid || ppeLinkMaking.has(pid)) return; if(ppeLinkOf(pid) || ppeLinks.some(l=>l.projectId===pid && l.active)){ toast('This project already has a link'); return; } ppeLinkMaking.add(pid); try{
   const token=siteNewToken(), u=auth.currentUser, p=await ppeLinkPayload(token, pid);
   try{ await db.collection('ppeLinks').doc(token).set({active:true, createdAt:new Date().toISOString(), createdBy:(u&&u.email)||'', ...p, sig:siteHash(JSON.stringify(p)), syncedAt:new Date().toISOString()});
     ppeReqUi.qr=token; toast('Project link created — share it or print the QR code'); renderPpe(); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not create the link'); }
+  } finally{ ppeLinkMaking.delete(pid); }
 }
 async function ppeLinkSetActive(token, on){
   try{ await db.collection('ppeLinks').doc(token).update({active:!!on, ...(on?{}:{switchedOffAt:new Date().toISOString()})}); toast(on?'PPE link switched on':'PPE link switched off — it no longer opens'); }
@@ -8423,8 +8426,18 @@ async function ppeProcessReceipts(){
     try{ await ppeProcessReceipt(r); }catch(e){ console.error('PPE receipt', e); ppeRcptBusy.delete(r.id); }
   }
 }
+// Batch 85: only one open tracker handles a receipt (the other browsers skip it)
+async function ppeClaim(id){
+  if(typeof db.runTransaction!=='function') return true;
+  const ref=db.collection('ppeRequests').doc(id);
+  try{ return await db.runTransaction(async t=>{ const sn=await t.get(ref), v=sn.exists?sn.data():null; if(!v || v.status!=='new') return false;
+    const c=v.claim; if(c && c.tab!==ppeTabId && Date.now()-Date.parse(c.at||0)<120000) return false;
+    t.update(ref, {claim:{tab:ppeTabId, at:new Date().toISOString()}}); return true; }); }
+  catch(e){ console.warn('PPE claim', e); return false; }
+}
 async function ppeProcessReceipt(r){
   const d=r.data||{}, w=workers.find(x=>x.id===r.workerId); if(!w) return;   // stays in "Problems" on the panel
+  if(!(await ppeClaim(r.id))){ ppeRcptBusy.delete(r.id); return; }
   const date=/^\d{4}-\d{2}-\d{2}$/.test(d.date||'')?d.date:ppeDateOf(r), now=new Date().toISOString(), u=auth.currentUser, by=(u&&u.email)||'';
   const lines=[], iss=[];
   for(const ref of (d.refs||[])){
@@ -8436,11 +8449,11 @@ async function ppeProcessReceipt(r){
   let sigId='';
   if(items.length){
     const byW=d.by && d.by!==w.id ? workers.find(x=>x.id===d.by) : null;
-    const ref=await db.collection('ppeSignatures').add({workerId:w.id, name:w.fullName||d.name||'', civilId:w.civilId||'', designation:w.designation||'', projectId:w.projectId||'', img:String(d.sig||''), date, receiptId:r.id,
+    const sigDocId='rc_'+r.id, ref=db.collection('ppeSignatures').doc(sigDocId); await ref.set({workerId:w.id, name:w.fullName||d.name||'', civilId:w.civilId||'', designation:w.designation||'', projectId:lines.length?ppeReqProject(lines[0].q, w):(w.projectId||''), img:String(d.sig||''), date, receiptId:r.id,
       ...(byW?{collectedBy:byW.fullName||''}:{}),
       items, requests:lines.map(({q, li})=>({id:q.id, li, submitted:ppeDateOf(q), reason:(q.data||{}).reason||'', neededBy:(q.data||{}).neededBy||'', requestedBy:li?((q.data||{}).name||''):'', hseBy:q.hseBy||'', hseAt:q.hseAt||'', mdBy:q.mdBy||'', mdAt:q.mdAt||''})),
       crewIssues:iss.map(x=>({id:x.id, date:x.date||'', issuedBy:x.issuedBy||'', condition:x.condition||''})), createdAt:now, createdBy:by});
-    sigId=ref.id;
+    sigId=sigDocId;
     await ppeAddIssued(w, lines, iss, date, sigId);
     const qs=[...new Set(lines.map(l=>l.q))];
     for(const q of qs) await ppeMarkGot(q, lines.filter(l=>l.q===q).map(l=>l.li), date, sigId, false);
@@ -8649,7 +8662,7 @@ function ppeReqCardHtml(r, mode){
     const outBox=mode==='md' && md && lines.length>1 ? `<label class="chk ppe-out"><input type="checkbox" data-pr-out="${esc(r.id+'|'+l.li)}" ${ppeReqUi.out.has(r.id+'|'+l.li)?'checked':''}> Leave out</label>`:'';
     return `${group?`<div class="ppe-rq-person">${lw?`<button type="button" class="att-link" data-ppe-worker="${esc(lw.id)}">${esc(lw.fullName||l.name)}</button>`:esc(l.name||'—')}${lw&&lw.designation?` <span class="wsub">${esc(lw.designation)}</span>`:''} ${tag}${outBox}</div>`:(tag&&mode!=='new'&&mode!=='md'?`<div class="ppe-rq-person">${tag}</div>`:'')}
       <div class="table-wrap"><table class="ppe-rq-t"><thead><tr><th>Item</th><th>Size</th><th class="num">Qty</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${rc?`<div style="margin:-2px 0 6px;">${rc}</div>`:''}`; };
-  const trail=[r.hseBy?`HSE checked: ${r.hseBy}${r.hseAt?' · '+isoToDmy(String(r.hseAt).slice(0,10)):''}${r.hseNote?' — '+r.hseNote:''}`:'', r.mdBy?`MD: ${r.mdBy}${r.mdAt?' · '+isoToDmy(String(r.mdAt).slice(0,10)):''}${r.mdNote?' — '+r.mdNote:''}`:''].filter(Boolean);
+  const trail=[r.hseBy?`HSE checked: ${r.hseBy}${r.hseAt?' · '+isoToDmy(isoToLocalDate(r.hseAt)):''}${r.hseNote?' — '+r.hseNote:''}`:'', r.mdBy?`MD: ${r.mdBy}${r.mdAt?' · '+isoToDmy(isoToLocalDate(r.mdAt)):''}${r.mdNote?' — '+r.mdNote:''}`:''].filter(Boolean);
   let acts='', note='';
   if(mode==='new' && ed){ note=`<input class="ppe-rq-note" data-pr-note="${esc(r.id)}" maxlength="300" placeholder="Comment for the MD / reason if not approved (optional)">`;
     acts=`<button type="button" class="btn btn-sm btn-primary" data-pr-md="${esc(r.id)}">Send ${group?'all ':''}to MD for approval</button><button type="button" class="btn btn-sm" data-pr-rej="${esc(r.id)}" data-armed="0">Reject</button>`; }
@@ -8733,7 +8746,7 @@ async function ppeReqXlsx(){
   const rows=[]; for(const r of all){ const d=r.data||{}, rq=workers.find(x=>x.id===r.workerId)||{};
     for(const l of ppeReqLines(r)){ const w=workers.find(x=>x.id===l.wid)||{}, st=ppeLineSt(r, l);
       rows.push([ppeDateOf(r), rq.fullName||d.name||'', w.fullName||l.name||'', w.civilId||'', w.designation||'', ppeReqProject(r, w)?projectName(ppeReqProject(r, w)):'', ppeItemsText(l.items), d.reason||'', d.neededBy||'', l.out?'Left out by MD':(PPE_REQ_ST[st]||st),
-        r.hseBy||'', String(r.hseAt||'').slice(0,10), r.mdBy||'', String(r.mdAt||'').slice(0,10), r.mdNote||r.hseNote||'', l.got?l.got.date||'':'', l.got?(l.got.paper?'Paper':'Signed on link'):'']); } }
+        r.hseBy||'', isoToLocalDate(r.hseAt), r.mdBy||'', isoToLocalDate(r.mdAt), r.mdNote||r.hseNote||'', l.got?l.got.date||'':'', l.got?(l.got.paper?'Paper':'Signed on link'):'']); } }
   const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — PPE requests (open + last 30 days)'],['Exported '+localToday()],[],
     ['Requested','Requested by','Worker','Civil ID','Designation','Project','Items','Reason','Needed by','Status','HSE checked by','HSE date','MD','MD date','Comment','Received','Proof'], ...rows]);
   sh['!cols']=[{wch:11},{wch:24},{wch:26},{wch:16},{wch:18},{wch:22},{wch:44},{wch:10},{wch:11},{wch:24},{wch:26},{wch:11},{wch:26},{wch:11},{wch:30},{wch:11},{wch:14}];
@@ -8760,7 +8773,7 @@ async function ppeReceiptPdf(sigId){
   for(const i of (s.items||[])) row([{t:i.item, w:CW-140},{t:i.size||'—', w:80},{t:String(i.qty||1), w:60}]);
   if(s.collectedBy){ kv('COLLECTED BY', `${s.collectedBy} (signed by ${s.name} on his phone)`); }
   for(const q of (s.requests||[])){ y+=8; kv('REQUESTED', `${isoToDmy(q.submitted)} · reason: ${q.reason||'—'}${q.neededBy?' · needed by '+isoToDmy(q.neededBy):''}${q.requestedBy?' · requested by '+q.requestedBy:''}`);
-    kv('HSE REVIEW', [q.hseBy, q.hseAt?isoToDmy(String(q.hseAt).slice(0,10)):''].filter(Boolean).join(' · ')||'—', 'MD APPROVAL', [q.mdBy, q.mdAt?isoToDmy(String(q.mdAt).slice(0,10)):''].filter(Boolean).join(' · ')||'—'); }
+    kv('HSE REVIEW', [q.hseBy, q.hseAt?isoToDmy(isoToLocalDate(q.hseAt)):''].filter(Boolean).join(' · ')||'—', 'MD APPROVAL', [q.mdBy, q.mdAt?isoToDmy(isoToLocalDate(q.mdAt)):''].filter(Boolean).join(' · ')||'—'); }
   for(const c of (s.crewIssues||[])){ y+=8; kv('CREW ISSUE', `${isoToDmy(c.date)} · ${c.condition||'—'}${c.issuedBy?' · issued by '+c.issuedBy:''}`); }
   ensure(150); y+=14; doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...INK);
   doc.splitTextToSize('I have received the PPE listed above in good condition. I will wear it as instructed, look after it and return it for replacement when worn or damaged.', CW).forEach((ln,i)=>doc.text(ln, M, y+i*12)); y+=30;
@@ -8887,7 +8900,7 @@ function renderTricPanel(){
   box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} TBT requests from the project link${nw.length?` <span class="badge danger">${nw.length} to review</span>`:''}</h3>
       <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><button type="button" class="btn btn-sm ${hseSigOf((auth.currentUser||{}).email)?'':'btn-primary'}" data-hsesig-open="1">${hseSigOf((auth.currentUser||{}).email)?'✓ My signature':'Add my signature'}</button><input type="month" id="tricMonthP" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf" data-tric-site="${esc(sid)}">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx" data-tric-site="${esc(sid)}">${ic('download')} Month Excel</button></span></div>
     <p class="wsub" style="margin:-4px 0 8px;">${link?'':'<strong>This project has no project link yet</strong> (Workforce → PPE → project links). '}The crew fill the TBT on the project link and <strong>everyone signs straight away</strong> → you write the <strong>topic</strong>, tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong>, add dynamic risks → <strong>✓ Reviewed</strong> (your saved signature is added) → the PDF can be downloaded on their link and the TBT is added to the list below. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month (all projects together: Monthly Report → TBT records).</p>
-    ${(()=>{ const t=localToday(), ej=all.flatMap(x=>(x.jobs||[]).filter(q=>String(q.at||'').slice(0,10)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
+    ${(()=>{ const t=localToday(), ej=all.flatMap(x=>(x.jobs||[]).filter(q=>isoToLocalDate(q.at)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
     ${tricUi.sigOpen?hseSigBoxHtml():''}
     <div class="subhead">Waiting for your review (${nw.length})</div>${nw.length?nw.map(tricReviewCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing to review.</p>'}
     <div class="subhead">Reviewed — waiting for signatures (${sg.length})</div>${sg.length?sg.map(tricSignCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing waiting.</p>'}
@@ -8895,6 +8908,9 @@ function renderTricPanel(){
   </div>`;
   if(tricUi.sigOpen) hseSigWire();
 }
+// Batch 85: remove only the signatures of people taken off the TBT — never rewrite the whole list (a crew member may be signing right now)
+function tricSigDrops(x, r){ const FV=fsFieldValue(), gone=Object.keys(x.sigs||{}).filter(w=>!r.att.some(p=>p.w===w)); if(!gone.length) return {};
+  if(!FV) return {sigs:Object.fromEntries(Object.entries(x.sigs||{}).filter(([w])=>r.att.some(p=>p.w===w)))}; return Object.fromEntries(gone.map(w=>['sigs.'+w, FV.delete()])); }
 async function tricSend(id){
   const x=tricSubs.find(s=>s.id===id); if(!x || !canEdit()) return; const r=tricRv(x), d=x.data||{};
   if(!r.topic.trim()){ toast('Write the topic first'); const el=document.querySelector(`[data-tbt-topic="${CSS.escape(id)}"]`); if(el) el.focus(); return; }
@@ -8903,7 +8919,7 @@ async function tricSend(id){
   if(!hs || !hs.img){ toast('Save your signature first — it is added to the TBT PDF'); tricUi.sigOpen=true; renderTricPanel(); const b=document.getElementById('hseSigBox'); if(b) b.scrollIntoView({block:'center'}); return; }
   try{ await db.collection('tbtSubmissions').doc(id).update({status:'sign', topic:r.topic.trim().slice(0,120), musted:TRIC_MUSTED.map((m,i)=>r.m.has(i)), lsr:Object.keys(TRIC_LSR).filter(k=>r.l.has(k)),
       data:{...d, att:r.att.map(p=>{ const w=workers.find(y=>y.id===p.w); return {w:p.w, n:tbtWho(p.w, p.n), ds:String((w&&w.designation)||p.ds||'').slice(0,40)}; })},
-      dra:r.dra.filter(q=>String(q.hz||'').trim()||String(q.m||'').trim()).map(q=>({hz:String(q.hz||'').trim().slice(0,120), m:String(q.m||'').trim().slice(0,200), r:q.r||'', rn:q.r?tbtWho(q.r,''):''})), sigs:Object.fromEntries(Object.entries(x.sigs||{}).filter(([w])=>r.att.some(p=>p.w===w))), reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString(), hseSig:{name:hs.name||'', role:hs.role||'', img:hs.img, email:String(u.email||'').toLowerCase()}});
+      dra:r.dra.filter(q=>String(q.hz||'').trim()||String(q.m||'').trim()).map(q=>({hz:String(q.hz||'').trim().slice(0,120), m:String(q.m||'').trim().slice(0,200), r:q.r||'', rn:q.r?tbtWho(q.r,''):''})), ...tricSigDrops(x, r), reviewedBy:(u&&u.email)||'', reviewedAt:new Date().toISOString(), hseSig:{name:hs.name||'', role:hs.role||'', img:hs.img, email:String(u.email||'').toLowerCase()}});
     delete tricUi.rv[id]; toast(r.att.every(p=>(x.sigs||{})[p.w])?'Reviewed — the final PDF is ready on their link':'Reviewed — waiting for the people who have not signed yet'); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
@@ -8915,7 +8931,7 @@ async function tricReject(id, cancel){
 }
 // everyone signed → complete: project toolbox talk + Monthly Report
 async function tricAutoComplete(){
-  if(!canEdit()) return;
+  if(!canEdit() || !workersLoaded || !sitesLoaded) return;   // Batch 85: wait for projects + workers
   for(const x of tricSubs.filter(s=>s.status==='sign' && tbtSignedAll(s))){
     if(tricUi.closing.has(x.id)) continue; tricUi.closing.add(x.id);
     const d=x.data||{}, site=tbtSite(x), now=new Date().toISOString();
@@ -8923,11 +8939,20 @@ async function tricAutoComplete(){
       let talkId='';
       if(site && !(site.toolboxTalks||[]).some(t=>t.tricId===x.id)){
         const ids=tbtAtt(x).map(p=>p.w).filter(w=>workers.some(y=>y.id===w)), extra=tbtAtt(x).length-ids.length;
-        const rec={id:genId(), topic:x.topic||d.job, date:d.date||localToday(), conductedBy:tbtWho(x.workerId, d.name), attendeeIds:ids, extraAttendees:extra?String(extra):'',
+        const rec={id:'tt_'+x.id, topic:x.topic||d.job, date:d.date||localToday(), conductedBy:tbtWho(x.workerId, d.name), attendeeIds:ids, extraAttendees:extra?String(extra):'',
           notes:[`TBT request from the project link · ${d.job} · ${d.loc||''}${d.jp?' · journey plan '+d.jp:''}`, (x.musted||[]).filter(Boolean).length?`Musta'ed ${(x.musted||[]).filter(Boolean).length}/7`:'', (x.lsr||[]).length?'LSR: '+(x.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '):''].filter(Boolean).join(' · ').slice(0,900), tricId:x.id};
+        talkId=rec.id;
+        if(typeof db.runTransaction==='function'){   // Batch 85: two HSE browsers open → only one adds the talk
+          const tref=db.collection('tbtSubmissions').doc(x.id), sref=db.collection('siteEquipment').doc(site.id); let added=false;
+          const okT=await db.runTransaction(async t=>{ const ts=await t.get(tref), cur=ts.exists?ts.data():null; if(!cur || cur.status!=='sign') return false;
+            const ss=await t.get(sref), sd=(ss.exists?ss.data():null)||{}; if(!(sd.toolboxTalks||[]).some(r=>r.tricId===x.id)){ t.update(sref, stamp({toolboxTalks:[...(sd.toolboxTalks||[]), rec]})); added=true; }
+            t.update(tref, {status:'done', open:false, closedAt:now, completedAt:now, tbtDate:d.date||localToday(), projectId:site.id, talkId}); return true; });
+          if(okT && added) await syncToolboxToReport(site, rec);
+          continue;
+        }
         const FV=fsFieldValue();
         await db.collection('siteEquipment').doc(site.id).update(stamp({toolboxTalks: FV?FV.arrayUnion(rec):[...(site.toolboxTalks||[]), rec]}));
-        await syncToolboxToReport(site, rec); talkId=rec.id;
+        await syncToolboxToReport(site, rec);
       }
       await db.collection('tbtSubmissions').doc(x.id).update({status:'done', open:false, closedAt:now, completedAt:now, tbtDate:d.date||localToday(), projectId:site?site.id:(d.projectId||''), ...(talkId?{talkId}:{})});
     }catch(e){ console.error('TBT complete', e); tricUi.closing.delete(x.id); }
@@ -8974,6 +8999,7 @@ function tbtPdfBody(doc, x, o){
   const INK=[20,22,28], LBL=[246,247,249], RED=[179,18,26], SUB=[90,96,106];
   let y=o.top||32; const ensure=h=>{ if(y+h>H-28){ doc.addPage(); y=o.top||32; } };
   const dmy2=v=>{ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v||''); return m?`${m[3]}-${m[2]}-${m[1]}`:(v||''); };
+  const isoLoc=v=>{ const t=new Date(v); return isNaN(t) ? String(v||'').slice(0,10) : `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; };   // Batch 85: Oman date, not UTC
   const drawTick=(cx,cy,on)=>{ doc.setDrawColor(110,116,126); doc.setLineWidth(0.6); doc.rect(cx-5,cy-5,10,10);
     if(on){ doc.setDrawColor(...INK); doc.setLineWidth(1.6); doc.line(cx-3.2,cy+0.2,cx-0.8,cy+2.8); doc.line(cx-0.8,cy+2.8,cx+3.8,cy-3.2); } doc.setLineWidth(0.5); };
   const row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:(c.img||c.check!==undefined)?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
@@ -9014,7 +9040,7 @@ function tbtPdfBody(doc, x, o){
     j.first?{t:'All attendees', w:90, color:SUB}:{img:j.sig, t:j.sig?'':who(j.by), w:90}], j.first?15:26));
   y+=6; const hs=x.hseSig||{};
   if(x.status==='new') row([{t:'HSE REVIEW: PENDING', w:CW, bold:true, color:RED}]);
-  else { ensure(52); row([{t:'REVIEWED BY HSE', w:K, bold:true, fill:LBL},{t:hs.name||x.reviewedBy||'—', sub:[hs.role, x.reviewedAt?dmy2(String(x.reviewedAt).slice(0,10)):''].filter(Boolean).join('  ·  '), w:CW-K-150, bold:true},{img:hs.img, t:hs.img?'':'—', w:150, color:SUB}], 40); }
+  else { ensure(52); row([{t:'REVIEWED BY HSE', w:K, bold:true, fill:LBL},{t:hs.name||x.reviewedBy||'—', sub:[hs.role, x.reviewedAt?dmy2(isoLoc(x.reviewedAt)):''].filter(Boolean).join('  ·  '), w:CW-K-150, bold:true},{img:hs.img, t:hs.img?'':'—', w:150, color:SUB}], 40); }
   row([{t:'Remember the 3 golden rules: 1) Comply  2) Intervene  3) Respect. STOP the work and re-assess if anything changes.', w:CW, size:7.6, bold:true, color:RED}]);
 }
 async function tricOnePdf(id){
@@ -9252,10 +9278,13 @@ function compPick(role){
     const pool=all.filter(q=>q.m===m), got=[];
     if(m==='core'){ for(const [tp,[,k]] of Object.entries(COMP_CORE_TOPICS)) got.push(...compShuffle(pool.filter(q=>q.tp===tp)).slice(0,k)); }
     const have=new Set(got.map(q=>q.id)); got.push(...compShuffle(pool.filter(q=>!have.has(q.id))).slice(0, Math.max(0, n-got.length)));
-    out.push(...got.slice(0,n));
+    const sel=got.slice(0,n);
+    if(m==='core'){ const inn=new Set(sel.map(q=>q.id)); sel.push(...compShuffle(pool.filter(q=>q.custom && !COMP_CORE_TOPICS[q.tp] && !inn.has(q.id))).slice(0,3)); }   // Batch 85: client's own core questions (no topic) are always asked
+    out.push(...sel);
   }
   return out.map(q=>{ const ord=compShuffle(q.o.map((_,i)=>i)); return {id:q.id, m:q.m, q:compL(q.q,0), o:ord.map(i=>compL(q.o[i],0)), a:ord.indexOf(q.a), ord}; });
 }
+function compPassed(sc){ return !!sc && sc.total>0 && sc.score*100 >= compPass()*sc.total; }   // Batch 85: exact, not the rounded %
 function compScore(qs, ans){ const total=(qs||[]).length; let score=0; (qs||[]).forEach((q,i)=>{ if(Number.isInteger(ans[i]) && ans[i]===q.a) score++; }); return {score, total, pct:total?Math.round(score*100/total):0}; }
 
 /* who needs which assessment */
@@ -9328,9 +9357,10 @@ function compSuggest(ed){
   if(!testDone) why.push('knowledge test not done yet'); if(!pracDone) why.push(`${pl.filter(p=>!pr[p.id]).length} practical point(s) not marked`); if(!scenDone) why.push(`${sl.filter(s=>!sc[s.id]).length} verbal question(s) not marked`);
   if(!testDone || !pracDone || !scenDone) return {res:'', why, done:false};
   const pct=compScore(t.qs, t.ans).pct, crit=pl.filter(p=>p.c && pr[p.id]==='no'), no=pl.filter(p=>!p.c && pr[p.id]==='no'), ni=pl.filter(p=>pr[p.id]==='ni'), sno=sl.filter(s=>sc[s.id]==='no');
-  if(pct<compPass()) why.push(`test ${pct}% — below the pass mark of ${compPass()}%`);
+  const scT=compScore(t.qs, t.ans), passT=compPassed(scT);
+  if(!passT) why.push(`test ${scT.score}/${scT.total} (${pct}%) — below the pass mark of ${compPass()}%`);
   if(crit.length) why.push(`${crit.length} critical practical point(s) Not OK`);
-  if(pct<compPass() || crit.length) return {res:'Not yet competent', why, done:true};
+  if(!passT || crit.length) return {res:'Not yet competent', why, done:true};
   if(badP.length) why.push(`documents: ${badP.map(p=>p.label).join(', ')}`);
   if(no.length) why.push(`${no.length} practical point(s) Not OK`); if(ni.length) why.push(`${ni.length} practical point(s) need improvement`); if(sno.length) why.push(`${sno.length} verbal answer(s) not OK`);
   if(badP.length || no.length || ni.length || sno.length) return {res:'Competent under supervision', why, done:true};
@@ -9349,7 +9379,7 @@ function startCompData(){
 function stopCompData(){ for(const u of [unsubComp, unsubCompTests]) if(u){ try{ u(); }catch(e){} } unsubComp=unsubCompTests=null; compList=[]; compTests=[]; compLoaded=false; compIdx=new Map(); }
 function compChanged(){
   compIdx=new Map(); for(const a of compList){ if(!compIdx.has(a.workerId)) compIdx.set(a.workerId, []); compIdx.get(a.workerId).push(a); }
-  const ed=compUi.ed; if(ed && ed.id){ const s=compList.find(a=>a.id===ed.id); if(s && s.test && Array.isArray(s.test.ans) && !(ed.test && Array.isArray(ed.test.ans))){ ed.test={...s.test}; if(s.wSig && !ed.wSig) ed.wSig=s.wSig; compRenderTop(); } }
+  const ed=compUi.ed; if(ed && ed.id){ const s=compList.find(a=>a.id===ed.id); if(compSameTest(s, ed)){ ed.test={...s.test}; if(s.wSig && !ed.wSig) ed.wSig=s.wSig; compRenderTop(); } }
   renderComp(); renderCcComp(); if(typeof activeSiteTab!=='undefined' && activeSiteTab==='comp' && currentSite()) renderSiteDrawerBody();
   compProcessTests(); if(canEdit()) ppeLinkSyncSoon();
 }
@@ -9374,23 +9404,27 @@ async function compProcessTests(){
 // open tests for the workers of one project → the project link (questions in English / Hindi / Arabic — never the answers)
 function compLinkPayload(pid){
   const out={}, now=Date.now(), bank=new Map(compBankAll().map(q=>[q.id,q]));
-  for(const a of compList){ const t=a.test||{}; if(a.status!=='open' || t.mode!=='phone' || !t.open || !(Number(t.open.until)>now) || Array.isArray(t.ans) || !Array.isArray(t.qs)) continue;
+  for(const a of compList){ const t=a.test||{}; if(a.status!=='open' || t.mode!=='phone' || !t.open || !(Number(t.open.until)>now-15*60000) || Array.isArray(t.ans) || !Array.isArray(t.qs)) continue;   // Batch 85: kept 15 min after the time (late send)
     const w=workers.find(x=>x.id===a.workerId); if(!w || w.projectId!==pid) continue;
-    out[a.workerId]={aid:a.id, until:Number(t.open.until), role:compRoleName(a.role), qs:t.qs.map(q=>{ const b=bank.get(q.id), tri=x=>({e:compL(x,0), h:Array.isArray(x)?(x[1]||''):'', a:Array.isArray(x)?(x[2]||''):''});
+    out[a.id]={w:a.workerId, aid:a.id, until:Number(t.open.until), role:compRoleName(a.role), qs:t.qs.map(q=>{ const b=bank.get(q.id), tri=x=>({e:compL(x,0), h:Array.isArray(x)?(x[1]||''):'', a:Array.isArray(x)?(x[2]||''):''});
       return {q:b?tri(b.q):{e:q.q, h:'', a:''}, o:(q.ord||[]).map((oi,j)=>b&&b.o[oi]?tri(b.o[oi]):{e:q.o[j]||'', h:'', a:''})}; })}; }
   return out;
 }
 async function compLinkSyncNow(){ clearTimeout(ppeLinkTimer); for(let i=0;i<6 && ppeLinkBusy;i++) await new Promise(r=>setTimeout(r, 500)); await ppeLinkSync(); }
 
 /* ---- save / complete / delete ---- */
-function compData(ed){ const o={...ed}; delete o.id; delete o._showQ; delete o._expEdited; delete o._armed; return JSON.parse(JSON.stringify(o)); }
+function compData(ed){ const o={...ed}; delete o.id; for(const k of Object.keys(o)) if(k.startsWith('_')) delete o[k]; return JSON.parse(JSON.stringify(o)); }
+const compNewTid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+// the server copy has the phone answers of the SAME test the editor shows (not a cancelled one)
+const compSameTest=(srv, ed)=>!!(srv && srv.test && Array.isArray(srv.test.ans) && ed && ed.test && !Array.isArray(ed.test.ans) && (ed.test.qs||[]).length && (srv.test.tid||'')===(ed.test.tid||''));
 async function compSave(ed, quiet){
   if(!canEdit()) return false; const u=auth.currentUser, now=new Date().toISOString();
   const srv=ed.id?compList.find(a=>a.id===ed.id):null;
-  if(srv && srv.test && Array.isArray(srv.test.ans) && !(ed.test && Array.isArray(ed.test.ans))){ ed.test={...srv.test}; if(srv.wSig && !ed.wSig) ed.wSig=srv.wSig; }
+  if(srv && (srv.updatedAt||'')!==(ed._base||'')){ toast(srv.status==='done'?'Not saved — this assessment was completed on another screen. Close it and open it again.':'Not saved — this assessment was changed on another screen. Close it and open it again.'); return false; }
+  if(compSameTest(srv, ed)){ ed.test={...srv.test}; if(srv.wSig && !ed.wSig) ed.wSig=srv.wSig; }
   const data={...compData(ed), updatedAt:now, updatedBy:(u&&u.email)||''};
-  try{ if(ed.id) await db.collection('compAssess').doc(ed.id).set(data);
-    else { data.createdAt=now; data.createdBy=(u&&u.email)||''; const r=await db.collection('compAssess').add(data); ed.id=r.id; ed.createdAt=now; ed.createdBy=data.createdBy; }
+  try{ if(ed.id){ await db.collection('compAssess').doc(ed.id).set(data); ed._base=data.updatedAt; }
+    else { data.createdAt=now; data.createdBy=(u&&u.email)||''; const r=await db.collection('compAssess').add(data); ed.id=r.id; ed.createdAt=now; ed.createdBy=data.createdBy; ed._base=data.updatedAt; }
     if(!quiet) toast('Saved'); return true; }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); return false; }
 }
@@ -9400,7 +9434,7 @@ async function compWriteRecord(a){
   const rid='ca_'+a.id, skill=compRoleName(a.role)+' — competency assessment';
   const rec={id:rid, skill, result:a.result, assessor:(a.hse&&a.hse.name)||a.assessor||'', date:a.date, expiry:a.expiry||'', notes:compRecNote(a), assessId:a.id, createdAt:new Date().toISOString()};
   // a newer assessment of the same kind replaces the older one, also when the new result is "Not yet competent"
-  const list=(w.competency||[]).filter(r=>r.id!==rid).map(r=>(String(r.id||'').startsWith('ca_') && r.skill===skill && r.expiry && rec.expiry && r.expiry>rec.expiry && String(r.date||'')<=String(rec.date||'')) ? {...r, expiry:rec.expiry, notes:String(r.notes||'')+' · replaced by the assessment of '+isoToDmy(rec.date)} : r);
+  const list=(w.competency||[]).filter(r=>r.id!==rid).map(r=>(String(r.id||'').startsWith('ca_') && r.skill===skill && r.expiry && rec.expiry && r.expiry>rec.expiry && String(r.date||'')<=String(rec.date||'')) ? {...r, expiry:rec.expiry, origExpiry:r.origExpiry||r.expiry, origNotes:r.origNotes!==undefined?r.origNotes:String(r.notes||''), replacedBy:a.id, notes:String(r.notes||'')+' · replaced by the assessment of '+isoToDmy(rec.date)} : r);
   list.push(rec);
   await db.collection('workers').doc(w.id).update(stamp({competency:list}));
 }
@@ -9424,7 +9458,10 @@ async function compComplete(){
 async function compDelete(id){
   const a=compList.find(x=>x.id===id)||(compUi.ed&&compUi.ed.id===id?compUi.ed:null); if(!canEdit()) return;
   try{ if(id) await db.collection('compAssess').doc(id).delete();
-    const w=a&&workers.find(x=>x.id===a.workerId); if(w && (w.competency||[]).some(r=>r.id==='ca_'+id)) await db.collection('workers').doc(w.id).update(stamp({competency:(w.competency||[]).filter(r=>r.id!=='ca_'+id)}));
+    const w=a&&workers.find(x=>x.id===a.workerId);
+    if(w && (w.competency||[]).some(r=>r.id==='ca_'+id || r.replacedBy===id)){   // Batch 85: an older record cut short by this one gets its own dates back
+      const back=r=>{ if(r.replacedBy!==id) return r; const o={...r, expiry:r.origExpiry||r.expiry, notes:r.origNotes!==undefined?r.origNotes:r.notes}; delete o.origExpiry; delete o.origNotes; delete o.replacedBy; return o; };
+      await db.collection('workers').doc(w.id).update(stamp({competency:(w.competency||[]).filter(r=>r.id!=='ca_'+id).map(back)})); }
     toast('Assessment deleted'); if(compUi.ed && compUi.ed.id===id) compUi.ed=null; compRenderTop(); if(canEdit()) ppeLinkSyncSoon(); }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not delete'); }
 }
@@ -9438,7 +9475,7 @@ function compStart(wid, role){
   compUi.ed={workerId:wid, role, projectId:w.projectId||'', date:localToday(), status:'open', test:{mode:ppeLinkOf(w.projectId)?'phone':'paper'}, papers:{seen:{}}, prac:{}, scen:{}, result:'', expiry:'', notes:'', pracNote:'', wSig:'', wPaper:false, assessor:hs.name||''};
   compUi.panel=''; compUi.sigOpen=false; compGotoPage(); compRenderTop(); const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'});
 }
-function compEdit(id){ const a=compList.find(x=>x.id===id); if(!a) return; compUi.ed=JSON.parse(JSON.stringify(a)); compUi.panel=''; compUi.sigOpen=false; compGotoPage(); compRenderTop(); const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); }
+function compEdit(id){ const a=compList.find(x=>x.id===id); if(!a) return; compUi.ed=JSON.parse(JSON.stringify(a)); compUi.ed._base=a.updatedAt||''; compUi.panel=''; compUi.sigOpen=false; compGotoPage(); compRenderTop(); const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); }
 function compGotoPage(pid){
   const sec=document.getElementById('compSection'); if(sec && sec.hidden){ const b=document.querySelector('.sidenav-btn[data-section="comp"]'); if(b) b.click(); }
   if(pid!==undefined){ compUi.project=pid||'all'; const sel=document.getElementById('compProject'); if(sel) sel.value=compUi.project; renderComp(); }
@@ -9462,10 +9499,20 @@ function compRowHtml(p, noProject){
     ${compUi.rolesFor===w.id && !ro?`<tr class="comp-roles-row"><td colspan="${noProject?6:7}">${compRolesEditHtml(w)}</td></tr>`:''}`;
 }
 function compRolesEditHtml(w){
-  const cur=new Set(compNeeds(w));
+  if(compUi.rolesFor!==w.id || !compUi.rolesDraft) compUi.rolesDraft=new Set(compNeeds(w));
+  const cur=compUi.rolesDraft;
   return `<div class="comp-roles-ed"><strong>Assessments for ${esc(w.fullName||'')}</strong> <span class="wsub">(guessed from his designation: ${esc(compRoleName(compRoleGuess(w))||'none')}) — tick every job he does, e.g. Driver + Scaffolder</span>
-    <div class="comp-roles-grid">${Object.entries(COMP_ROLES).map(([k,r])=>`<label class="chk"><input type="checkbox" data-comp-rolechk="${esc(k)}" ${cur.has(k)?'checked':''}> ${esc(r.name)}</label>`).join('')}</div>
+    <div class="comp-roles-grid">${Object.entries(COMP_ROLES).map(([k,r])=>`<label class="chk"><input type="checkbox" data-comp-rolechk="${esc(k)}" data-comp-roledraft="1" ${cur.has(k)?'checked':''}> ${esc(r.name)}</label>`).join('')}</div>
     <div class="form-actions" style="margin-top:6px;"><button type="button" class="btn btn-sm" data-comp-roles="">Cancel</button><button type="button" class="btn btn-sm" data-comp-rolesave="${esc(w.id)}" data-reset="1">Back to the guess</button><button type="button" class="btn btn-sm btn-primary" data-comp-rolesave="${esc(w.id)}">Save</button></div></div>`;
+}
+// Batch 85: give an assessment to someone not on the list (office staff, or everything was unticked)
+function compAddWorkerHtml(){
+  if(!compUi.rolesDraft) compUi.rolesDraft=new Set();
+  const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && !compNeeds(w).length).sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  return `<div class="panel comp-roles-ed"><strong>Add a worker to the competency register</strong> <span class="wsub">— workers with no assessment yet (e.g. office staff, or all assessments unticked)</span>
+    <div class="form-grid" style="margin-top:8px;"><label>Worker<select id="compAddW"><option value="">Choose… (${ws.length})</option>${ws.map(w=>`<option value="${esc(w.id)}" ${compUi.addW===w.id?'selected':''}>${esc(w.fullName||'—')}${w.designation?' — '+esc(w.designation):''}</option>`).join('')}</select></label></div>
+    <div class="comp-roles-grid">${Object.entries(COMP_ROLES).map(([k,r])=>`<label class="chk"><input type="checkbox" data-comp-rolechk="${esc(k)}" data-comp-roledraft="1" ${compUi.rolesDraft.has(k)?'checked':''}> ${esc(r.name)}</label>`).join('')}</div>
+    <div class="form-actions" style="margin-top:6px;"><button type="button" class="btn btn-sm" data-comp-roles="__add">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-comp-rolesave="__add">Add</button></div></div>`;
 }
 function compTilesHtml(c){
   const t=[['Competent workers', c.compW, `${c.pct===null?'—':c.pct+'%'} of ${c.workers} who need an assessment`, 'ok', '--cat-4'],
@@ -9486,6 +9533,7 @@ function renderComp(){
   const order={none:0, expired:1, nyc:2, due:3, sup:4, ok:5}; pairs.sort((a,b)=>(order[a.st]-order[b.st]) || String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
   const open=compList.filter(a=>a.status==='open' && a.test && a.test.mode==='phone' && a.test.open && Number(a.test.open.until)>Date.now() && !Array.isArray(a.test.ans));
   body.innerHTML=`${open.length?`<div class="panel comp-live"><div class="subhead" style="margin-top:0;">📱 Tests open on the phones (${open.length})</div>${open.map(a=>{ const w=workers.find(x=>x.id===a.workerId); return `<div class="comp-live-row"><strong>${esc(w?w.fullName:'—')}</strong> · ${esc(compRoleName(a.role))} · ${a.test.qs.length} questions · open until <strong>${esc(new Date(Number(a.test.open.until)).toLocaleTimeString('en-GB',{hour:'2-digit', minute:'2-digit'}))}</strong> — waiting for his answers <button type="button" class="btn btn-sm" data-comp-open="${esc(a.id)}">Open</button></div>`; }).join('')}</div>`:''}
+    ${canEdit()?(compUi.rolesFor==='__add'?compAddWorkerHtml():`<div style="margin:0 0 8px;"><button type="button" class="btn btn-sm" data-comp-roles="__add">+ Add a worker who is not listed</button></div>`):''}
     <div class="table-wrap"><table class="comp-table"><thead><tr><th>Worker</th><th>Project</th><th>Assessment</th><th>Status</th><th>Last assessment</th><th>Valid until</th><th></th></tr></thead>
     <tbody>${pairs.length?pairs.map(p=>compRowHtml(p)).join(''):`<tr><td colspan="7" class="empty-state">${ws.length?'Nobody matches the filters.':'No active workers in this view.'}</td></tr>`}</tbody></table></div>
     <p class="wsub" style="margin-top:8px;">The assessment each worker needs is guessed from his <strong>designation</strong> (helper, scaffolder, foreman, inspector, driver…). Office staff are not included. Click ✎ to change it — a driver who also works as a scaffolder can need both. Pass mark ${compPass()}% · valid ${compMonths()} months.</p>`;
@@ -9526,7 +9574,7 @@ function compRenderTop(){
       <div class="comp-papers">${papers.map(p=>{ const L=COMP_PAPER_LBL[p.st]||[p.st,'muted'], ok=compPaperOk(p, seen); return `<div class="comp-paper"><span>${esc(p.label)}${p.sub?` <span class="wsub">${esc(p.sub)}</span>`:''}</span><span class="badge ${L[1]}">${esc(L[0])}</span>${!['ok','expiring','info'].includes(p.st)?`<label class="chk comp-seen"><input type="checkbox" data-comp-seen="${esc(p.k)}" ${seen[p.k]||p.seen?'checked':''} ${dis}> seen a valid copy</label>`:`<span class="comp-okmark">${ok?'✓':''}</span>`}</div>`; }).join('')}</div>
       ${papers.some(p=>!compPaperOk(p, seen))?`<p class="wsub" style="margin:6px 0 0;">Missing or expired documents → he cannot be <strong>Competent</strong> (only "under supervision") until they are added in his worker record.</p>`:''}</div>
     <div class="comp-step"><div class="comp-step-h"><span class="n">2</span>Knowledge test <small>pass mark ${compPass()}% · ${qs.length||Object.values((COMP_ROLES[ed.role]||{}).q||{}).reduce((a,b)=>a+b,0)} questions</small></div>
-      ${hasAns?`<div class="comp-score ${sc.pct>=compPass()?'pass':'fail'}">Score <strong>${sc.score} / ${sc.total}</strong> = <strong>${sc.pct}%</strong> — ${sc.pct>=compPass()?'PASS':'FAIL'} <span class="wsub">(${t.by==='phone'?'answered on his phone':'paper test'}${t.at?' · '+esc(isoToDmy(String(t.at).slice(0,10))):''})</span> <button type="button" class="att-link" data-comp-showq="1">${ed._showQ?'Hide':'Show'} the answers</button></div>`:''}
+      ${hasAns?`<div class="comp-score ${compPassed(sc)?'pass':'fail'}">Score <strong>${sc.score} / ${sc.total}</strong> = <strong>${sc.pct}%</strong> — ${compPassed(sc)?'PASS':'FAIL'} <span class="wsub">(${t.by==='phone'?'answered on his phone':'paper test'}${t.at?' · '+esc(isoToDmy(isoToLocalDate(t.at))):''})</span> <button type="button" class="att-link" data-comp-showq="1">${ed._showQ?'Hide':'Show'} the answers</button></div>`:''}
       ${!hasAns && !ro?`<div class="comp-seg comp-mode">${[['phone','📱 On his phone (project link)'],['paper','📄 On paper / read out to him']].map(([v,l])=>`<button type="button" class="${t.mode===v?'on ok':''}" data-comp-mode="${v}">${l}</button>`).join('')}</div>
         ${t.mode==='phone'?(!link?`<p class="wsub">His project has no project link${w.projectId?'':' (he is not assigned to a project)'} — use the paper test, or create the link in Workforce → PPE.</p>`
           : isOpen?`<div class="comp-open">Open on his phone until <strong>${esc(new Date(Number(t.open.until)).toLocaleTimeString('en-GB',{hour:'2-digit', minute:'2-digit'}))}</strong> — he opens the project link, logs in, taps <strong>🎓 Competency test</strong>. The score appears here by itself. <button type="button" class="btn btn-sm" data-comp-testclose="1">Close the test</button></div>`
@@ -9561,7 +9609,7 @@ function compRenderTop(){
 function compBankHtml(){
   const cfg=settingsDocs.compBank||{}, off=new Set(cfg.off||[]), m=compUi.bankMod, list=compBankAll().filter(q=>q.m===m), f=compUi.qf, ro=!canEdit();
   return `<div class="panel comp-bank"><div class="section-head"><h3>${ic('books')} Question bank</h3><span style="display:flex; gap:6px;">${ro?'':`<button type="button" class="btn btn-sm btn-primary" data-comp-qadd="1">+ Add a question</button>`}<button type="button" class="btn btn-sm" data-comp-panel="">Close</button></span></div>
-    <p class="wsub" style="margin:-4px 0 8px;">Each test picks questions at random from the bank: client core ${Object.values(COMP_CORE_TOPICS).map(([l,n])=>`${n} ${l}`).join(', ')} + the job questions. Untick a question to stop using it. Add the client's own questions (e.g. their zone management rules) — Hindi and Arabic are optional; the phone shows English when they are blank.</p>
+    <p class="wsub" style="margin:-4px 0 8px;">Each test picks questions at random from the bank: client core ${Object.values(COMP_CORE_TOPICS).map(([l,n])=>`${n} ${l}`).join(', ')} + the job questions. Untick a question to stop using it. Add the client's own questions (e.g. their zone management rules) — a Client core question with <strong>no topic</strong> is asked in <strong>every</strong> test (max 3) — Hindi and Arabic are optional; the phone shows English when they are blank.</p>
     <div class="division-tabs">${Object.entries(COMP_MODS).map(([k,l])=>`<button type="button" class="division-tab ${k===m?'active':''}" data-comp-bankmod="${esc(k)}">${esc(k==='core'?'Client core':l)} (${compBankAll().filter(q=>q.m===k && !off.has(q.id)).length})</button>`).join('')}</div>
     ${f?`<div class="comp-qform"><div class="form-grid"><label>Part<select data-cq="m">${Object.entries(COMP_MODS).map(([k,l])=>`<option value="${esc(k)}" ${f.m===k?'selected':''}>${esc(l)}</option>`).join('')}</select></label>
         <label>Topic (client core)<select data-cq="tp"><option value="">—</option>${Object.entries(COMP_CORE_TOPICS).map(([k,[l]])=>`<option value="${esc(k)}" ${f.tp===k?'selected':''}>${esc(l)}</option>`).join('')}</select></label><span></span>
@@ -9647,7 +9695,7 @@ function compPdfBody(doc, a, w){
   papers.forEach(p=>{ const L=COMP_PAPER_LBL[p.st]||[p.st]; g.row([{t:p.label, sub:p.sub, w:CW-200},{t:L[0], w:120, bold:true, color:['ok','expiring','info'].includes(p.st)?g.INK:g.RED},{check:['ok','expiring'].includes(p.st)||!!(p.seen||seen[p.k]), w:80}], p.sub?24:15); });
   // 2 test
   g.head(`2. KNOWLEDGE TEST — pass mark ${compPass()}%`);
-  if(hasAns){ const sc=compScore(qs, t.ans), pass=sc.pct>=compPass();
+  if(hasAns){ const sc=compScore(qs, t.ans), pass=compPassed(sc);
     g.row([{t:'SCORE', w:K, bold:true, fill:LBL},{t:`${sc.score} / ${sc.total}  =  ${sc.pct}%  —  ${pass?'PASS':'FAIL'}`, w:hw, bold:true, color:pass?[15,118,80]:g.RED},{t:'HOW', w:K, bold:true, fill:LBL},{t:t.by==='phone'?'On the project link (own phone)':'On paper', w:hw}]);
     g.row([{t:'#', w:22, bold:true, fill:LBL},{t:'Question', w:CW-22-170-40, bold:true, fill:LBL},{t:'Answer given', w:170, bold:true, fill:LBL},{t:'', w:40, bold:true, fill:LBL}]);
     qs.forEach((q,i)=>{ const an=t.ans[i], ok=an===q.a; g.row([{t:String(i+1), w:22},{t:q.q, w:CW-22-170-40},{t:an>=0?q.o[an]:'no answer', w:170, color:ok?g.INK:g.RED},{check:true, cross:!ok, w:40}]); });
@@ -9669,7 +9717,7 @@ function compPdfBody(doc, a, w){
   g.row([{t:'RESULT', w:K, bold:true, fill:LBL},{t:a.result||'—', w:hw, bold:true, color:resCol},{t:'SUGGESTED', w:K, bold:true, fill:LBL},{t:a.suggested||compSuggest(a).res||'—', w:hw, size:8}]);
   if(a.notes) g.row([{t:'REMARKS / TRAINING NEEDED', w:K, bold:true, fill:LBL, size:7.6},{t:a.notes, w:CW-K}]);
   g.ensure(70); const hs=a.hse||{};
-  g.row([{t:'ASSESSOR (HSE)', w:K, bold:true, fill:LBL},{t:hs.name||a.assessor||'—', sub:[hs.role, a.doneAt?isoToDmy(String(a.doneAt).slice(0,10)):''].filter(Boolean).join('  ·  '), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},{img:hs.img, t:hs.img?'':'', blank:true, w:hw}], 46);
+  g.row([{t:'ASSESSOR (HSE)', w:K, bold:true, fill:LBL},{t:hs.name||a.assessor||'—', sub:[hs.role, a.doneAt?isoToDmy(isoToLocalDate(a.doneAt)):''].filter(Boolean).join('  ·  '), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},{img:hs.img, t:hs.img?'':'', blank:true, w:hw}], 46);
   g.row([{t:'WORKER', w:K, bold:true, fill:LBL},{t:w.fullName||a.wName||'—', sub:'Result explained to me', w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},a.wSig?{img:a.wSig, w:hw}:{t:a.wPaper?'Signed on the paper copy':'', blank:true, w:hw, color:g.SUB}], 46);
   g.y+=6; g.row([{t:'Competent = can do the tasks assessed without supervision.  Competent under supervision = works only with a competent person / supervisor until re-assessed.  Not yet competent = must not do these tasks — retrain and re-assess.', w:CW, size:7.4, color:g.SUB}]);
 }
@@ -9730,7 +9778,7 @@ async function compBlankPracPdf(role){
 }
 function compRegisterPairs(pid){
   if(pid){ const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===pid); return compPairs(ws); }
-  const q=compUi.q.trim().toLowerCase(); let pairs=compPairs(compFilterWs()).filter(p=>!q || String(p.w.fullName||'').toLowerCase().includes(q));
+  const q=compUi.q.trim().toLowerCase(); let pairs=compPairs(compFilterWs()).filter(p=>!q || String(p.w.fullName||'').toLowerCase().includes(q) || String(p.w.designation||'').toLowerCase().includes(q));
   if(compUi.status!=='all') pairs=pairs.filter(p=>compUi.status==='open' ? !!p.open : compUi.status==='bad' ? ['none','nyc','expired'].includes(p.st) : p.st===compUi.status);
   return pairs.sort((a,b)=>String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
 }
@@ -9738,15 +9786,15 @@ async function compRegisterPdf(pid){
   if(!compPdfReady()) return;
   const pairs=compRegisterPairs(pid).sort((a,b)=>String(a.w.fullName||'').localeCompare(String(b.w.fullName||''))), scope=pid?(projectName(pid)||'Project'):(compUi.project!=='all'?(projectName(compUi.project)||'No project'):(compUi.div!=='all'?divLabel(compUi.div):'All projects'));
   if(!pairs.length){ toast('Nobody in this view needs an assessment'); return; }
-  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'comp', docSub:'Team register — '+scope}), g=compGrid(doc, 32), CW=g.CW, cov=compCoverage([...new Set(pairs.map(p=>p.w))]);
-  g.title('COMPETENCY REGISTER — '+scope.toUpperCase(), `${cov.compW} of ${cov.workers} competent · ${isoToDmy(localToday())}`);
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'comp', docSub:'Team register — '+scope}), g=compGrid(doc, 32), CW=g.CW, cnt=st=>pairs.filter(p=>p.st===st).length, okN=pairs.filter(p=>(p.st==='ok'||p.st==='due') && p.a && p.a.result==='Competent').length;
+  g.title('COMPETENCY REGISTER — '+scope.toUpperCase(), `${okN} of ${pairs.length} assessments competent · ${isoToDmy(localToday())}`);
   const cols=[['#',24],['Name',150],['Designation',110],['Project',120],['Assessment',120],['Status',90],['Date',58],['Test',40],['Valid until',62]], rest=CW-cols.reduce((n,c)=>n+c[1],0);
   cols[1][1]+=rest;
   g.row(cols.map(([t,w])=>({t, w, bold:true, fill:g.LBL})));
   pairs.forEach((p,i)=>{ const a=p.a, t=(a&&a.test)||{}, col=['none','nyc','expired'].includes(p.st)?g.RED:p.st==='ok'?[15,118,80]:[180,83,9];
     g.row([{t:String(i+1), w:cols[0][1]},{t:p.w.fullName||'—', w:cols[1][1], bold:true},{t:p.w.designation||'—', w:cols[2][1]},{t:projectName(p.w.projectId)||'—', w:cols[3][1]},{t:compRoleName(p.role), w:cols[4][1]},
       {t:(COMP_ST[p.st]||[p.st])[0], w:cols[5][1], bold:true, color:col},{t:a?isoToDmy(a.date||''):'—', w:cols[6][1]},{t:Array.isArray(t.ans)?t.pct+'%':'—', w:cols[7][1]},{t:a&&a.expiry&&a.result!=='Not yet competent'?isoToDmy(a.expiry):'—', w:cols[8][1]}]); });
-  g.y+=6; g.row([{t:`Competent ${cov.ok} · under supervision ${cov.sup} · not yet competent ${cov.nyc} · expired ${cov.expired} · not assessed ${cov.none} · due within 30 days ${cov.due}. Pass mark ${compPass()}%, valid ${compMonths()} months.`, w:CW, size:7.6, color:g.SUB}]);
+  g.y+=6; g.row([{t:`In this list: competent ${okN} · under supervision ${pairs.filter(p=>(p.st==='sup')||(p.st==='due'&&p.a&&p.a.result!=='Competent')).length} · not yet competent ${cnt('nyc')} · expired ${cnt('expired')} · not assessed ${cnt('none')} · due within 30 days ${cnt('due')}. Pass mark ${compPass()}%, valid ${compMonths()} months.`, w:CW, size:7.6, color:g.SUB}]);
   doc.save(`Competency_register_${compSafeName(scope)}_${localToday()}.pdf`);
 }
 async function compXlsx(){
@@ -9776,10 +9824,11 @@ document.addEventListener('click', async e=>{
   if(D.compPdf){ await compPdf(D.compPdf); return; }
   if(D.compRegpdf){ await compRegisterPdf(D.compRegpdf==='filter'?null:D.compRegpdf); return; }
   if(D.compXlsx){ await compXlsx(); return; }
-  if('compRoles' in D){ compUi.rolesFor=compUi.rolesFor===D.compRoles?'':D.compRoles; compKeep(()=>{ renderComp(); if(activeSiteTab==='comp' && currentSite()) renderSiteDrawerBody(); }); return; }
-  if(D.compRolesave){ const wid=D.compRolesave, box=b.closest('.comp-roles-ed'); if(!box) return;
+  if('compRoles' in D){ compUi.rolesFor=compUi.rolesFor===D.compRoles?'':D.compRoles; compUi.rolesDraft=null; compKeep(()=>{ renderComp(); if(activeSiteTab==='comp' && currentSite()) renderSiteDrawerBody(); }); return; }
+  if(D.compRolesave){ const box=b.closest('.comp-roles-ed'); if(!box) return; const wid=D.compRolesave==='__add'?((box.querySelector('#compAddW')||{}).value||''):D.compRolesave;
+    if(!wid){ toast('Choose the worker'); return; } if(D.compRolesave==='__add' && ![...box.querySelectorAll('[data-comp-rolechk]')].some(c=>c.checked)){ toast('Tick at least one assessment'); return; }
     const val=D.reset ? firebase.firestore.FieldValue.delete() : [...box.querySelectorAll('[data-comp-rolechk]')].filter(c=>c.checked).map(c=>c.dataset.compRolechk);
-    if(await saveSettings('compSettings', {roles:{[wid]:val}}, settingsStamp('compSettings'))) compUi.rolesFor=''; return; }
+    if(await saveSettings('compSettings', {roles:{[wid]:val}}, settingsStamp('compSettings'))){ compUi.rolesFor=''; compUi.rolesDraft=null; renderComp(); } return; }
   if('compPanel' in D){ compUi.panel=compUi.panel===D.compPanel?'':D.compPanel; compUi.qf=null; compRenderTop(); if(compUi.panel){ const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); } return; }
   if(D.compBlank){ const r=(document.getElementById('compBlankRole')||{}).value||compUi.blankRole; compUi.blankRole=r; if(D.compBlank==='q') await compPaperPdf(r, compPick(r), null); else await compBlankPracPdf(r); return; }
   if(D.compSetsave){ const pass=Number((document.getElementById('compPassIn')||{}).value), months=Number((document.getElementById('compMonthsIn')||{}).value);
@@ -9789,7 +9838,8 @@ document.addEventListener('click', async e=>{
   if('compQadd' in D){ compUi.qf=D.compQadd===''?null:{m:compUi.bankMod, tp:'', q:'', qh:'', qa:'', o:['','','',''], a:0}; compRenderTop(); return; }
   if(D.compQsave){ const f=compUi.qf; if(!f) return; const o=(f.o||[]).map(x=>String(x||'').trim()).filter(Boolean);
     if(!String(f.q||'').trim()){ toast('Write the question'); return; } if(o.length<2){ toast('Write at least answers A and B'); return; }
-    const a=Math.min(o.length-1, Number(f.a)||0); if(!String((f.o||[])[Number(f.a)||0]||'').trim()){ toast('The correct answer is empty'); return; }
+    const raw=(f.o||[]).map(x=>String(x||'').trim()), ai=Number(f.a)||0; if(!raw[ai]){ toast('The correct answer is empty'); return; }
+    const a=raw.slice(0, ai).filter(Boolean).length;   // Batch 85: position among the filled answers
     const q={id:'x'+Date.now().toString(36), m:f.m, tp:f.m==='core'?(f.tp||''):'', q:String(f.q).trim().slice(0,200), qh:String(f.qh||'').trim().slice(0,200), qa:String(f.qa||'').trim().slice(0,200), o:o.map(x=>x.slice(0,140)), a};
     if(await compBankSave({custom:[...((settingsDocs.compBank||{}).custom||[]), q]})){ compUi.qf=null; compUi.bankMod=f.m; } return; }
   if(D.compQdel){ if(!compArm(b,'Tap again')) return; await compBankSave({custom:((settingsDocs.compBank||{}).custom||[]).filter(x=>x.id!==D.compQdel)}); return; }
@@ -9806,20 +9856,21 @@ document.addEventListener('click', async e=>{
     if(n<qs.length && !compArm(b, `${qs.length-n} not answered — tap again to mark them wrong`)) return;
     const ans=qs.map((q,i)=>Number.isInteger(pans[i])?pans[i]:-1), sc=compScore(qs, ans); Object.assign(t, {ans, score:sc.score, total:sc.total, pct:sc.pct, at:new Date().toISOString(), by:'paper', open:null});
     await compSave(ed, true); toast(`Paper marked — ${sc.score}/${sc.total} (${sc.pct}%)`); compKeep(compRenderTop); return; }
-  if(D.compRetest){ if(!compArm(b,'Tap again — the answers are removed')) return; ed.test={mode:t.mode||'paper'}; await compSave(ed, true); compLinkSyncNow(); compKeep(compRenderTop); return; }
-  if(D.compPaperpdf){ if(!(t.qs||[]).length){ t.qs=compPick(ed.role); t.pans=[]; } t.mode='paper'; t.open=null; if(await compSave(ed, true)) await compPaperPdf(ed.role, t.qs, ed); compKeep(compRenderTop); return; }
+  if(D.compRetest){ if(!compArm(b,'Tap again — the answers are removed')) return; ed.test={mode:t.mode||'paper', tid:compNewTid()}; await compSave(ed, true); compLinkSyncNow(); compKeep(compRenderTop); return; }
+  if(D.compPaperpdf){ if(compUi.busy) return; compUi.busy=true; b.disabled=true;   // Batch 85: no double assessment on a double tap
+    try{ if(!(t.qs||[]).length){ t.qs=compPick(ed.role); t.pans=[]; t.tid=compNewTid(); } t.mode='paper'; t.open=null; if(await compSave(ed, true)) await compPaperPdf(ed.role, t.qs, ed); } finally{ compUi.busy=false; compKeep(compRenderTop); } return; }
   if(D.compTestopen){ const w=workers.find(x=>x.id===ed.workerId); if(!w || !ppeLinkOf(w.projectId)){ toast('His project has no project link — use the paper test'); return; }
-    if(!(t.qs||[]).length) t.qs=compPick(ed.role); t.mode='phone'; t.open={at:new Date().toISOString(), until:Date.now()+COMP_TEST_MIN*60000}; delete t.pans;
-    b.disabled=true; try{ if(await compSave(ed, true)){ await compLinkSyncNow(); toast('Test open — he taps 🎓 Competency test on the project link'); } } finally{ compKeep(compRenderTop); } return; }
+    if(compUi.busy) return; if(!(t.qs||[]).length){ t.qs=compPick(ed.role); t.tid=compNewTid(); } t.mode='phone'; t.open={at:new Date().toISOString(), until:Date.now()+COMP_TEST_MIN*60000}; delete t.pans;
+    b.disabled=true; compUi.busy=true; try{ if(await compSave(ed, true)){ await compLinkSyncNow(); toast('Test open — he taps 🎓 Competency test on the project link'); } } finally{ compUi.busy=false; compKeep(compRenderTop); } return; }
   if(D.compTestclose){ t.open=null; if(await compSave(ed, true)) await compLinkSyncNow(); toast('Test closed'); compKeep(compRenderTop); return; }
-  if(D.compSave){ b.disabled=true; try{ if(await compSave(ed)) compKeep(compRenderTop); } finally{ b.disabled=false; } return; }
-  if(D.compDone){ b.disabled=true; try{ await compComplete(); } finally{ b.disabled=false; } return; }
+  if(D.compSave){ if(compUi.busy) return; compUi.busy=true; b.disabled=true; try{ if(await compSave(ed)) compKeep(compRenderTop); } finally{ compUi.busy=false; b.disabled=false; } return; }
+  if(D.compDone){ if(compUi.busy) return; compUi.busy=true; b.disabled=true; try{ await compComplete(); } finally{ compUi.busy=false; b.disabled=false; } return; }
   if(D.compDel){ if(!compArm(b,'Tap again to delete')) return; await compDelete(D.compDel); return; }
 });
 document.addEventListener('input', e=>{ const el=e.target; if(!el || !el.dataset) return;
   if(el.dataset.cq && compUi.qf){ const k=el.dataset.cq; if(/^o\d$/.test(k)){ compUi.qf.o=compUi.qf.o||[]; compUi.qf.o[+k[1]]=el.value; } else compUi.qf[k]=el.value; return; }
   const k=el.dataset.ci, ed=compUi.ed; if(!k || !ed || ed.status==='done') return;
-  if(k==='expiry'){ if(ed.result==='Not yet competent') ed.reassess=el.value; else { ed.expiry=el.value; ed._expEdited=true; } return; }
+  if(k==='expiry'){ if(ed.result==='Not yet competent'){ ed.reassess=el.value; ed.reassessManual=true; } else { ed.expiry=el.value; ed.expManual=true; } return; }
   if(['assessor','notes','pracNote','date'].includes(k)) ed[k]=el.value;
 });
 document.addEventListener('change', e=>{ const el=e.target; if(!el || !el.dataset) return;
@@ -9827,6 +9878,8 @@ document.addEventListener('change', e=>{ const el=e.target; if(!el || !el.datase
   if(el.id==='compProject'){ compUi.project=el.value; renderComp(); return; }
   if(el.id==='compStatus'){ compUi.status=el.value; renderComp(); return; }
   if(el.id==='compBlankRole'){ compUi.blankRole=el.value; return; }
+  if(el.id==='compAddW'){ compUi.addW=el.value; return; }
+  if(el.dataset.compRoledraft && compUi.rolesDraft){ const k=el.dataset.compRolechk; if(el.checked) compUi.rolesDraft.add(k); else compUi.rolesDraft.delete(k); return; }
   if(el.dataset.cq && compUi.qf){ const k=el.dataset.cq; if(k==='m'||k==='a'||k==='tp'){ compUi.qf[k]=el.value; if(k==='m') compKeep(compRenderTop); } return; }
   if(el.dataset.compQoff){ const off=new Set((settingsDocs.compBank||{}).off||[]); if(el.checked) off.delete(el.dataset.compQoff); else off.add(el.dataset.compQoff); compBankSave({off:[...off]}); return; }
   const ed=compUi.ed; if(!ed || ed.status==='done') return;
@@ -9834,8 +9887,8 @@ document.addEventListener('change', e=>{ const el=e.target; if(!el || !el.datase
   const k=el.dataset.ci; if(!k) return;
   if(k==='role'){ if(ed.id) return; ed.role=el.value; ed.prac={}; ed.scen={}; ed.test={mode:(ed.test||{}).mode||'paper'}; compKeep(compRenderTop); return; }
   if(k==='wPaper'){ ed.wPaper=el.checked; compKeep(compRenderTop); return; }
-  if(k==='result'){ ed.result=el.value; if(ed.result==='Not yet competent'){ ed.expiry=ed.date||localToday(); ed.reassess=ed.reassess||compAddMonths(ed.date||localToday(),1); } else if(!ed._expEdited || !ed.expiry || ed.expiry===ed.date) ed.expiry=compAutoExpiry(ed); compKeep(compRenderTop); return; }
-  if(k==='date'){ ed.date=el.value; if(ed.result && !ed._expEdited) ed.expiry=compAutoExpiry(ed); compKeep(compRenderTop); return; }
+  if(k==='result'){ ed.result=el.value; if(ed.result==='Not yet competent'){ ed.expiry=ed.date||localToday(); if(!ed.reassessManual) ed.reassess=compAddMonths(ed.date||localToday(),1); } else if(!ed.expManual || !ed.expiry || ed.expiry===ed.date) ed.expiry=compAutoExpiry(ed); compKeep(compRenderTop); return; }
+  if(k==='date'){ ed.date=el.value; if(ed.result==='Not yet competent'){ ed.expiry=ed.date; if(!ed.reassessManual) ed.reassess=compAddMonths(ed.date||localToday(),1); } else if(ed.result && !ed.expManual) ed.expiry=compAutoExpiry(ed); compKeep(compRenderTop); return; }
 });
 document.addEventListener('input', e=>{ if(e.target && e.target.id==='compSearch'){ compUi.q=e.target.value; renderComp(); } });
 
@@ -12168,6 +12221,7 @@ new MutationObserver(()=>lockFormsForViewer()).observe(document.documentElement,
 // Stop the live listeners BEFORE signing out, otherwise Firestore reports a
 // harmless "permission denied" on the way out and the warning banner stuck.
 function stopDataListeners(){
+  workersLoaded=false; sitesLoaded=false;
   stopSiteLinkData();
   stopPpeReqData();
   stopTricData();
@@ -12235,7 +12289,7 @@ auth.onAuthStateChanged(user=>{
 async function startData(){
   try{
     unsubscribeWorkers = db.collection('workers').orderBy('fullName','asc').onSnapshot(snap=>{
-      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); if(typeof siteLinksSyncSoon==='function') siteLinksSyncSoon(); if(typeof ppeLinkSyncSoon==='function' && canEdit()) ppeLinkSyncSoon();
+      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); workersLoaded=true; if(typeof siteLinksSyncSoon==='function') siteLinksSyncSoon(); if(typeof ppeLinkSyncSoon==='function' && canEdit()) ppeLinkSyncSoon();
       document.getElementById('dbUnavailableBanner').hidden=true;
       renderAll();
     }, err=>{ console.error(err); if(!auth.currentUser) return; toast('Sync error — some data may be stale.'); document.getElementById('dbUnavailableBanner').hidden=false; });
@@ -12254,9 +12308,9 @@ function startVehicleData(){
 function startSiteData(){
   try{
     unsubscribeSiteEquipment = db.collection('siteEquipment').orderBy('siteName','asc').onSnapshot(snap=>{
-      siteEquipmentList = snap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
+      siteEquipmentList = snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); sitesLoaded=true;
       renderSiteAll();
-      if(typeof renderTricPanel==='function'){ renderTricPanel(); if(canEdit()) ppeLinkSyncSoon(); }   // Batch 77: project names on TRIC cards / link
+      if(typeof renderTricPanel==='function'){ renderTricPanel(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(tricAutoComplete, 1000); } }   // Batch 77: project names on TRIC cards / link
       renderEquipAll();           // location names come from projects
       renderReportAll();          // project names / filter in the Monthly Report
       if(regState.scaff && !document.getElementById('scaffSection')?.hidden) renderRegAll('scaff');
@@ -17174,6 +17228,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const data={...d, projectId:d.projectId||'', division:(site&&site.division)||'', incNo:nextIncNo(d.date), status:'Reported', reportedDate:localToday(),
       persons:[], capa:[], files:[], immediateCauses:[], rootCauses:[], whys:[], createdAt:new Date().toISOString(), createdBy:(u&&u.email)||''};
     data.ram='PDO'; data.workRelated=data.workRelated||WORK_REL[0]; data.invDue=incAutoDue(data); data.invDueAuto=data.invDue;
+    if(incFromReport){ try{ const rs=await db.collection('incidentReports').doc(incFromReport).get(), rd=rs.exists?rs.data():null;   // Batch 85: not twice for one site report
+      if(!rd || rd.status!=='new'){ toast(rd&&rd.incNo?`This site report is already recorded as ${rd.incNo} — not saved again`:'This site report was already closed on another screen — not saved'); incFromReport=null; closeAddIncForm(); return; } }catch(e2){ console.warn(e2); } }
     incBusy=true;
     try{
       const ref=await db.collection('incidents').add(stamp(data));
