@@ -1105,6 +1105,16 @@ details.icam-grp .cause-list{margin:6px 0;}
 .cc-comp .cc-g{position:relative;} .cc-comp-n{display:flex; flex-wrap:wrap; gap:4px 8px; justify-content:center; font-size:11px; margin-top:2px;} .cc-comp-panel .cc-title .btn{margin-left:auto;}
 .hse-sig-up{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px; border:1px dashed var(--line); border-radius:8px; margin:6px 0;} .hse-sig-up > div:first-child{flex-basis:100%;}
 .hse-sig-file{cursor:pointer;} .hse-sig-prev,.hse-sig-cur{height:56px; max-width:260px; vertical-align:middle; background:#fff; border-radius:4px; padding:3px; border:1px solid var(--line);}
+
+/* Batch 86: audit programme */
+.aud-tiles{grid-template-columns:repeat(5,1fr) !important;} @media (max-width:1000px){ .aud-tiles{grid-template-columns:repeat(2,1fr) !important;} }
+.aud-prog{border-left:3px solid var(--accent);} .aud-prog-t{min-width:900px;} .aud-prog-t td.c, .aud-prog-t th{text-align:center;} .aud-prog-t th:first-child, .aud-prog-t td:first-child{text-align:left;}
+.aud-prog-t tbody tr{cursor:default;} .aud-prog-t input[type=checkbox]{width:18px; height:18px;}
+.aud-cell{display:inline-flex; flex-direction:column; align-items:center; justify-content:center; min-width:34px; padding:3px 5px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font:inherit; font-weight:700; font-size:13px; cursor:pointer; line-height:1.1;}
+.aud-cell small{font-size:9.5px; font-weight:600; opacity:.85;} .aud-cell.ok{background:var(--ok-bg); color:var(--ok); border-color:var(--ok);} .aud-cell.warn{background:var(--warn-bg); color:var(--warn); border-color:var(--warn);}
+.aud-cell.danger{background:var(--danger-bg); color:var(--danger); border-color:var(--danger);} .aud-cell.info{background:color-mix(in srgb, #8b5cf6 16%, transparent); color:#a78bfa; border-color:#8b5cf6;} .aud-cell.muted{color:var(--muted);}
+.aud-cell.extra{border-style:dashed; color:var(--ok);} .aud-legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; font-size:12px; align-items:center;} .aud-legend .aud-cell{cursor:default; min-width:24px;}
+.aud-agenda table{min-width:640px;} .aud-agenda input{padding:6px 8px;} .aud-agenda tbody tr{cursor:default;}
 </style>
 </head>
 <body class="auth-open">
@@ -1692,7 +1702,8 @@ details.icam-grp .cause-list{margin:6px 0;}
           <button class="btn btn-primary" id="addAudBtn" type="button">+ Add audit</button>
         </div>
       </div>
-      <div class="tiles tiles-4" id="audTiles"></div>
+      <div class="tiles aud-tiles" id="audTiles"></div>
+      <div id="audProgBox"></div>
       <div class="panel" id="addAudPanel" hidden>
         <h3>New audit</h3>
         <form id="addAudForm">
@@ -2217,7 +2228,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2907,6 +2918,7 @@ function startSettingsData(){
       renderPpe(true);   // Batch 49
       if(canEdit()) ppeLinkSyncSoon();   // Batch 73: approved PPE list / photos → worker link
       renderComp(); if(compUi.panel) compRenderTop(); renderCcComp();   // Batch 84
+      if(document.getElementById('audRows')){ renderAudProg(); renderAudTiles(); }   // Batch 86: audit programme lives in settings
       preloadPdfLogo();   // Batch 51
     }, err=>{
       console.error(err); if(!auth.currentUser) return;
@@ -2918,7 +2930,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b85';
+const APP_BUILD='b86';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4445,9 +4457,10 @@ const IMS_BHN_EXTRA=[
   ['F0913-04','Yearly HSE Report','Form','P0913-02','yearlyReport','Made by the tracker — Monthly Report → yearly PDF'],
   ['F0913-05','Client Monthly HSE Report','Form','P0913-02','clientPack','Made by the tracker — Monthly Report → client report'],
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
+  ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -5911,7 +5924,7 @@ async function syncAuditToReport(a){
   const id='aud_'+a.id;
   if(a.deleted || auditParty(a.auditType)!=='internal' || !a.startDate || a.status==='Planned'){ try{ await db.collection('hseLogs').doc(id).delete(); }catch(e){} return; }
   const site=siteEquipmentList.find(s=>s.id===a.projectId), fc=findingCounts(a);
-  try{ await db.collection('hseLogs').doc(id).set(stamp({category:'internalAudit', date:a.startDate, division:(site&&site.division)||'Office staff', projectId:a.projectId||null,
+  try{ await db.collection('hseLogs').doc(id).set(stamp({category:'internalAudit', date:a.startDate, division:a.division||(site&&site.division)||'Office staff', projectId:a.projectId||null,
     area:`${a.auditNo||''} — ${a.title||'Internal audit'}`, findings:fc.major+fc.minor+fc.obs, conductedBy:a.leadAuditor||'', source:'audit', sourceAuditId:a.id})); }
   catch(e){ console.error('audit sync failed', e); }
 }
@@ -5927,7 +5940,7 @@ function startAuditData(){
 }
 function renderAuditAll(){
   if(!document.getElementById('audRows')) return;
-  renderAudTiles(); renderAudFilters(); renderAudTable();
+  renderAudTiles(); renderAudFilters(); renderAudTable(); renderAudProg();
   document.getElementById('audTrashBtn').innerHTML = ic('trash')+` Deleted audits (${deletedAudits().length})`;
   if(activeAudId) renderAudDrawer();
   if(!document.getElementById('audTrashDrawer').hidden) renderAudTrashBody();
@@ -5945,6 +5958,7 @@ function renderAudTiles(){
     {label:`Audits ${y==='all'?'(all years)':y}`, num:list.length, cls:'', sub:`${by('internal')} internal · ${by('second')} client/2nd · ${by('third')} 3rd party`, icon:'clipcheck'},
     {label:'Average score', num:avg===null?'—':avg+'%', cls:r?r.cls:'', sub:r?`${r.t} · ${scored.length} scored audit${scored.length===1?'':'s'}`:'no scores recorded yet', icon:'chart'},
     {label:'Open findings', num:open, cls:over||major?'danger':(open?'warn':'ok'), sub:`${major} major NC open · ${over} overdue`, icon:'alert'},
+    (()=>{ const py=y==='all'?String(new Date().getFullYear()):y, ps=audProgStats(py); return {label:`Audit programme ${py}`, num:`${ps.done}/${ps.total}`, cls:ps.overdue?'danger':(ps.total&&ps.done===ps.total?'ok':''), sub:`${ps.pct===null?'nothing due yet':ps.pct+'% of the audits due so far'}${ps.overdue?' · '+ps.overdue+' overdue':''}`, icon:'clipcheck'}; })(),
     {label:'Next audit', num:upcoming?`${daysUntil(upcoming.d)}d`:'—', cls:'', sub:upcoming?`${upcoming.d} · ${upcoming.a.auditType.replace(/ \(.*\)/,'')}`:(certSoon.length?`${certSoon.length} certificate(s) expiring ≤ 90 days`:'nothing scheduled'), icon:'clock'},
   ].map(t=>`<div class="tile"><div class="tile-head"><div class="tile-icon">${ic(t.icon)}</div><div class="tile-label">${esc(t.label)}</div></div><div class="tile-num ${t.cls}">${esc(String(t.num))}</div><div class="tile-sub">${esc(t.sub)}</div></div>`).join('');
 }
@@ -5971,7 +5985,7 @@ function renderAudTable(){
     return `<tr data-id="${a.id}">
       <td class="mono" style="white-space:nowrap;"><strong>${esc(a.auditNo||'—')}</strong></td>
       <td class="mono" style="white-space:nowrap;">${esc(a.startDate||'—')}${a.endDate&&a.endDate!==a.startDate?`<div class="wsub">to ${esc(a.endDate)}</div>`:''}</td>
-      <td><div class="wname">${esc(a.title||'—')}</div><div class="wsub">${esc(a.auditType||'')}${a.projectId?' · '+esc(projectName(a.projectId)):''}</div></td>
+      <td><div class="wname">${esc(a.title||'—')}</div><div class="wsub">${esc(a.auditType||'')}${audDivOf(a)?' · '+esc(audDivLabel(audDivOf(a))):''}${a.projectId?' · '+esc(projectName(a.projectId)):''}</div></td>
       <td><div class="wsub" style="margin:0;">${esc((a.standards||[]).join(', ')||'—')}</div></td>
       <td>${esc(a.auditingBody||'—')}<div class="wsub">${esc(a.leadAuditor||'')}</div></td>
       <td>${r?`<span class="badge ${r.cls}">${esc(String(a.score))}% · ${r.t}</span>`:'<span class="wsub">—</span>'}</td>
@@ -6017,6 +6031,7 @@ const FINDING_FIELDS=[
 function openAddAudForm(){
   document.getElementById('addAudFields').innerHTML = AUD_PLAN_FIELDS.filter(f=>['auditType','title','startDate','endDate','auditingBody','leadAuditor','status'].includes(f.key)).map(f=>incFieldHtml(f, f.key==='status'?'Planned':f.key==='startDate'?localToday():'', 'data-afield')).join('')
     + `<label>Project (optional)<select data-afield="projectId">${projectOptionsHtml('')}</select></label>`
+    + `<label>Division / area audited<select data-afield="division"><option value="">— not set —</option>${AUD_AREAS.map(x=>`<option value="${esc(x.div)}" ${x.div===('')?'selected':''}>${esc(x.label)}</option>`).join('')}</select></label>`
     + `<div class="span-all"><div class="pick-label">Standards / criteria</div><div class="cause-list">${AUDIT_STANDARDS.map(x=>`<label class="chk"><input type="checkbox" data-astd value="${esc(x)}" ${x==='ISO 45001:2018'?'checked':''}>${esc(x)}</label>`).join('')}</div></div>`;
   document.getElementById('addAudPanel').hidden=false;
 }
@@ -6037,9 +6052,11 @@ function audPlanHtml(a){
   const sel=new Set(a.standards||[]);
   return `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">${auditStatusBadge(a)} <span class="badge muted">${esc(AUDIT_PARTIES.find(p=>p.key===auditParty(a.auditType)).label)}</span></div>${updatedNoteHtml(a)}
   <form id="audPlanForm"><div class="form-grid">${AUD_PLAN_FIELDS.map(f=>incFieldHtml(f, a[f.key], 'data-afield')).join('')}
-    <label>Project (optional)<select data-afield="projectId">${projectOptionsHtml(a.projectId)}</select></label></div>
+    <label>Project (optional)<select data-afield="projectId">${projectOptionsHtml(a.projectId)}</select></label>
+    ${`<label>Division / area audited<select data-afield="division"><option value="">— not set —</option>${AUD_AREAS.map(x=>`<option value="${esc(x.div)}" ${x.div===(audDivOf(a))?'selected':''}>${esc(x.label)}</option>`).join('')}</select></label>`}</div>
     <div class="subhead">Standards / criteria</div><div class="cause-list">${AUDIT_STANDARDS.map(x=>`<label class="chk"><input type="checkbox" data-astd value="${esc(x)}" ${sel.has(x)?'checked':''}>${esc(x)}</label>`).join('')}</div>
-    <div class="form-actions"><button type="submit" class="btn btn-primary">Save plan &amp; team</button></div></form>
+    ${audAgendaHtml(a)}
+    <div class="form-actions"><button type="button" class="btn btn-sm" data-audplanpdf="1">${ic('download')} Audit plan PDF</button><button type="submit" class="btn btn-primary">Save plan &amp; team</button></div></form>
   <div class="danger-zone"><p>Deleting moves this audit to Deleted audits. It can be restored.</p><button type="button" class="btn btn-danger btn-sm" id="deleteAudBtn" data-armed="0">Delete audit</button></div>`;
 }
 function audFindingsHtml(a){
@@ -6087,7 +6104,7 @@ function buildAuditPdf(a){
   y=40; doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.text(`${a.auditNo||'Audit'} — ${a.auditType||''}`, M, y); y+=16;
   doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(90); doc.text(`${a.title||''}`, M, y); doc.setTextColor(20); y+=8;
   const r=auditRating(a.score), c=findingCounts(a);
-  h2('1. Audit details'); kv('Standards / criteria', (a.standards||[]).join(', ')); kv('Criteria references', a.criteria); kv('Objectives', a.objectives); kv('Areas audited', a.areas); kv('Project / location', [a.projectId?projectName(a.projectId):'', a.location].filter(Boolean).join(' · '));
+  h2('1. Audit details'); kv('Standards / criteria', (a.standards||[]).join(', ')); kv('Criteria references', a.criteria); kv('Objectives', a.objectives); kv('Division / area', audDivLabel(audDivOf(a))); kv('Areas audited', a.areas); kv('Project / location', [a.projectId?projectName(a.projectId):'', a.location].filter(Boolean).join(' · '));
   kv('Dates', `${a.startDate||'—'}${a.endDate?' to '+a.endDate:''}`); kv('Opening / closing meeting', `${a.openingMeeting||'—'} / ${a.closingMeeting||'—'}`); kv('Status', a.status);
   h2('2. Audit team'); kv('Auditing organisation', a.auditingBody); kv('Lead auditor', a.leadAuditor); kv('Team members', a.auditTeam); kv('Auditee representative', a.auditeeRep); kv('Personnel interviewed', a.interviewed);
   h2('3. Result'); kv('Score', r?`${a.score}% (${r.t})`:'—'); kv('Result', a.result); kv('Report issued', a.reportDate); kv('Findings', `${c.major} major NC · ${c.minor} minor NC · ${c.obs} observations · ${c.ofi} OFI · ${c.pos} positive`);
@@ -9891,6 +9908,176 @@ document.addEventListener('change', e=>{ const el=e.target; if(!el || !el.datase
   if(k==='date'){ ed.date=el.value; if(ed.result==='Not yet competent'){ ed.expiry=ed.date; if(!ed.reassessManual) ed.reassess=compAddMonths(ed.date||localToday(),1); } else if(ed.result && !ed.expManual) ed.expiry=compAutoExpiry(ed); compKeep(compRenderTop); return; }
 });
 document.addEventListener('input', e=>{ if(e.target && e.target.id==='compSearch'){ compUi.q=e.target.value; renderComp(); } });
+
+
+/* ================= Batch 86: internal audit programme (F0920-02), division audits, audit plan (F0920-06) ================= */
+const AUD_AREAS=[{div:'Scaffolding', label:'Scaffolding Division'},{div:'Civil', label:'Civil Division'},{div:'Rental', label:'Logistics & Rental Division'},{div:'Office staff', label:'HSE / IMS management (office)'}];
+const AUD_PROG_DEFAULT=[{id:'Scaffolding', label:'Scaffolding Division', div:'Scaffolding', months:[3,9]},{id:'Rental', label:'Logistics & Rental Division', div:'Rental', months:[4,10]},
+  {id:'Civil', label:'Civil Division', div:'Civil', months:[5]},{id:'Office staff', label:'HSE / IMS management (office)', div:'Office staff', months:[11]}];
+const AUD_IMS_STDS=['ISO 45001:2018','ISO 14001:2015','ISO 9001:2015','Client HSE requirements'];
+const AUD_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const AUD_AGENDA_STD=[['Opening meeting — scope, plan, confidentiality','Division manager + supervisors'],['Document review — HSE plan, risk assessments / JSA, method statements, permits','Division HSE / supervisor'],
+  ['Records check — training & competency, TBT, inspections, vehicle & equipment certificates','Admin / supervisor'],['Site visit — observe the work, PPE, housekeeping, environment','Site crew'],
+  ['Interviews — supervisor and crew (hazards, emergency, stop work, Life Saving Rules)','Crew'],['Auditor review — prepare findings','Auditor'],['Closing meeting — findings, actions, dates','Division manager']];
+let audProgUi={edit:false, rows:null};
+const audDivLabel=d=>(AUD_AREAS.find(x=>x.div===d)||{}).label||d||'';
+function audDivOf(a){ if(a.division) return a.division; const s=a.projectId?siteEquipmentList.find(x=>x.id===a.projectId):null; return s?(s.division||'Civil'):''; }
+function audProgYear(){ return audFilters.year==='all' ? String(new Date().getFullYear()) : audFilters.year; }
+function audProgData(y){ const d=(((settingsDocs.auditProgramme||{}).years)||{})[y]; return d && Array.isArray(d.rows) ? d : null; }
+function audProgRows(y){ const d=audProgData(y); return d ? d.rows : AUD_PROG_DEFAULT.map(r=>({...r, months:r.months.slice()})); }
+// one planned month = one slot; audits done between the middle of two planned months count for that slot
+function audProgSlots(y, row){
+  const months=[...new Set((row.months||[]).map(Number).filter(m=>m>=1&&m<=12))].sort((a,b)=>a-b);
+  const list=activeAudits().filter(a=>auditParty(a.auditType)==='internal' && auditYear(a)===y && audDivOf(a)===row.div).sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')));
+  const now=localToday(), cy=Number(now.slice(0,4)), cm=Number(now.slice(5,7)), Y=Number(y), used=new Set();
+  const slots=months.map((m,i)=>{ const lo=i?Math.floor((months[i-1]+m)/2)+1:1, hi=i<months.length-1?Math.floor((m+months[i+1])/2):12;
+    const inWin=list.filter(a=>{ const am=Number(String(a.startDate||'').slice(5,7)); return am>=lo && am<=hi && !used.has(a.id); });
+    const done=inWin.find(a=>(a.status||'Planned')!=='Planned'), sch=inWin.find(a=>(a.status||'Planned')==='Planned'), a=done||sch; if(a) used.add(a.id);
+    const past=Y<cy || (Y===cy && m<cm), cur=Y===cy && m===cm;
+    const st=done?'done':sch?(past?'late':'sched'):past?'overdue':cur?'due':'plan';
+    return {m, a, st}; });
+  const extra=list.filter(a=>!used.has(a.id) && (a.status||'Planned')!=='Planned');
+  return {slots, extra};
+}
+function audProgStats(y){
+  let total=0, done=0, overdue=0;
+  for(const r of audProgRows(y)) for(const sl of audProgSlots(y, r).slots){ total++; if(sl.st==='done') done++; if(sl.st==='overdue'||sl.st==='late') overdue++; }
+  const due=done+overdue; return {total, done, overdue, dueSoFar:due, pct: due ? Math.round(done*100/due) : null};
+}
+const AUD_ST={done:['✓','Done','ok'], sched:['◷','Scheduled','info'], due:['●','Due this month','warn'], plan:['●','Planned','muted'], overdue:['!','Overdue','danger'], late:['◷','Scheduled late','danger']};
+function renderAudProg(){
+  const el=document.getElementById('audProgBox'); if(!el || !auth.currentUser) return;
+  if(audProgUi.edit && el.contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return;
+  const y=audProgYear(), data=audProgData(y), rows=audProgUi.edit?(audProgUi.rows||(audProgUi.rows=audProgRows(y).map(r=>({...r, months:(r.months||[]).slice()})))):audProgRows(y), st=audProgStats(y), ed=canEdit();
+  if(audProgUi.edit){
+    el.innerHTML=`<div class="panel aud-prog"><div class="section-head"><h3>${ic('clipcheck')} Internal audit programme ${esc(y)} — edit</h3></div>
+      <p class="wsub" style="margin:-4px 0 8px;">Tick the months each area is audited. Higher-risk work more often (e.g. Scaffolding and Logistics twice a year). The HSE / IMS area must be audited by someone independent of HSE.</p>
+      <div class="table-wrap"><table class="aud-prog-t"><thead><tr><th>Area / division</th><th>Division</th>${AUD_MON.map(m=>`<th>${m}</th>`).join('')}<th></th></tr></thead><tbody>
+      ${rows.map((r,i)=>`<tr><td><input data-apr="${i}|label" value="${esc(r.label)}" maxlength="60"></td><td><select data-apr="${i}|div"><option value="">— other —</option>${AUD_AREAS.map(a=>`<option value="${esc(a.div)}" ${r.div===a.div?'selected':''}>${esc(a.label)}</option>`).join('')}</select></td>
+        ${AUD_MON.map((m,j)=>`<td class="c"><input type="checkbox" data-aprm="${i}|${j+1}" ${(r.months||[]).includes(j+1)?'checked':''} aria-label="${esc(r.label)} ${m}"></td>`).join('')}<td><button type="button" class="icon-btn danger" data-aprdel="${i}" aria-label="Remove">${ic('trash')}</button></td></tr>`).join('')}
+      </tbody></table></div>
+      ${(()=>{ const mt=audProgUi.meta||(audProgUi.meta={aprPrep:(data||{}).preparedBy||(hseSigOf((auth.currentUser||{}).email)||{}).name||'', aprAppr:(data||{}).approvedBy||'', aprDate:(data||{}).approvedAt||''});
+        return `<div class="form-grid" style="margin-top:10px;"><label>Prepared by<input id="aprPrep" data-aprmeta="1" value="${esc(mt.aprPrep)}" maxlength="60"></label><label>Approved by (management)<input id="aprAppr" data-aprmeta="1" value="${esc(mt.aprAppr)}" maxlength="60" placeholder="e.g. General Manager"></label><label>Approval date<input type="date" id="aprDate" data-aprmeta="1" value="${esc(mt.aprDate)}"></label></div>`; })()}
+      <div class="form-actions"><button type="button" class="btn btn-sm" data-apradd="1">+ Add an area</button><span style="flex:1"></span><button type="button" class="btn btn-sm" data-apredit="0">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-aprsave="1">Save programme</button></div></div>`;
+    return;
+  }
+  const cell=(s, row)=>{ const L=AUD_ST[s.st]; const clickable=s.a || (ed && ['plan','due','overdue'].includes(s.st));
+    return `<button type="button" class="aud-cell ${L[2]}" ${s.a?`data-apropen="${esc(s.a.id)}"`:clickable?`data-aprnew="${esc(row.id)}|${s.m}"`:''} title="${esc(L[1]+(s.a?' — '+(s.a.auditNo||'')+' '+(s.a.startDate||''):''))}">${L[0]}${s.a?`<small>${esc(s.a.auditNo||'')}</small>`:''}</button>`; };
+  el.innerHTML=`<div class="panel aud-prog"><div class="section-head"><h3>${ic('clipcheck')} Internal audit programme ${esc(y)} <small class="wsub">F0920-02</small></h3>
+      <span style="display:flex; gap:6px; flex-wrap:wrap;"><button type="button" class="btn btn-sm" data-aprpdf="1">${ic('download')} Programme PDF</button>${ed?`<button type="button" class="btn btn-sm" data-apredit="1">${ic('pencil')} Edit months</button>`:''}</span></div>
+    ${!data?`<div class="notice">Suggested programme by risk — not saved yet. Check the months and press <strong>Edit months → Save programme</strong> to approve it.</div>`:`<p class="wsub" style="margin:-4px 0 8px;">${data.approvedBy?`Approved by <strong>${esc(data.approvedBy)}</strong>${data.approvedAt?' on '+esc(isoToDmy(data.approvedAt)):''}`:'Not approved yet'}${data.preparedBy?' · prepared by '+esc(data.preparedBy):''}${data.rev?' · rev '+esc(String(data.rev)):''}</p>`}
+    <div class="table-wrap"><table class="aud-prog-t"><thead><tr><th>Area / division</th>${AUD_MON.map(m=>`<th>${m}</th>`).join('')}<th>Done</th></tr></thead><tbody>
+    ${rows.map(r=>{ const {slots, extra}=audProgSlots(y, r), by=new Map(slots.map(s=>[s.m,s])), ex=new Map(); for(const a of extra){ const m=Number(String(a.startDate||'').slice(5,7)); if(!ex.has(m)) ex.set(m, a); }
+      return `<tr><td><div class="wname">${esc(r.label)}</div>${r.div==='Office staff'?'<div class="wsub t-warn">audited by someone independent of HSE</div>':''}</td>
+        ${AUD_MON.map((m,j)=>{ const s=by.get(j+1), e=ex.get(j+1); return `<td class="c">${s?cell(s, r):''}${e?`<button type="button" class="aud-cell extra" data-apropen="${esc(e.id)}" title="Extra audit ${esc(e.auditNo||'')}">✓<small>${esc(e.auditNo||'')}</small></button>`:''}</td>`; }).join('')}
+        <td class="c"><strong>${slots.filter(s=>s.st==='done').length}/${slots.length}</strong></td></tr>`; }).join('')}
+    </tbody></table></div>
+    <div class="aud-legend">${Object.entries(AUD_ST).map(([k,[i,l,c]])=>`<span><span class="aud-cell ${c}">${i}</span> ${esc(l)}</span>`).join('')}${ed?'<span class="wsub">· click a planned month to create the audit</span>':''}</div>
+    <p class="wsub" style="margin:6px 0 0;"><strong>${st.done}</strong> of ${st.total} planned audits done${st.pct!==null?` · <strong>${st.pct}%</strong> of the audits due so far`:''}${st.overdue?` · <strong class="t-danger">${st.overdue} overdue</strong>`:''}. An internal audit counts for its area when its <strong>Division / area</strong> is set (or its project is in that division).</p></div>`;
+}
+function audProgCreate(rowId, m){
+  const y=audProgYear(), row=audProgRows(y).find(r=>r.id===rowId); if(!row || !canEdit()) return;
+  const now=localToday(), ym=`${y}-${String(m).padStart(2,'0')}`, start=now.slice(0,7)>=ym ? now : ym+'-01', hs=hseSigOf((auth.currentUser||{}).email)||{};
+  openAddAudForm(); const f=document.getElementById('addAudForm'), set=(k,v)=>{ const el=f.querySelector(`[data-afield="${k}"]`); if(el) el.value=v; };
+  set('auditType', AUDIT_TYPES[0]); set('title', `Internal IMS audit — ${row.label}`); set('startDate', start); set('status', 'Planned'); set('auditingBody', 'Internal');
+  set('division', row.div||''); if(row.div!=='Office staff') set('leadAuditor', hs.name||'');
+  f.querySelectorAll('[data-astd]').forEach(c=>{ c.checked=AUD_IMS_STDS.includes(c.value); });
+  const p=document.getElementById('addAudPanel'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'});
+  toast(row.div==='Office staff'?'Write the independent auditor (not HSE), check the date and save':'Check the date and save — the audit is linked to the programme');
+}
+async function audProgSave(){
+  const y=audProgYear(), rows=(audProgUi.rows||[]).map((r,i)=>({id:r.id||('a'+i+Date.now().toString(36)), label:String(r.label||'').trim().slice(0,60), div:r.div||'', months:[...new Set((r.months||[]).map(Number))].filter(m=>m>=1&&m<=12).sort((a,b)=>a-b)})).filter(r=>r.label);
+  if(!rows.length){ toast('Add at least one area'); return; }
+  const none=rows.filter(r=>!r.months.length); if(none.length){ toast(`Tick at least one month for: ${none.map(r=>r.label).join(', ')}`); return; }
+  const dup=rows.map(r=>r.div).filter(Boolean).filter((d,i,a)=>a.indexOf(d)!==i); if(dup.length){ toast('Each division can be on one row only'); return; }
+  const old=audProgData(y)||{}, v=id=>String(((audProgUi.meta||{})[id]!==undefined?audProgUi.meta[id]:(document.getElementById(id)||{}).value)||'').trim();
+  const yearData={rows, preparedBy:v('aprPrep').slice(0,60), approvedBy:v('aprAppr').slice(0,60), approvedAt:v('aprDate'), rev:(Number(old.rev)||0)+(audProgData(y)?1:0), savedAt:new Date().toISOString(), savedBy:(auth.currentUser&&auth.currentUser.email)||''};
+  if(await saveSettings('auditProgramme', {years:{[y]:yearData}}, settingsStamp('auditProgramme'))){ audProgUi={edit:false, rows:null, meta:null}; renderAudProg(); renderAudTiles(); }
+}
+
+/* ---- audit plan (agenda) + PDFs ---- */
+function audAgendaHtml(a){
+  const ag=(a.agenda||[]).slice(); while(ag.length<(a.agenda||[]).length+3) ag.push({});
+  return `<div class="subhead">Audit plan — agenda <span class="wsub">(for the audit plan PDF sent to the division before the audit)</span></div>
+    <div class="table-wrap aud-agenda"><table><thead><tr><th style="width:110px;">Date</th><th style="width:80px;">Time</th><th>Activity / process</th><th style="width:190px;">Auditee / area</th></tr></thead><tbody>
+    ${ag.map((r,i)=>`<tr><td><input type="date" data-agenda="${i}|d" value="${esc(r.d||'')}"></td><td><input type="time" data-agenda="${i}|t" value="${esc(r.t||'')}"></td><td><input data-agenda="${i}|a" value="${esc(r.a||'')}" maxlength="160"></td><td><input data-agenda="${i}|w" value="${esc(r.w||'')}" maxlength="80"></td></tr>`).join('')}
+    </tbody></table></div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;"><button type="button" class="btn btn-sm" data-audagenda="std">Fill the standard agenda</button><span class="wsub" style="align-self:center;">Empty rows are not saved. Save the plan, then download the audit plan PDF.</span></div>`;
+}
+function audAgendaRead(f){ const rows={}; f.querySelectorAll('[data-agenda]').forEach(el=>{ const [i,k]=el.dataset.agenda.split('|'); (rows[i]=rows[i]||{})[k]=String(el.value||'').trim(); });
+  return Object.keys(rows).sort((a,b)=>a-b).map(i=>rows[i]).filter(r=>r.a||r.t||r.w).map(r=>({d:(r.d||'').slice(0,10), t:(r.t||'').slice(0,5), a:(r.a||'').slice(0,160), w:(r.w||'').slice(0,80)})); }
+function audAgendaFillStd(){
+  const f=document.getElementById('audPlanForm'); if(!f) return; const a=currentAud()||{}, d=a.startDate||localToday(), times=['08:00','08:30','10:00','11:00','12:30','13:30','14:30'];
+  const empty=[...f.querySelectorAll('[data-agenda$="|a"]')].filter(el=>!el.value); if(empty.length<AUD_AGENDA_STD.length){ const tb=f.querySelector('.aud-agenda tbody'), n=f.querySelectorAll('[data-agenda$="|a"]').length;
+    for(let i=0;i<AUD_AGENDA_STD.length-empty.length;i++){ const k=n+i, tr=document.createElement('tr'); tr.innerHTML=`<td><input type="date" data-agenda="${k}|d"></td><td><input type="time" data-agenda="${k}|t"></td><td><input data-agenda="${k}|a" maxlength="160"></td><td><input data-agenda="${k}|w" maxlength="80"></td>`; tb.appendChild(tr); } }
+  const slots=[...f.querySelectorAll('[data-agenda$="|a"]')].filter(el=>!el.value).slice(0, AUD_AGENDA_STD.length);
+  slots.forEach((el,i)=>{ const k=el.dataset.agenda.split('|')[0], q=s=>f.querySelector(`[data-agenda="${k}|${s}"]`); q('d').value=d; q('t').value=times[i]||''; el.value=AUD_AGENDA_STD[i][0]; q('w').value=AUD_AGENDA_STD[i][1]; });
+  f.dataset.dirty='1'; toast('Standard agenda filled — change what you need and save');
+}
+function audPlanPdf(){
+  const a=currentAud(); if(!a) return; if(!compPdfReady()) return;
+  const f=document.getElementById('audPlanForm'); if(f && f.dataset.dirty==='1'){ toast('Save the plan first, then download the PDF'); return; }
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'auditPlan', docSub:`${a.auditNo||''} · ${audDivLabel(audDivOf(a))||a.title||''}`}), g=compGrid(doc, 32), CW=g.CW, K=100, hw=(CW-2*K)/2, L=g.LBL, hs=hseSigOf((auth.currentUser||{}).email)||{};
+  g.title('INTERNAL AUDIT PLAN', a.auditNo||'');
+  g.row([{t:'AUDIT NO.', w:K, bold:true, fill:L},{t:a.auditNo, w:hw, bold:true},{t:'AUDIT TYPE', w:K, bold:true, fill:L},{t:a.auditType, w:hw}]);
+  g.row([{t:'DIVISION / AREA', w:K, bold:true, fill:L},{t:audDivLabel(audDivOf(a))||'—', w:hw, bold:true},{t:'PROJECT / SITE', w:K, bold:true, fill:L},{t:[projectName(a.projectId), a.location].filter(Boolean).join(' · ')||'—', w:hw}]);
+  g.row([{t:'DATE(S)', w:K, bold:true, fill:L},{t:[isoToDmy(a.startDate||''), a.endDate&&a.endDate!==a.startDate?isoToDmy(a.endDate):''].filter(Boolean).join(' to '), w:hw},{t:'OPENING / CLOSING', w:K, bold:true, fill:L, size:7.8},{t:[a.openingMeeting?isoToDmy(a.openingMeeting):'', a.closingMeeting?isoToDmy(a.closingMeeting):''].filter(Boolean).join(' / ')||'see agenda', w:hw}]);
+  g.row([{t:'LEAD AUDITOR', w:K, bold:true, fill:L},{t:a.leadAuditor, w:hw},{t:'AUDITEE REP.', w:K, bold:true, fill:L},{t:a.auditeeRep, w:hw}]);
+  if(a.auditTeam) g.row([{t:'AUDIT TEAM', w:K, bold:true, fill:L},{t:a.auditTeam, w:CW-K}]);
+  g.head('SCOPE & OBJECTIVES');
+  g.row([{t:'SCOPE', w:K, bold:true, fill:L},{t:[a.title, a.areas].filter(Boolean).join(' — '), w:CW-K}]);
+  g.row([{t:'OBJECTIVES', w:K, bold:true, fill:L},{t:a.objectives||'Verify conformity with the IMS (ISO 45001, ISO 14001, ISO 9001), client HSE requirements and company procedures; check that controls are in place and effective; identify opportunities for improvement.', w:CW-K}]);
+  g.row([{t:'CRITERIA', w:K, bold:true, fill:L},{t:[(a.standards||[]).join(', '), a.criteria].filter(Boolean).join(' · ')||'—', w:CW-K}]);
+  g.head('AGENDA');
+  const ag=a.agenda||[];
+  g.row([{t:'Date', w:70, bold:true, fill:L},{t:'Time', w:46, bold:true, fill:L},{t:'Activity / process', w:CW-70-46-150, bold:true, fill:L},{t:'Auditee / area', w:150, bold:true, fill:L}]);
+  if(ag.length) ag.forEach(r=>g.row([{t:r.d?isoToDmy(r.d):'', blank:true, w:70},{t:r.t, blank:true, w:46},{t:r.a, w:CW-70-46-150},{t:r.w, blank:true, w:150}]));
+  else for(let i=0;i<6;i++) g.row([{t:'', blank:true, w:70},{t:'', blank:true, w:46},{t:'', blank:true, w:CW-70-46-150},{t:'', blank:true, w:150}], 18);
+  g.head('NOTES FOR THE AUDITEES');
+  g.row([{t:'Please make the people and records available as in the agenda (HSE plan, risk assessments, permits, TBT, training and competency records, inspection and certificate records). The audit samples the work — it is not a check of individuals. Findings are discussed at the closing meeting; corrective actions are agreed with an owner and a target date.', w:CW, size:8}]);
+  g.ensure(70);
+  g.row([{t:'PREPARED BY (AUDITOR)', w:K, bold:true, fill:L, size:7.6},{t:a.leadAuditor||hs.name||'', sub:isoToDmy(localToday()), w:hw},{t:'SIGNATURE', w:K, bold:true, fill:L},a.leadAuditor && hs.img && hs.name && String(a.leadAuditor).toLowerCase().includes(String(hs.name).toLowerCase().split(' ')[0])?{img:hs.img, w:hw}:{t:'', blank:true, w:hw}], 42);
+  g.row([{t:'RECEIVED BY (AUDITEE)', w:K, bold:true, fill:L, size:7.6},{t:a.auditeeRep||'', blank:true, w:hw},{t:'SIGNATURE / DATE', w:K, bold:true, fill:L, size:7.6},{t:'', blank:true, w:hw}], 42);
+  doc.save(`Audit_plan_${compSafeName(a.auditNo||'audit')}.pdf`);
+}
+function audProgPdf(){
+  if(!compPdfReady()) return;
+  const y=audProgYear(), data=audProgData(y), rows=audProgRows(y), st=audProgStats(y);
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'auditProg', docSub:'Year '+y}), g=compGrid(doc, 32), CW=g.CW, L=g.LBL;
+  g.title('INTERNAL AUDIT PROGRAMME '+y, `${st.done} of ${st.total} done${st.overdue?' · '+st.overdue+' overdue':''}`);
+  const aw=170, mw=(CW-aw-60)/12;
+  g.row([{t:'Area / division', w:aw, bold:true, fill:L}, ...AUD_MON.map(m=>({t:m, w:mw, bold:true, fill:L, center:true})), {t:'Done', w:60, bold:true, fill:L, center:true}]);
+  for(const r of rows){ const {slots, extra}=audProgSlots(y, r), by=new Map(slots.map(s=>[s.m,s]));
+    g.row([{t:r.label, sub:r.div==='Office staff'?'independent auditor (not HSE)':'', w:aw, bold:true}, ...AUD_MON.map((m,j)=>{ const s=by.get(j+1), e=extra.find(a=>Number(String(a.startDate||'').slice(5,7))===j+1);
+      const t=s?({done:'DONE', sched:'SCHED.', due:'DUE', plan:'P', overdue:'OVERDUE', late:'LATE'}[s.st])+(s.a&&s.a.auditNo?'\n'+s.a.auditNo.replace(/^AUD-/,''):''):e?'EXTRA\n'+(e.auditNo||'').replace(/^AUD-/,''):'';
+      return {t, blank:true, w:mw, size:6.6, center:true, bold:!!s, color:s&&(s.st==='overdue'||s.st==='late')?g.RED:s&&s.st==='done'?[15,118,80]:g.INK, fill:s?[250,244,244]:undefined}; }),
+      {t:`${slots.filter(s=>s.st==='done').length}/${slots.length}`, w:60, bold:true, center:true}], 26); }
+  g.y+=4; g.row([{t:'P = planned · SCHED. = audit scheduled · DUE = this month · DONE = audit carried out (audit no.) · OVERDUE = planned month passed, no audit. Higher-risk divisions are audited more often. The HSE / IMS management area is audited by a person independent of HSE (ISO 45001 / 9001 cl. 9.2).', w:CW, size:7.4, color:g.SUB}]);
+  const list=activeAudits().filter(a=>auditParty(a.auditType)==='internal' && auditYear(a)===y).sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')));
+  if(list.length){ g.head('INTERNAL AUDITS '+y);
+    g.row([{t:'Audit no.', w:80, bold:true, fill:L},{t:'Date', w:70, bold:true, fill:L},{t:'Division / area', w:150, bold:true, fill:L},{t:'Title / scope', w:CW-80-70-150-90-110, bold:true, fill:L},{t:'Status', w:90, bold:true, fill:L},{t:'Findings', w:110, bold:true, fill:L}]);
+    list.forEach(a=>{ const c=findingCounts(a); g.row([{t:a.auditNo, w:80},{t:isoToDmy(a.startDate||''), w:70},{t:audDivLabel(audDivOf(a))||'—', w:150},{t:a.title, w:CW-80-70-150-90-110},{t:a.status||'Planned', w:90},{t:`${c.major} major · ${c.minor} minor · ${c.obs} obs`, w:110, size:7.6}]); }); }
+  g.ensure(60); g.y+=6;
+  g.row([{t:'PREPARED BY', w:90, bold:true, fill:L},{t:(data||{}).preparedBy||'', blank:true, w:(CW-270)/2},{t:'APPROVED BY', w:90, bold:true, fill:L},{t:(data||{}).approvedBy||'', blank:true, w:(CW-270)/2},{t:'DATE / REV', w:90, bold:true, fill:L, sub:[(data||{}).approvedAt?isoToDmy(data.approvedAt):'', data&&data.rev!==undefined?'rev '+data.rev:''].filter(Boolean).join(' · ')}], 36);
+  doc.save(`Internal_audit_programme_${y}.pdf`);
+}
+
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-apredit],[data-aprdel],[data-apradd],[data-aprsave],[data-apropen],[data-aprnew],[data-aprpdf],[data-audagenda],[data-audplanpdf]'); if(!b) return; const D=b.dataset;
+  if(D.apredit!==undefined){ audProgUi={edit:D.apredit==='1', rows:null, meta:null}; renderAudProg(); return; }
+  if(D.aprdel!==undefined){ audProgUi.rows.splice(+D.aprdel,1); renderAudProg(); return; }
+  if(D.apradd){ audProgUi.rows.push({id:'a'+Date.now().toString(36), label:'New area', div:'', months:[]}); renderAudProg(); return; }
+  if(D.aprsave){ b.disabled=true; try{ await audProgSave(); } finally{ b.disabled=false; } return; }
+  if(D.apropen){ openAudDrawer(D.apropen); return; }
+  if(D.aprnew){ const [id,m]=D.aprnew.split('|'); audProgCreate(id, Number(m)); return; }
+  if(D.aprpdf){ audProgPdf(); return; }
+  if(D.audagenda){ audAgendaFillStd(); return; }
+  if(D.audplanpdf){ audPlanPdf(); return; } });
+document.addEventListener('change', e=>{ const t=e.target; if(!t || !t.dataset) return;
+  if(t.dataset.aprmeta && audProgUi.meta){ audProgUi.meta[t.id]=t.value; return; }
+  if(t.dataset.aprm && audProgUi.rows){ const [i,m]=t.dataset.aprm.split('|').map(Number), r=audProgUi.rows[i]; if(!r) return; const set=new Set(r.months||[]); if(t.checked) set.add(m); else set.delete(m); r.months=[...set]; return; }
+  if(t.dataset.apr && audProgUi.rows){ const [i,k]=t.dataset.apr.split('|'), r=audProgUi.rows[+i]; if(r) r[k]=t.value; return; }
+  if(t.matches && t.matches('#addAudForm [data-afield="projectId"]')){ const s=activeSites().find(x=>x.id===t.value), dv=document.querySelector('#addAudForm [data-afield="division"]'); if(s && dv && !dv.value) dv.value=s.division||''; } });
+document.addEventListener('input', e=>{ const t=e.target; if(t && t.dataset && t.dataset.aprmeta && audProgUi.meta){ audProgUi.meta[t.id]=t.value; return; } if(t && t.dataset && t.dataset.apr && audProgUi.rows){ const [i,k]=t.dataset.apr.split('|'), r=audProgUi.rows[+i]; if(r) r[k]=t.value; } });
 
 /* ---- action tracker: extra sources ---- */
 const B12_ACT_SOURCES=[{key:'obs',label:'Observations'},{key:'insp',label:'Inspections'},{key:'hira',label:'Risk register'},{key:'moc',label:'Change (MOC)'},{key:'heat',label:'Heat stress'}];
@@ -14251,6 +14438,7 @@ function renderCommandCentre(entries, m, key){
     ['Vehicle documents valid', pct(vehOk,av.length), vehSub],
     ['Equipment certificates in date', pct(eqOk,eq.length), `${eqOk} of ${eq.length} items`],
     ['QHSE documents up to date (company-wide)', pct(libOk,lib.length), `${libOk} of ${lib.length} documents`],
+    (()=>{ const ps=audProgStats(String(new Date().getFullYear())); return ['Internal audit programme (company-wide)', ps.pct, `${ps.done} of ${ps.total} planned audits done${ps.overdue?' · '+ps.overdue+' overdue':''}`]; })(),
   ];
   { const ms=document.getElementById('ccMiniScope'); if(ms) ms.textContent = (division==='all' && project==='all') ? 'company-wide' : scope; }
   document.getElementById('ccMini').innerHTML = minis.map(([n,v,s])=>`<div class="cc-m">${ccDial(v,58,6,n)}<div><div class="cc-mv" style="color:${ccStatusColor(v)}">${v===null?'—':v+'%'}</div><div class="cc-ml">${esc(n)}</div><div class="cc-ms">${esc(v===null && /^\d/.test(s)?'nothing recorded yet':s)}</div></div></div>`).join('');
@@ -17434,7 +17622,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     e.preventDefault(); const a=currentAud(); if(!a || !canEdit()) return; const f=e.target;
     if(f.id==='audPlanForm' || f.id==='audResultForm'){
       const d={}; f.querySelectorAll('[data-afield]').forEach(el=>{ d[el.dataset.afield]=el.value; });
-      if(f.id==='audPlanForm') d.standards=[...f.querySelectorAll('[data-astd]:checked')].map(x=>x.value);
+      if(f.id==='audPlanForm'){ d.standards=[...f.querySelectorAll('[data-astd]:checked')].map(x=>x.value); d.agenda=audAgendaRead(f); }
       if('score' in d){ if(d.score==='') d.score=''; else { const n=Number(d.score); if(isNaN(n)||n<0||n>100){ toast('Score must be between 0 and 100'); return; } d.score=n; } }
       if(d.auditNo && d.auditNo!==a.auditNo && activeAudits().some(x=>x.id!==a.id && x.auditNo===d.auditNo)){ toast('That audit number is already used'); return; }
       if(f.id==='audResultForm' && a.status==='Planned' && d.score!=='' ) d.status = findingCounts(a).open ? 'Findings open' : 'Report issued';
