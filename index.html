@@ -1107,6 +1107,17 @@ details.icam-grp .cause-list{margin:6px 0;}
 .hse-sig-file{cursor:pointer;} .hse-sig-prev,.hse-sig-cur{height:56px; max-width:260px; vertical-align:middle; background:#fff; border-radius:4px; padding:3px; border:1px solid var(--line);}
 
 /* Batch 86: audit programme */
+.ind-ed{border-left-color:#0ea5e9;} .ind-bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:4px 0 10px;}
+label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind-ed label.hse-sig-file{display:inline-flex !important; align-items:center; gap:6px;}
+.ind-topic{display:flex !important; gap:10px; align-items:flex-start; padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-bottom:6px; background:var(--surface); cursor:pointer;}
+.ind-topic.on{border-color:var(--ok); background:var(--ok-bg);} .ind-topic input{width:20px; height:20px; margin:1px 0 0; flex:none; accent-color:var(--ok);} .ind-topic .wsub{display:block; margin-top:2px;}
+.ind-tn{display:inline-grid; place-items:center; min-width:22px; height:22px; border-radius:50%; background:var(--muted-bg); color:var(--ink); font-size:12px; font-weight:700; flex:none;}
+.ind-decl{font-style:italic; background:var(--surface); border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px; margin:0 0 8px; font-size:13px;}
+.ind-tiles{grid-template-columns:repeat(3,1fr) !important;} @media (max-width:700px){ .ind-tiles{grid-template-columns:1fr !important;} }
+.ind-mrow{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;}
+.ind-neww{border:1px dashed var(--line); border-radius:8px; padding:8px 10px; margin-top:8px; background:var(--surface);}
+.ind-tedit{display:flex; gap:8px; align-items:flex-start; padding:6px 0; border-bottom:1px dashed var(--line);} .ind-tedit .form-grid{flex:1;}
+.ind-saved{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
 .aud-tiles{grid-template-columns:repeat(5,1fr) !important;} @media (max-width:1000px){ .aud-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .aud-prog{border-left:3px solid var(--accent);} .aud-prog-t{min-width:900px;} .aud-prog-t td.c, .aud-prog-t th{text-align:center;} .aud-prog-t th:first-child, .aud-prog-t td:first-child{text-align:left;}
 .aud-prog-t tbody tr{cursor:default;} .aud-prog-t input[type=checkbox]{width:18px; height:18px;}
@@ -1200,6 +1211,7 @@ details.icam-grp .cause-list{margin:6px 0;}
       <nav class="division-tabs" id="workforceViewTabs">
         <button type="button" class="division-tab active" data-wview="register">Register</button>
         <button type="button" class="division-tab" data-wview="matrix">Training matrix</button>
+        <button type="button" class="division-tab" data-wview="induction">Induction</button>
         <button type="button" class="division-tab" data-wview="recognition">⭐ Recognition</button>
         <button type="button" class="division-tab" data-wview="ppe">PPE</button>
       </nav>
@@ -1312,6 +1324,7 @@ details.icam-grp .cause-list{margin:6px 0;}
         </div>
         <p class="wsub" style="margin-top:8px;">Each worker needs the trainings of their <strong>Designation</strong> plus any <strong>extra roles</strong> (set in their Profile). “—” means not required for that person. A training counts when the course name on the worker's Training record contains the required name — e.g. “Working at Height – Level 2” counts for “Working at Height”. Click a row to open that worker's Training tab.</p>
       </div>
+      <div id="inductionPane" hidden><div class="ind-bar" id="indBar"></div><div id="indTop"></div><div id="indBody"></div></div>
       <div id="recognitionPane" hidden></div>
       <div id="ppePane" hidden></div>
     </main>
@@ -2228,7 +2241,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2930,7 +2943,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b86';
+const APP_BUILD='b87';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4094,6 +4107,8 @@ function setWorkforceView(v){
   document.getElementById('trainingMatrixPane').hidden = v!=='matrix';
   document.getElementById('recognitionPane').hidden = v!=='recognition';
   document.getElementById('ppePane').hidden = v!=='ppe';
+  { const ip=document.getElementById('inductionPane'); if(ip) ip.hidden = v!=='induction'; }   // Batch 87
+  if(v==='induction'){ renderInd(); indRenderTop(); }
   if(v==='ppe') renderPpe();
   if(v==='matrix') renderMatrix();
   if(v==='recognition') renderRecognition();
@@ -4279,7 +4294,7 @@ function workerRolesFormHtml(w){
 }
 // Worker → Induction tab: onboarding induction (here) + project inductions attended (from Monthly Report sessions)
 function projectInductionsForWorker(wid){
-  return liveReportEntries().filter(e=>e.category==='induction' && (e.attendeeIds||[]).includes(wid))
+  return liveReportEntries().filter(e=>e.category==='induction' && e.source!=='inductionForm' && (e.attendeeIds||[]).includes(wid))
     .map(e=>({date:String(e.date||'').slice(0,10), projectId:e.projectId||'', project:e.projectId?projectName(e.projectId):'No specific project', by:e.conductedBy||'', id:e.id}))
     .sort((a,b)=>b.date.localeCompare(a.date));
 }
@@ -4288,7 +4303,7 @@ function workerInductionStatusHtml(w){
   const onb=recs.find(r=>inductionTypeOf(r)==='Onboarding induction');
   const line=(label, badge, txt)=>`<div class="rf"><span class="rf-k">${badge}</span><span class="rf-v"><strong>${esc(label)}</strong> · ${txt}</span></div>`;
   const onbLine = onb ? line('Onboarding induction', badgeHtml('valid'), `done ${esc(onb.date||'—')} · no expiry${onb.conductedBy?` · by ${esc(onb.conductedBy)}`:''}`)
-    : line('Onboarding induction', '<span class="badge danger">Missing</span>', 'not recorded yet — add it below');
+    : line('Onboarding induction', '<span class="badge danger">Missing</span>', 'not recorded yet'+(canEdit()?` — <button type="button" class="btn btn-sm btn-primary" data-ind-give="${esc(w.id)}">Give induction (form F0723-04)</button> or add an old paper record below`:''));
   const att=projectInductionsForWorker(w.id);
   const site=w.projectId ? siteEquipmentList.find(x=>x.id===w.projectId && !x.deleted) : null;
   let projLine='';
@@ -4460,7 +4475,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -8580,7 +8595,7 @@ async function hseSigSave(){
   const img=hseSigUp || (hseSigPad&&hseSigPad.ink?hseSigPad.image():old.img); if(!img){ toast('Upload your signature image or sign in the box first'); return; }
   const sigs={...(((settingsDocs.hseSignatures||{}).sigs)||{}), [em]:{name:name.slice(0,60), role:role.slice(0,60), img, savedAt:new Date().toISOString(), ...(hseSigUp?{uploaded:true}:{})}};
   if(await saveSettings('hseSignatures', {sigs}, settingsStamp('hseSignatures'))){ settingsDocs.hseSignatures={...(settingsDocs.hseSignatures||{}), sigs}; hseSigUp=null; tricUi.sigOpen=false; if(typeof compUi!=='undefined') compUi.sigOpen=false;
-    toast('Signature saved — it is added to every TBT you review and every assessment you complete'); renderTricPanel(); if(typeof compRenderTop==='function') compRenderTop(); }
+    toast('Signature saved — it is added to every TBT you review and every assessment you complete'); renderTricPanel(); if(typeof compRenderTop==='function') compRenderTop(); if(typeof indUi!=='undefined' && indUi.sigOpen){ indUi.sigOpen=false; indRenderTop(); } }
 }
 
 /* ---- Batch 83: incidents reported on the project links ---- */
@@ -9680,14 +9695,16 @@ function compGrid(doc, top){
   g.ensure=h=>{ if(g.y+h>H-28){ doc.addPage(); g.y=top||32; return true; } return false; };
   const tick=(cx,cy,on,cross)=>{ doc.setDrawColor(110,116,126); doc.setLineWidth(0.6); doc.rect(cx-5,cy-5,10,10);
     if(on){ doc.setDrawColor(...(cross?RED:INK)); doc.setLineWidth(1.6); if(cross){ doc.line(cx-3,cy-3,cx+3,cy+3); doc.line(cx+3,cy-3,cx-3,cy+3); } else { doc.line(cx-3.2,cy+0.2,cx-0.8,cy+2.8); doc.line(cx-0.8,cy+2.8,cx+3.8,cy-3.2); } } doc.setLineWidth(0.5); };
-  g.row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); return {...c, l:(c.img||c.check!==undefined)?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8))}; });
-    const h=Math.max(minH||15, ...pc.map(c=>c.l.length*LH+5+(c.sub?LH:0))); g.ensure(h); let xx=M;
+  g.row=(cells, minH)=>{ const pc=cells.map(c=>{ doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); const l=(c.img||c.check!==undefined)?[]:doc.splitTextToSize(String(c.t===undefined||c.t===null||c.t===''?(c.blank?'':'—'):c.t), Math.max(10, c.w-8));
+      let sl=[]; if(c.sub){ doc.setFont('helvetica','normal'); doc.setFontSize(7.4); sl=doc.splitTextToSize(String(c.sub), Math.max(10, c.w-8)); if(!Array.isArray(sl)||!sl.length) sl=[String(c.sub)]; }
+      return {...c, l, sl}; });
+    const h=Math.max(minH||15, ...pc.map(c=>c.l.length*LH+5+(c.sub?LH+(c.sl.length-1)*9:0))); g.ensure(h); let xx=M;
     for(const c of pc){ if(c.fill){ doc.setFillColor(...c.fill); doc.rect(xx,g.y,c.w,h,'F'); } doc.setDrawColor(150,156,166); doc.setLineWidth(0.5); doc.rect(xx,g.y,c.w,h);
-      if(c.img){ try{ let iw=c.w-10, ih=h-6; try{ const pr=doc.getImageProperties(c.img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(c.img, 'PNG', xx+(c.w-iw)/2, g.y+(h-ih)/2, iw, ih); }catch(e){} }
+      if(c.img){ try{ let iw=c.w-10, ih=h-6; try{ const pr=doc.getImageProperties(c.img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(c.img, /^data:image\/jpe?g/i.test(c.img)?'JPEG':'PNG', xx+(c.w-iw)/2, g.y+(h-ih)/2, iw, ih); }catch(e){} }
       if(c.check!==undefined) tick(xx+c.w/2, g.y+h/2, !!c.check, c.cross);
       doc.setFont('helvetica', c.bold?'bold':'normal'); doc.setFontSize(c.size||FS); doc.setTextColor(...(c.color||INK));
       c.l.forEach((ln,i)=>c.center?doc.text(ln, xx+c.w/2, g.y+10.5+i*LH, {align:'center'}):doc.text(ln, xx+5, g.y+10.5+i*LH));
-      if(c.sub){ doc.setFont('helvetica','normal'); doc.setFontSize(7.4); doc.setTextColor(...SUB); doc.text(String(c.sub), xx+5, g.y+10.5+c.l.length*LH); }
+      if(c.sub){ doc.setFont('helvetica','normal'); doc.setFontSize(7.4); doc.setTextColor(...SUB); c.sl.forEach((ln,i)=>doc.text(ln, xx+5, g.y+10.5+c.l.length*LH+i*9)); }
       xx+=c.w; }
     g.y+=h; doc.setTextColor(...INK); };
   g.head=t=>{ g.ensure(40); g.y+=7; g.row([{t, w:CW, bold:true, fill:RED, color:[255,255,255], size:8.8}], 16); };
@@ -10078,6 +10095,329 @@ document.addEventListener('change', e=>{ const t=e.target; if(!t || !t.dataset) 
   if(t.dataset.apr && audProgUi.rows){ const [i,k]=t.dataset.apr.split('|'), r=audProgUi.rows[+i]; if(r) r[k]=t.value; return; }
   if(t.matches && t.matches('#addAudForm [data-afield="projectId"]')){ const s=activeSites().find(x=>x.id===t.value), dv=document.querySelector('#addAudForm [data-afield="division"]'); if(s && dv && !dv.value) dv.value=s.division||''; } });
 document.addEventListener('input', e=>{ const t=e.target; if(t && t.dataset && t.dataset.aprmeta && audProgUi.meta){ audProgUi.meta[t.id]=t.value; return; } if(t && t.dataset && t.dataset.apr && audProgUi.rows){ const [i,k]=t.dataset.apr.split('|'), r=audProgUi.rows[+i]; if(r) r[k]=t.value; } });
+
+/* ================= Batch 87: company onboarding induction form (F0723-04) =================
+   HSE gives the induction in the tracker (laptop / phone / tablet): ticks each topic explained, asks 3 questions,
+   the employee signs on the screen (or HSE uploads a photo of his signature on paper), HSE's saved signature is added.
+   inductionRecords/{id} keeps the full record (topics as they were that day + signatures). The worker gets a light
+   "Onboarding induction" record (id 'ind_'+id) and, if ticked, the Monthly Report gets an Induction entry (hseLogs 'ind_'+id). */
+const IND_DEFAULT={
+  sections:[
+    {id:'s1', t:'Company & HSE policy', p:'HSE policy and targets · golden rules: Comply, Intervene, Respect · ID card and good conduct'},
+    {id:'s2', t:'Drugs & alcohol', p:'Zero tolerance at work and in the camp · testing (random / after an incident) · tell HSE about any medicines you take'},
+    {id:'s3', t:'Safety warnings & penalties', p:'Verbal warning → written warning → final warning · a Life-Saving Rule breach = removal from site · warnings are kept in your file'},
+    {id:'s4', t:'Reporting & Stop Work', p:'Report every incident, near miss and hazard at once · anyone can stop unsafe work — no blame, no punishment'},
+    {id:'s5', t:'Client rules', p:"The 9 Life-Saving Rules · Musta'ed steps · permit to work · red zones / restricted areas"},
+    {id:'s6', t:'Emergency & H2S', p:'Muster point and alarm · emergency numbers · first aid · H2S alarm and windsock — move crosswind and uphill'},
+    {id:'s7', t:'Hazards & PPE', p:'Hazards of your job · daily toolbox talk · wear the PPE required · check scaffold and tool tags'},
+    {id:'s8', t:'Health & environment', p:'Heat stress — drink water, take rest · camp hygiene · waste in the right bin · report spills'},
+    {id:'s9', t:'Vehicles', p:'Seat belt always · keep the speed limit · no phone while driving · IVMS is monitored'},
+    {id:'s10', t:'Training', p:'The trainings your job needs · competency assessment for your role'},
+  ],
+  qs:[
+    {id:'q1', q:'What do you do if you see unsafe work?', x:'Stop the work and tell the supervisor / HSE'},
+    {id:'q2', q:'Where do you go when the alarm sounds?', x:'To the muster point — check the windsock'},
+    {id:'q3', q:'What happens if you break a Life-Saving Rule?', x:'Removal from site and a warning in the file'},
+  ],
+};
+const IND_LANGS=['English','Hindi','Urdu','Malayalam','Tamil','Telugu','Bengali','Nepali','Arabic','Other'];
+const IND_DECL='I received this induction in a language I understand. I understood the company rules above — including the drugs & alcohol policy and the safety warnings and penalties — and I will follow them.';
+let indList=[], indLoaded=false, unsubInd=null;
+const indUi={ed:null, q:'', sigOpen:false, newW:false, saved:'', topics:false, tdraft:null, missAll:false, busy:false};
+function indContent(){
+  const s=settingsDocs.inductionContent||{};
+  const secs=Array.isArray(s.sections)&&s.sections.length ? s.sections : IND_DEFAULT.sections;
+  const qs=Array.isArray(s.qs) ? s.qs : IND_DEFAULT.qs;
+  return {sections:secs.map(x=>({id:String(x.id||''), t:String(x.t||''), p:String(x.p||'')})), qs:qs.map(x=>({id:String(x.id||''), q:String(x.q||''), x:String(x.x||'')}))};
+}
+function indHas(w){ return (w.inductions||[]).some(r=>inductionTypeOf(r)==='Onboarding induction'); }
+function indActiveWs(){ return activeWorkers().filter(w=>(w.status||'active')==='active').sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||''))); }
+function indDraftKey(){ const u=auth.currentUser; return 'bhnIndDraft_'+String((u&&u.email)||'').toLowerCase(); }
+function indDraftSave(){ const ed=indUi.ed; if(!ed) return; try{ localStorage.setItem(indDraftKey(), JSON.stringify({...ed, keptAt:Date.now()})); }catch(e){} }
+function indDraftGet(){ try{ const d=JSON.parse(localStorage.getItem(indDraftKey())||'null'); return d && Array.isArray(d.secs) ? d : null; }catch(e){ return null; } }
+function indDraftClear(){ try{ localStorage.removeItem(indDraftKey()); }catch(e){} }
+
+function startIndData(){
+  stopIndData(); if(!auth.currentUser) return;
+  try{ unsubInd=db.collection('inductionRecords').onSnapshot(snap=>{ indList=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); indLoaded=true; renderInd(); },
+    err=>{ console.warn('inductionRecords', err); indList=[]; indLoaded=false; renderInd(); }); }
+  catch(e){ console.warn('induction', e); }
+}
+function stopIndData(){ if(unsubInd){ try{ unsubInd(); }catch(e){} } unsubInd=null; indList=[]; indLoaded=false; }
+
+function indStart(wid, fromDraft){
+  if(!canEdit()) return;
+  if(fromDraft){ const d=indDraftGet(); if(d){ delete d.keptAt; indUi.ed=d; } }
+  if(!fromDraft || !indUi.ed){ const c=indContent();
+    indUi.ed={workerId:wid||'', date:localToday(), dur:45, lang:'English', interp:'', ticks:{}, ans:{}, notes:'', wSig:'', wSigKind:'', report:true, secs:c.sections, qs:c.qs}; }
+  indUi.saved=''; indUi.newW=false; indUi.topics=false; indUi.sigOpen=false;
+  if(workforceView!=='induction') setWorkforceView('induction'); else renderInd();
+  indRenderTop(); indDraftSave();
+  const t=document.getElementById('indTop'); if(t && t.scrollIntoView) t.scrollIntoView({block:'start', behavior:'smooth'});
+}
+const indBusyEd=ed=>!!(ed && (ed.wSig || Object.keys(ed.ticks||{}).length || Object.keys(ed.ans||{}).length));
+function indGive(wid){
+  if(activeWorkerId) closeDrawer();
+  const sec=document.getElementById('workforceSection'); if(sec && sec.hidden){ const b=document.querySelector('.sidenav-btn[data-section="workforce"]'); if(b) b.click(); }
+  const open=indUi.ed || (!indUi.ed && indDraftGet());
+  if(open && indBusyEd(open) && open.workerId!==wid){
+    if(workforceView!=='induction') setWorkforceView('induction'); else renderInd();
+    toast('An induction is not saved yet — save it or discard it first'); indRenderTop();
+    const t=document.getElementById(indUi.ed?'indTop':'indBody'); if(t && t.scrollIntoView) t.scrollIntoView({block:'start'}); return; }
+  if(open && open.workerId===wid && !indUi.ed){ indStart(wid, true); return; }
+  if(indUi.ed && indUi.ed.workerId===wid && wid){ if(workforceView!=='induction') setWorkforceView('induction'); indRenderTop(); return; }
+  indStart(wid);
+}
+function indWorkerOpts(sel){
+  const ws=indActiveWs(), miss=ws.filter(w=>!indHas(w)), done=ws.filter(w=>indHas(w));
+  const o=w=>`<option value="${esc(w.id)}" ${w.id===sel?'selected':''}>${esc(w.fullName||'—')}${w.designation?' — '+esc(w.designation):''}</option>`;
+  return `<option value="">Choose the employee…</option>${miss.length?`<optgroup label="No onboarding induction yet (${miss.length})">${miss.map(o).join('')}</optgroup>`:''}${done.length?`<optgroup label="Already inducted — re-induction">${done.map(o).join('')}</optgroup>`:''}`;
+}
+function indNewWorkerHtml(){
+  const trades=['Scaffolding Division','Civil Division','Logistics & Rental Division','Office Staff','Sub Contractor'];
+  return `<div class="ind-neww"><strong>New employee</strong> <span class="wsub">— added to the Workforce register now; complete his profile later</span>
+    <div class="form-grid" style="margin-top:6px;"><label>Full name *<input id="indNwName" maxlength="80" placeholder="e.g. Ramesh Kumar"></label><label>Civil ID *<input id="indNwCivil" class="mono" maxlength="30"></label>
+      <label>Division *<select id="indNwTrade"><option value="">Select…</option>${trades.map(t=>`<option>${esc(t)}</option>`).join('')}</select></label><label>Designation<input id="indNwDes" maxlength="60" placeholder="e.g. Scaffolder"></label>
+      <label>Nationality<input id="indNwNat" maxlength="40"></label><label>Date of joining<input type="date" id="indNwJoin" value="${esc(localToday())}"></label></div>
+    <div class="form-actions" style="margin-top:4px;"><button type="button" class="btn btn-sm" data-ind-neww="0">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-ind-nwsave="1">Add employee</button></div></div>`;
+}
+function indRenderTop(){
+  const top=document.getElementById('indTop'); if(!top) return;
+  if(indUi.topics){ top.innerHTML=indTopicsHtml(); return; }
+  const ed=indUi.ed; if(!ed){ top.innerHTML=''; return; }
+  const w=workers.find(x=>x.id===ed.workerId&&!x.deleted), u=auth.currentUser, hs=hseSigOf(u&&u.email);
+  const nT=ed.secs.filter(s=>ed.ticks[s.id]).length, nQ=ed.qs.filter(q=>ed.ans[q.id]==='ok').length, prev=w?(w.inductions||[]).filter(r=>inductionTypeOf(r)==='Onboarding induction'):[];
+  top.innerHTML=`<div class="panel comp-ed ind-ed"><div class="section-head"><h3>${ic('clipcheck')} Onboarding induction <span class="wsub">F0723-04</span></h3><button type="button" class="btn btn-sm" data-ind-close="1">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 6px;">Not saved yet — kept on this device until you press <strong>Save induction record</strong>, so a weak network does not lose it.</p>
+    <div class="comp-step"><div class="comp-step-h"><span class="n">1</span>Employee</div>
+      <div class="form-grid"><label class="span-all">Employee<select id="indWorker">${indWorkerOpts(ed.workerId)}</select></label></div>
+      ${w?`<div class="wsub" style="margin-top:4px;">${esc(w.designation||'—')} · ${esc(divLabel(workerDivKey(w)||'')||'—')}${w.projectId?' · project <strong>'+esc(projectName(w.projectId)||'')+'</strong>':''}${w.civilId?' · Civil ID '+esc(w.civilId):''}${w.dateOfJoining?' · joined '+esc(isoToDmy(w.dateOfJoining)):''}</div>`:''}
+      ${prev.length?`<div class="notice" style="margin-top:6px;">He already has an onboarding induction (${esc(prev.map(r=>isoToDmy(r.date)||r.date||'—').join(', '))}). Saving adds a new one — e.g. a re-induction after long leave.</div>`:''}
+      ${indUi.newW?indNewWorkerHtml():`<button type="button" class="att-link" data-ind-neww="1" style="margin-top:6px;">+ New employee — not in the register yet</button>`}
+      <div class="form-grid" style="margin-top:8px;"><label>Date<input type="date" data-ii="date" value="${esc(ed.date||'')}" max="${esc(localToday())}"></label>
+        <label>Duration (minutes)<input type="number" min="5" max="480" step="5" data-ii="dur" value="${esc(ed.dur)}"></label>
+        <label>Language used<select data-ii="lang">${IND_LANGS.map(l=>`<option ${ed.lang===l?'selected':''}>${esc(l)}</option>`).join('')}</select></label>
+        <label>Interpreter (if any)<input data-ii="interp" value="${esc(ed.interp||'')}" maxlength="60" placeholder="name — blank if not needed"></label></div></div>
+    <div class="comp-step"><div class="comp-step-h"><span class="n">2</span>Topics explained <small>${nT} of ${ed.secs.length} ticked</small><button type="button" class="att-link" data-ind-tickall="1" style="margin-left:auto;">${nT===ed.secs.length?'Untick all':'Tick all'}</button></div>
+      ${ed.secs.map((s,i)=>`<label class="ind-topic${ed.ticks[s.id]?' on':''}"><input type="checkbox" data-ind-tick="${esc(s.id)}" ${ed.ticks[s.id]?'checked':''}><span class="ind-tn">${i+1}</span><span><strong>${esc(s.t)}</strong><span class="wsub">${esc(s.p)}</span></span></label>`).join('')}</div>
+    ${ed.qs.length?`<div class="comp-step"><div class="comp-step-h"><span class="n">3</span>Understanding check <small>ask him — ${nQ} of ${ed.qs.length} understood</small></div>
+      ${ed.qs.map(q=>`<div class="comp-pi"><div class="comp-pi-t">${esc(q.q)}<div class="wsub">Expected: ${esc(q.x)}</div></div><div class="comp-seg">${[['ok','Understood'],['no','Explain again']].map(([v,l])=>`<button type="button" class="${ed.ans[q.id]===v?'on '+v:''}" data-ind-ans="${esc(q.id+'|'+v)}">${l}</button>`).join('')}</div></div>`).join('')}</div>`:''}
+    <div class="comp-step"><div class="comp-step-h"><span class="n">${ed.qs.length?4:3}</span>Declaration &amp; signatures</div>
+      <p class="ind-decl">“${esc(IND_DECL)}”</p>
+      <label class="comp-note">Notes (optional)<textarea data-ii="notes" maxlength="600">${esc(ed.notes||'')}</textarea></label>
+      ${indUi.sigOpen?hseSigBoxHtml():''}
+      <div class="comp-sigs"><div><div class="comp-sig-h">Employee${w?' — '+esc(w.fullName||''):''}</div>
+          ${ed.wSig?`<img src="${esc(ed.wSig)}" alt="Employee signature" class="comp-sigimg"><div class="wsub">${ed.wSigKind==='photo'?'Photo of his signature on paper':ed.wSigKind==='upload'?'Uploaded signature':'Signed on the screen'} · <button type="button" class="att-link" data-ind-wsigclr="1">Remove / sign again</button></div>`
+          :`<div class="hse-sig-pad"><canvas id="indWSig" width="600" height="200"></canvas></div><div class="wsub">He signs here with his finger or the mouse — or, if he signed on paper:</div>
+            <label class="btn btn-sm hse-sig-file" style="margin-top:6px;">${ic('camera')} Upload photo of his signature<input type="file" id="indWSigFile" accept="image/png,image/jpeg,image/webp" hidden></label>`}</div>
+        <div><div class="comp-sig-h">Induction given by (HSE)</div>${hs&&hs.img?`<img src="${esc(hs.img)}" alt="" class="comp-sigimg"><div class="wsub">${esc(hs.name||'')} · ${esc(hs.role||'')} · added when you save</div>`
+          :`<p class="wsub">Your saved signature is added when you save.</p><button type="button" class="btn btn-sm btn-primary" data-hsesig-open="ind">Add my signature</button>`}</div></div>
+      <label class="chk" style="margin-top:10px;"><input type="checkbox" data-ii="report" ${ed.report?'checked':''}> Count it in the Monthly Report (Induction · 1 person)</label></div>
+    <div class="form-actions"><button type="button" class="btn btn-sm btn-ghost" data-ind-discard="1" data-armed="0">Discard</button><button type="button" class="btn btn-sm btn-primary" data-ind-save="1" ${indUi.busy?'disabled':''}>✓ Save induction record</button></div></div>`;
+  if(indUi.sigOpen) hseSigWire();
+  if(!ed.wSig) compPadWire(document.getElementById('indWSig'), img=>{ if(indUi.ed){ indUi.ed.wSig=img; indUi.ed.wSigKind='drawn'; indDraftSave(); } });
+}
+// photo of a signature on paper → transparent PNG (same as the HSE signature upload); a busy photo → small JPEG of the photo
+function indPhotoJpeg(file){
+  return new Promise((resolve, reject)=>{ const url=URL.createObjectURL(file), img=new Image();
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('Could not open this image — try a JPG or PNG')); };
+    img.onload=()=>{ try{ const k=Math.min(1, 700/Math.max(img.naturalWidth, img.naturalHeight)), W=Math.max(1,Math.round(img.naturalWidth*k)), H=Math.max(1,Math.round(img.naturalHeight*k));
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(img,0,0,W,H); URL.revokeObjectURL(url); resolve(cv.toDataURL('image/jpeg', 0.72)); }catch(e){ reject(e); } };
+    img.src=url; });
+}
+async function indSigUpload(file){
+  const ed=indUi.ed; if(!ed || !file) return;
+  if(!/^image\//.test(file.type||'')){ toast('Choose an image file (JPG or PNG)'); return; }
+  try{ ed.wSig=await hseSigFromImage(file); ed.wSigKind='upload'; }
+  catch(e){ try{ ed.wSig=await indPhotoJpeg(file); ed.wSigKind='photo'; toast('The signature could not be cut out of the photo — the photo is kept as it is'); }
+    catch(e2){ console.warn(e2); toast(e2&&e2.message?e2.message:'Could not read this image'); return; } }
+  if(indUi.ed===ed){ indDraftSave(); compKeep(indRenderTop); }
+}
+async function indAddWorker(){
+  const v=id=>String((document.getElementById(id)||{}).value||'').trim();
+  const name=v('indNwName'), civil=v('indNwCivil'), trade=v('indNwTrade');
+  if(!name || !civil || !trade){ toast('Write the name, Civil ID and division'); return; }
+  const k=normKey(civil), dup=k && workers.find(w=>normKey(w.civilId)===k);
+  if(dup){ toast(`${dup.fullName||'A worker'} already has Civil ID ${civil}${dup.deleted?' (in Deleted workers)':''} — choose him in the list`); return; }
+  const data={fullName:name, civilId:civil, trade, designation:v('indNwDes'), nationality:v('indNwNat'), dateOfJoining:v('indNwJoin'), status:'active',
+    inductions:[],trainings:[],competency:[],medical:[],licenses:[],warnings:[],violations:[], createdAt:new Date().toISOString(), createdBy:(auth.currentUser&&auth.currentUser.email)||''};
+  try{ const r=await db.collection('workers').add(data); if(indUi.ed){ indUi.ed.workerId=r.id; } indUi.newW=false; toast(`${name} added to the Workforce register`); indDraftSave(); compKeep(indRenderTop); }
+  catch(e){ console.error(e); toast('Could not add the employee — '+((e&&e.code)||'error')); }
+}
+async function indSave(){
+  const ed=indUi.ed; if(!ed || !canEdit() || indUi.busy) return;
+  const w=workers.find(x=>x.id===ed.workerId && !x.deleted);
+  if(!w){ toast('Choose the employee'); return; }
+  if(!ed.date){ toast('Enter the date'); return; }
+  if(ed.date>localToday()){ toast('The date is in the future'); return; }
+  const miss=ed.secs.filter(s=>!ed.ticks[s.id]);
+  if(miss.length){ toast(`Tick every topic you explained — ${miss.length} not ticked (${miss.map(s=>s.t).slice(0,3).join(', ')}${miss.length>3?'…':''})`); return; }
+  const noA=ed.qs.filter(q=>ed.ans[q.id]!=='ok');
+  if(noA.length){ toast(noA.some(q=>ed.ans[q.id]==='no') ? 'Explain again until he understands, then ask again and mark “Understood”' : `Ask the ${noA.length===1?'question':noA.length+' questions'} and mark his answer`); return; }
+  if(!ed.wSig){ toast('The employee signs in his box (or upload a photo of his signature)'); return; }
+  const u=auth.currentUser, hs=hseSigOf(u&&u.email);
+  if(!hs || !hs.img){ toast('Save your signature first — it goes on the induction record'); indUi.sigOpen=true; indRenderTop(); return; }
+  indUi.busy=true; indRenderTop();
+  const id=genId(), now=new Date().toISOString(), me=(u&&u.email)||'', dur=Math.max(5, Math.min(480, Math.round(Number(ed.dur)||45)));
+  const rec={workerId:w.id, wName:w.fullName||'', wDes:w.designation||'', wCivil:w.civilId||'', wNat:w.nationality||'', wDiv:workerDivKey(w)||'', wJoin:w.dateOfJoining||'', projectId:w.projectId||'',
+    date:ed.date, dur, lang:ed.lang||'English', interp:String(ed.interp||'').trim().slice(0,60), notes:String(ed.notes||'').trim().slice(0,600),
+    secs:ed.secs, ticks:Object.fromEntries(ed.secs.map(s=>[s.id,true])), qs:ed.qs, ans:Object.fromEntries(ed.qs.map(q=>[q.id,'ok'])),
+    wSig:ed.wSig, wSigKind:ed.wSigKind||'drawn', hse:{name:hs.name||'', role:hs.role||'', img:hs.img, email:me}, report:!!ed.report, status:'done', createdAt:now, createdBy:me};
+  try{ await db.collection('inductionRecords').doc(id).set(stamp(rec)); }
+  catch(e){ console.error(e); indUi.busy=false; indRenderTop(); toast(e&&e.code==='permission-denied' ? RULES_UPDATE_MSG : 'Not saved — check the internet and try again (your form is kept on this device)'); return; }
+  indDraftClear(); indUi.ed=null; indUi.busy=false; indUi.saved=id; indUi.sigOpen=false;
+  let warn='';
+  try{ const cur=workers.find(x=>x.id===w.id)||w;
+    const lr={id:'ind_'+id, site:'Onboarding induction', inductionType:'Onboarding induction', date:rec.date, conductedBy:rec.hse.name, indId:id,
+      notes:`Induction form F0723-04 · ${rec.secs.length} topics · ${dur} min · ${rec.lang}${rec.interp?' · interpreter '+rec.interp:''}`, createdAt:now};
+    await db.collection('workers').doc(w.id).update(stamp({inductions:[...(cur.inductions||[]).filter(r=>r.id!==lr.id), lr]})); }
+  catch(e){ console.error(e); warn=' — but his worker record could not be updated'; }
+  if(rec.report){ try{ await db.collection('hseLogs').doc('ind_'+id).set(stamp({category:'induction', date:rec.date, division:rec.wDiv||'Civil', projectId:null, count:1, hours:Math.round(dur/60*100)/100,
+      conductedBy:rec.hse.name, attendeeIds:[w.id], source:'inductionForm', sourceIndId:id})); }
+    catch(e){ console.error(e); warn+=(warn?' and':' — but')+' the Monthly Report could not be updated'; } }
+  toast(`Induction saved — ${w.fullName}${warn}`); indRenderTop(); renderInd();
+}
+async function indDelete(id){
+  if(!canEdit()) return; const r=indList.find(x=>x.id===id); if(!r) return;
+  try{ await db.collection('inductionRecords').doc(id).delete(); }catch(e){ console.error(e); toast('Could not delete — '+((e&&e.code)||'error')); return; }
+  const w=workers.find(x=>x.id===r.workerId);
+  if(w && (w.inductions||[]).some(x=>x.id==='ind_'+id)){ try{ await db.collection('workers').doc(w.id).update(stamp({inductions:(w.inductions||[]).filter(x=>x.id!=='ind_'+id)})); }catch(e){ console.error(e); } }
+  try{ if(reportEntries.some(e=>e.id==='ind_'+id)) await db.collection('hseLogs').doc('ind_'+id).delete(); }catch(e){ /* already gone */ }
+  if(indUi.saved===id) indUi.saved='';
+  toast('Induction record deleted'); renderInd();
+}
+
+/* ---- topics editor (settings/inductionContent) ---- */
+function indTopicsHtml(){
+  const d=indUi.tdraft||(indUi.tdraft=JSON.parse(JSON.stringify(indContent())));
+  return `<div class="panel comp-ed"><div class="section-head"><h3>${ic('pencil')} Induction topics &amp; questions</h3><button type="button" class="btn btn-sm" data-ind-topics="0">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Change the wording to your company's own (e.g. your drugs &amp; alcohol policy or penalty steps). Inductions already saved keep the topics they had on that day.</p>
+    <div class="subhead">Topics (${d.sections.length})</div>
+    ${d.sections.map((s,i)=>`<div class="ind-tedit"><span class="ind-tn">${i+1}</span><div class="form-grid"><label>Topic<input data-it="s|${i}|t" value="${esc(s.t)}" maxlength="60"></label><label class="span-all">Main points<textarea data-it="s|${i}|p" maxlength="300">${esc(s.p)}</textarea></label></div>
+      <button type="button" class="icon-btn danger" data-ind-tdel="s|${i}" aria-label="Remove topic">${ic('trash')}</button></div>`).join('')}
+    ${d.sections.length<15?`<button type="button" class="btn btn-sm" data-ind-tadd="s">+ Add topic</button>`:''}
+    <div class="subhead">Understanding questions (${d.qs.length})</div>
+    ${d.qs.map((q,i)=>`<div class="ind-tedit"><span class="ind-tn">${i+1}</span><div class="form-grid"><label>Question<input data-it="q|${i}|q" value="${esc(q.q)}" maxlength="120"></label><label>Expected answer<input data-it="q|${i}|x" value="${esc(q.x)}" maxlength="120"></label></div>
+      <button type="button" class="icon-btn danger" data-ind-tdel="q|${i}" aria-label="Remove question">${ic('trash')}</button></div>`).join('')}
+    ${d.qs.length<6?`<button type="button" class="btn btn-sm" data-ind-tadd="q">+ Add question</button>`:''}
+    <div class="form-actions"><button type="button" class="btn btn-sm btn-ghost" data-ind-treset="1" data-armed="0">Back to the standard topics</button><button type="button" class="btn btn-sm btn-primary" data-ind-tsave="1">Save topics</button></div></div>`;
+}
+async function indTopicsSave(){
+  const d=indUi.tdraft; if(!d || !canEdit()) return;
+  const sections=d.sections.map(s=>({id:s.id||('s'+genId().slice(0,8)), t:String(s.t||'').trim(), p:String(s.p||'').trim()})).filter(s=>s.t);
+  const qs=d.qs.map(q=>({id:q.id||('q'+genId().slice(0,8)), q:String(q.q||'').trim(), x:String(q.x||'').trim()})).filter(q=>q.q);
+  if(!sections.length){ toast('Keep at least one topic'); return; }
+  if(await saveSettings('inductionContent', {sections, qs}, settingsStamp('inductionContent'))){ settingsDocs.inductionContent={...(settingsDocs.inductionContent||{}), sections, qs}; indUi.topics=false; indUi.tdraft=null; indRenderTop(); }
+}
+
+/* ---- the Induction tab in Workforce ---- */
+function renderInd(){
+  const pane=document.getElementById('inductionPane'), body=document.getElementById('indBody'); if(!pane || pane.hidden || !body || !auth.currentUser) return;
+  const ed=canEdit(), ws=indActiveWs(), miss=ws.filter(w=>!indHas(w)), done=ws.length-miss.length, dr=!indUi.ed && ed ? indDraftGet() : null;
+  const bar=document.getElementById('indBar'); if(bar) bar.innerHTML=`${ed?`<button type="button" class="btn btn-primary" data-ind-give="">+ Give induction</button><button type="button" class="btn btn-sm" data-ind-topics="1">${ic('pencil')} Topics &amp; questions</button>`:''}<button type="button" class="btn btn-sm" data-ind-blank="1">${ic('printer')} Blank form (paper)</button>`;
+  const q=indUi.q.trim().toLowerCase(), recs=indList.filter(r=>!q || String(r.wName||'').toLowerCase().includes(q) || String(r.wDes||'').toLowerCase().includes(q)).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')) || String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  const sv=indUi.saved && indList.find(r=>r.id===indUi.saved);
+  const tile=(l,n,s,cls,cat)=>`<div class="tile" style="--tile-accent:var(${cat})"><div class="tile-head"><div class="tile-icon">${ic('clipcheck')}</div><div class="tile-label">${esc(l)}</div></div><div class="tile-num ${cls}">${n}</div><div class="tile-sub">${esc(s)}</div></div>`;
+  const mlist=indUi.missAll?miss:miss.slice(0,12);
+  body.innerHTML=`${sv?`<div class="notice ind-saved">✓ Induction saved — <strong>${esc(sv.wName||'')}</strong>, ${esc(isoToDmy(sv.date))}. <button type="button" class="btn btn-sm btn-primary" data-ind-pdf="${esc(sv.id)}">${ic('download')} Download PDF</button></div>`:''}
+    ${dr?`<div class="notice">An induction not saved yet${(()=>{ const x=workers.find(w=>w.id===dr.workerId); return x?' — <strong>'+esc(x.fullName||'')+'</strong>':''; })()}, ${esc(isoToDmy(dr.date)||'')}. <button type="button" class="btn btn-sm btn-primary" data-ind-resume="1">Continue</button> <button type="button" class="btn btn-sm btn-ghost" data-ind-drop="1" data-armed="0">Discard</button></div>`:''}
+    <div class="tiles ind-tiles">${tile('Active employees', ws.length, 'in the Workforce register', '', '--cat-1')}${tile('Onboarding induction done', done, ws.length?Math.round(done/ws.length*100)+'% of active employees':'—', 'ok', '--cat-4')}${tile('No induction record', miss.length, miss.length?'give it, or add the old paper record':'everyone has a record', miss.length?'danger':'', '--cat-9')}</div>
+    ${miss.length?`<div class="panel ind-miss"><div class="subhead" style="margin-top:0;">No onboarding induction record (${miss.length})</div>
+      ${mlist.map(w=>`<div class="ind-mrow"><span><strong>${esc(w.fullName||'—')}</strong> <span class="wsub">${esc(w.designation||'')}${w.designation?' · ':''}${esc(divLabel(workerDivKey(w)||'')||'—')}${w.dateOfJoining?' · joined '+esc(isoToDmy(w.dateOfJoining)):''}</span></span>
+        <span style="display:flex; gap:6px;">${ed?`<button type="button" class="btn btn-sm" data-ind-give="${esc(w.id)}">Give induction</button>`:''}<button type="button" class="att-link" data-ind-oldrec="${esc(w.id)}" title="Add the record of an induction given earlier on paper">Old paper record</button></span></div>`).join('')}
+      ${miss.length>12?`<button type="button" class="att-link" data-ind-missall="1">${indUi.missAll?'Show fewer':'Show all '+miss.length}</button>`:''}</div>`:''}
+    <div class="section-head" style="margin-top:14px;"><h3>Induction records (${indList.length})</h3><input type="search" id="indSearch" placeholder="Search name or designation…" value="${esc(indUi.q)}" style="max-width:260px;"></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Employee</th><th>Designation</th><th>Language</th><th>Given by</th><th></th></tr></thead>
+      <tbody>${recs.length?recs.map(r=>`<tr><td class="mono">${esc(isoToDmy(r.date)||'—')}</td><td><strong>${esc(r.wName||'—')}</strong></td><td>${esc(r.wDes||'—')}</td><td>${esc(r.lang||'—')}${r.interp?` <span class="wsub">· ${esc(r.interp)}</span>`:''}</td><td>${esc((r.hse&&r.hse.name)||'—')}</td>
+        <td style="white-space:nowrap;"><button type="button" class="btn btn-sm" data-ind-pdf="${esc(r.id)}">${ic('download')} PDF</button>${ed?` <button type="button" class="icon-btn danger" data-ind-del="${esc(r.id)}" data-armed="0" aria-label="Delete">${ic('trash')}</button>`:''}</td></tr>`).join('')
+        :`<tr><td colspan="6" class="empty-state">${indLoaded?(indList.length?'Nobody matches the search.':'No induction given in the tracker yet — press “+ Give induction”.'):'Loading…'}</td></tr>`}</tbody></table></div>
+    <p class="wsub" style="margin-top:8px;">Older inductions given on paper: open the worker → <strong>Induction</strong> tab → “+ Add induction record” and attach the scanned form. Project / site inductions are logged in Monthly Report → Log an entry → Induction.</p>`;
+}
+
+/* ---- PDF (BHN-F0723-04) ---- */
+function indPdfBody(doc, r, w, blank){
+  const g=compGrid(doc, 32), CW=g.CW, K=96, hw=(CW-2*K)/2, LBL=g.LBL, val=t=>blank?{t:'', blank:true}:{t};
+  g.title('COMPANY ONBOARDING INDUCTION', blank?'Tick each topic when explained':'COMPLETED', blank?[90,96,106]:[15,118,80]);
+  const L=(a,b,c,d)=>g.row([{t:a, w:K, bold:true, fill:LBL},{...val(b), w:hw, bold:a==='NAME'},{t:c, w:K, bold:true, fill:LBL},{...val(d), w:hw}], blank?20:15);
+  L('NAME', w.fullName||r.wName, 'DESIGNATION', w.designation||r.wDes);
+  L('CIVIL ID', w.civilId||r.wCivil, 'NATIONALITY', w.nationality||r.wNat);
+  L('DIVISION', divLabel(r.wDiv||workerDivKey(w)||'')||'—', 'DATE OF JOINING', isoToDmy(w.dateOfJoining||r.wJoin)||'—');
+  L('INDUCTION DATE', isoToDmy(r.date), 'DURATION', r.dur?r.dur+' minutes':'—');
+  L('LANGUAGE USED', r.lang, 'INTERPRETER', r.interp||'Not needed');
+  const secs=r.secs||[], ticks=r.ticks||{}, qs=r.qs||[], ans=r.ans||{};
+  g.head('1. TOPICS EXPLAINED TO THE EMPLOYEE');
+  g.row([{t:'#', w:22, bold:true, fill:LBL, center:true},{t:'Topic and main points', w:CW-22-70, bold:true, fill:LBL},{t:'Explained', w:70, bold:true, fill:LBL, center:true}]);
+  secs.forEach((s,i)=>g.row([{t:String(i+1), w:22, center:true},{t:s.t, sub:s.p, w:CW-22-70, bold:true},{check:!blank && !!ticks[s.id], w:70}], 24));
+  if(qs.length){ g.head('2. UNDERSTANDING CHECK — QUESTIONS ASKED');
+    g.row([{t:'Question — expected answer', w:CW-140, bold:true, fill:LBL},{t:'Understood', w:70, bold:true, fill:LBL, center:true},{t:'Explain again', w:70, bold:true, fill:LBL, center:true}]);
+    qs.forEach(q=>g.row([{t:q.q, sub:'Expected: '+q.x, w:CW-140},{check:!blank && ans[q.id]==='ok', w:70},{check:!blank && ans[q.id]==='no', cross:true, w:70}], 24)); }
+  if(r.notes || blank) g.row([{t:'NOTES', w:K, bold:true, fill:LBL},{t:r.notes||'', blank:true, w:CW-K}], blank?30:15);
+  g.head(`${qs.length?3:2}. DECLARATION & SIGNATURES`);
+  g.ensure(120);
+  g.row([{t:IND_DECL, w:CW, size:8.4}], 20);
+  const hs=r.hse||{};
+  g.row([{t:'EMPLOYEE', w:K, bold:true, fill:LBL},{...val(w.fullName||r.wName||''), sub:blank?'Date:':'Date: '+isoToDmy(r.date)+(r.wSigKind==='photo'||r.wSigKind==='upload'?'  ·  signed on paper (photo)':''), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},blank||!r.wSig?{t:'', blank:true, w:hw}:{img:r.wSig, w:hw}], 46);
+  g.row([{t:'INDUCTION BY (HSE)', w:K, bold:true, fill:LBL, size:7.8},{...val(hs.name||''), sub:blank?'Position:':[hs.role, r.createdAt?isoToDmy(isoToLocalDate(r.createdAt)):''].filter(Boolean).join('  ·  '), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},blank||!hs.img?{t:'', blank:true, w:hw}:{img:hs.img, w:hw}], 46);
+  g.y+=6; g.row([{t:'Keep this record in the employee file. Give the induction before he starts work, in a language he understands; give it again after a long absence or a change of job.', w:CW, size:7.4, color:g.SUB}]);
+}
+async function indPdf(id){
+  const r=indList.find(x=>x.id===id); if(!r){ toast('Induction record not found'); return; }
+  if(!compPdfReady()) return;
+  const w=workers.find(x=>x.id===r.workerId)||{};
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'induction', docSub:`${r.wName||w.fullName||''} · onboarding induction`});
+  indPdfBody(doc, r, {fullName:r.wName||w.fullName, designation:r.wDes||w.designation, civilId:r.wCivil||w.civilId, nationality:r.wNat||w.nationality, dateOfJoining:r.wJoin||w.dateOfJoining}, false);
+  doc.save(`Induction_${compSafeName(r.wName||w.fullName)}_${r.date||''}.pdf`);
+}
+async function indBlankPdf(){
+  if(!compPdfReady()) return; const c=indContent();
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'induction', docSub:'Blank form'});
+  indPdfBody(doc, {secs:c.sections, qs:c.qs}, {}, true);
+  doc.save('Induction_form_blank.pdf');
+}
+
+/* ---- events ---- */
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('[data-ind-give],[data-ind-close],[data-ind-neww],[data-ind-nwsave],[data-ind-tickall],[data-ind-ans],[data-ind-wsigclr],[data-ind-discard],[data-ind-save],[data-ind-pdf],[data-ind-del],[data-ind-blank],[data-ind-topics],[data-ind-tadd],[data-ind-tdel],[data-ind-treset],[data-ind-tsave],[data-ind-resume],[data-ind-drop],[data-ind-missall],[data-ind-oldrec],[data-ropen-ind]');
+  if(!b || b.disabled) return; const D=b.dataset, ed=indUi.ed;
+  if('indGive' in D){ if(!canEdit()) return; if(indUi.ed && !D.indGive){ indRenderTop(); const t=document.getElementById('indTop'); if(t&&t.scrollIntoView) t.scrollIntoView({block:'start'}); return; } indGive(D.indGive); return; }
+  if(D.indPdf){ await indPdf(D.indPdf); return; }
+  if(D.indBlank){ await indBlankPdf(); return; }
+  if(D.ropenInd!==undefined){ const s=document.querySelector('.sidenav-btn[data-section="workforce"]'); if(s) s.click(); setWorkforceView('induction'); return; }
+  if(D.indMissall){ indUi.missAll=!indUi.missAll; compKeep(renderInd); return; }
+  if(D.indOldrec){ openDrawer(D.indOldrec); activeTab='inductions'; addFormOpen=true; renderDrawer(); return; }
+  if(!canEdit()) return;
+  if(D.indDel){ if(!compArm(b,'Tap again to delete')) return; b.disabled=true; await indDelete(D.indDel); return; }
+  if(D.indResume){ indStart('', true); return; }
+  if(D.indDrop){ if(!compArm(b,'Tap again to discard')) return; indDraftClear(); renderInd(); return; }
+  if('indTopics' in D){ indUi.topics=D.indTopics==='1'; indUi.tdraft=null; indRenderTop(); if(indUi.topics){ const t=document.getElementById('indTop'); if(t&&t.scrollIntoView) t.scrollIntoView({block:'start'}); } return; }
+  if(D.indTadd){ const d=indUi.tdraft; if(!d) return; if(D.indTadd==='s') d.sections.push({id:'', t:'', p:''}); else d.qs.push({id:'', q:'', x:''}); compKeep(indRenderTop); return; }
+  if(D.indTdel){ const d=indUi.tdraft; if(!d) return; const [k,i]=D.indTdel.split('|'); (k==='s'?d.sections:d.qs).splice(Number(i),1); compKeep(indRenderTop); return; }
+  if(D.indTreset){ if(!compArm(b,'Tap again — back to standard')) return; indUi.tdraft=JSON.parse(JSON.stringify(IND_DEFAULT)); compKeep(indRenderTop); return; }
+  if(D.indTsave){ await indTopicsSave(); return; }
+  if(D.indClose){ indUi.ed=null; indUi.sigOpen=false; indUi.newW=false; indRenderTop(); renderInd(); return; }
+  if(!ed) return;
+  if('indNeww' in D){ indUi.newW=D.indNeww==='1'; compKeep(indRenderTop); return; }
+  if(D.indNwsave){ b.disabled=true; await indAddWorker(); b.disabled=false; return; }
+  if(D.indTickall){ const all=ed.secs.every(s=>ed.ticks[s.id]); ed.ticks=all?{}:Object.fromEntries(ed.secs.map(s=>[s.id,true])); indDraftSave(); compKeep(indRenderTop); return; }
+  if(D.indAns){ const [qid,v]=D.indAns.split('|'); ed.ans={...ed.ans, [qid]:v}; indDraftSave(); compKeep(indRenderTop); return; }
+  if(D.indWsigclr){ ed.wSig=''; ed.wSigKind=''; indDraftSave(); compKeep(indRenderTop); return; }
+  if(D.indDiscard){ if(!compArm(b,'Tap again to discard')) return; indDraftClear(); indUi.ed=null; indUi.sigOpen=false; indRenderTop(); renderInd(); return; }
+  if(D.indSave){ await indSave(); return; }
+});
+document.addEventListener('change', e=>{
+  const el=e.target; if(!el || !el.closest || !el.closest('#inductionPane')) return;
+  if(el.id==='indWSigFile'){ const f=el.files&&el.files[0]; if(f) indSigUpload(f); return; }
+  const ed=indUi.ed;
+  if(el.id==='indWorker' && ed){ ed.workerId=el.value; indDraftSave(); compKeep(indRenderTop); return; }
+  if(el.dataset.indTick && ed){ ed.ticks={...ed.ticks, [el.dataset.indTick]:el.checked}; if(!el.checked) delete ed.ticks[el.dataset.indTick]; indDraftSave(); compKeep(indRenderTop); return; }
+  const k=el.dataset.ii; if(k && ed){ ed[k]=k==='report'?el.checked:k==='dur'?Number(el.value)||'':el.value; indDraftSave(); if(k==='date'||k==='report') compKeep(indRenderTop); return; }
+});
+document.addEventListener('input', e=>{
+  const el=e.target; if(!el || !el.closest || !el.closest('#inductionPane')) return;
+  if(el.id==='indSearch'){ indUi.q=el.value; renderInd(); const s=document.getElementById('indSearch'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } return; }
+  if(el.dataset.it && indUi.tdraft){ const [k,i,f]=el.dataset.it.split('|'); const arr=k==='s'?indUi.tdraft.sections:indUi.tdraft.qs; if(arr[Number(i)]) arr[Number(i)][f]=el.value; return; }
+  const k=el.dataset.ii, ed=indUi.ed; if(k && ed && (k==='notes'||k==='interp'||k==='dur')){ ed[k]=k==='dur'?Number(el.value)||'':el.value; indDraftSave(); }
+});
 
 /* ---- action tracker: extra sources ---- */
 const B12_ACT_SOURCES=[{key:'obs',label:'Observations'},{key:'insp',label:'Inspections'},{key:'hira',label:'Risk register'},{key:'moc',label:'Change (MOC)'},{key:'heat',label:'Heat stress'}];
@@ -12414,6 +12754,7 @@ function stopDataListeners(){
   stopTricData();
   stopIncRepData();
   stopCompData();
+  stopIndData();   // Batch 87
   if(unsubscribeWorkers){ unsubscribeWorkers(); unsubscribeWorkers=null; }
   if(unsubscribeVehicles){ unsubscribeVehicles(); unsubscribeVehicles=null; }
   if(unsubscribeSiteEquipment){ unsubscribeSiteEquipment(); unsubscribeSiteEquipment=null; }
@@ -12452,6 +12793,7 @@ auth.onAuthStateChanged(user=>{
     startTricData();   // Batch 77
     startIncRepData();   // Batch 83
     startCompData();   // Batch 84
+    startIndData();   // Batch 87
   } else {
     stopDataListeners();
     document.getElementById('dbUnavailableBanner').hidden=true;
@@ -12596,6 +12938,7 @@ function renderAll(){
   renderSiteAll();
   renderMatrix();
   renderReportAll();
+  if(typeof renderInd==='function') renderInd();   // Batch 87
   if(pendingWorkerOpen) setTimeout(openPendingWorker, 0);   // project Team tabs & counts use worker data
 }
 
@@ -14632,8 +14975,11 @@ function renderReportTable(entries){
     const fromIncident = e.source==='incident' && e.sourceIncidentId && activeIncidents().some(x=>x.id===e.sourceIncidentId);
     const fromAudit = e.source==='audit' && e.sourceAuditId && activeAudits().some(x=>x.id===e.sourceAuditId);
     const fromObs = e.source==='observation' && e.sourceObsId && regState.obs && regActive('obs').some(x=>x.id===e.sourceObsId);
+    const fromInd = e.source==='inductionForm' && e.sourceIndId && (!indLoaded || indList.some(x=>x.id===e.sourceIndId));   // Batch 87
     const fromAutoMh = e.source==='autoManHours', fromVeh = e.source==='vehicleInspection' && e.sourceVehicleId && activeVehicles().some(x=>x.id===e.sourceVehicleId);
-    const actions = fromAutoMh
+    const actions = fromInd
+      ? `<button type="button" class="btn btn-sm" data-ropen-ind="${esc(e.sourceIndId)}" title="Recorded with the induction form — Workforce → Induction">Open induction</button>`
+      : fromAutoMh
       ? `<button type="button" class="btn btn-sm" data-ropen-mh="${esc(e.projectId)}" title="Counted automatically from the project team — change it in the project's HSE statistics">Open project</button>`
       : fromVeh
       ? `<button type="button" class="btn btn-sm" data-ropen-veh="${esc(e.sourceVehicleId)}" title="Recorded in the vehicle's Inspections tab — open it there">Open vehicle</button>`
@@ -14734,6 +15080,7 @@ function openReportEntryForm(entryId, presetProjectId, presetCategory){
   if(audSynced){ openAudDrawer(audSynced.sourceAuditId); return; }
   const obsSynced = entryId && regState.obs && reportEntries.find(x=>x.id===entryId && x.source==='observation' && regActive('obs').some(o=>o.id===x.sourceObsId));
   if(obsSynced){ openRegDrawer('obs', obsSynced.sourceObsId); return; }
+  if(entryId && reportEntries.some(x=>x.id===entryId && x.source==='inductionForm')){ const b=document.querySelector('.sidenav-btn[data-section="workforce"]'); if(b) b.click(); setWorkforceView('induction'); return; }   // Batch 87
   editingReportEntryId = entryId || null;
   const editing = entryId ? reportEntries.find(e=>e.id===entryId) : null;
   const category = editing ? editing.category : (presetCategory && REPORT_CATEGORIES[presetCategory] ? presetCategory : 'training');
@@ -15230,6 +15577,7 @@ function recordTabHtml(w,key,cfg){
       </div>
       <div class="record-fields">${fieldsHtml}</div>
       ${key==='toolboxTalks'&&r.tricId?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(r.tricId)}" style="margin-top:6px;">${ic('download')} TBT record (PDF)</button>`:''}
+      ${key==='inductions'&&r.indId?`<button type="button" class="btn btn-sm" data-ind-pdf="${esc(r.indId)}" style="margin-top:6px;">${ic('download')} Induction form (PDF)</button>`:''}
       ${key==='competency'&&r.assessId?`<button type="button" class="btn btn-sm" data-comp-pdf="${esc(r.assessId)}" style="margin-top:6px;">${ic('download')} Assessment (PDF)</button>`:''}
       ${key==='ppeIssued'&&r.sigId?`<button type="button" class="btn btn-sm" data-ppe-rcpt="${esc(r.sigId)}" style="margin-top:6px;">${ic('download')} Signed receipt (PDF)</button>`:''}
       ${attach}
@@ -17104,8 +17452,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-site-ppe-xlsx]'); if(b) sitePpeXlsx(b.dataset.sitePpeXlsx); });   // Batch 81
   // Batch 83: HSE signature + incident reports
   document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-hsesig-open],[data-hsesig-close],[data-hsesig-clear],[data-hsesig-save],[data-hsesig-unup],[data-increp-goto],[data-increp-open],[data-increp-close]'); if(!b) return; const D=b.dataset;
-    if(D.hsesigOpen){ hseSigPad=null; hseSigUp=null; if(D.hsesigOpen==='comp'){ compUi.sigOpen=!compUi.sigOpen; compRenderTop(); } else { tricUi.sigOpen=!tricUi.sigOpen; renderTricPanel(); } return; }
-    if(D.hsesigClose){ tricUi.sigOpen=false; compUi.sigOpen=false; hseSigPad=null; hseSigUp=null; renderTricPanel(); compRenderTop(); return; }
+    if(D.hsesigOpen){ hseSigPad=null; hseSigUp=null; if(D.hsesigOpen==='comp'){ compUi.sigOpen=!compUi.sigOpen; compRenderTop(); } else if(D.hsesigOpen==='ind'){ indUi.sigOpen=!indUi.sigOpen; indRenderTop(); } else { tricUi.sigOpen=!tricUi.sigOpen; renderTricPanel(); } return; }
+    if(D.hsesigClose){ tricUi.sigOpen=false; compUi.sigOpen=false; const io=indUi.sigOpen; indUi.sigOpen=false; hseSigPad=null; hseSigUp=null; renderTricPanel(); compRenderTop(); if(io) indRenderTop(); return; }
     if(D.hsesigUnup){ hseSigUp=null; const pv=document.getElementById('hseSigPrev'); if(pv) pv.innerHTML=''; return; }
     if(D.hsesigClear){ if(hseSigPad) hseSigPad.clear(); return; }
     if(D.hsesigSave){ await hseSigSave(); return; }
