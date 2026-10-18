@@ -1107,6 +1107,21 @@ details.icam-grp .cause-list{margin:6px 0;}
 .hse-sig-file{cursor:pointer;} .hse-sig-prev,.hse-sig-cur{height:56px; max-width:260px; vertical-align:middle; background:#fff; border-radius:4px; padding:3px; border:1px solid var(--line);}
 
 /* Batch 86: audit programme */
+.cmx-jobs{border-top:1px dashed var(--line); margin-top:10px; padding-top:6px;} .cmx-jobs-g{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:2px 12px; margin-top:4px;} .cmx-so{border-top:1px dashed var(--line); margin-top:8px; padding-top:4px;} .cmx-so-g{grid-template-columns:repeat(auto-fit,minmax(170px,1fr)) !important;}
+#compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
+.cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
+.cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
+.cmx-table th, .cmx-table td{padding:5px 6px;} .cmx-table .cmx-name{min-width:170px; text-align:left;} .cmx-h{font-size:11px; font-weight:600; max-width:96px; white-space:normal; line-height:1.15; vertical-align:bottom;}
+.cmx-c{text-align:center; font-weight:700; min-width:58px;} .cmx-c span{display:block; font-size:14px; line-height:1;} .cmx-c small{display:block; font-weight:400; font-size:10px; opacity:.85; margin-top:2px;}
+.cmx-c.ok{background:var(--ok-bg); color:var(--ok);} .cmx-c.soon,.cmx-c.sup{background:var(--warn-bg); color:var(--warn);} .cmx-c.bad{background:var(--danger-bg); color:var(--danger);} .cmx-c.na{color:var(--ink-muted);}
+.cmx-lv{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font-weight:800; background:var(--ok-bg); color:var(--ok); border:2px solid var(--ok);} .cmx-lv.low{background:var(--danger-bg); color:var(--danger); border-color:var(--danger);} .cmx-lvc{text-align:center;}
+tr.cmx-open > td{background:var(--surface-2);} .cmx-detail > td{background:var(--surface-2); padding:10px 12px !important;}
+.cmx-det-h{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;} .cmx-ev td, .cmx-ev th{font-size:12px;}
+.cmx-det-x{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin:10px 0 4px;} .cmx-det-x label:not(.chk){display:flex; flex-direction:column; font-size:12px;}
+.cmx-gap{border-top:1px dashed var(--line); margin-top:8px; padding-top:6px;} .cmx-why{max-width:300px; font-size:12px;}
+.cmx-profs{display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:12px;} @media (max-width:500px){ .cmx-profs{grid-template-columns:1fr;} }
+.cmx-rv{grid-template-columns:repeat(auto-fit,minmax(170px,1fr)) !important;} .cmx-res{border-left:3px solid var(--ok);}
+.cmx-dash{margin-top:10px; padding:8px 10px; border-top:1px dashed var(--line); font-size:12.5px;}
 .ind-ed{border-left-color:#0ea5e9;} .ind-bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:4px 0 10px;}
 label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind-ed label.hse-sig-file{display:inline-flex !important; align-items:center; gap:6px;}
 .ind-topic{display:flex !important; gap:10px; align-items:flex-start; padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-bottom:6px; background:var(--surface); cursor:pointer;}
@@ -1469,6 +1484,8 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
           <button class="btn btn-sm" type="button" data-comp-xlsx="1"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Excel</button>
         </div>
       </div>
+      <nav class="division-tabs" id="compTabs"><button type="button" class="division-tab active" data-comp-tab="assess">Assessments</button><button type="button" class="division-tab" data-comp-tab="matrix">Competency matrix (F0723-02)</button></nav>
+      <div id="compAssessPane">
       <div id="compTop"></div>
       <div class="tiles comp-tiles" id="compTiles"></div>
       <div class="toolbar">
@@ -1478,6 +1495,8 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
         <select id="compStatus"><option value="all">Every status</option><option value="bad">Needs action (not assessed / expired / not yet)</option><option value="none">Not assessed</option><option value="ok">Competent</option><option value="sup">Under supervision</option><option value="nyc">Not yet competent</option><option value="expired">Expired</option><option value="due">Due within 30 days</option><option value="open">In progress</option></select>
       </div>
       <div id="compBody"></div>
+      </div>
+      <div id="cmxPane" hidden></div>
     </main>
 
     <main class="app-main" id="siteSection" hidden>
@@ -2241,7 +2260,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2528,6 +2547,7 @@ const RECORD_TYPES = {
     fields:[
       {key:'name', label:'Course / training name', type:'text', required:true, placeholder:'e.g. Working at Height — or pick a PDO course above'},
       {key:'provider', label:'Provider', type:'text'},
+      {key:'certNo', label:'Certificate / card no.', type:'text', placeholder:'e.g. OPAL / CISRS card or certificate number'},
       {key:'date', label:'Completion date', type:'date', required:true},
       {key:'expiry', label:'Valid until', type:'date'},
       {key:'hours', label:'Duration (hours)', type:'number', placeholder:'PDO courses fill in automatically'},
@@ -2928,6 +2948,7 @@ function startSettingsData(){
       if(regState.scaff && document.getElementById('scaffSection') && !document.getElementById('scaffSection').hidden) renderRegAll('scaff');
       renderTiles();   // Batch 40: training bars on the Workforce dashboard depend on the roles / training groups
       renderStarStrip(); renderRecognition(); renderCalendar(); renderCcExtras();   // Batch 42
+      if(typeof cmxRender==='function') cmxRender();   // Batch 88
       renderPpe(true);   // Batch 49
       if(canEdit()) ppeLinkSyncSoon();   // Batch 73: approved PPE list / photos → worker link
       renderComp(); if(compUi.panel) compRenderTop(); renderCcComp();   // Batch 84
@@ -2943,7 +2964,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b87';
+const APP_BUILD='b89';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4475,7 +4496,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -9412,7 +9433,7 @@ function stopCompData(){ for(const u of [unsubComp, unsubCompTests]) if(u){ try{
 function compChanged(){
   compIdx=new Map(); for(const a of compList){ if(!compIdx.has(a.workerId)) compIdx.set(a.workerId, []); compIdx.get(a.workerId).push(a); }
   const ed=compUi.ed; if(ed && ed.id){ const s=compList.find(a=>a.id===ed.id); if(compSameTest(s, ed)){ ed.test={...s.test}; if(s.wSig && !ed.wSig) ed.wSig=s.wSig; compRenderTop(); } }
-  renderComp(); renderCcComp(); if(typeof activeSiteTab!=='undefined' && activeSiteTab==='comp' && currentSite()) renderSiteDrawerBody();
+  renderComp(); renderCcComp(); if(typeof cmxRender==='function') cmxRender(); if(typeof activeSiteTab!=='undefined' && activeSiteTab==='comp' && currentSite()) renderSiteDrawerBody();
   compProcessTests(); if(canEdit()) ppeLinkSyncSoon();
 }
 // answers sent from the project link → scored and saved on the assessment
@@ -9510,6 +9531,7 @@ function compStart(wid, role){
 function compEdit(id){ const a=compList.find(x=>x.id===id); if(!a) return; compUi.ed=JSON.parse(JSON.stringify(a)); compUi.ed._base=a.updatedAt||''; compUi.panel=''; compUi.sigOpen=false; compGotoPage(); compRenderTop(); const p=document.getElementById('compTop'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); }
 function compGotoPage(pid){
   const sec=document.getElementById('compSection'); if(sec && sec.hidden){ const b=document.querySelector('.sidenav-btn[data-section="comp"]'); if(b) b.click(); }
+  if(sec && sec.classList.contains('cmx-on')) cmxTab('assess');   // Batch 88
   if(pid!==undefined){ compUi.project=pid||'all'; const sel=document.getElementById('compProject'); if(sel) sel.value=compUi.project; renderComp(); }
   if(typeof closeSiteDrawer==='function' && document.getElementById('siteDrawer') && !document.getElementById('siteDrawer').hidden) closeSiteDrawer();
 }
@@ -9683,7 +9705,7 @@ function renderCcComp(){
   el.innerHTML=`<div class="cc-title">Competency assessment <small>workers assessed competent and in date — helpers, scaffolders, foremen, inspectors, drivers</small><button type="button" class="btn btn-sm" data-comp-goto="">${ic('badge')} Open</button></div>
     <div class="cc-gauges cc-comp">${rows.length?rows.map(r=>{ const c=r.c; return `<div class="cc-g">${ccDial(c.pct,120,10,r.d,{color:COMP_PURPLE})}<div class="cc-gv" style="color:${COMP_PURPLE}">${c.pct}%</div><div class="cc-gl">${esc(r.d)}</div><div class="cc-gs">${c.compW} of ${c.workers} competent</div>
       <div class="cc-comp-n">${c.none?`<span class="t-danger">${c.none} not assessed</span>`:''}${c.expired||c.nyc?`<span class="t-danger">${c.expired+c.nyc} expired / not yet</span>`:''}${c.due?`<span class="t-warn">${c.due} due ≤30 d</span>`:''}${c.sup?`<span>${c.sup} supervised</span>`:''}</div></div>`; }).join('')
-      : `<p class="wsub" style="grid-column:1/-1; margin:6px 4px;">No workers in this view need a competency assessment.</p>`}</div>`;
+      : `<p class="wsub" style="grid-column:1/-1; margin:6px 4px;">No workers in this view need a competency assessment.</p>`}</div>${typeof cmxDashLine==='function'?cmxDashLine():''}`;
   el.querySelectorAll('.cc-arc').forEach(a=>{ a.style.transition='none'; a.style.strokeDashoffset=a.dataset.to; });
 }
 
@@ -10139,7 +10161,7 @@ function indDraftClear(){ try{ localStorage.removeItem(indDraftKey()); }catch(e)
 
 function startIndData(){
   stopIndData(); if(!auth.currentUser) return;
-  try{ unsubInd=db.collection('inductionRecords').onSnapshot(snap=>{ indList=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); indLoaded=true; renderInd(); },
+  try{ unsubInd=db.collection('inductionRecords').onSnapshot(snap=>{ indList=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); indLoaded=true; renderInd(); if(typeof cmxRender==='function') cmxRender(); },
     err=>{ console.warn('inductionRecords', err); indList=[]; indLoaded=false; renderInd(); }); }
   catch(e){ console.warn('induction', e); }
 }
@@ -10417,6 +10439,451 @@ document.addEventListener('input', e=>{
   if(el.id==='indSearch'){ indUi.q=el.value; renderInd(); const s=document.getElementById('indSearch'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } return; }
   if(el.dataset.it && indUi.tdraft){ const [k,i,f]=el.dataset.it.split('|'); const arr=k==='s'?indUi.tdraft.sections:indUi.tdraft.qs; if(arr[Number(i)]) arr[Number(i)][f]=el.value; return; }
   const k=el.dataset.ii, ed=indUi.ed; if(k && ed && (k==='notes'||k==='interp'||k==='dur')){ ed[k]=k==='dur'?Number(el.value)||'':el.value; indDraftSave(); }
+});
+
+/* ================= Batch 88: competency matrix (F0723-02) =================
+   ISO 9001 / 14001 / 45001 clause 7.2 in four linked parts:
+   A  what each job needs (job profiles: induction, training matrix, cards / licences, medical, experience, in-house assessment, HSE-critical, required level)
+   B  each employee against his job — filled in by the tracker from his records (level 0–4; level 3 = Competent assessment AND every requirement valid)
+   C  gap plan — every gap gets an interim control, action, owner, target; closed only after it is verified effective
+   D  review & approval — revision, prepared (HSE signature) / approved, next review in 3 months
+   Stored in settings/compMatrix {profiles, gaps, assessors, review}. Batch 89: ALL staff — office (manager / site visitor, HSE staff, office only), Civil (foreman, plant operator), Rental (crane operator, rigger).
+   A person can hold several jobs (compMatrix.jobs[wid]); otherwise jobs are guessed from the designation. Office / manager jobs are proven by a
+   sign-off in the tracker (compMatrix.signoffs['wid|job|item']) instead of the phone test. */
+const CMX_CATS={aware:'Awareness (induction)', tm:'Training matrix', train:'Training', card:'Licence / card / permit', med:'Medical fitness', exp:'Experience', assess:'Assessed skill (test)', signoff:'Sign-off (practical / manager)'};
+const CMX_LEVELS=[
+  ['0','Not trained','Required training, card or induction missing or expired','No'],
+  ['1','Trained / aware','Requirements in date, ability not yet assessed (or a card has expired)','No'],
+  ['2','Competent under supervision','Assessed "Competent under supervision" and requirements in date','Only under a named supervisor'],
+  ['3','Competent','Assessed "Competent" AND every requirement in date','Yes'],
+  ['4','Assessor / trainer','Competent and able to assess or train others','Yes — may assess others'],
+];
+const CMX_INTERIM=['Work only under a named supervisor','Must not do this task until competent','Not to drive / operate until renewed','Removed from the task — moved to other work','Other (write below)'];
+const CMX_ACTIONS=['Training','Re-assessment','Renew card / licence / permit','Medical','Mentoring / supervised practice','Induction','Record the missing evidence','Move to other work'];
+const cmxCommon=()=>[
+  {id:'ind', c:'aware', s:'Induction', n:'Onboarding induction — hazards, emergency & Stop Work, environment', src:'ISO 45001 7.2 / 7.3 · ISO 14001 7.2'},
+  {id:'tm', c:'tm', s:'Training matrix', n:'Trainings required for his designation (training matrix)', src:'ISO 45001 7.2 · client'},
+  {id:'opal', c:'card', s:'OPAL Passport', n:'OPAL HSE Passport', kw:'OPAL, HSE Passport', src:'OPAL — concession access'},
+  {id:'med', c:'med', s:'Medical', n:'Medical fitness', src:'Client (PDO) medical standard'},
+];
+const CMX_DEFAULT={
+  general:{crit:false, req:3, items:[...cmxCommon(), {id:'as', c:'assess', s:'Assessment', n:'Competency assessment', src:'ISO 7.2 b) — tracker assessment'}]},
+  helper:{crit:false, req:2, items:[...cmxCommon(), {id:'as', c:'assess', s:'Assessment', n:'Competency assessment', src:'ISO 7.2 b) — tracker assessment'}]},
+  scaffolder:{crit:true, req:3, items:[...cmxCommon(), {id:'wah', c:'train', n:'Working at Height', src:'Life-Saving Rules · client'}, {id:'cisrs', c:'card', n:'CISRS scaffolder card', kw:'CISRS', src:'CISRS OSTS — client requirement'}, {id:'as', c:'assess', s:'Assessment', n:'Competency assessment', src:'ISO 7.2 b) — tracker assessment'}]},
+  advanced:{crit:true, req:3, items:[...cmxCommon(), {id:'wah', c:'train', n:'Working at Height', src:'Life-Saving Rules · client'}, {id:'cisrs', c:'card', n:'CISRS card (Level 2 / 3)', kw:'CISRS', src:'CISRS OSTS — client requirement'}, {id:'exp', c:'exp', n:'Scaffolding experience', yrs:3, src:'Company requirement'}, {id:'as', c:'assess', s:'Assessment', n:'Competency assessment', src:'ISO 7.2 b) — tracker assessment'}]},
+  foreman:{crit:true, req:3, items:[...cmxCommon(), {id:'wah', c:'train', n:'Working at Height', src:'Life-Saving Rules · client'}, {id:'cisrs', c:'card', n:'CISRS supervisor / scaffolder card', kw:'CISRS', src:'CISRS OSTS — client requirement'}, {id:'ptw', c:'train', n:'Permit to Work', src:'Client permit system'}, {id:'exp', c:'exp', n:'Scaffolding experience', yrs:5, src:'Company requirement'}, {id:'as', c:'assess', s:'Assessment', n:'Competency assessment', src:'ISO 7.2 b) — tracker assessment'}]},
+  inspector:{crit:true, req:3, items:[...cmxCommon(), {id:'wah', c:'train', n:'Working at Height', src:'Life-Saving Rules · client'}, {id:'cisrs', c:'card', n:'CISRS scaffold inspection card', kw:'CISRS insp, scaffold inspection', src:'CISRS — inspection scheme'}, {id:'exp', c:'exp', n:'Scaffolding experience', yrs:3, src:'CISRS — employer shows knowledge & experience'}, {id:'as', c:'assess', s:'Assessment', n:'Competency assessment', src:'ISO 7.2 b) — tracker assessment'}]},
+  driver:{crit:true, req:3, items:[...cmxCommon(), {id:'rop', c:'card', s:'ROP licence', n:'Driving licence (ROP) — class for the vehicle', kw:'driving licen, driver licen, ROP licen', src:'ROP · PDO SP-2000'}, {id:'dd', c:'card', s:'DD permit', n:'Defensive Driving permit (DD code for the vehicle)', kw:'defensive driving, DD0', src:'PDO SP-2000 — max 4 years'}, {id:'exp', c:'exp', n:'Driving experience', yrs:3, src:'PDO SP-2000 (LV 3 · HGV 5 · bus 8 years)'}, {id:'as', c:'assess', s:'Assessment', n:'Competency assessment', src:'ISO 7.2 b) — tracker assessment'}]},
+};
+const cmxSO=(n, src)=>({id:'so', c:'signoff', s:'Sign-off', n, src:src||'ISO 7.2 b) — sign-off in the tracker'});
+Object.assign(CMX_DEFAULT, {
+  civfore:{crit:true, req:3, items:[...cmxCommon(), {id:'ptw', c:'train', n:'Permit to Work', src:'Client permit system'}, {id:'exc', c:'train', s:'Excavation', n:'Excavation Safety', src:'Life-Saving Rules · client'}, {id:'exp', c:'exp', n:'Construction experience', yrs:5, src:'Company requirement'}, cmxSO('Supervisor competence — practical sign-off (permits, excavation, toolbox talks, team control)')]},
+  plant:{crit:true, req:3, items:[...cmxCommon(), {id:'rop', c:'card', s:'ROP licence', n:'Driving licence (ROP) — class for the machine', kw:'driving licen, driver licen, ROP licen', src:'ROP'}, {id:'opc', c:'card', s:'Operator card', n:'Plant operator card / certificate (excavator, JCB, loader…)', kw:'operator card, operator cert, excavator, JCB, loader, backhoe, plant operator', src:'OPAL / client'}, {id:'exp', c:'exp', n:'Operating experience', yrs:2, src:'Company requirement'}, cmxSO('Practical sign-off — observed operating, daily checks, banksman signals')]},
+  crane:{crit:true, req:3, items:[...cmxCommon(), {id:'rop', c:'card', s:'ROP licence', n:'Driving licence (ROP) — heavy', kw:'driving licen, driver licen, ROP licen', src:'ROP'}, {id:'crc', c:'card', s:'Crane card', n:'OPAL lifting operator card (crane type & skill level)', kw:'crane, lifting operator, OPAL lift', src:'OPAL / RTITB — only certified operators'}, {id:'exp', c:'exp', n:'Crane operating experience', yrs:3, src:'Company requirement'}, cmxSO('Practical sign-off — observed lift to the lift plan')]},
+  rigger:{crit:true, req:3, items:[...cmxCommon(), {id:'rgc', c:'card', s:'Rigger card', n:'OPAL rigger / banksman card', kw:'rigger, rigging, banksman, slinger, signalman', src:'OPAL / RTITB'}, cmxSO('Practical sign-off — observed slinging, signals, exclusion zone')]},
+  manager:{crit:true, req:3, items:[...cmxCommon(), {id:'h2s', c:'train', s:'H2S', n:'H2S Awareness', src:'Client — site access'}, {id:'ra', c:'train', s:'Risk assessment', n:'Risk Assessment', src:'ISO 45001 6.1 / 8.1'}, {id:'ii', c:'train', s:'Incident investigation', n:'Incident Investigation', src:'ISO 45001 10.2'}, cmxSO('Management competence sign-off — HSE leadership, legal duties, risk & incident management')]},
+  hse:{crit:true, req:3, items:[...cmxCommon(), {id:'h2s', c:'train', s:'H2S', n:'H2S Awareness', src:'Client — site access'}, {id:'neb', c:'card', s:'NEBOSH / IOSH', n:'NEBOSH / IOSH or equal HSE qualification', kw:'NEBOSH, IOSH, OSHA, HSE diploma, HSE certificate', src:'Client HSE staff requirement'}, {id:'ii', c:'train', s:'Incident investigation', n:'Incident Investigation', src:'ISO 45001 10.2'}, {id:'aud', c:'card', s:'Internal auditor', n:'Internal / lead auditor (ISO 45001 / 14001 / 9001)', kw:'internal audit, lead audit, auditor', src:'ISO 9.2 — competent auditors'}, {id:'fa', c:'train', s:'First aid', n:'First Aid', src:'Company requirement'}, cmxSO('HSE competence sign-off')]},
+  office:{crit:false, req:3, items:[{id:'ind', c:'aware', s:'Induction', n:'Onboarding induction — hazards, emergency, environment', src:'ISO 45001 7.3 · ISO 14001 7.3'}, {id:'tm', c:'tm', s:'Training matrix', n:'Trainings required for his designation (training matrix)', src:'ISO 45001 7.2'}, {id:'fire', c:'train', s:'Fire & emergency', n:'Fire Fighting', src:'Emergency plan (ISO 45001 8.2)'}, cmxSO('Awareness sign-off — office safety (ergonomics), fire & emergency, environment (waste, energy)')]},
+});
+const CMX_EXTRA={civfore:'Civil foreman / supervisor', plant:'Plant operator (excavator / JCB / loader)', crane:'Crane operator', rigger:'Rigger / banksman', manager:'Manager / site visitor', hse:'HSE staff', office:'Office only'};
+const CMX_JOB_KEYS=['helper','scaffolder','advanced','foreman','inspector','general','civfore','plant','driver','crane','rigger','manager','hse','office'];
+const cmxJobName=k=>CMX_EXTRA[k]||compRoleName(k);
+// jobs of one person: set by HSE (compMatrix.jobs[wid]) or guessed from the designation (the assessment guess + office / civil / rental jobs)
+function cmxJobGuess(w){
+  const d=(String(w.designation||'')+' '+String(w.mainRole||'')).toLowerCase(), div=workerDivKey(w);
+  let jobs=compRoleGuess(w)?[compRoleGuess(w)]:[];
+  const swap=(from, to)=>{ jobs=jobs.filter(j=>j!==from); if(!jobs.includes(to)) jobs.push(to); };
+  if(/crane/.test(d)) swap('driver','crane');
+  else if(/excavator|jcb|loader|backhoe|bobcat|roller|dozer|grader|plant operator|forklift/.test(d)) swap('driver','plant');
+  if(/rigger|banksman|slinger|signalman/.test(d)) swap('general','rigger');
+  if(div==='Civil' && /foreman|supervisor|charge ?hand|leading hand/.test(d)) swap('general','civfore');
+  const keepDrv=()=>{ jobs=jobs.filter(j=>['driver','crane','plant'].includes(j)); };   // a manager / HSE person is not a scaffolder or helper — keep only a driving job
+  if(/\bhse\b|safety (officer|engineer|manager|advisor|coordinator)|hse officer/.test(d)){ keepDrv(); jobs.push('hse'); }
+  else if(/manager|engineer|coordinator|superintendent|director|\bgm\b/.test(d) || (div==='Office staff' && /supervisor|in.?charge/.test(d))){ keepDrv(); jobs.push('manager'); }
+  if(!jobs.length && div==='Office staff') jobs.push('office');
+  return [...new Set(jobs)];
+}
+function cmxJobs(w){ const s=((cmxSet().jobs)||{})[w.id]; return Array.isArray(s) ? s.filter(k=>CMX_JOB_KEYS.includes(k)) : cmxJobGuess(w); }
+const cmxUi={tab:'status', q:'', div:'all', project:'all', gapsOnly:false, open:'', edit:'', draft:null, rev:false};
+const cmxSet=()=>settingsDocs.compMatrix||{};
+function cmxProfile(role){
+  const p=((cmxSet().profiles)||{})[role], d=CMX_DEFAULT[role]||CMX_DEFAULT.general;
+  if(!p || !Array.isArray(p.items)) return {crit:d.crit, req:d.req, items:d.items.map(x=>({...x})), std:true};
+  return {crit:!!p.crit, req:Math.max(1, Math.min(4, Number(p.req)||3)), items:p.items.filter(x=>x && CMX_CATS[x.c]).map(x=>({...x}))};
+}
+const cmxShort=it=>{ const s=String(it.s||it.n||'').split(/ — | \(/)[0].trim(); return s.length>26?s.slice(0,25)+'…':s; };
+const cmxKey=(wid, role)=>wid+'|'+role;
+function cmxDays(exp){ const d=daysUntil(exp); return d===null?null:d; }
+function cmxStOf(exp){ if(!exp) return 'ok'; const d=cmxDays(exp); return d===null?'ok':d<0?'bad':d<=60?'soon':'ok'; }
+function cmxKwHit(text, kw){
+  const t=' '+String(text||'').toLowerCase()+' ';
+  return String(kw||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean).some(alt=>alt.split(/\s+/).every(word=>t.includes(word)));
+}
+function cmxYears(w){
+  const prior=w.expPrior===undefined||w.expPrior===null||w.expPrior===''?null:Number(w.expPrior)||0;
+  const j=/^(\d{4})-(\d{2})-(\d{2})/.exec(w.dateOfJoining||''); const since=j?Math.max(0,(Date.now()-new Date(+j[1],+j[2]-1,+j[3]).getTime())/(365.25*864e5)):null;
+  if(prior===null && since===null) return null; return Math.round(((prior||0)+(since||0))*10)/10;
+}
+// one requirement for one employee → {st:'ok'|'soon'|'bad'|'sup'|'na', txt, ev:{no, by, date, exp}}
+function cmxEval(w, role, it){
+  const dmy=d=>isoToDmy(d)||d||'';
+  if(it.c==='aware'){ const r=(w.inductions||[]).filter(x=>inductionTypeOf(x)==='Onboarding induction').sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0];
+    return r?{st:'ok', txt:'Inducted '+dmy(r.date), ev:{no:r.indId?'Form F0723-04':'Paper record', by:r.conductedBy||'', date:r.date||'', exp:''}}:{st:'bad', txt:'No onboarding induction'}; }
+  if(it.c==='tm'){ const c=workerTrainingCompliance(w); if(!c.need) return {st:'na', txt:'No trainings set for his designation'};
+    const miss=c.cells.filter(x=>!(x.st.status==='valid'||x.st.status==='expiring')), soon=c.cells.filter(x=>x.st.expiry && cmxStOf(x.st.expiry)==='soon');
+    const first=c.cells.map(x=>x.st.expiry).filter(Boolean).sort()[0]||'';
+    return miss.length?{st:'bad', txt:`${c.ok} of ${c.need} in date — missing: ${miss.map(x=>x.name).join(', ')}`}:{st:soon.length?'soon':'ok', txt:`${c.ok} of ${c.need} in date${soon.length?' — expiring: '+soon.map(x=>x.name).join(', '):''}`, ev:{no:'Training records', by:'', date:'', exp:first}}; }
+  if(it.c==='train'){ const s=trainingStatusFor(w, it.n); if(!s || s.status==='na' || s.status==='missing') return {st:'bad', txt:'Not recorded'};
+    const r=(w.trainings||[]).find(x=>(x.name||'')===s.name && (x.expiry||'')===(s.expiry||''))||{};
+    const ev={no:r.certNo||'', by:r.provider||'', date:r.date||'', exp:s.expiry||''};
+    if(s.status==='expired') return {st:'bad', txt:'Expired '+dmy(s.expiry), ev}; return {st:cmxStOf(s.expiry), txt:s.expiry?'Valid until '+dmy(s.expiry):'No expiry', ev}; }
+  if(it.c==='card'){ const cand=[...(w.licenses||[]).filter(r=>cmxKwHit(r.type, it.kw||it.n)).map(r=>({name:r.type, no:r.number||'', by:r.issuingAuthority||'', date:r.date||'', exp:r.expiry||''})),
+      ...(w.trainings||[]).filter(r=>cmxKwHit(r.name, it.kw||it.n)).map(r=>({name:r.name, no:r.certNo||'', by:r.provider||'', date:r.date||'', exp:r.expiry||''}))];
+    if(!cand.length) return {st:'bad', txt:'Not recorded'};
+    const best=cand.sort((a,b)=>(a.exp?(cmxDays(a.exp)<0?1:0):0)-(b.exp?(cmxDays(b.exp)<0?1:0):0) || String(b.exp||'9999').localeCompare(String(a.exp||'9999')))[0], st=cmxStOf(best.exp);
+    return {st, txt:(st==='bad'?'Expired ':best.exp?'Valid until ':'No expiry')+(best.exp?dmy(best.exp):'')+(best.name&&best.name.toLowerCase()!==String(it.n).toLowerCase()?' · '+best.name:''), ev:best}; }
+  if(it.c==='med'){ const r=(w.medical||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0];
+    if(!r) return {st:'bad', txt:'No medical record'}; const ev={no:r.type||'', by:r.clinic||'', date:r.date||'', exp:r.expiry||''};
+    if(r.result==='Unfit') return {st:'bad', txt:'Unfit', ev}; if(r.result==='Pending') return {st:'bad', txt:'Result pending', ev};
+    const st=cmxStOf(r.expiry); return {st, txt:(st==='bad'?'Expired ':r.expiry?'Fit until ':'Fit')+(r.expiry?dmy(r.expiry):'')+(r.result==='Fit with restrictions'?' · with restrictions':''), ev}; }
+  if(it.c==='exp'){ const y=cmxYears(w), need=Number(it.yrs)||0; if(y===null) return {st:'bad', txt:'Experience not recorded'};
+    return {st:y>=need?'ok':'bad', txt:`${y} of ${need} years`, ev:{no:'', by:'', date:w.dateOfJoining||'', exp:''}}; }
+  if(it.c==='signoff'){ const so=((cmxSet().signoffs)||{})[w.id+'|'+role+'|'+it.id]; if(!so) return {st:'bad', txt:'Not signed off', lv:0};
+    const ev={no:'Sign-off '+dmy(so.date), by:so.by||'', date:so.date||'', exp:so.until||''}, ex=so.until?cmxStOf(so.until):'ok';
+    if(so.result==='Not yet competent') return {st:'bad', txt:'Not yet competent (sign-off '+dmy(so.date)+')', ev, lv:0}; if(ex==='bad') return {st:'bad', txt:'Sign-off expired '+dmy(so.until), ev, lv:0};
+    if(so.result==='Competent under supervision') return {st:'sup', txt:'Competent under supervision', ev, lv:2}; return {st:ex, txt:'Competent'+(so.until?' until '+dmy(so.until):''), ev, lv:3}; }
+  if(it.c==='assess'){ const ar=COMP_ROLES[role]?role:(it.ar&&COMP_ROLES[it.ar]?it.ar:''); if(!ar) return {st:'bad', txt:'Choose the assessment type in the job profile', lv:0}; const s=compState(w.id, ar), a=s.a; const ev=a?{no:'Assessment '+dmy(a.date), by:(a.hse&&a.hse.name)||a.assessor||'', date:a.date||'', exp:a.expiry||'', aid:a.id}:null;
+    if(s.st==='ok') return {st:'ok', txt:'Competent until '+dmy(a.expiry), ev, lv:3}; if(s.st==='due') return {st:'soon', txt:'Competent — re-assess by '+dmy(a.expiry), ev, lv:3};
+    if(s.st==='sup') return {st:'sup', txt:'Competent under supervision', ev, lv:2};
+    return {st:'bad', txt:s.st==='nyc'?'Not yet competent':s.st==='expired'?'Assessment expired':'Not assessed', ev, lv:0}; }
+  return {st:'na', txt:''};
+}
+function cmxPair(w, role){
+  const prof=cmxProfile(role), cells=prof.items.map(it=>({it, ...cmxEval(w, role, it)}));
+  const PROOF=['assess','signoff'], cred=cells.filter(c=>!PROOF.includes(c.it.c)).every(c=>c.st!=='bad'), proofs=cells.filter(c=>PROOF.includes(c.it.c)), plv=proofs.length?Math.max(...proofs.map(c=>c.lv||0)):null;
+  let lv=plv!==null ? (plv===3?(cred?3:1):plv===2?(cred?2:1):(cred?1:0)) : (cred?1:0);
+  if(lv===3 && (cmxSet().assessors||{})[w.id]) lv=4;
+  const bad=cells.filter(c=>c.st==='bad'), gap=lv<prof.req || bad.length>0;
+  const why=[...bad.map(c=>cmxShort(c.it)+': '+c.txt), ...(lv<prof.req && !bad.length?[`level ${lv} — needs ${prof.req}`]:[])];
+  return {w, role, prof, cells, lv, req:prof.req, crit:prof.crit, gap, why, soon:cells.filter(c=>c.st==='soon').length, key:cmxKey(w.id, role)};
+}
+function cmxWorkers(){
+  const q=cmxUi.q.trim().toLowerCase();
+  return activeWorkers().filter(w=>(w.status||'active')==='active' && (cmxUi.div==='all' || workerDivKey(w)===cmxUi.div) && (cmxUi.project==='all' || (cmxUi.project==='none'?!w.projectId:w.projectId===cmxUi.project))
+    && (!q || String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q)));
+}
+function cmxPairs(ws){ const out=[]; for(const w of (ws||cmxWorkers())){ if(w.deleted || (w.status||'active')!=='active') continue; for(const j of cmxJobs(w)) out.push(cmxPair(w, j)); } return out; }
+function cmxGapOf(p){ const g=((cmxSet().gaps)||{})[p.key]; return g && !g.closedAt ? g : null; }
+function cmxGapState(p){ const g=cmxGapOf(p); if(!g || !g.action) return 'noplan'; return g.target && g.target<localToday() ? 'overdue' : 'open'; }
+function cmxStats(ps){
+  const crit=ps.filter(p=>p.crit), okC=crit.filter(p=>!p.gap).length, ok=ps.filter(p=>!p.gap).length, gaps=ps.filter(p=>p.gap);
+  return {n:ps.length, ok, pct:ps.length?Math.round(ok*100/ps.length):null, crit:crit.length, okC, pctC:crit.length?Math.round(okC*100/crit.length):null,
+    gaps:gaps.length, noplan:gaps.filter(p=>cmxGapState(p)==='noplan').length, overdue:gaps.filter(p=>cmxGapState(p)==='overdue').length, soon:ps.reduce((n,p)=>n+p.soon,0)};
+}
+function cmxReview(){ return cmxSet().review||{}; }
+function cmxResolved(){   // gaps with a plan that are now closed by the records → waiting for "verified effective"
+  const gs=(cmxSet().gaps)||{}, out=[];
+  for(const [k,g] of Object.entries(gs)){ if(!g || g.closedAt) continue; const [wid, role]=k.split('|'); const w=workers.find(x=>x.id===wid && !x.deleted && (x.status||'active')==='active');
+    if(!w || !cmxJobs(w).includes(role)){ out.push({k, g, w, role, gone:true}); continue; } const p=cmxPair(w, role); if(!p.gap) out.push({k, g, w, role, p}); }
+  return out;
+}
+
+/* ---- page ---- */
+function cmxTab(t){
+  const sec=document.getElementById('compSection'); if(!sec) return;
+  const on=t==='matrix'; sec.classList.toggle('cmx-on', on);
+  document.querySelectorAll('#compTabs [data-comp-tab]').forEach(b=>b.classList.toggle('active', b.dataset.compTab===(on?'matrix':'assess')));
+  const a=document.getElementById('compAssessPane'), m=document.getElementById('cmxPane'); if(a) a.hidden=on; if(m) m.hidden=!on;
+  if(on) cmxRender(true); else renderComp();
+}
+function cmxLvHtml(lv, req){ return `<span class="cmx-lv l${lv}${lv<req?' low':''}" title="${esc(CMX_LEVELS[lv][1])}">${lv}</span>`; }
+function cmxCellHtml(c){
+  const cls=c.st==='ok'?'ok':c.st==='soon'?'soon':c.st==='sup'?'sup':c.st==='na'?'na':'bad', sym=c.st==='ok'?'✓':c.st==='soon'?'!':c.st==='sup'?'S':c.st==='na'?'–':'✗';
+  const tip=[c.txt, c.ev&&c.ev.no?'No. '+c.ev.no:'', c.ev&&c.ev.by?c.ev.by:''].filter(Boolean).join(' · ');
+  return `<td class="cmx-c ${cls}" title="${esc(tip)}"><span>${sym}</span>${c.ev&&c.ev.exp&&c.st!=='na'?`<small>${esc(isoToDmy(c.ev.exp).slice(0,6)+isoToDmy(c.ev.exp).slice(8))}</small>`:''}</td>`;
+}
+function cmxRender(force){
+  const pane=document.getElementById('cmxPane'); if(!pane || pane.hidden || !auth.currentUser) return;
+  if(!force && formDirtyIn('cmxPane')) return;
+  const ed=canEdit(), all=cmxPairs(), st=cmxStats(all), rv=cmxReview(), res=cmxResolved();
+  const ps=cmxUi.gapsOnly?all.filter(p=>p.gap):all, nextRv=rv.nextReview||'', rvLate=!nextRv || nextRv<localToday();
+  const sites=activeSites().slice().sort((a,b)=>String(a.siteName).localeCompare(String(b.siteName)));
+  const tile=(l,n,s,cls,cat)=>`<div class="tile" style="--tile-accent:var(${cat})"><div class="tile-head"><div class="tile-icon">${ic('badge')}</div><div class="tile-label">${esc(l)}</div></div><div class="tile-num ${cls}">${n}</div><div class="tile-sub">${esc(s)}</div></div>`;
+  const tabs=[['status','B · Employee status'],['gaps',`C · Gap plan (${st.gaps})`],['profiles','A · Job profiles'],['review','D · Review & approval']];
+  let body='';
+  if(cmxUi.tab==='status'){
+    const roles=CMX_JOB_KEYS.filter(r=>ps.some(p=>p.role===r));
+    body=roles.length?roles.map(r=>{ const rp=ps.filter(p=>p.role===r).sort((a,b)=>(b.gap-a.gap) || String(a.w.fullName||'').localeCompare(String(b.w.fullName||''))), prof=cmxProfile(r);
+      return `<div class="panel cmx-grp"><div class="section-head"><h3>${esc(cmxJobName(r))} ${prof.crit?'<span class="badge danger">HSE-critical</span>':''} <span class="wsub">required level ${prof.req} · ${rp.length} employee${rp.length===1?'':'s'}</span></h3></div>
+        <div class="table-wrap"><table class="cmx-table"><thead><tr><th class="cmx-name">Employee</th>${prof.items.map(it=>`<th class="cmx-h" title="${esc(it.n+' — '+CMX_CATS[it.c])}"><span>${esc(cmxShort(it))}</span></th>`).join('')}<th>Level</th><th>Gap</th></tr></thead>
+        <tbody>${rp.map(p=>{ const gs=p.gap?cmxGapState(p):''; return `<tr class="${cmxUi.open===p.key?'cmx-open':''}"><td class="cmx-name"><button type="button" class="att-link" data-cmx-open="${esc(p.key)}">${esc(p.w.fullName||'—')}</button><div class="wsub">${esc(p.w.designation||'—')}${p.w.projectId?' · '+esc(projectName(p.w.projectId)||''):''}</div></td>
+          ${p.cells.map(cmxCellHtml).join('')}<td class="cmx-lvc">${cmxLvHtml(p.lv, p.req)}</td><td>${p.gap?`<span class="badge ${gs==='overdue'?'danger':gs==='noplan'?'danger':'warn'}">${gs==='overdue'?'Overdue':gs==='noplan'?'No plan':'Plan open'}</span>`:'<span class="badge ok">OK</span>'}</td></tr>
+          ${cmxUi.open===p.key?`<tr class="cmx-detail"><td colspan="${p.cells.length+3}">${cmxDetailHtml(p)}</td></tr>`:''}`; }).join('')}</tbody></table></div></div>`; }).join('')
+      : `<div class="panel"><p class="wsub" style="margin:0;">${all.length?'Nobody matches the filters.':'No active employees in this view.'}</p></div>`;
+    body+=`<p class="wsub">✓ in date · ! expires within 60 days · S competent under supervision · ✗ missing / expired · – not needed. Hover a cell for the evidence; click a name for details and the gap plan. Each person's job(s) are guessed from his designation — change them in his details (click the name).</p>`;
+  } else if(cmxUi.tab==='gaps'){
+    const gs=all.filter(p=>p.gap).sort((a,b)=>(b.crit-a.crit) || ({overdue:0,noplan:1,open:2}[cmxGapState(a)]-{overdue:0,noplan:1,open:2}[cmxGapState(b)]) || String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
+    const closed=Object.entries((cmxSet().gaps)||{}).filter(([,g])=>g&&g.closedAt).sort((a,b)=>String(b[1].closedAt).localeCompare(String(a[1].closedAt))).slice(0,15);
+    body=`${res.length?`<div class="panel cmx-res"><div class="subhead" style="margin-top:0;">Closed by the records — check it worked, then confirm (${res.length})</div>${res.map(x=>`<div class="ind-mrow"><span><strong>${esc(x.w?x.w.fullName:'(employee left / job changed)')}</strong> <span class="wsub">${esc(cmxJobName(x.role))} · action: ${esc(x.g.action||x.g.type||'—')}${x.p&&x.p.cells.find(c=>(c.it.c==='assess'||c.it.c==='signoff')&&c.ev)?' · evidence: '+esc(x.p.cells.find(c=>(c.it.c==='assess'||c.it.c==='signoff')&&c.ev).ev.no):''}</span></span>${ed?`<button type="button" class="btn btn-sm btn-primary" data-cmx-close="${esc(x.k)}">✓ Verified effective — close</button>`:''}</div>`).join('')}</div>`:''}
+      <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Job</th><th>Level</th><th>What is missing</th><th>Interim control</th><th>Action · owner</th><th>Target</th><th>Status</th></tr></thead>
+      <tbody>${gs.length?gs.map(p=>{ const g=cmxGapOf(p)||{}, s=cmxGapState(p); return `<tr><td><button type="button" class="att-link" data-cmx-open="${esc(p.key)}" data-cmx-totab="status">${esc(p.w.fullName||'—')}</button><div class="wsub">${esc(p.w.designation||'')}</div></td><td>${esc(cmxJobName(p.role))}${p.crit?' <span class="badge danger">HSE-critical</span>':''}</td>
+        <td>${p.lv} / ${p.req}</td><td class="cmx-why">${esc(p.why.join(' · '))}</td><td>${esc(g.interim||'—')}${g.sup?`<div class="wsub">${esc(g.sup)}</div>`:''}</td><td>${esc([g.type, g.action].filter(Boolean).join(' — ')||'—')}${g.owner?`<div class="wsub">${esc(g.owner)}</div>`:''}</td><td class="mono">${esc(isoToDmy(g.target)||'—')}</td>
+        <td><span class="badge ${s==='open'?'warn':'danger'}">${s==='overdue'?'Overdue':s==='noplan'?'No plan':'Open'}</span></td></tr>`; }).join(''):`<tr><td colspan="8" class="empty-state">No gaps — everybody in this view is at the required level.</td></tr>`}</tbody></table></div>
+      ${closed.length?`<div class="subhead">Closed gaps — verified effective (last ${closed.length})</div>${closed.map(([k,g])=>{ const w=workers.find(x=>x.id===k.split('|')[0]); return `<div class="rf"><span class="rf-k mono">${esc(isoToDmy(String(g.closedAt).slice(0,10)))}</span><span class="rf-v"><strong>${esc(w?w.fullName:'—')}</strong> · ${esc(cmxJobName(k.split('|')[1]))} · ${esc(g.action||g.type||'')}${g.eff?' · '+esc(g.eff):''} <span class="wsub">· verified by ${esc(g.closedBy||'')}</span></span></div>`; }).join('')}`:''}
+      <p class="wsub">ISO 7.2 c): every action is checked for effectiveness. A gap closes in the records when the employee reaches the required level (usually through a new assessment); HSE then confirms it worked.</p>`;
+  } else if(cmxUi.tab==='profiles'){
+    body=cmxUi.edit?cmxProfEditHtml(cmxUi.edit):`<div class="cmx-profs">${CMX_JOB_KEYS.map(r=>{ const p=cmxProfile(r), n=all.filter(x=>x.role===r).length;
+      return `<div class="panel cmx-prof"><div class="section-head"><h3>${esc(cmxJobName(r))} ${p.crit?'<span class="badge danger">HSE-critical</span>':''}</h3>${ed?`<button type="button" class="btn btn-sm" data-cmx-edit="${esc(r)}">${ic('pencil')} Edit</button>`:''}</div>
+        <div class="wsub" style="margin:-6px 0 6px;">Required level <strong>${p.req} — ${esc(CMX_LEVELS[p.req][1])}</strong> · ${n} employee${n===1?'':'s'} in this view${p.std?' · standard profile':''}</div>
+        ${p.items.map(it=>`<div class="rf"><span class="rf-k">${esc(CMX_CATS[it.c])}</span><span class="rf-v"><strong>${esc(it.n)}</strong>${it.c==='exp'?` — ${esc(it.yrs||0)} years`:''}<div class="wsub">Source: ${esc(it.src||'—')}${it.c==='card'?' · found in records named: '+esc(it.kw||it.n):''}</div></span></div>`).join('')}</div>`; }).join('')}</div>
+      <p class="wsub">Every job includes hazard identification, emergency &amp; Stop Work and environment (through the onboarding induction) — ISO 45001 7.2 / 7.3 and ISO 14001 7.2. Put your client's mandatory list (e.g. PDO) into these profiles when you have it.</p>`;
+  } else {
+    const h=(rv.history||[]).slice().reverse();
+    body=`<div class="panel"><div class="form-grid cmx-rv">
+        <div><div class="wsub">Revision</div><strong>${esc(rv.rev!==undefined?String(rv.rev).padStart(2,'0'):'— not reviewed yet')}</strong></div>
+        <div><div class="wsub">Prepared by (HSE)</div><strong>${esc(rv.preparedBy||'—')}</strong>${rv.preparedAt?`<div class="wsub">${esc(isoToDmy(rv.preparedAt))}</div>`:''}</div>
+        <div><div class="wsub">Approved by</div><strong>${esc(rv.approvedBy||'—')}</strong>${rv.approvedRole?`<div class="wsub">${esc(rv.approvedRole)}${rv.approvedAt?' · '+esc(isoToDmy(rv.approvedAt)):''}</div>`:''}</div>
+        ${rv.approved2By?`<div><div class="wsub">Approved by (2)</div><strong>${esc(rv.approved2By)}</strong><div class="wsub">${esc(rv.approved2Role||'')}${rv.approved2At?' · '+esc(isoToDmy(rv.approved2At)):''}</div></div>`:''}
+        <div><div class="wsub">Next review</div><strong class="${rvLate?'t-danger':''}">${esc(isoToDmy(nextRv)||'—')}</strong>${rvLate?'<div class="wsub t-danger">review due</div>':''}</div></div>
+      ${ed?(cmxUi.rev?cmxRevFormHtml(rv):`<div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm btn-primary" data-cmx-rev="1">Record a review / approval</button></div>`):''}</div>
+      <div class="panel"><div class="subhead" style="margin-top:0;">Change history</div>${h.length?h.map(x=>`<div class="rf"><span class="rf-k mono">Rev ${esc(String(x.rev).padStart(2,'0'))} · ${esc(isoToDmy(x.date))}</span><span class="rf-v">${esc(x.note||'Reviewed')} <span class="wsub">· ${esc(x.by||'')}</span></span></div>`).join(''):'<p class="wsub" style="margin:0;">No reviews recorded yet.</p>'}</div>
+      <div class="panel"><div class="subhead" style="margin-top:0;">For the management review</div>
+        <div class="rf"><span class="rf-k">HSE-critical at required level</span><span class="rf-v"><strong>${st.pctC===null?'—':st.pctC+'%'}</strong> (${st.okC} of ${st.crit})</span></div>
+        <div class="rf"><span class="rf-k">All employees at required level</span><span class="rf-v"><strong>${st.pct===null?'—':st.pct+'%'}</strong> (${st.ok} of ${st.n})</span></div>
+        <div class="rf"><span class="rf-k">Open gaps</span><span class="rf-v"><strong>${st.gaps}</strong> · ${st.noplan} without a plan · ${st.overdue} overdue</span></div>
+        <div class="rf"><span class="rf-k">Expiring within 60 days</span><span class="rf-v"><strong>${st.soon}</strong> cards / trainings / medicals / assessments</span></div></div>
+      <p class="wsub">Review the status every 3 months and the job profiles every year — and when a new client requirement, a new job or an incident linked to competence comes up.</p>`;
+  }
+  pane.innerHTML=`<div class="cmx-bar"><button type="button" class="btn btn-sm btn-primary" data-cmx-pdf="1">${ic('download')} Matrix PDF (F0723-02)</button><button type="button" class="btn btn-sm" data-cmx-xlsx="1">${ic('download')} Excel</button>
+      <span class="wsub">Rev ${esc(rv.rev!==undefined?String(rv.rev).padStart(2,'0'):'—')} · next review <strong class="${rvLate?'t-danger':''}">${esc(isoToDmy(nextRv)||'not set')}</strong></span></div>
+    <div class="tiles cmx-tiles">${tile('HSE-critical at required level', st.pctC===null?'—':st.pctC+'%', `${st.okC} of ${st.crit} in HSE-critical jobs`, st.pctC===null||st.pctC>=90?'ok':'danger', '--cat-4')}
+      ${tile('Everyone at required level', st.pct===null?'—':st.pct+'%', `${st.ok} of ${st.n} employee jobs`, '', '--cat-1')}
+      ${tile('Open gaps', st.gaps, `${st.noplan} without a plan · ${st.overdue} overdue`, st.noplan||st.overdue?'danger':st.gaps?'warn':'', '--cat-9')}
+      ${tile('Expiring ≤ 60 days', st.soon, 'cards, trainings, medicals, assessments', st.soon?'warn':'', '--cat-2')}</div>
+    <div class="toolbar"><input type="search" id="cmxSearch" placeholder="Search name or designation…" value="${esc(cmxUi.q)}">
+      <select id="cmxDiv"><option value="all">All divisions</option>${DIVISIONS.map(d=>`<option value="${esc(d)}" ${cmxUi.div===d?'selected':''}>${esc(divLabel(d))}</option>`).join('')}</select>
+      <select id="cmxProject" style="max-width:220px;"><option value="all">All projects</option><option value="none" ${cmxUi.project==='none'?'selected':''}>No project</option>${sites.map(s=>`<option value="${esc(s.id)}" ${cmxUi.project===s.id?'selected':''}>${esc(s.siteName)}</option>`).join('')}</select>
+      <label class="chk"><input type="checkbox" id="cmxGapsOnly" ${cmxUi.gapsOnly?'checked':''}> Only gaps</label></div>
+    <nav class="division-tabs cmx-tabs">${tabs.map(([k,l])=>`<button type="button" class="division-tab ${cmxUi.tab===k?'active':''}" data-cmx-tab="${k}">${esc(l)}</button>`).join('')}</nav>
+    ${body}`;
+}
+function cmxDetailHtml(p){
+  const w=p.w, ed=canEdit(), g=cmxGapOf(p)||{}, y=cmxYears(w), hasExp=p.prof.items.some(i=>i.c==='exp'), isAs=!!(cmxSet().assessors||{})[w.id];
+  return `<div class="cmx-det"><div class="cmx-det-h"><strong>${esc(w.fullName||'')}</strong> · ${esc(cmxJobName(p.role))} · level <strong>${p.lv}</strong> (${esc(CMX_LEVELS[p.lv][1])}) — needs <strong>${p.req}</strong>
+      <span style="margin-left:auto; display:flex; gap:6px;"><button type="button" class="btn btn-sm" data-cmx-worker="${esc(w.id)}">Open worker</button><button type="button" class="btn btn-sm" data-cmx-open="${esc(p.key)}">Close</button></span></div>
+    <div class="table-wrap"><table class="cmx-ev"><thead><tr><th>Requirement</th><th>Type</th><th>Status</th><th>Evidence no.</th><th>Issued by / assessor</th><th>Date</th><th>Valid until</th></tr></thead><tbody>
+      ${p.cells.map(c=>`<tr><td><strong>${esc(c.it.n)}</strong><div class="wsub">${esc(c.it.src||'')}</div></td><td>${esc(CMX_CATS[c.it.c])}</td><td><span class="badge ${c.st==='ok'?'ok':c.st==='soon'||c.st==='sup'?'warn':c.st==='na'?'muted':'danger'}">${esc(c.txt||'—')}</span></td>
+        <td>${c.ev&&c.ev.aid?`<button type="button" class="att-link" data-comp-pdf="${esc(c.ev.aid)}">${esc(c.ev.no)}</button>`:esc((c.ev&&c.ev.no)||(c.st==='ok'&&['train','card'].includes(c.it.c)?'⚠ number not recorded':'—'))}</td><td>${esc((c.ev&&c.ev.by)||'—')}</td><td class="mono">${esc(isoToDmy(c.ev&&c.ev.date)||'—')}</td><td class="mono">${esc(isoToDmy(c.ev&&c.ev.exp)||'—')}</td></tr>`).join('')}</tbody></table></div>
+    ${ed?`<div class="cmx-det-x">${hasExp||y!==null?`<label>Experience before joining (years)<input type="number" min="0" max="50" step="0.5" id="cmxExp" value="${esc(w.expPrior===undefined?'':w.expPrior)}" style="max-width:110px;"></label><button type="button" class="btn btn-sm" data-cmx-expsave="${esc(w.id)}">Save</button><span class="wsub">${y===null?'':'total now '+y+' years'}${w.dateOfJoining?' · joined '+esc(isoToDmy(w.dateOfJoining)):' · date of joining not set'}</span>`:''}
+      <label class="chk" style="margin-left:auto;"><input type="checkbox" data-cmx-assessor="${esc(w.id)}" ${isAs?'checked':''}> Qualified assessor / trainer (level 4)</label></div>`:''}
+    ${cmxSignoffHtml(p)}
+    ${ed?`<div class="cmx-jobs"><strong>Jobs of ${esc(w.fullName||'')}</strong> <span class="wsub">${Array.isArray(((cmxSet().jobs)||{})[w.id])?'set by HSE':'guessed from the designation “'+esc(w.designation||'—')+'”'}</span>
+      <div class="cmx-jobs-g">${CMX_JOB_KEYS.map(k=>`<label class="chk"><input type="checkbox" data-cmx-job="${esc(k)}" ${cmxJobs(w).includes(k)?'checked':''}> ${esc(cmxJobName(k))}</label>`).join('')}</div>
+      <div class="form-actions" style="justify-content:flex-start; margin-top:4px;"><button type="button" class="btn btn-sm btn-primary" data-cmx-jobsave="${esc(w.id)}">Save jobs</button>${Array.isArray(((cmxSet().jobs)||{})[w.id])?`<button type="button" class="btn btn-sm" data-cmx-jobreset="${esc(w.id)}">Back to the guess</button>`:''}<span class="wsub">e.g. a manager who also drives: tick Manager and Driver.</span></div></div>`:''}
+    ${p.gap?`<form id="cmxGapForm" data-key="${esc(p.key)}" class="cmx-gap"><div class="subhead" style="margin-top:4px;">Gap plan — ${esc(p.why.join(' · '))}</div>
+      <div class="form-grid"><label>Interim control (until closed)<select name="interim" ${ed?'':'disabled'}><option value="">Choose…</option>${CMX_INTERIM.map(x=>`<option ${g.interim===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+        <label>Supervisor / details<input name="sup" value="${esc(g.sup||'')}" maxlength="80" placeholder="e.g. under foreman Suresh" ${ed?'':'disabled'}></label>
+        <label>Action type<select name="type" ${ed?'':'disabled'}><option value="">Choose…</option>${CMX_ACTIONS.map(x=>`<option ${g.type===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+        <label>Action<input name="action" value="${esc(g.action||'')}" maxlength="160" placeholder="e.g. CISRS Level 2 course, then re-assess" ${ed?'':'disabled'}></label>
+        <label>Owner<input name="owner" value="${esc(g.owner||'')}" maxlength="60" placeholder="e.g. Scaffolding manager" ${ed?'':'disabled'}></label>
+        <label>Target date<input type="date" name="target" value="${esc(g.target||'')}" ${ed?'':'disabled'}></label></div>
+      ${g.raisedAt?`<div class="wsub">Plan made ${esc(isoToDmy(String(g.raisedAt).slice(0,10)))} by ${esc(g.raisedBy||'')}. Effectiveness is checked by the next assessment / record — then confirm it in the Gap plan tab.</div>`:''}
+      ${ed?`<div class="form-actions"><button type="submit" class="btn btn-sm btn-primary">Save gap plan</button></div>`:''}</form>`:'<p class="wsub" style="margin:6px 0 0;">✓ At the required level — no gap.</p>'}</div>`;
+}
+function cmxSignoffHtml(p){
+  const ed=canEdit(), items=p.prof.items.filter(it=>it.c==='signoff'); if(!items.length) return '';
+  const hs=hseSigOf((auth.currentUser||{}).email)||{};
+  return items.map(it=>{ const k=p.w.id+'|'+p.role+'|'+it.id, so=((cmxSet().signoffs)||{})[k];
+    return `<div class="cmx-so"><div class="subhead" style="margin-top:4px;">${esc(it.n)}</div>
+      ${so?`<div class="rf"><span class="rf-k">${esc(so.result||'')}</span><span class="rf-v">signed off ${esc(isoToDmy(so.date))} by <strong>${esc(so.by||'')}</strong>${so.until?' · valid until '+esc(isoToDmy(so.until)):''}${so.note?' · '+esc(so.note):''}</span></div>`:''}
+      ${ed?`<form class="cmx-soform" data-sokey="${esc(k)}"><div class="form-grid cmx-so-g"><label>Result<select name="result"><option ${so&&so.result==='Competent'?'selected':''}>Competent</option><option ${so&&so.result==='Competent under supervision'?'selected':''}>Competent under supervision</option><option ${so&&so.result==='Not yet competent'?'selected':''}>Not yet competent</option></select></label>
+        <label>Date<input type="date" name="date" value="${esc((so&&so.date)||localToday())}" max="${esc(localToday())}"></label><label>Valid until<input type="date" name="until" value="${esc((so&&so.until)||compAddMonths(localToday(),24))}"></label>
+        <label>Signed off by<input name="by" value="${esc((so&&so.by)||hs.name||'')}" maxlength="60" placeholder="HSE / manager name"></label><label class="span-all">How checked / note<input name="note" value="${esc((so&&so.note)||'')}" maxlength="160" placeholder="e.g. interview + reviewed his JSA and incident reports"></label></div>
+        <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">${so?'Update sign-off':'Save sign-off'}</button>${so?`<button type="button" class="btn btn-sm btn-ghost" data-cmx-sodel="${esc(k)}" data-armed="0">Remove</button>`:''}</div></form>`:''}</div>`; }).join('');
+}
+async function cmxSaveSignoff(form){
+  const k=form.dataset.sokey, v=n=>String((form.elements[n]||{}).value||'').trim();
+  const so={result:v('result')||'Competent', date:v('date'), until:v('until'), by:v('by'), note:v('note'), at:new Date().toISOString(), email:(auth.currentUser&&auth.currentUser.email)||''};
+  if(!so.date || !so.by){ toast('Enter the date and who signed off'); return; }
+  if(so.date>localToday()){ toast('The date is in the future'); return; }
+  if(so.until && so.until<so.date){ toast('"Valid until" is before the date'); return; }
+  if(await saveSettings('compMatrix', {signoffs:{[k]:so}}, settingsStamp('compMatrix'))){ settingsDocs.compMatrix={...cmxSet(), signoffs:{...(cmxSet().signoffs||{}), [k]:so}}; clearDirtyForms(); compKeep(()=>cmxRender(true)); }
+}
+function cmxProfEditHtml(role){
+  const d=cmxUi.draft||(cmxUi.draft=(()=>{ const x=JSON.parse(JSON.stringify(cmxProfile(role))); x.items.forEach(it=>{ it._n0=it.n; }); return x; })());
+  return `<form class="panel comp-ed" id="cmxProfForm"><div class="section-head"><h3>${ic('pencil')} Job profile — ${esc(cmxJobName(role))}</h3><button type="button" class="btn btn-sm" data-cmx-edit="">Close</button></div>
+    <div class="form-grid"><label>Required level<select data-cp="req">${[1,2,3,4].map(l=>`<option value="${l}" ${d.req===l?'selected':''}>${l} — ${esc(CMX_LEVELS[l][1])}</option>`).join('')}</select></label>
+      <label class="chk" style="align-self:end;"><input type="checkbox" data-cp="crit" ${d.crit?'checked':''}> HSE-critical job (a mistake can kill — Life-Saving Rule activity)</label></div>
+    <div class="subhead">Requirements (${d.items.length})</div>
+    ${d.items.map((it,i)=>`<div class="ind-tedit"><span class="ind-tn">${i+1}</span><div class="form-grid">
+        <label>Type<select data-cpi="${i}|c">${Object.entries(CMX_CATS).map(([k,l])=>`<option value="${k}" ${it.c===k?'selected':''}>${esc(l)}</option>`).join('')}</select></label>
+        <label>Requirement${it.c==='train'?' (training name as in the records)':''}<input data-cpi="${i}|n" value="${esc(it.n||'')}" maxlength="90"></label>
+        ${it.c==='card'?`<label>Found in records named <span class="wsub">(comma = or)</span><input data-cpi="${i}|kw" value="${esc(it.kw||'')}" maxlength="90" placeholder="e.g. CISRS insp, scaffold inspection"></label>`:''}
+        ${it.c==='assess'&&!COMP_ROLES[role]?`<label>Which assessment (test)<select data-cpi="${i}|ar"><option value="">Choose…</option>${Object.keys(COMP_ROLES).map(k=>`<option value="${k}" ${it.ar===k?'selected':''}>${esc(compRoleName(k))}</option>`).join('')}</select></label>`:''}
+        ${it.c==='exp'?`<label>Minimum years<input type="number" min="0" max="40" data-cpi="${i}|yrs" value="${esc(it.yrs||0)}"></label>`:''}
+        <label>Source of the requirement<input data-cpi="${i}|src" value="${esc(it.src||'')}" maxlength="90" placeholder="e.g. PDO SP-2000, contract, ISO 45001 7.2"></label></div>
+      <button type="button" class="icon-btn danger" data-cmx-idel="${i}" aria-label="Remove">${ic('trash')}</button></div>`).join('')}
+    ${d.items.length<14?`<button type="button" class="btn btn-sm" data-cmx-iadd="1">+ Add requirement</button>`:''}
+    <div class="form-actions"><button type="button" class="btn btn-sm btn-ghost" data-cmx-preset="${esc(role)}" data-armed="0">Back to the standard profile</button><button type="submit" class="btn btn-sm btn-primary">Save job profile</button></div></form>`;
+}
+function cmxRevFormHtml(rv){
+  const u=auth.currentUser, hs=hseSigOf(u&&u.email)||{};
+  return `<form id="cmxRevForm" class="cmx-gap"><div class="subhead">Record review — becomes Rev ${String((Number(rv.rev)||0)+(rv.rev===undefined?0:1)).padStart(2,'0')}</div>
+    <div class="form-grid"><label>Prepared by (HSE)<input name="preparedBy" value="${esc(hs.name||rv.preparedBy||'')}" maxlength="60" required></label><label>Position<input name="preparedRole" value="${esc(hs.role||rv.preparedRole||'HSE Engineer')}" maxlength="60"></label>
+      <label>Approved by<input name="approvedBy" value="${esc(rv.approvedBy||'')}" maxlength="60" placeholder="e.g. Operations Manager name"></label><label>Position<input name="approvedRole" value="${esc(rv.approvedRole||'')}" maxlength="60" placeholder="e.g. Operations Manager"></label>
+      <label>Approval date<input type="date" name="approvedAt" value="${esc(localToday())}"></label><span></span>
+      <label>2nd approver <span class="wsub">(optional, e.g. GM)</span><input name="approved2By" value="${esc(rv.approved2By||'')}" maxlength="60"></label><label>Position<input name="approved2Role" value="${esc(rv.approved2Role||'')}" maxlength="60"></label>
+      <label class="span-all">What changed / review note<input name="note" maxlength="200" placeholder="e.g. Quarterly review — driver profile: DD permit added; 3 gaps closed" required></label></div>
+    ${hs.img?'':'<p class="wsub">Tip: save your signature (Toolbox talks → Add my signature) — it is printed as "Prepared by" on the PDF.</p>'}
+    <div class="form-actions"><button type="button" class="btn btn-sm" data-cmx-rev="0">Cancel</button><button type="submit" class="btn btn-sm btn-primary">Save review</button></div></form>`;
+}
+
+/* ---- saving ---- */
+async function cmxSaveGap(form){
+  const key=form.dataset.key, v=n=>String((form.elements[n]||{}).value||'').trim();
+  const old=((cmxSet().gaps)||{})[key]||{}, fresh=!old.raisedAt || !!old.closedAt, u=auth.currentUser;
+  const g={interim:v('interim'), sup:v('sup'), type:v('type'), action:v('action'), owner:v('owner'), target:v('target'), raisedAt:fresh?new Date().toISOString():old.raisedAt, raisedBy:fresh?((u&&u.email)||''):(old.raisedBy||''), closedAt:'', closedBy:'', eff:''};
+  if(!g.interim){ toast('Choose the interim control — what he may do until the gap is closed'); return; }
+  if(!g.action && !g.type){ toast('Write the action'); return; }
+  if(!g.target){ toast('Set the target date'); return; }
+  if(await saveSettings('compMatrix', {gaps:{[key]:g}}, settingsStamp('compMatrix'))){ settingsDocs.compMatrix={...cmxSet(), gaps:{...(cmxSet().gaps||{}), [key]:g}}; clearDirtyForms(); cmxRender(true); }
+}
+async function cmxCloseGap(key){
+  const g=((cmxSet().gaps)||{})[key]; if(!g) return; const [wid, role]=key.split('|'), w=workers.find(x=>x.id===wid), u=auth.currentUser;
+  let eff='records show the required level'; if(w){ const p=cmxPair(w, role), a=p.cells.filter(c=>c.it.c==='assess'||c.it.c==='signoff').sort((x,y)=>(y.lv||0)-(x.lv||0))[0]; if(a && a.ev) eff=a.ev.no+' — '+a.txt; } else eff='employee no longer in this job';
+  const ng={...g, closedAt:new Date().toISOString(), closedBy:(hseSigOf(u&&u.email)||{}).name||((u&&u.email)||''), eff};
+  if(await saveSettings('compMatrix', {gaps:{[key]:ng}}, settingsStamp('compMatrix'))){ settingsDocs.compMatrix={...cmxSet(), gaps:{...(cmxSet().gaps||{}), [key]:ng}}; cmxRender(true); }
+}
+async function cmxSaveProfile(){
+  const d=cmxUi.draft, role=cmxUi.edit; if(!d || !role) return;
+  const items=d.items.map(it=>({id:it.id||('i'+genId().slice(0,8)), c:CMX_CATS[it.c]?it.c:'train', n:String(it.n||'').trim(), ...(it.s && it._n0===it.n?{s:it.s}:{}), src:String(it.src||'').trim(), ...(it.c==='card'?{kw:String(it.kw||'').trim()}:{}), ...(it.c==='exp'?{yrs:Math.max(0, Number(it.yrs)||0)}:{}), ...(it.c==='assess'&&it.ar?{ar:it.ar}:{})})).filter(it=>it.n);
+  if(!items.length){ toast('Keep at least one requirement'); return; }
+  const prof={crit:!!d.crit, req:Math.max(1, Math.min(4, Number(d.req)||3)), items};
+  if(await saveSettings('compMatrix', {profiles:{[role]:prof}}, settingsStamp('compMatrix'))){ settingsDocs.compMatrix={...cmxSet(), profiles:{...(cmxSet().profiles||{}), [role]:prof}}; cmxUi.edit=''; cmxUi.draft=null; clearDirtyForms(); cmxRender(true); }
+}
+async function cmxSaveReview(form){
+  const v=n=>String((form.elements[n]||{}).value||'').trim(), rv=cmxReview(), u=auth.currentUser, today=localToday();
+  if(!v('preparedBy') || !v('note')){ toast('Write the name and what changed'); return; }
+  const rev=rv.rev===undefined?0:(Number(rv.rev)||0)+1, hs=hseSigOf(u&&u.email)||{};
+  const review={rev, preparedBy:v('preparedBy'), preparedRole:v('preparedRole'), preparedAt:today, preparedImg:hs.img||'', approvedBy:v('approvedBy'), approvedRole:v('approvedRole'), approvedAt:v('approvedBy')?v('approvedAt'):'',
+    approved2By:v('approved2By'), approved2Role:v('approved2Role'), approved2At:v('approved2By')?v('approvedAt'):'', nextReview:compAddMonths(today, 3),
+    history:[...(rv.history||[]), {rev, date:today, by:v('preparedBy'), note:v('note')}].slice(-40)};
+  if(await saveSettings('compMatrix', {review}, settingsStamp('compMatrix'))){ settingsDocs.compMatrix={...cmxSet(), review}; cmxUi.rev=false; clearDirtyForms(); cmxRender(true); }
+}
+
+/* ---- PDF (BHN-F0723-02, landscape) ---- */
+function cmxScopeText(){ return [cmxUi.div!=='all'?divLabel(cmxUi.div):'All divisions', cmxUi.project==='all'?'all projects':cmxUi.project==='none'?'no project':(projectName(cmxUi.project)||''), cmxUi.q?'search "'+cmxUi.q+'"':''].filter(Boolean).join(' · '); }
+async function cmxPdf(){
+  if(!compPdfReady()) return;
+  const ps=cmxPairs(), st=cmxStats(ps), rv=cmxReview();
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'compMatrix', docSub:cmxScopeText()}), g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL, K=130, hw=(CW-2*K)/2;
+  const GRN=[15,118,80], AMB=[180,83,9];
+  g.title('COMPETENCY MATRIX — ISO 9001 / 14001 / 45001 clause 7.2', `Rev ${rv.rev!==undefined?String(rv.rev).padStart(2,'0'):'—'} · ${isoToDmy(localToday())}`);
+  g.row([{t:'SCOPE', w:K, bold:true, fill:LBL},{t:cmxScopeText(), w:hw},{t:'NEXT REVIEW', w:K, bold:true, fill:LBL},{t:isoToDmy(rv.nextReview)||'—', w:hw, bold:true}]);
+  g.row([{t:'HSE-CRITICAL AT REQUIRED LEVEL', w:K, bold:true, fill:LBL, size:7.6},{t:st.pctC===null?'—':`${st.pctC}%  (${st.okC} of ${st.crit})`, w:hw, bold:true, color:st.pctC!==null&&st.pctC<90?g.RED:GRN},{t:'ALL AT REQUIRED LEVEL', w:K, bold:true, fill:LBL},{t:st.pct===null?'—':`${st.pct}%  (${st.ok} of ${st.n})`, w:hw}]);
+  g.row([{t:'OPEN GAPS', w:K, bold:true, fill:LBL},{t:`${st.gaps}  ·  ${st.noplan} without a plan  ·  ${st.overdue} overdue`, w:hw, color:st.gaps?g.RED:g.INK},{t:'EXPIRING ≤ 60 DAYS', w:K, bold:true, fill:LBL},{t:String(st.soon), w:hw}]);
+  g.head('COMPETENCE LEVELS');
+  g.row([{t:'Level', w:40, bold:true, fill:LBL, center:true},{t:'Name', w:150, bold:true, fill:LBL},{t:'Meaning', w:CW-40-150-150, bold:true, fill:LBL},{t:'May work alone?', w:150, bold:true, fill:LBL}]);
+  CMX_LEVELS.forEach(l=>g.row([{t:l[0], w:40, center:true, bold:true},{t:l[1], w:150, bold:true},{t:l[2], w:CW-40-150-150},{t:l[3], w:150}]));
+  // A
+  const roles=CMX_JOB_KEYS.filter(r=>ps.some(p=>p.role===r));
+  g.head('PART A — WHAT EACH JOB NEEDS (job competence profiles)');
+  g.row([{t:'Job', w:150, bold:true, fill:LBL},{t:'Requirement', w:CW-150-120-220, bold:true, fill:LBL},{t:'Type', w:120, bold:true, fill:LBL},{t:'Source of the requirement', w:220, bold:true, fill:LBL}]);
+  for(const r of roles){ const p=cmxProfile(r); p.items.forEach((it,i)=>g.row([i?{t:'', blank:true, w:150}:{t:cmxJobName(r), sub:`Required level ${p.req}${p.crit?'  ·  HSE-CRITICAL':''}`, w:150, bold:true},{t:it.n+(it.c==='exp'?` — ${it.yrs||0} years`:''), w:CW-150-120-220},{t:CMX_CATS[it.c], w:120},{t:it.src||'—', w:220, size:7.8}], i?15:24)); }
+  // B
+  doc.addPage(); g.y=32;
+  g.head('PART B — EMPLOYEES AGAINST THEIR JOB  (OK = in date · DUE = expires within 60 days · SUP = under supervision · X = missing / expired)');
+  for(const r of roles){ const p0=cmxProfile(r), rp=ps.filter(p=>p.role===r).sort((a,b)=>String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
+    const NW=150, LW=50, GW=50, cw=Math.max(40,(CW-NW-LW-GW)/Math.max(1,p0.items.length));
+    g.ensure(60); g.y+=4;
+    g.row([{t:cmxJobName(r)+(p0.crit?'  —  HSE-critical':'')+`  ·  required level ${p0.req}`, w:CW, bold:true, size:8.6, color:g.RED}], 15);
+    g.row([{t:'Employee', w:NW, bold:true, fill:LBL},...p0.items.map(it=>({t:cmxShort(it), w:cw, bold:true, fill:LBL, size:6.8})),{t:'Level', w:LW, bold:true, fill:LBL, center:true},{t:'Gap', w:GW, bold:true, fill:LBL, center:true}], 22);
+    rp.forEach(p=>g.row([{t:p.w.fullName||'—', sub:p.w.designation||'', w:NW, bold:true},...p.cells.map(c=>({t:c.st==='ok'?'OK'+(c.ev&&c.ev.exp?' '+isoToDmy(c.ev.exp):''):c.st==='soon'?'DUE '+isoToDmy(c.ev&&c.ev.exp||''):c.st==='sup'?'SUP':c.st==='na'?'n/a':'X', w:cw, size:7, bold:c.st==='bad', color:c.st==='ok'?GRN:c.st==='soon'||c.st==='sup'?AMB:c.st==='na'?g.SUB:g.RED})),
+      {t:`${p.lv} / ${p.req}`, w:LW, bold:true, center:true, color:p.lv<p.req?g.RED:GRN},{t:p.gap?'YES':'—', w:GW, center:true, bold:p.gap, color:p.gap?g.RED:g.SUB}], 22)); }
+  if(!roles.length) g.row([{t:'No employees in this view.', w:CW, color:g.SUB}]);
+  // C
+  const gs=ps.filter(p=>p.gap);
+  g.head('PART C — GAP PLAN  (ISO 7.2 c: action + effectiveness check)');
+  g.row([{t:'Employee / job', w:140, bold:true, fill:LBL},{t:'Lvl', w:34, bold:true, fill:LBL, center:true},{t:'What is missing', w:CW-140-34-150-150-90-62-56, bold:true, fill:LBL},{t:'Interim control', w:150, bold:true, fill:LBL},{t:'Action', w:150, bold:true, fill:LBL},{t:'Owner', w:90, bold:true, fill:LBL},{t:'Target', w:62, bold:true, fill:LBL},{t:'Status', w:56, bold:true, fill:LBL}]);
+  gs.forEach(p=>{ const gp=cmxGapOf(p)||{}, s=cmxGapState(p); g.row([{t:p.w.fullName||'—', sub:cmxJobName(p.role), w:140, bold:true},{t:`${p.lv}/${p.req}`, w:34, center:true},{t:p.why.join('; '), w:CW-140-34-150-150-90-62-56, size:7.6},{t:[gp.interim, gp.sup].filter(Boolean).join(' — ')||'—', w:150, size:7.6},{t:[gp.type, gp.action].filter(Boolean).join(' — ')||'—', w:150, size:7.6},{t:gp.owner||'—', w:90, size:7.6},{t:isoToDmy(gp.target)||'—', w:62},{t:s==='overdue'?'OVERDUE':s==='noplan'?'NO PLAN':'OPEN', w:56, bold:true, color:s==='open'?AMB:g.RED}], 24); });
+  if(!gs.length) g.row([{t:'No gaps — every employee in this view is at the required level.', w:CW, color:GRN}]);
+  const closed=Object.entries((cmxSet().gaps)||{}).filter(([,x])=>x&&x.closedAt).sort((a,b)=>String(b[1].closedAt).localeCompare(String(a[1].closedAt))).slice(0,10);
+  if(closed.length){ g.row([{t:'Recently closed — verified effective', w:CW, bold:true, size:8, color:g.SUB}], 14);
+    closed.forEach(([k,x])=>{ const w=workers.find(q=>q.id===k.split('|')[0]); g.row([{t:isoToDmy(String(x.closedAt).slice(0,10)), w:70},{t:(w?w.fullName:'—')+' · '+cmxJobName(k.split('|')[1]), w:200},{t:[x.type, x.action].filter(Boolean).join(' — '), w:CW-70-200-260},{t:'Effectiveness: '+(x.eff||'—')+' · verified by '+(x.closedBy||''), w:260, size:7.4}]); }); }
+  // D
+  g.head('PART D — REVIEW & APPROVAL');
+  (rv.history||[]).slice(-6).forEach(h=>g.row([{t:'Rev '+String(h.rev).padStart(2,'0'), w:60, bold:true},{t:isoToDmy(h.date), w:70},{t:h.note||'', w:CW-60-70-160},{t:h.by||'', w:160}]));
+  g.ensure(110); const SW=(CW-3*K)/3;
+  g.row([{t:'PREPARED BY (HSE)', w:K, bold:true, fill:LBL},{t:rv.preparedBy||'', blank:true, sub:[rv.preparedRole, isoToDmy(rv.preparedAt)].filter(Boolean).join('  ·  '), w:SW+60, bold:true},{t:'SIGNATURE', w:K-40, bold:true, fill:LBL},rv.preparedImg?{img:rv.preparedImg, w:CW-K-(SW+60)-(K-40)}:{t:'', blank:true, w:CW-K-(SW+60)-(K-40)}], 44);
+  g.row([{t:'APPROVED BY', w:K, bold:true, fill:LBL},{t:rv.approvedBy||'', blank:true, sub:[rv.approvedRole, isoToDmy(rv.approvedAt)].filter(Boolean).join('  ·  ')||'Name / position / date', w:SW+60, bold:true},{t:'SIGNATURE', w:K-40, bold:true, fill:LBL},{t:'', blank:true, w:CW-K-(SW+60)-(K-40)}], 44);
+  if(rv.approved2By) g.row([{t:'APPROVED BY', w:K, bold:true, fill:LBL},{t:rv.approved2By, sub:[rv.approved2Role, isoToDmy(rv.approved2At)].filter(Boolean).join('  ·  '), w:SW+60, bold:true},{t:'SIGNATURE', w:K-40, bold:true, fill:LBL},{t:'', blank:true, w:CW-K-(SW+60)-(K-40)}], 44);
+  g.y+=6; g.row([{t:'Generated from the HSE tracker on '+isoToDmy(localToday())+'. Evidence (certificates, cards, assessments, inductions) is kept in each employee record. Status reviewed every 3 months; job profiles every year.', w:CW, size:7.4, color:g.SUB}]);
+  doc.save(`Competency_Matrix_${localToday()}.pdf`);
+}
+async function cmxXlsx(){
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection and try again'); return; }
+  const ps=cmxPairs(), roles=CMX_JOB_KEYS;
+  const A=[['Job','HSE-critical','Required level','Requirement','Type','Source','Found in records named / years']];
+  roles.forEach(r=>{ const p=cmxProfile(r); p.items.forEach(it=>A.push([cmxJobName(r), p.crit?'Yes':'No', p.req, it.n, CMX_CATS[it.c], it.src||'', it.c==='card'?(it.kw||it.n):it.c==='exp'?(it.yrs||0):''])); });
+  const B=[['Employee','Civil ID','Designation','Division','Project','Job','HSE-critical','Requirement','Type','Status','Detail','Evidence no.','Issued by / assessor','Date','Valid until','Level required','Level actual']];
+  ps.forEach(p=>p.cells.forEach(c=>B.push([p.w.fullName||'', p.w.civilId||'', p.w.designation||'', divLabel(workerDivKey(p.w)||'')||'', projectName(p.w.projectId)||'', cmxJobName(p.role), p.crit?'Yes':'No', c.it.n, CMX_CATS[c.it.c], {ok:'In date',soon:'Expires ≤60 days',sup:'Under supervision',na:'Not needed',bad:'Missing / expired'}[c.st]||c.st, c.txt||'', (c.ev&&c.ev.no)||'', (c.ev&&c.ev.by)||'', isoToDmy(c.ev&&c.ev.date)||'', isoToDmy(c.ev&&c.ev.exp)||'', p.req, p.lv])));
+  const C=[['Employee','Job','Level','What is missing','Interim control','Supervisor / details','Action type','Action','Owner','Target','Status']];
+  ps.filter(p=>p.gap).forEach(p=>{ const g=cmxGapOf(p)||{}; C.push([p.w.fullName||'', cmxJobName(p.role), `${p.lv}/${p.req}`, p.why.join('; '), g.interim||'', g.sup||'', g.type||'', g.action||'', g.owner||'', isoToDmy(g.target)||'', {overdue:'Overdue',noplan:'No plan',open:'Open'}[cmxGapState(p)]]); });
+  const wb=XLSX.utils.book_new();
+  [['A Job profiles',A],['B Employee status',B],['C Gap plan',C]].forEach(([n,rows])=>{ const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=rows[0].map((h,i)=>({wch:Math.min(48, Math.max(10, ...rows.map(r=>String(r[i]==null?'':r[i]).length)))})); XLSX.utils.book_append_sheet(wb, ws, n); });
+  XLSX.writeFile(wb, `Competency_Matrix_${localToday()}.xlsx`);
+}
+function cmxDashLine(){
+  const ws=activeWorkers().filter(w=>(w.status||'active')==='active'); const st=cmxStats(cmxPairs(ws)), rv=cmxReview();
+  if(!st.n) return '';
+  return `<div class="cmx-dash"><strong>Competency matrix</strong> · HSE-critical at required level <strong class="${st.pctC!==null&&st.pctC<90?'t-danger':''}">${st.pctC===null?'—':st.pctC+'%'}</strong> · ${st.gaps} open gap${st.gaps===1?'':'s'}${st.overdue?` (<span class="t-danger">${st.overdue} overdue</span>)`:''} · ${st.soon} expiring ≤60 d · next review <span class="${!rv.nextReview||rv.nextReview<localToday()?'t-danger':''}">${esc(isoToDmy(rv.nextReview)||'not set')}</span> <button type="button" class="att-link" data-cmx-goto="1">Open matrix</button></div>`;
+}
+
+/* ---- events ---- */
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('[data-comp-tab],[data-cmx-tab],[data-cmx-open],[data-cmx-edit],[data-cmx-iadd],[data-cmx-idel],[data-cmx-preset],[data-cmx-rev],[data-cmx-close],[data-cmx-expsave],[data-cmx-worker],[data-cmx-pdf],[data-cmx-xlsx],[data-cmx-goto],[data-cmx-jobsave],[data-cmx-jobreset],[data-cmx-sodel]');
+  if(!b || b.disabled) return; const D=b.dataset;
+  if(D.compTab){ cmxTab(D.compTab); return; }
+  if(D.cmxGoto){ const s=document.querySelector('.sidenav-btn[data-section="comp"]'); if(s) s.click(); cmxTab('matrix'); window.scrollTo(0,0); return; }
+  if(D.cmxTab){ cmxUi.tab=D.cmxTab; cmxUi.edit=''; cmxUi.draft=null; cmxUi.rev=false; cmxRender(true); return; }
+  if(D.cmxOpen){ cmxUi.open=cmxUi.open===D.cmxOpen?'':D.cmxOpen; if(D.cmxTotab){ cmxUi.tab=D.cmxTotab; cmxUi.open=D.cmxOpen; } compKeep(()=>cmxRender(true)); return; }
+  if(D.cmxPdf){ await cmxPdf(); return; }
+  if(D.cmxXlsx){ await cmxXlsx(); return; }
+  if(D.cmxWorker){ openDrawer(D.cmxWorker); return; }
+  if(!canEdit()) return;
+  if('cmxEdit' in D){ cmxUi.edit=D.cmxEdit; cmxUi.draft=null; cmxRender(true); return; }
+  if(D.cmxIadd){ const d=cmxUi.draft; if(!d) return; d.items.push({id:'', c:'train', n:'', src:''}); compKeep(()=>cmxRender(true)); return; }
+  if(D.cmxIdel!==undefined){ const d=cmxUi.draft; if(!d) return; d.items.splice(Number(D.cmxIdel),1); compKeep(()=>cmxRender(true)); return; }
+  if(D.cmxPreset){ if(!compArm(b,'Tap again — standard profile')) return; const s=CMX_DEFAULT[D.cmxPreset]||CMX_DEFAULT.general; cmxUi.draft={crit:s.crit, req:s.req, items:s.items.map(x=>({...x, _n0:x.n}))}; compKeep(()=>cmxRender(true)); return; }
+  if(D.cmxRev){ cmxUi.rev=D.cmxRev==='1'; cmxRender(true); return; }
+  if(D.cmxClose){ b.disabled=true; await cmxCloseGap(D.cmxClose); return; }
+  if(D.cmxJobsave||D.cmxJobreset){ const wid=D.cmxJobsave||D.cmxJobreset, box=b.closest('.cmx-jobs'); const val=D.cmxJobreset?firebase.firestore.FieldValue.delete():[...(box?box.querySelectorAll('[data-cmx-job]:checked'):[])].map(x=>x.dataset.cmxJob);
+    if(D.cmxJobsave && !val.length){ toast('Tick at least one job'); return; }
+    if(await saveSettings('compMatrix', {jobs:{[wid]:val}}, settingsStamp('compMatrix'))){ const j={...(cmxSet().jobs||{})}; if(D.cmxJobreset) delete j[wid]; else j[wid]=val; settingsDocs.compMatrix={...cmxSet(), jobs:j};
+      const w=workers.find(x=>x.id===wid), first=w?cmxJobs(w)[0]:''; if(cmxUi.open.startsWith(wid+'|') && w && !cmxJobs(w).includes(cmxUi.open.split('|')[1])) cmxUi.open=first?wid+'|'+first:''; clearDirtyForms(); cmxRender(true); } return; }
+  if(D.cmxSodel){ if(!compArm(b,'Tap again to remove')) return; if(await saveSettings('compMatrix', {signoffs:{[D.cmxSodel]:firebase.firestore.FieldValue.delete()}}, settingsStamp('compMatrix'))){ const so={...(cmxSet().signoffs||{})}; delete so[D.cmxSodel]; settingsDocs.compMatrix={...cmxSet(), signoffs:so}; cmxRender(true); } return; }
+  if(D.cmxExpsave){ const inp=document.getElementById('cmxExp'), v=inp?inp.value:''; const n=v===''?null:Math.max(0, Math.min(50, Number(v)||0));
+    try{ await db.collection('workers').doc(D.cmxExpsave).update(stamp({expPrior:n===null?firebase.firestore.FieldValue.delete():n})); toast('Experience saved'); clearDirtyForms(); }catch(err){ console.error(err); toast('Could not save — '+((err&&err.code)||'error')); } return; }
+});
+document.addEventListener('change', async e=>{
+  const el=e.target; if(!el || !el.closest || !el.closest('#cmxPane')) return;
+  if(el.id==='cmxDiv'){ cmxUi.div=el.value; cmxRender(true); return; }
+  if(el.id==='cmxProject'){ cmxUi.project=el.value; cmxRender(true); return; }
+  if(el.id==='cmxGapsOnly'){ cmxUi.gapsOnly=el.checked; cmxRender(true); return; }
+  if(el.dataset.cmxAssessor && canEdit()){ const wid=el.dataset.cmxAssessor; if(await saveSettings('compMatrix', {assessors:{[wid]:el.checked?true:firebase.firestore.FieldValue.delete()}}, settingsStamp('compMatrix'))){ const a={...(cmxSet().assessors||{})}; if(el.checked) a[wid]=true; else delete a[wid]; settingsDocs.compMatrix={...cmxSet(), assessors:a}; clearDirtyForms(); compKeep(()=>cmxRender(true)); } return; }
+  const d=cmxUi.draft;
+  if(d && el.dataset.cp){ if(el.dataset.cp==='crit') d.crit=el.checked; else d.req=Number(el.value)||3; return; }
+  if(d && el.dataset.cpi){ const [i,f]=el.dataset.cpi.split('|'); if(d.items[+i]){ d.items[+i][f]=f==='yrs'?Number(el.value)||0:el.value; if(f==='c') compKeep(()=>cmxRender(true)); } return; }
+});
+document.addEventListener('input', e=>{
+  const el=e.target; if(!el || !el.closest || !el.closest('#cmxPane')) return;
+  if(el.id==='cmxSearch'){ cmxUi.q=el.value; cmxRender(true); const s=document.getElementById('cmxSearch'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } return; }
+  const d=cmxUi.draft; if(d && el.dataset.cpi){ const [i,f]=el.dataset.cpi.split('|'); if(d.items[+i] && f!=='c') d.items[+i][f]=f==='yrs'?Number(el.value)||0:el.value; }
+});
+document.addEventListener('submit', async e=>{
+  const f=e.target; if(f && f.classList && f.classList.contains('cmx-soform')){ e.preventDefault(); if(canEdit()) await cmxSaveSignoff(f); return; }
+  if(!f || !f.id || !['cmxGapForm','cmxProfForm','cmxRevForm'].includes(f.id)) return; e.preventDefault(); if(!canEdit()) return;
+  if(f.id==='cmxGapForm') await cmxSaveGap(f); else if(f.id==='cmxProfForm') await cmxSaveProfile(); else await cmxSaveReview(f);
 });
 
 /* ---- action tracker: extra sources ---- */
@@ -12939,6 +13406,7 @@ function renderAll(){
   renderMatrix();
   renderReportAll();
   if(typeof renderInd==='function') renderInd();   // Batch 87
+  if(typeof cmxRender==='function') cmxRender();   // Batch 88
   if(pendingWorkerOpen) setTimeout(openPendingWorker, 0);   // project Team tabs & counts use worker data
 }
 
