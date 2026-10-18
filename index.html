@@ -1108,6 +1108,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 
 /* Batch 86: audit programme */
 .cmx-jobs{border-top:1px dashed var(--line); margin-top:10px; padding-top:6px;} .cmx-jobs-g{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:2px 12px; margin-top:4px;} .cmx-so{border-top:1px dashed var(--line); margin-top:8px; padding-top:4px;} .cmx-so-g{grid-template-columns:repeat(auto-fit,minmax(170px,1fr)) !important;}
+.waste-months th, .waste-months td{text-align:center; padding:4px 6px; font-size:12px;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
@@ -1183,6 +1184,9 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
     <button type="button" class="sidenav-btn" data-section="heat">Heat Stress</button>
     <button type="button" class="sidenav-btn" data-section="actions">Action Tracker</button>
     <button type="button" class="sidenav-btn" data-section="calendar">Safety Calendar</button>
+    <div class="nav-group">Environment</div>
+    <button type="button" class="sidenav-btn" data-section="aspects">Aspects &amp; Impacts</button>
+    <button type="button" class="sidenav-btn" data-section="waste">Waste Log</button>
     <div class="nav-group">Assurance</div>
     <button type="button" class="sidenav-btn" data-section="objectives">Objectives &amp; KPIs</button>
     <button type="button" class="sidenav-btn" data-section="assurance">Assurance Plan</button>
@@ -2260,7 +2264,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2382,7 +2386,7 @@ function deltaize(current, data){
 }
 
 /* ---------------- change history: every add / update / set / delete is written to activityLog ---------------- */
-const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress'};
+const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log'};
 const LOG_IGNORE_KEYS = new Set(['updatedAt','updatedBy','createdAt','createdBy']);
 function logCacheFind(col, id){
   try{
@@ -2964,7 +2968,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b89';
+const APP_BUILD='b90';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4483,7 +4487,7 @@ const IMS_BHN_EXTRA=[
   ['F0811-22','Safety Observation Card','Form','P0811-01','','Recorded in the tracker — Observations'],
   ['F0811-23','Project HSE Record','Form','P0811-01','site','Made by the tracker — Project Details → PDF'],
   ['P0812-03','Waste Management Procedure','Procedure','','',''],
-  ['F0812-03','Waste Disposal Log','Register / log','P0812-03','',''],
+  ['F0812-03','Waste Disposal Log','Register / log','P0812-03','waste','Made by the tracker — Environment → Waste Log'],
   ['F0540-03','Safety Star Certificate','Form','P0540-01','star','Made by the tracker — Safety Star of the Month'],
   ['F0713-06','Vehicle HSE Record','Form','P0713-01','vehicle','Made by the tracker — Plant & Equipment → vehicle PDF'],
   ['F0713-07','Vehicle Inspection Checklist','Form','P0713-01','vehInsp','Made by the tracker — Plant & Equipment → vehicle → Inspections (SP-2000)'],
@@ -4496,7 +4500,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -7012,7 +7016,7 @@ function collectAllActions(){
   for(const v of activeVehicles()) for(const x of (v.inspections||[])) if(x.result==='A' || x.result==='B'){ const cl=viClose(v,x), d=viDefects(x);
     out.push({src:'vehicle', projectId:x.projectId||v.projectId||'', ref:v.vehicleNumber||'Vehicle', where:`Inspection ${x.date} · Class ${x.result}${x.result==='A'?' — do not use':''}`, text:d.map(z=>z.text+(z.note?' ('+z.note+')':'')).join('; ')||'Rectify defects', owner:x.actionOwner, targetDate:x.targetDate, status:cl.closed?'Closed':'Open', closedDate:cl.closed?cl.date:'', tag:'Class '+x.result,
       open:()=>{ document.querySelector('.sidenav-btn[data-section="vehicles"]').click(); openVehicleDrawer(v.id); activeVehicleTab='inspections'; renderVehicleDrawer(); }}); }
-  const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat'};
+  const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat', aspects:'aspect'};
   if(REG.obs) for(const r of regActive('obs')) if(r.obsType!=='Positive' && (r.owner||r.targetDate)) out.push({src:'obs', projectId:r.projectId||'', ref:r.obsNo||'Observation', where:[r.category, r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), text:r.description, owner:r.owner, targetDate:r.targetDate, status:r.status||'Open', closedDate:r.closedDate, tag:r.obsType, open:()=>openRegDrawer('obs', r.id)});
   for(const [k,src] of Object.entries(regSrc)){ const cfg=REG[k]; if(!cfg) continue;
     for(const r of regActive(k)) for(const [sk,sc] of Object.entries(cfg.subs||{})) if(sc.isAction) for(const x of (r[sk]||[])) out.push({src, projectId:r.projectId||'', ref:r[cfg.noField]||cfg.singular, where:cfg.titleOf(r), text:x.action, owner:x.owner, targetDate:x.targetDate, status:x.status||'Open', closedDate:x.closedDate, open:()=>openRegDrawer(k, r.id, 'sub:'+sk)}); }
@@ -7215,6 +7219,216 @@ function renderHiraMatrix(){
   el.innerHTML=`<div class="panel"><div class="section-head"><h3>RISK MATRIX</h3><div class="seg-tabs" style="margin:0;"><button type="button" class="seg-btn ${mode==='init'?'active':''}" data-hmode="init">Initial risk</button><button type="button" class="seg-btn ${mode==='res'?'active':''}" data-hmode="res">Residual risk</button></div></div>
     <div class="rmx-wrap">${g}<div class="rmx-legend"><span class="badge ok">1–4 Low</span><span class="badge warn">5–9 Medium</span><span class="badge danger">10–14 High</span><span class="badge danger rmx-extb">15–25 Extreme</span><p class="wsub">Numbers show how many hazards sit in each cell. Aim to move every hazard to the green / amber area with additional controls.</p></div></div></div>`;
 }
+
+/* =============================== Batch 90: environment — aspect & impact register (F0612-02) + waste log (F0812-03) =============================== */
+const ASP_TYPES=['Emissions to air (exhaust, fumes)','Dust','Noise & vibration','Spill / leak to soil or water','Waste generation','Hazardous waste','Use of fuel / energy','Use of water','Use of materials / resources','Hazardous materials storage & handling','Wastewater / washout / sewage','Land / habitat disturbance','Fire / emergency release','Other'];
+const ASP_IMPACTS=['Air pollution','Climate change (CO₂)','Soil contamination','Water / groundwater contamination','Depletion of natural resources','Landfill / waste burden','Nuisance to neighbours (noise, dust)','Harm to wildlife / habitat','Other'];
+const ASP_SEV=['1 · Negligible','2 · Minor — local, short','3 · Moderate — on site, reversible','4 · Major — off site or long-term','5 · Severe — serious, permanent'];
+const ASP_FREQ=['1 · Rare / emergency only','2 · Yearly','3 · Monthly','4 · Weekly','5 · Daily / continuous'];
+const ASP_STATUSES=['Current','Under review','Obsolete'];
+function aspSig(r){
+  const s=sevNum(r.severity), f=sevNum(r.frequency), score=s&&f?s*f:null, why=[];
+  if(score!==null && score>=10) why.push('score '+score+' ≥ 10'); if(r.legal==='Yes') why.push('legal / compliance obligation'); if(r.concern==='Yes') why.push('concern of neighbours / client');
+  return {score, sig:why.length>0, why};
+}
+function aspSigBadge(r){ const g=aspSig(r); return g.score===null && !g.sig ? '<span class="wsub">not rated</span>' : g.sig ? `<span class="badge danger" title="${esc(g.why.join(' · '))}">Significant</span>` : '<span class="badge ok">Not significant</span>'; }
+const ASP_TYPICAL=[
+  ['Vehicle & plant operation (scaffold transport, cranes, trucks)','Emissions to air (exhaust, fumes)','Air pollution','Normal',2,5,'Yes','No','Vehicle maintenance plan · no idling · IVMS'],
+  ['Refuelling vehicles, generators and plant','Spill / leak to soil or water','Soil contamination','Abnormal',3,3,'Yes','No','Drip trays · spill kit at the fuel point · trained staff'],
+  ['Scaffold material loading, transport and handling','Noise & vibration','Nuisance to neighbours (noise, dust)','Normal',2,4,'No','No','Work hours near camps / villages · vehicle condition'],
+  ['Scaffold erection / dismantling','Waste generation','Landfill / waste burden','Normal',2,3,'No','No','Damaged tubes and boards to scrap / recycling · housekeeping'],
+  ['Concrete work and equipment washing','Wastewater / washout / sewage','Water / groundwater contamination','Normal',3,3,'Yes','No','Lined washout pit · no washout on open ground'],
+  ['Cement, sand and block cutting','Dust','Air pollution','Normal',3,4,'No','No','Water suppression · wet cutting · covered stockpiles'],
+  ['Office and camp electricity / air-conditioning','Use of fuel / energy','Climate change (CO₂)','Normal',2,5,'No','No','Switch-off rules · AC set to 24 °C · maintenance'],
+  ['Camp and site — domestic waste and sewage','Waste generation','Landfill / waste burden','Normal',2,5,'Yes','No','Segregated bins · licensed collection · septic tank emptied by an approved contractor'],
+  ['Vehicle and plant maintenance','Hazardous waste','Soil contamination','Normal',4,3,'Yes','No','Used oil, filters and batteries stored on hard standing and sent to an approved recycler with a waste transfer note'],
+  ['Storage of diesel, paint, gas cylinders and chemicals','Hazardous materials storage & handling','Soil contamination','Emergency',4,2,'Yes','No','Bunded storage · SDS on site · fire extinguishers · spill kit'],
+  ['Fire at the yard, camp or site','Fire / emergency release','Air pollution','Emergency',4,1,'Yes','No','Emergency response plan · drills · firefighting water contained'],
+  ['Dust suppression, camp and washing','Use of water','Depletion of natural resources','Normal',2,4,'No','No','Use treated / recycled water where allowed · fix leaks'],
+];
+regDefine({
+  key:'aspects', collection:'aspects', singular:'Aspect', title:'Environmental Aspects & Impacts', tagline:'Identify · Evaluate · Control · Review',
+  addLabel:'+ Add aspect', noField:'aspNo', noPrefix:'ASP', noYear:false, dateField:'reviewDate', statuses:ASP_STATUSES, statusOf:r=>r.status||'Current',
+  headerButtons:'<button class="btn btn-sm reg-edit-only" type="button" id="aspTypicalBtn" data-armed="0" title="Add the typical aspects of scaffolding, civil and logistics work — then adjust them">Load typical aspects</button><button class="btn btn-sm" type="button" id="aspPdfBtn">'+ic('download')+' Register PDF (F0612-02)</button>',
+  searchPlaceholder:'Search activity, aspect, impact, control…', emptyEditor:'No aspects yet — press “Load typical aspects” for a starting list, or add each activity’s aspects and impacts.',
+  titleOf:r=>r.aspect||'Aspect', subOf:r=>[r.activity, r.projectId?projectName(r.projectId):(r.division||'')].filter(Boolean).join(' · '),
+  badgesOf:r=>{ const g=aspSig(r); return `${aspSigBadge(r)}${g.score!==null?` <span class="badge muted">Score ${g.score}</span>`:''}${g.why.length?` <span class="wsub" style="display:inline;">${esc(g.why.join(' · '))}</span>`:''}`; },
+  searchText:r=>[r.aspNo,r.activity,r.aspect,r.aspectDetail,r.impact,r.controls,r.legalRef].join(' '),
+  sort:(a,b)=>(aspSig(b).sig-aspSig(a).sig) || String(a.activity||'').localeCompare(String(b.activity||'')) || String(a.aspNo||'').localeCompare(String(b.aspNo||'')),
+  addFields:['activity','aspect','impact','condition','severity','frequency'], addDefaults:{status:'Current', condition:'Normal'},
+  segs:[{key:'sig', label:'Significant', match:r=>aspSig(r).sig},{key:'emg', label:'Abnormal / emergency', match:r=>r.condition==='Abnormal'||r.condition==='Emergency'},{key:'rev', label:'Review overdue', match:r=>r.reviewDate&&daysUntil(r.reviewDate)<0}], segAllLabel:'All aspects',
+  tabs:[{key:'main', label:'Aspect', groups:[
+    {fields:[
+      {key:'aspNo', label:'Ref no.', required:true},
+      {key:'status', label:'Status', type:'select', options:ASP_STATUSES},
+      {key:'activity', label:'Activity / product / service', required:true, wide:true, placeholder:'e.g. Refuelling generators at site'},
+      {key:'division', label:'Division', type:'select', options:divisionOptions},
+      {key:'projectId', label:'Project (optional)', type:'project'},
+      {key:'aspect', label:'Environmental aspect', type:'select', options:ASP_TYPES, required:true},
+      {key:'aspectDetail', label:'Aspect details', wide:true, placeholder:'e.g. Diesel spill while filling from the bowser'},
+      {key:'impact', label:'Environmental impact', type:'select', options:ASP_IMPACTS, required:true},
+      {key:'condition', label:'Condition', type:'select', options:['Normal','Abnormal','Emergency']},
+      {key:'lifecycle', label:'Life-cycle stage (ISO 14001 6.1.2)', type:'select', options:['Our own work','Purchased materials / suppliers','Transport','Use by the client','End of life / disposal']},
+    ]},
+    {title:'Significance', fields:[
+      {key:'severity', label:'Severity of the impact', type:'select', options:ASP_SEV, required:true},
+      {key:'frequency', label:'How often', type:'select', options:ASP_FREQ, required:true},
+      {key:'legal', label:'Legal / compliance obligation applies?', type:'select', options:['No','Yes']},
+      {key:'legalRef', label:'Which law / permit / client requirement', wide:true, showWhen:'legal=Yes', placeholder:'e.g. Royal Decree 114/2001 · PDO SP-1005 waste management'},
+      {key:'concern', label:'Concern of neighbours / client?', type:'select', options:['No','Yes']},
+    ]},
+    {title:'Control', fields:[
+      {key:'controls', label:'Controls in place', type:'textarea', wide:true},
+      {key:'improve', label:'Improvement / objective (for significant aspects)', type:'textarea', wide:true},
+      {key:'owner', label:'Owner'},
+      {key:'reviewDate', label:'Next review', type:'date'},
+    ]}],
+    intro:'Significant = severity × frequency ≥ 10, or a legal / compliance obligation applies, or neighbours / the client are concerned. Significant aspects need controls and are considered in objectives (ISO 14001 6.1.2 / 6.2).'},
+    {key:'sub:actions', label:'Actions', sub:'actions'}],
+  subs:{actions:actionSub('Actions to control the aspect')},
+  columns:[
+    {label:'Ref', cls:'mono', html:r=>`<strong>${esc(r.aspNo||'—')}</strong>`},
+    {label:'Activity / aspect', html:r=>`<div class="wname">${esc(r.aspect||'—')}${r.aspectDetail?` — <span class="wsub" style="display:inline;">${esc(r.aspectDetail)}</span>`:''}</div><div class="wsub">${esc(r.activity||'')}</div>`},
+    {label:'Impact', html:r=>esc(r.impact||'—')},
+    {label:'Condition', html:r=>`<span class="badge ${r.condition==='Emergency'?'danger':r.condition==='Abnormal'?'warn':'muted'}">${esc(r.condition||'Normal')}</span>`},
+    {label:'Score', cls:'mono', html:r=>{ const g=aspSig(r); return g.score===null?'—':String(g.score); }},
+    {label:'Significance', html:r=>aspSigBadge(r)},
+    {label:'Review', html:r=>`<span class="mono ${r.reviewDate&&daysUntil(r.reviewDate)<0?'text-danger':''}">${esc(isoToDmy(r.reviewDate)||'—')}</span>`},
+  ],
+  tiles:list=>{ const cur=list.filter(r=>(r.status||'Current')!=='Obsolete'), sig=cur.filter(r=>aspSig(r).sig), od=cur.filter(r=>r.reviewDate&&daysUntil(r.reviewDate)<0);
+    return [{label:'Aspects identified', num:cur.length, sub:`${new Set(cur.map(r=>r.activity)).size} activities`, icon:'flask'},
+      {label:'Significant aspects', num:sig.length, cls:sig.length?'warn':'ok', sub:`${sig.filter(r=>!String(r.controls||'').trim()).length} without controls written`, icon:'alert'},
+      {label:'With a legal obligation', num:cur.filter(r=>r.legal==='Yes').length, sub:'linked to the Legal Register', icon:'books'},
+      {label:'Review overdue', num:od.length, cls:od.length?'danger':'ok', sub:`${cur.filter(r=>aspSig(r).score===null).length} not rated yet`, icon:'clock'}]; },
+});
+async function aspLoadTypical(){
+  if(!canEdit()) return; const have=new Set(regActive('aspects').map(r=>(String(r.activity||'')+'|'+String(r.aspect||'')).toLowerCase())), u=auth.currentUser;
+  let n=0, max=0; for(const r of regState.aspects.list){ const m=/^ASP-(\d+)$/.exec(r.aspNo||''); if(m) max=Math.max(max, Number(m[1])); }
+  const next=compAddMonths(localToday(), 12);
+  try{ for(const [activity, aspect, impact, condition, s, f, legal, concern, controls] of ASP_TYPICAL){ if(have.has((activity+'|'+aspect).toLowerCase())) continue; max++;
+      await db.collection('aspects').add(stamp({deleted:false, createdAt:new Date().toISOString(), createdBy:(u&&u.email)||'', actions:[], aspNo:'ASP-'+String(max).padStart(3,'0'), status:'Current', activity, aspect, impact, condition,
+        severity:ASP_SEV[s-1], frequency:ASP_FREQ[f-1], legal, concern, controls, reviewDate:next, owner:''})); n++; }
+    toast(n?`${n} typical aspects added — check the ratings and controls for your sites`:'The typical aspects are already in the register'); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not add — '+((e&&e.code)||'error')); }
+}
+async function aspPdf(){
+  if(!compPdfReady()) return;
+  const list=regActive('aspects').filter(r=>(r.status||'Current')!=='Obsolete').sort(REG.aspects.sort), sig=list.filter(r=>aspSig(r).sig);
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'aspects', docSub:`${list.length} aspects · ${sig.length} significant`}), g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL, hs=hseSigOf((auth.currentUser||{}).email)||{};
+  g.title('ENVIRONMENTAL ASPECT & IMPACT REGISTER — ISO 14001 6.1.2', isoToDmy(localToday()));
+  g.row([{t:'SIGNIFICANCE RULE', w:130, bold:true, fill:LBL},{t:'Score = severity (1–5) × frequency (1–5). Significant when the score is 10 or more, OR a legal / compliance obligation applies, OR neighbours / the client are concerned.', w:CW-130}]);
+  const C=[{t:'Ref', w:48},{t:'Activity', w:128},{t:'Aspect', w:118},{t:'Impact', w:96},{t:'Cond.', w:52},{t:'S×F', w:40},{t:'Legal', w:38},{t:'Significant', w:60},{t:'Controls', w:0},{t:'Review', w:56}];
+  C[8].w=CW-C.reduce((n,c)=>n+c.w,0);
+  g.row(C.map(c=>({t:c.t, w:c.w, bold:true, fill:LBL, size:7.8})), 16);
+  list.forEach(r=>{ const a=aspSig(r); g.row([{t:r.aspNo||'', w:C[0].w, size:7.6},{t:r.activity||'', w:C[1].w, size:7.6},{t:r.aspect||'', sub:r.aspectDetail||'', w:C[2].w, size:7.6},{t:r.impact||'', w:C[3].w, size:7.6},{t:r.condition||'Normal', w:C[4].w, size:7.4},
+    {t:a.score===null?'—':`${sevNum(r.severity)}×${sevNum(r.frequency)}=${a.score}`, w:C[5].w, size:7.4},{t:r.legal==='Yes'?'Yes':'No', w:C[6].w, size:7.4},{t:a.sig?'YES':'No', w:C[7].w, bold:a.sig, color:a.sig?g.RED:g.INK, size:7.6},{t:[r.controls, r.improve?'Improve: '+r.improve:''].filter(Boolean).join('\n')||'—', w:C[8].w, size:7.4},{t:isoToDmy(r.reviewDate)||'—', w:C[9].w, size:7.4}], 20); });
+  if(!list.length) g.row([{t:'No aspects recorded.', w:CW, color:g.SUB}]);
+  g.ensure(60); g.y+=8;
+  g.row([{t:'PREPARED BY (HSE)', w:130, bold:true, fill:LBL},{t:hs.name||'', blank:true, sub:[hs.role, isoToDmy(localToday())].filter(Boolean).join('  ·  '), w:(CW-260)/2, bold:true},{t:'SIGNATURE', w:130, bold:true, fill:LBL},hs.img?{img:hs.img, w:(CW-260)/2}:{t:'', blank:true, w:(CW-260)/2}], 40);
+  doc.save(`Aspect_Register_${localToday()}.pdf`);
+}
+
+const WASTE_TYPES=['General / domestic waste','Scrap metal (tubes, fittings, steel)','Wood (boards, pallets)','Concrete / rubble / blocks','Plastic & packaging','Paper & cardboard','Used oil & oily rags','Oil / fuel filters','Batteries','Chemical / paint containers','Tyres','Sewage / grey water','E-waste','Other'];
+const WASTE_HAZ=['Used oil & oily rags','Oil / fuel filters','Batteries','Chemical / paint containers','E-waste'];
+const WASTE_ROUTES=['Reused on site','Recycled','Returned to supplier','Disposed — approved landfill','Disposed — treatment / incineration','Collected by municipality'];
+const WASTE_UNITS=['kg','tonnes','m³','litres','pieces','loads / trips'];
+const wasteGood=r=>['Reused on site','Recycled','Returned to supplier'].includes(r.route);
+const wasteT=r=>{ const q=Number(r.quantity)||0; return r.unit==='kg'?q/1000:r.unit==='tonnes'?q:null; };
+const wasteHaz=r=>(r.category||(WASTE_HAZ.includes(r.wasteType)?'Hazardous':'Non-hazardous'))==='Hazardous';
+const wasteR1=x=>Math.round(x*100)/100;
+function wasteYearList(){ const y=regState.waste.f.year; return regActive('waste').filter(r=>y==='all' || String(r.date||'').slice(0,4)===y); }
+function wasteStats(list){
+  const tonnes=list.reduce((n,r)=>n+(wasteT(r)||0),0), tGood=list.filter(wasteGood).reduce((n,r)=>n+(wasteT(r)||0),0), withW=list.filter(r=>wasteT(r)!==null).length;
+  const pct=withW ? (tonnes>0?Math.round(tGood*100/tonnes):null) : (list.length?Math.round(list.filter(wasteGood).length*100/list.length):null);
+  return {n:list.length, tonnes:wasteR1(tonnes), pct, byWeight:withW>0, haz:list.filter(wasteHaz).length, hazNoNote:list.filter(r=>wasteHaz(r)&&!String(r.noteNo||'').trim()).length};
+}
+regDefine({
+  key:'waste', collection:'wasteLogs', singular:'Waste removal', title:'Waste Log', tagline:'Segregate · Reduce · Reuse · Recycle',
+  addLabel:'+ Log waste removal', noField:'wstNo', noPrefix:'WST', noYear:true, dateField:'date', yearFilter:true,
+  headerButtons:'<button class="btn btn-sm" type="button" id="wastePdfBtn">'+ic('download')+' Waste log PDF (F0812-03)</button>',
+  searchPlaceholder:'Search type, carrier, disposal site, note no.…', emptyEditor:'No waste removals yet — log each load that leaves a site, camp or yard (type, quantity, where it went and the waste transfer note).',
+  titleOf:r=>r.wasteType||'Waste', subOf:r=>[isoToDmy(r.date), r.projectId?projectName(r.projectId):(r.division||''), r.route].filter(Boolean).join(' · '),
+  badgesOf:r=>`<span class="badge ${wasteHaz(r)?'danger':'muted'}">${wasteHaz(r)?'Hazardous':'Non-hazardous'}</span> <span class="badge ${wasteGood(r)?'ok':'warn'}">${esc(r.route||'route not set')}</span>${wasteHaz(r)&&!String(r.noteNo||'').trim()?' <span class="badge danger">No waste transfer note no.</span>':''}`,
+  searchText:r=>[r.wstNo,r.wasteType,r.description,r.carrier,r.disposalSite,r.noteNo,r.vehicleNo].join(' '),
+  addFields:['date','wasteType','quantity','unit','route','projectId'], addDefaults:{unit:'kg'},
+  validate:d=>!(Number(d.quantity)>0)?'Enter the quantity':(!d.wasteType?'Choose the waste type':(!d.route?'Choose where it went':'')),
+  prepare:(d)=>{ if(!d.category && d.wasteType) d.category=WASTE_HAZ.includes(d.wasteType)?'Hazardous':'Non-hazardous'; },
+  segs:[{key:'haz', label:'Hazardous', match:r=>wasteHaz(r)},{key:'good', label:'Reused / recycled', match:r=>wasteGood(r)},{key:'nonote', label:'Hazardous without note no.', match:r=>wasteHaz(r)&&!String(r.noteNo||'').trim()}], segAllLabel:'All removals',
+  tabs:[{key:'main', label:'Removal', groups:[
+    {fields:[
+      {key:'wstNo', label:'Ref no.', required:true},
+      {key:'date', label:'Date', type:'date', required:true},
+      {key:'projectId', label:'Project / site', type:'project'},
+      {key:'division', label:'Division', type:'select', options:divisionOptions},
+      {key:'location', label:'Location (yard, camp, site area)'},
+      {key:'wasteType', label:'Waste type', type:'select', options:WASTE_TYPES, required:true},
+      {key:'category', label:'Category', type:'select', options:['Non-hazardous','Hazardous']},
+      {key:'description', label:'Description', wide:true, placeholder:'e.g. 40 damaged scaffold boards'},
+      {key:'quantity', label:'Quantity', type:'number', min:0, required:true},
+      {key:'unit', label:'Unit', type:'select', options:WASTE_UNITS},
+    ]},
+    {title:'Where it went', fields:[
+      {key:'route', label:'Reused / recycled / disposed', type:'select', options:WASTE_ROUTES, required:true},
+      {key:'carrier', label:'Carrier / waste contractor'},
+      {key:'vehicleNo', label:'Vehicle no.'},
+      {key:'disposalSite', label:'Recycler / disposal site', placeholder:'e.g. Be’ah approved landfill — Barka'},
+      {key:'noteNo', label:'Waste transfer / consignment note no.'},
+      {key:'receivedBy', label:'Received by (name at the facility)'},
+      {key:'notes', label:'Notes', type:'textarea', wide:true},
+    ]}],
+    intro:'Hazardous waste (used oil, filters, batteries, chemical containers, e-waste) must go to an approved facility with a waste transfer note — upload a scan in Files.'}],
+  files:[{key:'noteFile', label:'Waste transfer / consignment note (scan)'},{key:'photoFile', label:'Photo of the load'}],
+  columns:[
+    {label:'Ref', cls:'mono', html:r=>`<strong>${esc(r.wstNo||'—')}</strong>`},
+    {label:'Date', cls:'mono', html:r=>esc(isoToDmy(r.date)||'—')},
+    {label:'Waste', html:r=>`<div class="wname">${esc(r.wasteType||'—')}</div><div class="wsub">${esc(r.description||'')}${r.projectId?(r.description?' · ':'')+esc(projectName(r.projectId)||''):''}</div>`},
+    {label:'Quantity', cls:'mono', html:r=>`${esc(String(r.quantity??'—'))} ${esc(r.unit||'')}`},
+    {label:'Category', html:r=>`<span class="badge ${wasteHaz(r)?'danger':'muted'}">${wasteHaz(r)?'Hazardous':'Non-haz.'}</span>`},
+    {label:'Where it went', html:r=>`<span class="badge ${wasteGood(r)?'ok':'warn'}">${esc(r.route||'—')}</span><div class="wsub">${esc([r.carrier, r.disposalSite].filter(Boolean).join(' → '))}</div>`},
+    {label:'Note no.', html:r=>r.noteNo?`<span class="mono">${esc(r.noteNo)}</span>${r.noteFile&&r.noteFile.url?' 📎':''}`:(wasteHaz(r)?'<span class="badge danger">missing</span>':'—')},
+  ],
+  tiles:()=>{ const st=wasteStats(wasteYearList()), y=regState.waste.f.year;
+    return [{label:'Waste removals '+(y==='all'?'(all years)':y), num:st.n, sub:`${st.haz} hazardous`, icon:'truck'},
+      {label:'Weight recorded', num:st.tonnes+' t', sub:'entries in kg or tonnes', icon:'chart'},
+      {label:'Reused / recycled', num:st.pct===null?'—':st.pct+'%', cls:st.pct===null?'':st.pct>=50?'ok':'warn', sub:st.byWeight?'by weight':'by number of removals', icon:'trend'},
+      {label:'Hazardous without note no.', num:st.hazNoNote, cls:st.hazNoNote?'danger':'ok', sub:'waste transfer note missing', icon:'alert'}]; },
+  topPanel:()=>wasteTopPanel(),
+});
+function wasteTopPanel(){
+  const el=document.getElementById('wasteTop'); if(!el) return; const list=wasteYearList(), y=regState.waste.f.year;
+  if(!list.length){ el.innerHTML=''; return; }
+  const types=[...new Set(list.map(r=>r.wasteType||'Other'))].sort();
+  const rowsT=types.map(t=>{ const l=list.filter(r=>(r.wasteType||'Other')===t), s=wasteStats(l), units=[...new Set(l.filter(r=>wasteT(r)===null).map(r=>r.unit))];
+    const other=units.map(u=>`${wasteR1(l.filter(r=>r.unit===u).reduce((n,r)=>n+(Number(r.quantity)||0),0))} ${u}`).join(', ');
+    return `<tr><td>${esc(t)}</td><td class="mono">${s.n}</td><td class="mono">${s.tonnes?s.tonnes+' t':''}${other?(s.tonnes?' + ':'')+esc(other):''}</td><td>${s.pct===null?'—':s.pct+'%'}</td></tr>`; }).join('');
+  const months=y==='all'?[]:Array.from({length:12},(_,i)=>`${y}-${String(i+1).padStart(2,'0')}`).filter(m=>m<=localToday().slice(0,7));
+  const rowsM=months.map(m=>{ const s=wasteStats(list.filter(r=>String(r.date||'').startsWith(m))); return `<td class="mono" title="${s.n} removals">${s.n?`${s.tonnes} t<div class="wsub">${s.pct===null?'—':s.pct+'%'}</div>`:'—'}</td>`; }).join('');
+  el.innerHTML=`<div class="panel"><div class="section-head"><h3>WASTE ${esc(y==='all'?'— ALL YEARS':y)} BY TYPE</h3></div>
+    <div class="table-wrap"><table><thead><tr><th>Waste type</th><th>Removals</th><th>Quantity</th><th>Reused / recycled</th></tr></thead><tbody>${rowsT}</tbody></table></div>
+    ${months.length?`<div class="table-wrap" style="margin-top:10px;"><table class="waste-months"><thead><tr>${months.map(m=>`<th>${esc(new Date(m+'-01T00:00:00').toLocaleDateString('en-GB',{month:'short'}))}</th>`).join('')}</tr></thead><tbody><tr>${rowsM}</tr></tbody></table></div><p class="wsub" style="margin:4px 0 0;">Tonnes per month (kg / tonne entries) and the % reused or recycled.</p>`:''}</div>`;
+}
+async function wastePdf(){
+  if(!compPdfReady()) return;
+  const y=regState.waste.f.year, list=wasteYearList().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))), st=wasteStats(list);
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'waste', docSub:y==='all'?'All years':'Year '+y}), g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL;
+  g.title('WASTE DISPOSAL LOG', y==='all'?'All years':'Year '+y);
+  g.row([{t:'REMOVALS', w:110, bold:true, fill:LBL},{t:`${st.n}  (${st.haz} hazardous)`, w:(CW-440)/2},{t:'WEIGHT RECORDED', w:110, bold:true, fill:LBL},{t:st.tonnes+' tonnes', w:(CW-440)/2},{t:'REUSED / RECYCLED', w:110, bold:true, fill:LBL},{t:st.pct===null?'—':st.pct+'% '+(st.byWeight?'by weight':'by count'), w:110, bold:true}]);
+  const C=[['Ref',62],['Date',58],['Waste type',120],['Description',0],['Qty',62],['Cat.',52],['Where it went',110],['Carrier → site',140],['Note no.',72]]; C[3][1]=CW-C.reduce((n,c)=>n+c[1],0);
+  g.row(C.map(([t,w])=>({t, w, bold:true, fill:LBL, size:7.8})), 16);
+  list.forEach(r=>g.row([{t:r.wstNo||'', w:C[0][1], size:7.4},{t:isoToDmy(r.date), w:C[1][1], size:7.4},{t:r.wasteType||'', w:C[2][1], size:7.4},{t:[r.description, r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · ')||'—', w:C[3][1], size:7.4},
+    {t:`${r.quantity??''} ${r.unit||''}`, w:C[4][1], size:7.4},{t:wasteHaz(r)?'Haz.':'Non-haz.', w:C[5][1], size:7.4, bold:wasteHaz(r), color:wasteHaz(r)?g.RED:g.INK},{t:r.route||'—', w:C[6][1], size:7.4},{t:[r.carrier, r.disposalSite].filter(Boolean).join(' → ')||'—', w:C[7][1], size:7.4},{t:r.noteNo||(wasteHaz(r)?'MISSING':'—'), w:C[8][1], size:7.4, color:!r.noteNo&&wasteHaz(r)?g.RED:g.INK}], 18));
+  if(!list.length) g.row([{t:'No waste removals recorded.', w:CW, color:g.SUB}]);
+  doc.save(`Waste_Log_${y==='all'?'all':y}.pdf`);
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#aspPdfBtn,#aspTypicalBtn,#wastePdfBtn'); if(!b || b.disabled) return;
+  if(b.id==='aspPdfBtn'){ await aspPdf(); return; }
+  if(b.id==='wastePdfBtn'){ await wastePdf(); return; }
+  if(b.id==='aspTypicalBtn'){ if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent=`Tap again — add ${ASP_TYPICAL.length} typical aspects`; setTimeout(()=>{ if(b.dataset.armed==='1'){ b.dataset.armed='0'; b.textContent='Load typical aspects'; } },4000); return; }
+    b.disabled=true; b.dataset.armed='0'; b.textContent='Adding…'; await aspLoadTypical(); b.disabled=false; b.textContent='Load typical aspects'; }
+});
+
+ACT_SOURCES.push({key:'aspect', label:'Environmental aspects'});
 
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
