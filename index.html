@@ -1109,6 +1109,8 @@ details.icam-grp .cause-list{margin:6px 0;}
 /* Batch 86: audit programme */
 .cmx-jobs{border-top:1px dashed var(--line); margin-top:10px; padding-top:6px;} .cmx-jobs-g{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:2px 12px; margin-top:4px;} .cmx-so{border-top:1px dashed var(--line); margin-top:8px; padding-top:4px;} .cmx-so-g{grid-template-columns:repeat(auto-fit,minmax(170px,1fr)) !important;}
 .waste-months th, .waste-months td{text-align:center; padding:4px 6px; font-size:12px;}
+.crit-box{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0 0; padding:8px 10px; border:1px dashed var(--line); border-radius:8px;} .crit-box.on{border-style:solid; border-color:var(--danger); background:var(--danger-bg);}
+#critPane .pane-head{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start; margin-bottom:10px;} #critRows tr{cursor:pointer;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
@@ -1192,6 +1194,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
     <button type="button" class="sidenav-btn" data-section="assurance">Assurance Plan</button>
     <button type="button" class="sidenav-btn" data-section="audits">Audits</button>
     <button type="button" class="sidenav-btn" data-section="hira">Risk Register</button>
+    <button type="button" class="sidenav-btn" data-section="hra">Health Risks (HRA)</button>
     <button type="button" class="sidenav-btn" data-section="moc">Change (MOC)</button>
     <button type="button" class="sidenav-btn" data-section="legal">Legal Register</button>
     <button type="button" class="sidenav-btn" data-section="meetings">Meetings</button>
@@ -1472,6 +1475,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
           </table>
         </div>
       </div><!-- /registerPane -->
+      <div id="critPane" hidden></div>
     </main>
 
 
@@ -2264,7 +2268,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2386,7 +2390,7 @@ function deltaize(current, data){
 }
 
 /* ---------------- change history: every add / update / set / delete is written to activityLog ---------------- */
-const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log'};
+const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log', hra:'Health Risk Assessment'};
 const LOG_IGNORE_KEYS = new Set(['updatedAt','updatedBy','createdAt','createdBy']);
 function logCacheFind(col, id){
   try{
@@ -2968,7 +2972,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b90';
+const APP_BUILD='b91';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4491,6 +4495,8 @@ const IMS_BHN_EXTRA=[
   ['F0540-03','Safety Star Certificate','Form','P0540-01','star','Made by the tracker — Safety Star of the Month'],
   ['F0713-06','Vehicle HSE Record','Form','P0713-01','vehicle','Made by the tracker — Plant & Equipment → vehicle PDF'],
   ['F0713-07','Vehicle Inspection Checklist','Form','P0713-01','vehInsp','Made by the tracker — Plant & Equipment → vehicle → Inspections (SP-2000)'],
+  ['F0713-08','HSE-Critical Equipment Register','Register / log','P0713-01','critEquip','Made by the tracker — Plant & Equipment → HSE-critical'],
+  ['F0811-24','Health Risk Assessment (HRA) Register','Register / log','P0811-01','hra','Made by the tracker — Health Risks (HRA)'],
   ['F0723-07','Employee HSE Record','Form','P0723-01','workerProfile','Made by the tracker — Workforce → worker profile PDF'],
   ['F0740-02','Toolbox Talk Record','Form','P0740-01','',''],
   ['F0740-03','Safety Alert','Form','P0740-01','alert','Made by the tracker — Safety Alerts → Alert PDF'],
@@ -4500,7 +4506,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -7016,7 +7022,7 @@ function collectAllActions(){
   for(const v of activeVehicles()) for(const x of (v.inspections||[])) if(x.result==='A' || x.result==='B'){ const cl=viClose(v,x), d=viDefects(x);
     out.push({src:'vehicle', projectId:x.projectId||v.projectId||'', ref:v.vehicleNumber||'Vehicle', where:`Inspection ${x.date} · Class ${x.result}${x.result==='A'?' — do not use':''}`, text:d.map(z=>z.text+(z.note?' ('+z.note+')':'')).join('; ')||'Rectify defects', owner:x.actionOwner, targetDate:x.targetDate, status:cl.closed?'Closed':'Open', closedDate:cl.closed?cl.date:'', tag:'Class '+x.result,
       open:()=>{ document.querySelector('.sidenav-btn[data-section="vehicles"]').click(); openVehicleDrawer(v.id); activeVehicleTab='inspections'; renderVehicleDrawer(); }}); }
-  const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat', aspects:'aspect'};
+  const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat', aspects:'aspect', hra:'hra'};
   if(REG.obs) for(const r of regActive('obs')) if(r.obsType!=='Positive' && (r.owner||r.targetDate)) out.push({src:'obs', projectId:r.projectId||'', ref:r.obsNo||'Observation', where:[r.category, r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), text:r.description, owner:r.owner, targetDate:r.targetDate, status:r.status||'Open', closedDate:r.closedDate, tag:r.obsType, open:()=>openRegDrawer('obs', r.id)});
   for(const [k,src] of Object.entries(regSrc)){ const cfg=REG[k]; if(!cfg) continue;
     for(const r of regActive(k)) for(const [sk,sc] of Object.entries(cfg.subs||{})) if(sc.isAction) for(const x of (r[sk]||[])) out.push({src, projectId:r.projectId||'', ref:r[cfg.noField]||cfg.singular, where:cfg.titleOf(r), text:x.action, owner:x.owner, targetDate:x.targetDate, status:x.status||'Open', closedDate:x.closedDate, open:()=>openRegDrawer(k, r.id, 'sub:'+sk)}); }
@@ -7429,6 +7435,194 @@ document.addEventListener('click', async e=>{
 });
 
 ACT_SOURCES.push({key:'aspect', label:'Environmental aspects'});
+
+/* =============================== Batch 91: HSE-critical equipment + Health Risk Assessment (HRA) =============================== */
+// HSE-critical = equipment whose failure can cause, or fail to prevent, a serious incident (a barrier). Lifting gear, harnesses, fire extinguishers,
+// first aid kits, calibrated instruments (gas detectors) and specialised PPE (SCBA) are critical unless untagged; any other item can be tagged.
+const EQUIP_CRIT_DEFAULT=['liftingGear','harness','extinguishers','firstAid','calibration','specialPpe'];
+const EQUIP_CRIT_WHY={liftingGear:'Barrier against dropped loads (lifting)', harness:'Barrier against falls from height', extinguishers:'Fire fighting — emergency response', firstAid:'First response to injuries', calibration:'Gas / measurement readings people rely on (e.g. H2S, LEL)', specialPpe:'Life-saving PPE (breathing apparatus, fall arrest)'};
+function equipCritical(e){ return e.hseCritical===true || (e.hseCritical===undefined && EQUIP_CRIT_DEFAULT.includes(e.category)); }
+let critFilters={cat:'all', status:'all', q:''};
+function critList(){ return activeEquipment().filter(equipCritical); }
+function critStatusOf(e){ if((e.condition||'In service')!=='In service') return 'oos'; if(!e.expiry) return 'noexp'; return statusFor(e.expiry); }
+function critMatches(e){
+  if(critFilters.cat!=='all' && e.category!==critFilters.cat) return false;
+  if(critFilters.status!=='all'){ const s=critStatusOf(e); if(critFilters.status==='attention' ? !['expired','expiring','oos','noexp'].includes(s) : s!==critFilters.status) return false; }
+  const q=critFilters.q.trim().toLowerCase(); if(q && !(equipTitle(e)+' '+(e.serial||'')+' '+(e.certNo||'')+' '+locLabel(equipLoc(e))).toLowerCase().includes(q)) return false;
+  return true;
+}
+function renderCritPane(){
+  const el=document.getElementById('critPane'); if(!el || el.hidden || !auth.currentUser) return;
+  const all=critList(), list=all.filter(critMatches).sort((a,b)=>({expired:0,oos:1,expiring:2,noexp:3,valid:4}[critStatusOf(a)]-{expired:0,oos:1,expiring:2,noexp:3,valid:4}[critStatusOf(b)]) || String(a.expiry||'9999').localeCompare(String(b.expiry||'9999')));
+  const n=s=>all.filter(e=>critStatusOf(e)===s).length;
+  const cats=[...new Set(all.map(e=>e.category))];
+  const tiles=[{label:'HSE-critical items', num:all.length, cls:'', sub:`${cats.length} equipment types`, icon:'alert', cat:'--cat-1'},
+    {label:'Expired / overdue', num:n('expired'), cls:n('expired')?'danger':'ok', sub:'certificate or inspection overdue', icon:'stop', cat:'--cat-9'},
+    {label:'Due within 30 days', num:n('expiring'), cls:n('expiring')?'warn':'ok', sub:'book the inspection / TPI', icon:'hourglass', cat:'--cat-2'},
+    {label:'Out of service', num:n('oos'), cls:n('oos')?'warn':'ok', sub:`${n('noexp')} with no expiry date set`, icon:'lock', cat:'--cat-7'}];
+  const stBadge=e=>{ const s=critStatusOf(e); return s==='oos'?conditionBadge(e.condition):s==='noexp'?'<span class="badge warn">No expiry set</span>':badgeHtml(s); };
+  el.innerHTML=`<div class="pane-head"><div><h2>HSE-critical equipment</h2><div class="wsub">Equipment whose failure can cause — or fail to prevent — a serious incident. Lifting gear, harnesses, fire extinguishers, first aid kits, calibrated instruments and specialised PPE are critical unless untagged; tag any other item in its record.</div></div>
+      <div class="topbar-actions"><button class="btn btn-sm" type="button" id="critPdfBtn">${ic('download')} HSE-critical list (PDF)</button></div></div>
+    <div class="tiles tiles-4">${tiles.map(t=>`<div class="tile" style="--tile-accent:var(${t.cat})"><div class="tile-head"><div class="tile-icon">${ic(t.icon)}</div><div class="tile-label">${esc(t.label)}</div></div><div class="tile-num ${t.cls}">${t.num}</div><div class="tile-sub">${esc(t.sub)}</div></div>`).join('')}</div>
+    <div class="toolbar"><input type="search" id="critSearch" placeholder="Search item, serial, location…" value="${esc(critFilters.q)}">
+      <select id="critCat"><option value="all">All types</option>${EQUIP_CATEGORY_ORDER.filter(k=>cats.includes(k)||critFilters.cat===k).map(k=>`<option value="${k}" ${critFilters.cat===k?'selected':''}>${esc(EQUIP_CATEGORIES[k].label)}</option>`).join('')}</select>
+      <select id="critStatus">${[['all','Any status'],['attention','Needs attention'],['expired','Expired'],['expiring','Due within 30 days'],['oos','Out of service'],['noexp','No expiry set'],['valid','In date']].map(([v,l])=>`<option value="${v}" ${critFilters.status===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="table-wrap"><table><thead><tr><th>Item</th><th>Type</th><th>Serial no.</th><th>Location</th><th>Status</th><th>Certificate / expiry</th><th>Why critical</th></tr></thead>
+      <tbody id="critRows">${list.length?list.map(e=>`<tr data-crit-id="${esc(e.id)}"><td><div class="wname">${esc(equipTitle(e))}</div>${e.make?`<div class="wsub">${esc(e.make)}</div>`:''}</td><td>${esc((EQUIP_CATEGORIES[e.category]||{}).short||'—')}</td><td class="mono">${esc(e.serial||'—')}</td>
+        <td>${equipLoc(e)==='store'?'<span class="badge muted">In store</span>':esc(locLabel(equipLoc(e)))}</td><td>${stBadge(e)}</td><td class="mono">${esc(isoToDmy(e.expiry)||'—')}${e.certNo?`<div class="wsub">${esc(e.certNo)}</div>`:''}</td><td class="wsub">${esc(e.critWhy||EQUIP_CRIT_WHY[e.category]||'—')}</td></tr>`).join('')
+        :`<tr><td colspan="7" class="empty-state">${all.length?'Nothing matches the filters.':'No HSE-critical equipment registered yet — add lifting gear, harnesses, extinguishers, first aid kits or gas detectors in their tabs.'}</td></tr>`}</tbody></table></div>`;
+}
+function critToggleHtml(e){
+  const on=equipCritical(e), def=EQUIP_CRIT_DEFAULT.includes(e.category);
+  return `<div class="crit-box ${on?'on':''}"><label class="chk"><input type="checkbox" id="equipCritChk" ${on?'checked':''} ${canEdit()?'':'disabled'}> <strong>HSE-critical equipment</strong></label>
+    <span class="wsub">${on?esc(e.critWhy||EQUIP_CRIT_WHY[e.category]||'Tagged as a safety-critical barrier'):'Tick if its failure can cause or fail to prevent a serious incident.'}${def&&e.hseCritical===undefined?' · critical by default for this type':''}</span></div>`;
+}
+async function critPdf(){
+  if(!compPdfReady()) return;
+  const list=critList().sort((a,b)=>EQUIP_CATEGORY_ORDER.indexOf(a.category)-EQUIP_CATEGORY_ORDER.indexOf(b.category) || String(a.expiry||'9999').localeCompare(String(b.expiry||'9999')));
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'critEquip', docSub:`${list.length} items`}), g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL;
+  const n=s=>list.filter(e=>critStatusOf(e)===s).length;
+  g.title('HSE-CRITICAL EQUIPMENT REGISTER', isoToDmy(localToday()));
+  g.row([{t:'ITEMS', w:90, bold:true, fill:LBL},{t:String(list.length), w:80},{t:'EXPIRED / OVERDUE', w:120, bold:true, fill:LBL},{t:String(n('expired')), w:60, bold:true, color:n('expired')?g.RED:g.INK},{t:'DUE ≤ 30 DAYS', w:100, bold:true, fill:LBL},{t:String(n('expiring')), w:60},{t:'OUT OF SERVICE', w:110, bold:true, fill:LBL},{t:String(n('oos')), w:CW-620}]);
+  const C=[['Item',150],['Type',90],['Serial no.',90],['Location',120],['Status',90],['Cert. no.',90],['Expiry',62],['Why critical',0]]; C[7][1]=CW-C.reduce((s,c)=>s+c[1],0);
+  g.row(C.map(([t,w])=>({t, w, bold:true, fill:LBL, size:7.8})), 16);
+  list.forEach(e=>{ const s=critStatusOf(e); g.row([{t:equipTitle(e), sub:e.make||'', w:C[0][1], size:7.6, bold:true},{t:(EQUIP_CATEGORIES[e.category]||{}).short||'', w:C[1][1], size:7.4},{t:e.serial||'—', w:C[2][1], size:7.4},{t:locLabel(equipLoc(e)), w:C[3][1], size:7.4},
+    {t:s==='oos'?(e.condition||''):s==='noexp'?'No expiry set':s==='expired'?'EXPIRED':s==='expiring'?'Due ≤30 days':'In date', w:C[4][1], size:7.4, bold:s!=='valid', color:s==='expired'||s==='oos'?g.RED:g.INK},{t:e.certNo||'—', w:C[5][1], size:7.4},{t:isoToDmy(e.expiry)||'—', w:C[6][1], size:7.4},{t:e.critWhy||EQUIP_CRIT_WHY[e.category]||'', w:C[7][1], size:7.2}], 20); });
+  if(!list.length) g.row([{t:'No HSE-critical equipment registered.', w:CW, color:g.SUB}]);
+  doc.save(`HSE_Critical_Equipment_${localToday()}.pdf`);
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#critPdfBtn,[data-crit-id]'); if(!b) return;
+  if(b.id==='critPdfBtn'){ await critPdf(); return; }
+  if(b.dataset.critId) openEquipDrawer(b.dataset.critId);
+});
+document.addEventListener('change', async e=>{
+  const el=e.target; if(!el) return;
+  if(el.id==='critCat'){ critFilters.cat=el.value; renderCritPane(); return; }
+  if(el.id==='critStatus'){ critFilters.status=el.value; renderCritPane(); return; }
+  if(el.id==='equipCritChk'){ const it=currentEquip(); if(!it || !canEdit()){ el.checked=!el.checked; return; } await updateEquip(it.id, {hseCritical:el.checked}); return; }
+});
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='critSearch'){ critFilters.q=e.target.value; renderCritPane(); const s=document.getElementById('critSearch'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } } });
+
+/* ---- Health Risk Assessment (HRA) register — PQ 2.2: health hazards per job, controls, health checks (fitness to work) ---- */
+const HRA_HAZARDS=['Heat stress','Noise','Dust / silica','Chemicals / fumes','H2S / toxic gas','Manual handling','Vibration (hand-arm / whole body)','Ergonomics / awkward posture','Fatigue / long hours','Sun / UV radiation','Biological (food, water, insects)','Psychosocial / stress','Other'];
+const HRA_CHECKS=['Pre-employment medical','Periodic medical (fitness to work)','Audiometry (hearing)','Lung function (spirometry)','Chest X-ray','Heat fitness / hydration check','Vision test','Blood / urine test','Musculoskeletal check','None needed'];
+const HRA_TYPICAL=[
+  ['Outdoor scaffolding, civil and yard work in summer','Heat stress','Scaffolder, Helper, Foreman, Mason, Labourer, Rigger','Heat exhaustion, heat stroke, dehydration','Heat stress plan · midday break 12:30–15:30 (Jun–Aug) · cool water and shaded rest · work/rest cycles · buddy system',4,3,'Heat index monitoring · acclimatisation for new joiners · daily heat check log',4,2,['Pre-employment medical','Periodic medical (fitness to work)','Heat fitness / hydration check']],
+  ['Grinding, cutting, generators, compressors, breakers','Noise','Scaffolder, Mason, Operator, Mechanic','Noise-induced hearing loss, tinnitus','Ear plugs / muffs where noise > 85 dB(A) · signs · maintained equipment',3,4,'Noise survey · hearing protection zones · rotation of tasks',3,2,['Pre-employment medical','Audiometry (hearing)']],
+  ['Block / concrete cutting, sand and cement handling, sandblasting','Dust / silica','Mason, Labourer, Helper, Carpenter','Silicosis, lung disease, eye irritation','Wet cutting · dust masks (FFP2 / FFP3) · covered stockpiles',4,3,'Water suppression on site · face-fit testing · extraction on cutters',4,2,['Pre-employment medical','Lung function (spirometry)','Chest X-ray']],
+  ['Work in PDO / oil field areas with sour gas','H2S / toxic gas','Scaffolder, Helper, Foreman, Driver, Rigger, Operator','Poisoning, loss of consciousness, death','H2S training · personal gas monitors · windsock · muster points · permit system',5,2,'Bump test gas detectors daily · escape sets where required · drills',5,1,['Pre-employment medical','Periodic medical (fitness to work)','Lung function (spirometry)']],
+  ['Lifting and carrying scaffold tubes, boards, blocks','Manual handling','Scaffolder, Helper, Labourer, Mason','Back injury, strains, hernia','Manual handling training · team lifting · mechanical aids',3,4,'Limit load weights · trolleys / forklift · task rotation',3,2,['Pre-employment medical','Musculoskeletal check']],
+  ['Driving light and heavy vehicles, long journeys','Fatigue / long hours','Driver, Operator','Fatigue, road accidents','Driving hours limits · rest breaks · IVMS monitoring · night driving rules',4,3,'Fatigue awareness · rotation of long trips · camp rest facilities',4,2,['Pre-employment medical','Periodic medical (fitness to work)','Vision test']],
+  ['Use of diesel, paints, thinners, welding','Chemicals / fumes','Mechanic, Painter, Welder, Store keeper','Skin irritation, breathing problems, poisoning','Safety data sheets · chemical gloves and goggles · ventilation · labelled storage',3,3,'COSHH assessment per chemical · respirators for welding / painting',3,2,['Pre-employment medical','Lung function (spirometry)']],
+  ['Breakers, compactors, plant operation','Vibration (hand-arm / whole body)','Operator, Labourer','Hand-arm vibration syndrome, back pain','Low-vibration tools · limit trigger time · maintained seats',3,3,'Vibration exposure time record · anti-vibration gloves',3,2,['Pre-employment medical','Musculoskeletal check']],
+  ['All outdoor work','Sun / UV radiation','Scaffolder, Helper, Labourer, Mason, Rigger, Driver','Sunburn, skin cancer, eye damage','Long sleeves · hard hat with neck shade · tinted safety glasses',2,4,'Sunscreen available · shade at rest areas',2,2,['None needed']],
+  ['Camp living, food and drinking water','Biological (food, water, insects)','All site workers','Food poisoning, infections','Approved caterer · clean drinking water · camp cleaning',3,2,'Camp hygiene inspections · pest control · food handler medicals',3,1,['Pre-employment medical']],
+];
+function hraTokens(r){ return String(r.designations||'').split(/[,;/]+/).map(s=>s.trim().toLowerCase()).filter(s=>s.length>=3); }
+function hraExposed(r){
+  const t=hraTokens(r); if(!t.length) return [];
+  if(t.some(x=>/^all\b/.test(x))) return activeWorkers().filter(w=>(w.status||'active')==='active' && workerDivKey(w)!=='Office staff');
+  return activeWorkers().filter(w=>(w.status||'active')==='active' && (r.projectId?w.projectId===r.projectId:true) && t.some(x=>String(w.designation||'').toLowerCase().includes(x)));
+}
+function hraMedOk(w){ const m=(w.medical||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0]; return !!m && !['Unfit','Pending'].includes(m.result) && (!m.expiry || statusFor(m.expiry)!=='expired'); }
+regDefine({
+  key:'hra', collection:'hra', singular:'Health risk', title:'Health Risk Assessment (HRA)', tagline:'Identify · Assess · Control · Monitor health',
+  addLabel:'+ Add health risk', noField:'hraNo', noPrefix:'HRA', noYear:false, dateField:'reviewDate', statuses:['Current','Under review','Obsolete'], statusOf:r=>r.status||'Current',
+  headerButtons:'<button class="btn btn-sm reg-edit-only" type="button" id="hraTypicalBtn" data-armed="0" title="Add typical health risks for scaffolding, civil and logistics work — then adjust them">Load typical health risks</button><button class="btn btn-sm" type="button" id="hraPdfBtn">'+ic('download')+' HRA PDF</button>',
+  searchPlaceholder:'Search job, hazard, designation…', emptyEditor:'No health risks yet — press “Load typical health risks” for a starting list, or add each job’s health hazards.',
+  titleOf:r=>r.hazardType||'Health risk', subOf:r=>[r.activity, r.projectId?projectName(r.projectId):(r.division||'')].filter(Boolean).join(' · '),
+  badgesOf:r=>{ const ex=hraExposed(r), noMed=ex.filter(w=>!hraMedOk(w)).length; return `<span class="wsub" style="display:inline;">Initial</span> ${rBadge(r.severity,r.likelihood)} <span class="wsub" style="display:inline;">→ Residual</span> ${rBadge(r.resSeverity,r.resLikelihood)} <span class="badge muted">${ex.length} exposed</span>${noMed?` <span class="badge danger">${noMed} without a valid medical</span>`:''}`; },
+  searchText:r=>[r.hraNo,r.activity,r.hazardType,r.hazard,r.designations,r.healthEffect,r.controls].join(' '),
+  sort:(a,b)=>String(a.hazardType||'').localeCompare(String(b.hazardType||''))||String(a.hraNo||'').localeCompare(String(b.hraNo||'')),
+  addFields:['activity','hazardType','designations','severity','likelihood'], addDefaults:{status:'Current'},
+  segs:[{key:'hi', label:'High / extreme residual', match:r=>(rScore(r.resSeverity||r.severity,r.resLikelihood||r.likelihood)||0)>=10},{key:'med', label:'Exposed without medical', match:r=>hraExposed(r).some(w=>!hraMedOk(w))},{key:'rev', label:'Review overdue', match:r=>r.reviewDate&&daysUntil(r.reviewDate)<0}], segAllLabel:'All health risks',
+  tabs:[{key:'main', label:'Health risk', groups:[
+    {fields:[
+      {key:'hraNo', label:'Ref no.', required:true},
+      {key:'status', label:'Status', type:'select', options:['Current','Under review','Obsolete']},
+      {key:'activity', label:'Job / activity', required:true, wide:true, placeholder:'e.g. Grinding and cutting scaffold tubes'},
+      {key:'division', label:'Division', type:'select', options:divisionOptions},
+      {key:'projectId', label:'Project (optional)', type:'project'},
+      {key:'hazardType', label:'Health hazard', type:'select', options:HRA_HAZARDS, required:true},
+      {key:'hazard', label:'Hazard details', wide:true, placeholder:'e.g. noise above 85 dB(A) from the grinder'},
+      {key:'designations', label:'Who is exposed (designations, comma separated — or "All site workers")', wide:true, required:true, placeholder:'e.g. Scaffolder, Helper, Foreman'},
+      {key:'exposure', label:'Exposure (how long / how often)', placeholder:'e.g. 4 h a day, daily'},
+      {key:'healthEffect', label:'Possible health effect', wide:true, placeholder:'e.g. noise-induced hearing loss'},
+    ]},
+    {title:'Initial risk (with existing controls)', fields:[
+      {key:'controls', label:'Existing controls', type:'textarea', wide:true},
+      {key:'severity', label:'Severity', type:'select', options:SEV_OPTS, required:true},
+      {key:'likelihood', label:'Likelihood', type:'select', options:LIK_OPTS, required:true},
+    ]},
+    {title:'Additional controls, residual risk & health checks', fields:[
+      {key:'additionalControls', label:'Additional controls', type:'textarea', wide:true},
+      {key:'resSeverity', label:'Residual severity', type:'select', options:SEV_OPTS},
+      {key:'resLikelihood', label:'Residual likelihood', type:'select', options:LIK_OPTS},
+      {key:'checks', label:'Health checks needed (fitness to work / health surveillance)', type:'checks', options:HRA_CHECKS},
+      {key:'checkMonths', label:'Health check every (months)', type:'number', min:0, max:60},
+      {key:'owner', label:'Owner'},
+      {key:'reviewDate', label:'Next review', type:'date'},
+    ]}]},
+    {key:'exposed', label:'Exposed employees', html:r=>{ const ex=hraExposed(r).sort((a,b)=>hraMedOk(a)-hraMedOk(b) || String(a.fullName||'').localeCompare(String(b.fullName||'')));
+      return `<p class="wsub" style="margin:0 0 10px;">Active employees whose designation matches “${esc(r.designations||'—')}”${r.projectId?' on '+esc(projectName(r.projectId)||''):''}. Health checks needed: <strong>${esc((r.checks||[]).join(', ')||'not set')}</strong>.</p>
+        ${ex.length?`<div class="table-wrap"><table><thead><tr><th>Employee</th><th>Designation</th><th>Latest medical</th><th>Status</th></tr></thead><tbody>${ex.map(w=>{ const m=(w.medical||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0];
+          return `<tr><td><button type="button" class="att-link" data-hra-worker="${esc(w.id)}">${esc(w.fullName||'—')}</button></td><td>${esc(w.designation||'—')}</td><td>${m?esc((m.type||'')+' · '+(isoToDmy(m.date)||'')+(m.expiry?' → '+isoToDmy(m.expiry):'')):'—'}</td><td>${hraMedOk(w)?'<span class="badge ok">Valid</span>':`<span class="badge danger">${m?esc(m.result==='Unfit'?'Unfit':m.result==='Pending'?'Pending':'Expired'):'No medical'}</span>`}</td></tr>`; }).join('')}</tbody></table></div>`
+        :'<p class="wsub">No active employee matches these designations.</p>'}`; }},
+    {key:'sub:actions', label:'Actions', sub:'actions'}],
+  subs:{actions:actionSub('Actions to reduce the health risk')},
+  columns:[
+    {label:'Ref', cls:'mono', html:r=>`<strong>${esc(r.hraNo||'—')}</strong>`},
+    {label:'Health hazard / job', html:r=>`<div class="wname">${esc(r.hazardType||'—')}</div><div class="wsub">${esc(r.activity||'')}</div>`},
+    {label:'Who is exposed', html:r=>{ const ex=hraExposed(r), noMed=ex.filter(w=>!hraMedOk(w)).length; return `${esc(r.designations||'—')}<div class="wsub">${ex.length} employee${ex.length===1?'':'s'}${noMed?` · <span class="t-danger">${noMed} without valid medical</span>`:''}</div>`; }},
+    {label:'Initial', html:r=>rBadge(r.severity,r.likelihood)},
+    {label:'Residual', html:r=>rBadge(r.resSeverity,r.resLikelihood)},
+    {label:'Health checks', html:r=>`<span class="wsub">${esc((r.checks||[]).filter(c=>c!=='None needed').join(', ')||'—')}</span>`},
+    {label:'Review', html:r=>`<span class="mono ${r.reviewDate&&daysUntil(r.reviewDate)<0?'text-danger':''}">${esc(isoToDmy(r.reviewDate)||'—')}</span>`},
+  ],
+  tiles:list=>{ const cur=list.filter(r=>(r.status||'Current')!=='Obsolete'), hi=cur.filter(r=>(rScore(r.resSeverity||r.severity,r.resLikelihood||r.likelihood)||0)>=10);
+    const ex=new Map(); for(const r of cur) for(const w of hraExposed(r)) ex.set(w.id, w); const noMed=[...ex.values()].filter(w=>!hraMedOk(w)).length, od=cur.filter(r=>r.reviewDate&&daysUntil(r.reviewDate)<0).length;
+    return [{label:'Health risks assessed', num:cur.length, sub:`${new Set(cur.map(r=>r.hazardType)).size} hazard types`, icon:'heart'},
+      {label:'High / extreme residual', num:hi.length, cls:hi.length?'danger':'ok', sub:'still high after controls', icon:'siren'},
+      {label:'Exposed without valid medical', num:noMed, cls:noMed?'danger':'ok', sub:`of ${ex.size} exposed employees`, icon:'hospital'},
+      {label:'Review overdue', num:od, cls:od?'danger':'ok', sub:'review the HRA at least yearly', icon:'clock'}]; },
+});
+ACT_SOURCES.push({key:'hra', label:'Health risks (HRA)'});
+async function hraLoadTypical(){
+  if(!canEdit()) return; const have=new Set(regActive('hra').map(r=>(String(r.activity||'')+'|'+String(r.hazardType||'')).toLowerCase())), u=auth.currentUser;
+  let n=0, max=0; for(const r of regState.hra.list){ const m=/^HRA-(\d+)$/.exec(r.hraNo||''); if(m) max=Math.max(max, Number(m[1])); }
+  const next=compAddMonths(localToday(), 12);
+  try{ for(const [activity, hazardType, designations, healthEffect, controls, s, l, additionalControls, rs, rl, checks] of HRA_TYPICAL){ if(have.has((activity+'|'+hazardType).toLowerCase())) continue; max++;
+      await db.collection('hra').add(stamp({deleted:false, createdAt:new Date().toISOString(), createdBy:(u&&u.email)||'', actions:[], hraNo:'HRA-'+String(max).padStart(3,'0'), status:'Current', activity, hazardType, designations, healthEffect, controls,
+        severity:SEV_OPTS[s-1], likelihood:LIK_OPTS[l-1], additionalControls, resSeverity:SEV_OPTS[rs-1], resLikelihood:LIK_OPTS[rl-1], checks, checkMonths:checks.includes('Periodic medical (fitness to work)')?24:'', reviewDate:next, owner:''})); n++; }
+    toast(n?`${n} typical health risks added — check the designations, ratings and health checks for your work`:'The typical health risks are already in the register'); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not add — '+((e&&e.code)||'error')); }
+}
+async function hraPdf(){
+  if(!compPdfReady()) return;
+  const list=regActive('hra').filter(r=>(r.status||'Current')!=='Obsolete').sort(REG.hra.sort), hs=hseSigOf((auth.currentUser||{}).email)||{};
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'hra', docSub:`${list.length} health risks`}), g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL;
+  const rTxt=(s,l)=>{ const sc=rScore(s,l), b=riskBand(sc); return sc===null?'—':`${sc} ${b.t}`; };
+  g.title('HEALTH RISK ASSESSMENT (HRA) REGISTER', isoToDmy(localToday()));
+  g.row([{t:'RISK RATING', w:110, bold:true, fill:LBL},{t:'Severity (1–5) × likelihood (1–5): 1–4 Low · 5–9 Medium · 10–14 High · 15–25 Extreme (same matrix as the HIRA register). Exposed employees are matched by designation; health checks are recorded in each employee\'s medical records.', w:CW-110}]);
+  const C=[['Ref',46],['Health hazard',92],['Job / activity',120],['Who is exposed',110],['Health effect',96],['Controls',0],['Initial',50],['Residual',52],['Health checks',110]]; C[5][1]=CW-C.reduce((s,c)=>s+c[1],0);
+  g.row(C.map(([t,w])=>({t, w, bold:true, fill:LBL, size:7.8})), 16);
+  list.forEach(r=>{ const ex=hraExposed(r), noMed=ex.filter(w=>!hraMedOk(w)).length; const hiR=(rScore(r.resSeverity||r.severity, r.resLikelihood||r.likelihood)||0)>=10;
+    g.row([{t:r.hraNo||'', w:C[0][1], size:7.4},{t:r.hazardType||'', w:C[1][1], size:7.4, bold:true},{t:r.activity||'', w:C[2][1], size:7.4},{t:r.designations||'', sub:`${ex.length} employees${noMed?` · ${noMed} no valid medical`:''}`, w:C[3][1], size:7.4},{t:r.healthEffect||'—', w:C[4][1], size:7.4},
+      {t:[r.controls, r.additionalControls?'Additional: '+r.additionalControls:''].filter(Boolean).join('\n')||'—', w:C[5][1], size:7.2},{t:rTxt(r.severity,r.likelihood), w:C[6][1], size:7.4},{t:rTxt(r.resSeverity,r.resLikelihood), w:C[7][1], size:7.4, bold:hiR, color:hiR?g.RED:g.INK},
+      {t:(r.checks||[]).join(', ')+(r.checkMonths?` — every ${r.checkMonths} months`:'')||'—', w:C[8][1], size:7.2}], 22); });
+  if(!list.length) g.row([{t:'No health risks recorded.', w:CW, color:g.SUB}]);
+  g.ensure(60); g.y+=8;
+  g.row([{t:'PREPARED BY (HSE)', w:130, bold:true, fill:LBL},{t:hs.name||'', blank:true, sub:[hs.role, isoToDmy(localToday())].filter(Boolean).join('  ·  '), w:(CW-260)/2, bold:true},{t:'SIGNATURE', w:130, bold:true, fill:LBL},hs.img?{img:hs.img, w:(CW-260)/2}:{t:'', blank:true, w:(CW-260)/2}], 40);
+  doc.save(`Health_Risk_Assessment_${localToday()}.pdf`);
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#hraPdfBtn,#hraTypicalBtn,[data-hra-worker]'); if(!b || b.disabled) return;
+  if(b.id==='hraPdfBtn'){ await hraPdf(); return; }
+  if(b.dataset.hraWorker){ const id=b.dataset.hraWorker; closeRegDrawer(); const s=document.querySelector('.sidenav-btn[data-section="workforce"]'); if(s) s.click(); openDrawer(id); activeTab='medical'; renderDrawer(); return; }
+  if(b.id==='hraTypicalBtn'){ if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent=`Tap again — add ${HRA_TYPICAL.length} typical health risks`; setTimeout(()=>{ if(b.dataset.armed==='1'){ b.dataset.armed='0'; b.textContent='Load typical health risks'; } },4000); return; }
+    b.disabled=true; b.dataset.armed='0'; b.textContent='Adding…'; await hraLoadTypical(); b.disabled=false; b.textContent='Load typical health risks'; }
+});
 
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
@@ -13621,6 +13815,7 @@ function renderAll(){
   renderReportAll();
   if(typeof renderInd==='function') renderInd();   // Batch 87
   if(typeof cmxRender==='function') cmxRender();   // Batch 88
+  if(typeof regState!=='undefined' && regState.hra && document.getElementById('hraSection') && !document.getElementById('hraSection').hidden) renderRegAll('hra');   // Batch 91: exposed employees
   if(pendingWorkerOpen) setTimeout(openPendingWorker, 0);   // project Team tabs & counts use worker data
 }
 
@@ -14886,16 +15081,18 @@ function renderSiteTrashBody(){
 /* ---------------- plant & equipment rendering ---------------- */
 function renderPlantTabs(){
   const counts={}; for(const e of activeEquipment()) counts[e.category]=(counts[e.category]||0)+1;
-  const tabs=[{key:'fleet', label:ic('truck')+' Fleet', n:activeVehicles().length}, ...EQUIP_CATEGORY_ORDER.map(k=>({key:k, label:`${ic(EQUIP_CATEGORIES[k].icon)} ${EQUIP_CATEGORIES[k].short}`, n:counts[k]||0}))];
+  const tabs=[{key:'fleet', label:ic('truck')+' Fleet', n:activeVehicles().length}, ...EQUIP_CATEGORY_ORDER.map(k=>({key:k, label:`${ic(EQUIP_CATEGORIES[k].icon)} ${EQUIP_CATEGORIES[k].short}`, n:counts[k]||0})), {key:'critical', label:ic('alert')+' HSE-critical', n:typeof critList==='function'?critList().length:0}];
   document.getElementById('plantTabs').innerHTML = tabs.map(t=>`<button type="button" class="division-tab ${t.key===activePlantTab?'active':''}" data-ptab="${t.key}">${t.label}<span class="tab-count">${t.n}</span></button>`).join('');
   document.getElementById('fleetPane').hidden = activePlantTab!=='fleet';
-  document.getElementById('registerPane').hidden = activePlantTab==='fleet';
+  document.getElementById('registerPane').hidden = activePlantTab==='fleet' || activePlantTab==='critical';
+  { const cp=document.getElementById('critPane'); if(cp) cp.hidden = activePlantTab!=='critical'; }   // Batch 91
 }
 
 function renderEquipAll(){
   renderPlantTabs();
   document.getElementById('equipTrashBtn').innerHTML = ic('trash')+` Deleted items (${deletedEquipment().length})`;
-  if(activePlantTab!=='fleet'){
+  if(activePlantTab==='critical') renderCritPane();   // Batch 91
+  else if(activePlantTab!=='fleet'){
     const cat=EQUIP_CATEGORIES[activePlantTab];
     document.getElementById('equipPaneTitle').textContent = cat.label;
     document.getElementById('equipPaneSub').textContent = `Every ${cat.noun} in the company, where it is right now, and when its certificate expires.`;
@@ -15042,6 +15239,7 @@ function equipDrawerBodyHtml(e){
     <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">${conditionBadge(e.condition)} ${e.expiry?badgeHtml(statusFor(e.expiry)):'<span class="badge muted">No expiry set</span>'}</div>
     ${moveForm}
   </div>
+  ${critToggleHtml(e)}
   ${updatedNoteHtml(e)}
 
   <div class="subhead" style="margin-top:18px;">Details</div>
@@ -15049,6 +15247,7 @@ function equipDrawerBodyHtml(e){
     <div class="form-grid">
       ${equipFieldsHtml(e.category, e, 'data-efield')}
       <label>Condition<select data-efield="condition">${EQUIP_CONDITIONS.map(c=>`<option value="${esc(c)}" ${(e.condition||'In service')===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
+      ${equipCritical(e)?`<label class="span-all">Why HSE-critical / what it protects against<input data-efield="critWhy" value="${esc(e.critWhy||'')}" maxlength="140" placeholder="${esc(EQUIP_CRIT_WHY[e.category]||'e.g. barrier against fire spreading in the camp kitchen')}"></label>`:''}
     </div>
     <div class="form-actions"><button type="submit" class="btn btn-primary btn-sm">Save changes</button></div>
   </form>
