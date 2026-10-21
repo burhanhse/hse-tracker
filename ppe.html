@@ -184,6 +184,10 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     engOnly:['Please write location and work in English letters — the TBT PDF prints English only.','कृपया स्थान और काम अंग्रेज़ी अक्षरों में लिखें — टीबीटी पीडीएफ सिर्फ़ अंग्रेज़ी छापती है।','يرجى كتابة الموقع والعمل بالأحرف الإنجليزية — ملف PDF يطبع الإنجليزية فقط.'],
     oldLink:['This is the old link — TBT, incident and competency test are on your project link. Ask HSE for it.','यह पुराना लिंक है — टीबीटी, घटना और परीक्षा आपके प्रोजेक्ट लिंक पर हैं। एचएसई से माँगें।','هذا الرابط القديم — اجتماع السلامة والحوادث والاختبار في رابط مشروعك. اطلبه من قسم السلامة.'],
     st_confirm:['Issued to you — please confirm','आपको दिया गया — पुष्टि करें','صُرفت لك — يرجى التأكيد'], st_sent:['Sent — waiting','भेजा गया — प्रतीक्षा','أُرسل — قيد الانتظار'],
+    trsToSign:['Training — please sign your attendance','प्रशिक्षण — अपनी उपस्थिति पर हस्ताक्षर करें','التدريب — يرجى توقيع حضورك'], trsSign:['Sign attendance','उपस्थिति पर हस्ताक्षर करें','توقيع الحضور'], trainer:['Trainer','प्रशिक्षक','المدرب'],
+    trsDecl:['I attended this training and I understood it.','मैंने यह प्रशिक्षण लिया और मैंने इसे समझा।','حضرت هذا التدريب وفهمته.'], trsSend:['Sign & send','हस्ताक्षर करके भेजें','وقّع وأرسل'],
+    trsSent:['Attendance signed','उपस्थिति पर हस्ताक्षर हो गए','تم توقيع الحضور'], trsSent2:['Thank you — HSE has your signature for this training.','धन्यवाद — एचएसई को इस प्रशिक्षण के लिए आपका हस्ताक्षर मिल गया।','شكرًا — وصل توقيعك على هذا التدريب إلى قسم السلامة.'],
+    trsGone:['This training is closed for signing — ask HSE.','यह प्रशिक्षण अब हस्ताक्षर के लिए बंद है — एचएसई से पूछें।','تم إغلاق التوقيع على هذا التدريب — اسأل قسم السلامة.'],
   };
   const tr=(k)=>{ const t=T[k]||[k,'','']; return `${esc(t[0])}<span class="tr">${esc(t[1])}${t[2]?` · <span class="ar" dir="rtl">${esc(t[2])}</span>`:''}</span>`; };
   const ITEM_T={helmet:['हेलमेट','خوذة'], impact:['इम्पैक्ट दस्ताने','قفازات مقاومة للصدمات'], leather:['चमड़े के दस्ताने','قفازات جلدية'], coverall:['कवरऑल','أفرول'], shoes:['सेफ्टी जूते','حذاء السلامة'], glasses:['सेफ्टी चश्मा','نظارة السلامة'], goggles:['गॉगल्स','نظارة واقية'], ear:['कान की सुरक्षा','واقي الأذن'], mask:['मास्क','كمامة'], vest:['रिफ्लेक्टिव जैकेट','سترة عاكسة'], harness:['हार्नेस','حزام الأمان'], shield:['फेस शील्ड','واقي الوجه'], gloves:['दस्ताने','قفازات'], other:['अन्य','أخرى']};
@@ -282,9 +286,11 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
           <button type="button" class="hbox hb-red" id="toInc">${svg('siren')}<span class="hbl">${tr('incRep')}</span></button>
           <button type="button" class="hbox hb-purple ${compOf()&&!compWasSent(compOf().aid)?'live':''}" id="toComp">${svg('cap')}<span class="hbl">${tr('comp')}<span class="hsub">${compOf()&&!compWasSent(compOf().aid)?esc(T.compOpen[0]):esc(T.compNone[0])}</span></span></button>`}</div>
         ${toSign.length?`<div class="card signme"><h2>${esc(T.tbtToSign[0])} (${toSign.length})<span class="tr">${esc(T.tbtToSign[1])} · <span class="ar" dir="rtl">${esc(T.tbtToSign[2])}</span></span></h2>${toSign.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><button class="btn green" data-tbt-open="${esc(x.id)}" style="margin-top:6px; padding:11px;">${tr('signNow')}</button></div>`).join('')}</div>`:''}
+        ${trsMine().length?`<div class="card signme"><h2>🎓 ${esc(T.trsToSign[0])} (${trsMine().length})<span class="tr">${esc(T.trsToSign[1])} · <span class="ar" dir="rtl">${esc(T.trsToSign[2])}</span></span></h2>${trsMine().map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><div class="note">${esc(T.trainer[0])}: ${esc(x.tr||'')}</div><button class="btn green" data-trs-open="${esc(x.id)}" style="margin-top:6px;">${tr('trsSign')}</button></div>`).join('')}</div>`:''}
         <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
       $('#out').onclick=()=>{ me=null; tbtF=null; incF=null; compA=null; jobF=null; people=[]; recSel=new Set(); need=''; reason=''; note=''; view='who'; render(); };
       app.querySelectorAll('[data-tbt-open]').forEach(bt=>bt.onclick=()=>openTbt(bt.dataset.tbtOpen));
+      app.querySelectorAll('[data-trs-open]').forEach(bt=>bt.onclick=()=>openTrs(bt.dataset.trsOpen));   // Batch 95
       $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
       $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
       if(link.projectId){ $('#toTbt').onclick=()=>{ if(!tbtF) tbtNew(); view='tbtReq'; render(); window.scrollTo(0,0); };
@@ -350,6 +356,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     if(view==='tbtJob'){ renderTbtJob(); return; }
     if(view==='inc'){ renderInc(); return; }
     if(view==='comp'){ renderComp(); return; }
+    if(view==='trsSign'){ renderTrsSign(); return; }
+    if(view==='trsSent' || view==='trsGone'){ const ok=view==='trsSent'; app.innerHTML=`<div class="card done"><div class="tick">${ok?'✓':'🎓'}</div><h2>${tr(ok?'trsSent':'trsGone')}</h2>${ok?`<p class="note">${tr('trsSent2')}</p>`:''}<button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; load().then(o=>{ if(o) render(); }); }; return; }
     if(view==='compNone' || view==='compSent'){ const sent=view==='compSent'; app.innerHTML=`<div class="card done"><div class="tick" style="background:#f3efff; color:#6d28d9;">${sent?'✓':'🎓'}</div><h2>${tr(sent?'compSent':'compNone')}</h2><p class="note">${tr(sent?'compSent2':'compNone2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
     if(view==='incSent'){ app.innerHTML=`<div class="card done"><div class="tick" style="background:var(--red-bg); color:var(--red);">✓</div><h2>${tr('incSent')}</h2><p class="note">${tr('incSent2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
     if(view==='tbtSent'){ app.innerHTML=`<div class="card done"><div class="tick">✓</div><h2>${tr('tbtSent')}</h2><p class="note">${tr('tbtSent2')}</p><button class="btn navy" id="home">${tr('back')}</button></div>`; $('#home').onclick=()=>{ view='home'; render(); }; return; }
@@ -573,6 +581,30 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   // Batch 85: the link lists open tests by assessment id — the first one for me that I have not sent yet
   const compOf=()=>{ if(!me) return null; const all=Object.entries((link&&link.comp)||{}).map(([k,c])=>({...c, aid:c.aid||k})).filter(c=>c.w===me.id && Number(c.until)>Date.now()-10*60000 && Array.isArray(c.qs));
     return all.find(c=>!compWasSent(c.aid)) || all[0] || null; };
+  /* ===== Batch 95: sign attendance of a training session (HSE opens signing for 24 h) ===== */
+  let trsCur=null, trsPad=null;
+  const trsSentKey=sid=>'trsSent_'+sid+'_'+(me&&me.id);
+  const trsWasSent=sid=>{ try{ return !!localStorage.getItem(trsSentKey(sid)); }catch(e){ return false; } };
+  function trsMine(){ const all=(link&&link.train)||{}, now=Date.now(); return Object.keys(all).map(id=>({id, ...all[id]})).filter(x=>me && (x.ws||[]).includes(me.id) && Number(x.until)>now && !trsWasSent(x.id)).sort((a,b)=>String(b.d).localeCompare(String(a.d))); }
+  async function openTrs(id){ const ok=await load(); if(!ok) return; trsCur=trsMine().find(x=>x.id===id)||null; view=trsCur?'trsSign':'trsGone'; render(); window.scrollTo(0,0); }
+  function renderTrsSign(){
+    const x=trsCur; if(!x){ view='trsGone'; render(); return; }
+    app.innerHTML=`<div class="card"><h2>🎓 ${esc(x.t||'')}</h2><p class="note">${esc(dmy(x.d))}${x.m?' · '+x.m+' min':''} · ${esc(T.trainer[0])}: <b>${esc(x.tr||'')}</b></p>${x.c?`<p class="note" style="white-space:pre-wrap;">${esc(x.c)}</p>`:''}
+        <div class="sgn"><div class="sgn-h">${esc(me.name)}</div><p class="note">${tr('trsDecl')}</p><div class="sigbox"><canvas id="trsCv" width="600" height="212"></canvas><div class="hint" id="trsHint">${tr('sign')}</div></div>
+        <button type="button" class="link" id="trsClr">${esc(T.clear[0])}</button></div>
+        <div id="err" class="err hidden"></div><button class="btn green" id="trsSend">${tr('trsSend')}</button></div>
+      <button class="btn ghost" id="back">${tr('back')}</button>`;
+    trsPad=makePad($('#trsCv'), $('#trsHint')); $('#trsClr').onclick=()=>trsPad.clear();
+    $('#back').onclick=()=>{ view='home'; render(); }; $('#trsSend').onclick=trsSend;
+  }
+  async function trsSend(){
+    const x=trsCur; if(!x) return; if(!trsPad || !trsPad.ink) return err('Sign in the box first.');
+    if(Date.now()>Number(x.until)) return err(T.trsGone[0]);
+    const b=$('#trsSend'); b.disabled=true;
+    try{ await db.collection('trainSigs').doc(x.id+'_'+me.id).set({token, workerId:me.id, sesId:x.id, sig:trsPad.image(300,100), submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      try{ localStorage.setItem(trsSentKey(x.id), '1'); }catch(e){} trsCur=null; view='trsSent'; render(); window.scrollTo(0,0); }
+    catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?T.trsGone[0]:'Not sent — check the internet and try again.'); }
+  }
   const compSentKey=aid=>'compSent_'+aid;
   const compWasSent=aid=>{ try{ return !!localStorage.getItem(compSentKey(aid)); }catch(e){ return false; } };
   const mmss=ms=>{ const s=Math.max(0, Math.round(ms/1000)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };

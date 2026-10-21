@@ -1120,6 +1120,10 @@ details.icam-grp .cause-list{margin:6px 0;}
 .drill-c.ok{background:var(--ok-bg); color:var(--ok);} .drill-c.warn{background:var(--warn-bg); color:var(--warn);} .drill-c.danger{background:var(--danger-bg); color:var(--danger);} .drill-c.muted{color:var(--ink-muted);}
 .drill-cb{background:none; border:0; color:inherit; font:inherit; cursor:pointer; padding:0 4px;} .drill-people{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:2px 12px; max-height:420px; overflow:auto;}
 .mr-pack{border-left:3px solid var(--accent); margin-bottom:12px;} .mr-pack .section-head{flex-wrap:wrap; gap:8px;} .mr-period{max-width:420px;}
+.trs-head{display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .trs-pick{margin-bottom:10px;}
+.trs-row{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:8px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;} .trs-who{min-width:180px;} .trs-sig{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+.trs-sigimg{height:44px; max-width:180px; background:#fff; border-radius:6px; border:1px solid var(--line); padding:2px;} .trs-trainer{border-top:2px solid var(--line); margin-top:6px;}
+.trs-link{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 10px; border:1px dashed var(--line); border-radius:8px; margin-bottom:8px;} .trs-link.on{border-style:solid; border-color:var(--ok); background:var(--ok-bg);}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
@@ -1181,6 +1185,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
     <div class="nav-group">Operations</div>
     <button type="button" class="sidenav-btn active" data-section="workforce">Workforce</button>
     <button type="button" class="sidenav-btn" data-section="comp">Competency</button>
+    <button type="button" class="sidenav-btn" data-section="trs">Training Records</button>
     <button type="button" class="sidenav-btn" data-section="vehicles">Plant &amp; Equipment</button>
     <button type="button" class="sidenav-btn" data-section="site">Project Details</button>
     <button type="button" class="sidenav-btn" data-section="scaff">Scaffolding Jobs</button>
@@ -2280,7 +2285,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2402,7 +2407,7 @@ function deltaize(current, data){
 }
 
 /* ---------------- change history: every add / update / set / delete is written to activityLog ---------------- */
-const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log', hra:'Health Risk Assessment', drills:'Emergency Drills'};
+const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log', hra:'Health Risk Assessment', drills:'Emergency Drills', trainSessions:'Training Records'};
 const LOG_IGNORE_KEYS = new Set(['updatedAt','updatedBy','createdAt','createdBy']);
 function logCacheFind(col, id){
   try{
@@ -2984,7 +2989,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b94';
+const APP_BUILD='b95';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4520,7 +4525,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -6514,6 +6519,7 @@ function renderRegDrawer(){
   if(t.key==='history') loadRegHistory(cfg.collection, r.id);
   applyShowWhen(b); if(activeReg==='scaff'){ updateScaffKm(b); updateCrewCheck(b); }
   if(activeReg==='lift') updateLiftCalc(b);
+  if(activeReg==='trs' && typeof trsUi!=='undefined' && trsUi.pad) trsWirePad();   // Batch 95
 }
 function regFormTabHtml(cfg, r, t){
   const head = t.key==='main' ? `${cfg.badgesOf?`<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">${cfg.badgesOf(r)}</div>`:''}${updatedNoteHtml(r)}` : '';
@@ -7953,6 +7959,217 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
 document.addEventListener('change', e=>{ const el=e.target; if(!el || !['mrFrom','mrTo'].includes(el.id)) return; const r=regCurrent(); if(!r) return; const P=mrDefaultPeriod(r);
   mrUi.id=r.id; mrUi.from=(document.getElementById('mrFrom')||{}).value||P.from; mrUi.to=(document.getElementById('mrTo')||{}).value||P.to; if(mrUi.from>mrUi.to){ toast('"From" is after "To"'); } });
 
+/* =============================== Batch 95: Training sessions — attendance signed on the spot =============================== */
+// trainSessions/{id}: attIds (Workforce), visitors [{id,n,co}], sigs {key: png}, sigVia {key:'device'|'link'}, trainerSig, paper (signed sheet attached),
+// signOpen + signUntil (attendees sign on their own phone through the project link → trainSigs/{sesId_workerId}, merged here by HSE).
+// Completing creates a training record on every attendee ('trs_'+id) and a Monthly Report "Internal training" entry ('trs_'+id).
+const TRS_METHODS=['Classroom','On-site / practical','Toolbox / short briefing','Online','External course'];
+const TRS_CHECKS=['None','Verbal questions','Written test','Practical demonstration'];
+const trsKeys=r=>[...(r.attIds||[]), ...(r.visitors||[]).map(v=>v.id)];
+const trsSigned=(r,k)=>!!((r.sigs||{})[k]);
+function trsName(r,k){ const v=(r.visitors||[]).find(x=>x.id===k); if(v) return v.n||'Visitor'; const w=workers.find(x=>x.id===k); return w?(w.fullName||'—'):'(removed)'; }
+function trsStats(r){ const ks=trsKeys(r), s=ks.filter(k=>trsSigned(r,k)).length; return {n:ks.length, signed:s, missing:ks.length-s, link:Object.values(r.sigVia||{}).filter(v=>v==='link').length}; }
+function trsLate(r){ const c=isoToLocalDate(r.createdAt||''); if(!c || !r.date) return 0; const d=(new Date(c+'T00:00:00')-new Date(r.date+'T00:00:00'))/864e5; return d>1?Math.round(d):0; }
+function trsStatusBadge(r){ const st=r.status||'Draft'; return `<span class="badge ${st==='Completed'?'ok':r.signOpen?'warn':'muted'}">${esc(st==='Completed'?'Completed':r.signOpen?'Signing open on the link':'Draft — collecting signatures')}</span>`; }
+async function trsSyncRecords(r){
+  const recId='trs_'+r.id, done=r.status==='Completed' && !r.deleted, ws=done?(r.attIds||[]):[];
+  const exp=r.validityMonths&&Number(r.validityMonths)>0?compAddMonths(r.date, Number(r.validityMonths)):'';
+  const touched=new Set([...(r.recWs||[]), ...ws]);
+  for(const wid of touched){ const w=workers.find(x=>x.id===wid); if(!w) continue;
+    const others=(w.trainings||[]).filter(x=>x.id!==recId), want=ws.includes(wid);
+    if(!want && others.length===(w.trainings||[]).length) continue;
+    const rec={id:recId, name:r.trainingName||r.topic||'Training', provider:r.provider||(r.trainer?'Internal — '+r.trainer:'Internal'), date:r.date||'', expiry:exp, hours:Math.round((Number(r.durationMin)||0)/60*100)/100||'', certNo:r.trsNo||'', notes:`Training session ${r.trsNo||''} — attendance signed${r.paper?' (paper sheet)':''}`, trsId:r.id};
+    try{ await db.collection('workers').doc(wid).update(stamp({trainings:want?[...others, rec]:others})); }catch(e){ console.error(e); } }
+  const lid='trs_'+r.id;
+  try{ if(!done){ await db.collection('hseLogs').doc(lid).delete(); }
+    else { const site=siteEquipmentList.find(s=>s.id===r.projectId); await db.collection('hseLogs').doc(lid).set(stamp({category:'training', date:r.date, division:(site&&site.division)||'Office staff', projectId:r.projectId||null, topic:r.topic||'', attendees:trsKeys(r).length, hours:Math.round((Number(r.durationMin)||0)/60*100)/100||null, conductedBy:r.trainer||'', attendeeIds:r.attIds||[], source:'trainingSession', sourceTrsId:r.id})); } }
+  catch(e){ /* already gone */ }
+  if(JSON.stringify(r.recWs||[])!==JSON.stringify(ws)){ try{ await db.collection('trainSessions').doc(r.id).update({recWs:ws}); }catch(e){} }
+}
+regDefine({
+  key:'trs', collection:'trainSessions', singular:'Training session', title:'Training Records', tagline:'Train · Sign · Record — on the spot',
+  addLabel:'+ New training session', noField:'trsNo', noPrefix:'TRS', noYear:true, dateField:'date', yearFilter:true, statuses:['Draft','Completed'], statusOf:r=>r.status||'Draft',
+  headerButtons:'<button class="btn btn-sm" type="button" id="trsBlankBtn">'+ic('printer')+' Blank attendance sheet</button>',
+  searchPlaceholder:'Search topic, trainer, attendee…', emptyEditor:'No training sessions yet — create one before or during the training; attendees sign on your phone or on their own phone (project link).',
+  titleOf:r=>r.topic||'Training', subOf:r=>[isoToDmy(r.date), r.trainer?'by '+r.trainer:'', r.projectId?projectName(r.projectId):r.venue].filter(Boolean).join(' · '),
+  badgesOf:r=>{ const s=trsStats(r), late=trsLate(r); return `${trsStatusBadge(r)} <span class="badge ${s.missing&&!r.paper?'warn':'ok'}">${s.signed}/${s.n} signed${r.paper?' + paper sheet':''}</span>${late?` <span class="badge muted" title="Recorded in the tracker ${late} days after the training">entered ${late} days later</span>`:''}`; },
+  searchText:r=>[r.trsNo,r.topic,r.trainingName,r.trainer,r.venue,(r.attIds||[]).map(id=>trsName(r,id)).join(' '),(r.visitors||[]).map(v=>v.n).join(' ')].join(' '),
+  addFields:['date','topic','trainer','durationMin','projectId','method'], addDefaults:{method:'Classroom', durationMin:60, trainer:()=>((hseSigOf((auth.currentUser||{}).email)||{}).name||'')},
+  validate:d=>!String(d.topic||'').trim()?'Write the training topic':(!(Number(d.durationMin)>0)?'Enter the duration in minutes':''),
+  segs:[{key:'open', label:'Signatures missing', match:r=>(r.status||'Draft')!=='Completed'},{key:'late', label:'Entered later', match:r=>trsLate(r)>0},{key:'paper', label:'Paper sheet', match:r=>!!r.paper}], segAllLabel:'All sessions',
+  tabs:[{key:'main', label:'Training', groups:[
+    {fields:[
+      {key:'trsNo', label:'Session no.', required:true},
+      {key:'date', label:'Date', type:'date', required:true},
+      {key:'startTime', label:'Start time', type:'time'},
+      {key:'durationMin', label:'Duration (minutes)', type:'number', min:5, max:1440, required:true},
+      {key:'topic', label:'Training topic', required:true, wide:true, placeholder:'e.g. Working at height — harness inspection and use'},
+      {key:'trainingName', label:'Name on the training records', type:'textlist', options:()=>trainingCatalogue(), wide:true, placeholder:'blank = same as the topic · pick a training-matrix name so it counts there'},
+      {key:'validityMonths', label:'Valid for (months, blank = no expiry)', type:'number', min:0, max:120},
+      {key:'method', label:'Method', type:'select', options:TRS_METHODS},
+      {key:'trainer', label:'Trainer', required:true},
+      {key:'provider', label:'Company / provider', placeholder:'blank = internal (Burhan)'},
+      {key:'projectId', label:'Project', type:'project'},
+      {key:'venue', label:'Venue', placeholder:'e.g. site office, yard, camp'},
+      {key:'language', label:'Language used'},
+      {key:'contents', label:'What was covered', type:'textarea', wide:true, placeholder:'Main points of the training'},
+    ]},
+    {title:'Understanding check', fields:[
+      {key:'checkMethod', label:'How was understanding checked?', type:'select', options:TRS_CHECKS},
+      {key:'checkResult', label:'Result / remarks', wide:true, placeholder:'e.g. all answered 3 questions correctly · 2 to repeat'},
+    ]}],
+    intro:'Create the session before or during the training, then open the <strong>Attendance</strong> tab — tick the people and let them sign on this phone, or open signing on the project link so each signs on his own phone. No phone? Print the attendance sheet and attach a photo of the signed sheet in Files.'},
+    {key:'att', label:'Attendance', html:r=>trsAttHtml(r)}],
+  files:[{key:'attendanceFile', label:'Photo / scan of the signed paper sheet'},{key:'photoFile', label:'Photo of the training'},{key:'materialFile', label:'Training material (presentation / handout)'}],
+  pdf:r=>trsPdf(r), pdfLabel:'Attendance record PDF',
+  afterSave:r=>{ if(r.deleted || r.status==='Completed' || (r.recWs||[]).length) trsSyncRecords(r); },
+  onData:()=>{ if(canEdit()){ ppeLinkSyncSoon(); trsProcessSigs(); } trsDeepLink(); },
+  columns:[
+    {label:'No.', cls:'mono', html:r=>`<strong>${esc(r.trsNo||'—')}</strong>`},
+    {label:'Date', cls:'mono', html:r=>esc(isoToDmy(r.date)||'—')},
+    {label:'Training', html:r=>`<div class="wname">${esc(r.topic||'—')}</div><div class="wsub">${esc([r.trainer?'by '+r.trainer:'', r.method, r.durationMin?r.durationMin+' min':''].filter(Boolean).join(' · '))}</div>`},
+    {label:'Where', html:r=>esc(r.projectId?projectName(r.projectId):(r.venue||'—'))},
+    {label:'Signed', html:r=>{ const s=trsStats(r); return `<span class="badge ${s.missing&&!r.paper?'warn':'ok'}">${s.signed}/${s.n}</span>${r.paper?' <span class="wsub">+ paper</span>':''}${s.link?` <span class="wsub">· ${s.link} on own phone</span>`:''}`; }},
+    {label:'Status', html:r=>trsStatusBadge(r)+(trsLate(r)?` <span class="wsub">entered ${trsLate(r)} d later</span>`:'')},
+  ],
+  tiles:list=>{ const y=regState.trs.f.year, L=list.filter(r=>y==='all'||String(r.date||'').slice(0,4)===y), done=L.filter(r=>r.status==='Completed');
+    const ppl=done.reduce((n,r)=>n+trsKeys(r).length,0), hrs=done.reduce((n,r)=>n+(Number(r.durationMin)||0)/60*trsKeys(r).length,0), open=L.filter(r=>(r.status||'Draft')!=='Completed');
+    const old=open.filter(r=>r.date && daysUntil(r.date)<=-3);
+    return [{label:'Sessions completed'+(y==='all'?'':' '+y), num:done.length, sub:`${L.length} recorded in total`, icon:'cap'},
+      {label:'People trained', num:ppl, sub:`${Math.round(hrs)} training man-hours`, icon:'users'},
+      {label:'Waiting for signatures', num:open.length, cls:old.length?'danger':open.length?'warn':'ok', sub:old.length?`${old.length} older than 3 days — finish them`:'complete them after signing', icon:'pencil'},
+      {label:'Entered later', num:L.filter(r=>trsLate(r)>0).length, sub:'recorded after the training day', icon:'clock'}]; },
+});
+/* ---- attendance tab ---- */
+let trsUi={id:'', q:'', pad:'', sel:null, vis:false};
+function trsAttHtml(r){
+  if(trsUi.id!==r.id){ trsUi={id:r.id, q:'', pad:'', sel:new Set(r.attIds||[]), vis:false}; }
+  const ed=canEdit()&&r.status!=='Completed', st=trsStats(r), hs=hseSigOf((auth.currentUser||{}).email)||{}, link=r.projectId?ppeLinkOf(r.projectId):null, q=trsUi.q.trim().toLowerCase();
+  const changed=JSON.stringify([...trsUi.sel].sort())!==JSON.stringify([...(r.attIds||[])].sort());
+  const pool=activeWorkers().filter(w=>trsUi.sel.has(w.id) || ((w.status||'active')==='active' && (!r.projectId || w.projectId===r.projectId || q))).filter(w=>!q || String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q)).sort((a,b)=>(trsUi.sel.has(b.id)-trsUi.sel.has(a.id)) || String(a.fullName||'').localeCompare(String(b.fullName||''))).slice(0,150);
+  const row=(k,name,sub)=>{ const s=(r.sigs||{})[k], via=(r.sigVia||{})[k];
+    return `<div class="trs-row"><div class="trs-who"><strong>${esc(name)}</strong> <span class="wsub">${esc(sub||'')}</span></div>
+      <div class="trs-sig">${s?`<img src="${esc(s)}" alt="signature" class="trs-sigimg"><span class="wsub">${via==='link'?'on own phone':'on screen'}</span>${ed?` <button type="button" class="att-link" data-trs-unsign="${esc(k)}" data-armed="0">remove</button>`:''}`
+        :trsUi.pad===k?`<div class="hse-sig-pad"><canvas id="trsPad" width="600" height="200"></canvas></div><div style="display:flex; gap:6px; margin-top:4px;"><button type="button" class="btn btn-sm" data-trs-padcancel="1">Cancel</button><button type="button" class="btn btn-sm" data-trs-padclr="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-trs-padsave="${esc(k)}">Save signature</button></div>`
+        :(ed?`<button type="button" class="btn btn-sm" data-trs-sign="${esc(k)}">✍ Sign here</button>`:'<span class="badge warn">Not signed</span>')+(r.paper?' <span class="wsub">signed on the paper sheet</span>':'')}</div></div>`; };
+  return `<div class="trs-head">${trsStatusBadge(r)} <span class="badge ${st.missing&&!r.paper?'warn':'ok'}">${st.signed} of ${st.n} signed</span>${r.paper?' <span class="badge muted">Paper sheet</span>':''}
+      <span style="margin-left:auto; display:flex; gap:6px; flex-wrap:wrap;"><button type="button" class="btn btn-sm" data-trs-sheet="${esc(r.id)}">${ic('printer')} Print attendance sheet (QR)</button></span></div>
+    ${ed?`<div class="panel trs-pick"><div class="subhead" style="margin-top:0;">1. Who attended?</div>
+      <div class="toolbar" style="margin-bottom:6px;"><input type="search" id="trsQ" placeholder="Search name or designation (any project)…" value="${esc(trsUi.q)}"><button type="button" class="btn btn-sm" data-trs-tickall="1">Tick all shown</button>${changed?`<button type="button" class="btn btn-sm btn-primary" data-trs-attsave="${esc(r.id)}">Save attendees (${trsUi.sel.size})</button>`:''}</div>
+      <div class="drill-people">${pool.length?pool.map(w=>`<label class="chk drill-pp"><input type="checkbox" data-trs-w="${esc(w.id)}" ${trsUi.sel.has(w.id)?'checked':''}> ${esc(w.fullName||'—')} <span class="wsub">${esc(w.designation||'')}${w.projectId&&w.projectId!==r.projectId?' · '+esc(projectName(w.projectId)||''):''}</span></label>`).join(''):'<p class="wsub">Nobody to show — search a name.</p>'}</div>
+      ${trsUi.vis?`<div class="form-grid" style="margin-top:8px;"><label>Visitor name<input id="trsVn" maxlength="60"></label><label>Company<input id="trsVc" maxlength="60" placeholder="e.g. client, subcontractor"></label></div><div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm" data-trs-vis="0">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-trs-visadd="${esc(r.id)}">Add visitor</button></div>`
+        :`<button type="button" class="att-link" data-trs-vis="1" style="margin-top:6px;">+ Add a visitor (not in the register)</button>`}</div>`:''}
+    <div class="panel"><div class="subhead" style="margin-top:0;">2. Signatures</div>
+      ${ed&&r.projectId?`<div class="trs-link ${r.signOpen?'on':''}">${!link?`<span class="wsub">The project has no project link — attendees sign on this phone.</span>`:r.signOpen?`<span>📱 <strong>Signing is open on the ${esc(projectName(r.projectId)||'')} project link</strong> until ${esc(new Date(Number(r.signUntil)).toLocaleString('en-GB',{day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}))} — each attendee opens the link, logs in and taps <strong>Sign attendance</strong>. Signatures appear here by themselves.</span><button type="button" class="btn btn-sm" data-trs-link="off">Close signing</button>`
+        :`<span class="wsub">Attendees of ${esc(projectName(r.projectId)||'')} can sign on their own phone (project link).</span><button type="button" class="btn btn-sm btn-primary" data-trs-link="on">📱 Open signing on the project link (24 h)</button>`}</div>`:''}
+      ${trsKeys(r).length?`${(r.attIds||[]).map(id=>{ const w=workers.find(x=>x.id===id); return row(id, w?w.fullName:'(removed)', w?[w.designation, w.projectId!==r.projectId&&w.projectId?projectName(w.projectId):''].filter(Boolean).join(' · '):''); }).join('')}${(r.visitors||[]).map(v=>row(v.id, v.n, 'visitor'+(v.co?' · '+v.co:''))).join('')}`:'<p class="wsub">Tick the attendees above first.</p>'}
+      <div class="trs-row trs-trainer"><div class="trs-who"><strong>Trainer — ${esc(r.trainer||'')}</strong></div><div class="trs-sig">${r.trainerSig?`<img src="${esc(r.trainerSig)}" alt="" class="trs-sigimg">${ed?` <button type="button" class="att-link" data-trs-unsign="__trainer" data-armed="0">remove</button>`:''}`
+        :trsUi.pad==='__trainer'?`<div class="hse-sig-pad"><canvas id="trsPad" width="600" height="200"></canvas></div><div style="display:flex; gap:6px; margin-top:4px;"><button type="button" class="btn btn-sm" data-trs-padcancel="1">Cancel</button><button type="button" class="btn btn-sm" data-trs-padclr="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-trs-padsave="__trainer">Save signature</button></div>`
+        :ed?`${hs.img?`<button type="button" class="btn btn-sm btn-primary" data-trs-mysig="1">Use my saved signature</button> `:''}<button type="button" class="btn btn-sm" data-trs-sign="__trainer">✍ Trainer signs here</button>`:'<span class="badge warn">Not signed</span>'}</div></div>
+      ${ed?`<label class="chk" style="margin-top:8px;"><input type="checkbox" data-trs-paper="${esc(r.id)}" ${r.paper?'checked':''}> Attendees signed a <strong>paper sheet</strong> instead (attach the photo in <strong>Files</strong>)</label>`:''}</div>
+    ${ed?`<div class="form-actions"><button type="button" class="btn btn-primary" data-trs-complete="${esc(r.id)}">✓ Complete — add to every attendee's training records</button></div>`
+      :r.status==='Completed'?`<div class="notice">✓ Completed${r.completedBy?' by '+esc(r.completedBy):''}${r.completedAt?' on '+esc(isoToDmy(isoToLocalDate(r.completedAt))):''} — the training is on ${(r.recWs||[]).length} worker record${(r.recWs||[]).length===1?'':'s'} and in the Monthly Report.${canEdit()?` <button type="button" class="att-link" data-trs-reopen="${esc(r.id)}" data-armed="0">Re-open to change</button>`:''}</div>`:''}
+    <p class="wsub" style="margin-top:8px;">Recorded in the tracker on ${esc(isoToDmy(isoToLocalDate(r.createdAt||''))||'—')} by ${esc(r.createdBy||'—')}${trsLate(r)?` — <strong>${trsLate(r)} days after the training</strong> (shown on the PDF)`:''}.</p>`;
+}
+async function trsUpd(id, data, msg){ try{ await db.collection('trainSessions').doc(id).update(stamp(data)); if(msg) toast(msg); return true; }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save — '+((e&&e.code)||'error')); return false; } }
+let trsPadObj=null, trsPadImg='';
+function trsWirePad(){ const cv=document.getElementById('trsPad'); trsPadImg=''; trsPadObj=cv?compPadWire(cv, img=>{ trsPadImg=img; }):null; }
+async function trsComplete(id){
+  const r=regState.trs.list.find(x=>x.id===id); if(!r) return;
+  const st=trsStats(r);
+  if(!st.n){ toast('Tick the attendees first'); return; }
+  if(JSON.stringify([...trsUi.sel].sort())!==JSON.stringify([...(r.attIds||[])].sort())){ toast('Save the attendees first'); return; }
+  if(st.missing && !r.paper){ toast(`${st.missing} attendee${st.missing===1?' has':'s have'} not signed — let them sign, or tick "paper sheet" and attach the photo`); return; }
+  if(r.paper && !(r.attendanceFile&&r.attendanceFile.url)){ toast('Attach the photo of the signed paper sheet in Files first'); return; }
+  if(!r.trainerSig && !r.paper){ toast('The trainer signs too'); return; }
+  const u=auth.currentUser, data={status:'Completed', signOpen:false, completedAt:new Date().toISOString(), completedBy:(hseSigOf(u&&u.email)||{}).name||((u&&u.email)||'')};
+  if(await trsUpd(id, data, 'Completed — training added to the worker records')) await trsSyncRecords({...r, ...data});
+}
+/* ---- signatures sent from the project link (trainSigs) ---- */
+let trsSigList=[], unsubTrsSigs=null, trsSigBusy=new Set();
+function startTrsSigData(){ stopTrsSigData(); if(!auth.currentUser || !canEdit()) return;
+  try{ unsubTrsSigs=db.collection('trainSigs').onSnapshot(snap=>{ trsSigList=snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); trsProcessSigs(); }, err=>console.warn('trainSigs', err)); }catch(e){ console.warn('trainSigs', e); } }
+function stopTrsSigData(){ if(unsubTrsSigs){ try{ unsubTrsSigs(); }catch(e){} } unsubTrsSigs=null; trsSigList=[]; }
+async function trsProcessSigs(){
+  if(!canEdit() || !regState.trs) return;
+  for(const t of trsSigList){ if(trsSigBusy.has(t.id)) continue; const r=regState.trs.list.find(x=>x.id===t.sesId); if(!r) continue; trsSigBusy.add(t.id);
+    try{ if((r.attIds||[]).includes(t.workerId) && !trsSigned(r, t.workerId) && typeof t.sig==='string' && t.sig.startsWith('data:image/') && r.status!=='Completed')
+        await db.collection('trainSessions').doc(r.id).update({['sigs.'+t.workerId]:t.sig, ['sigVia.'+t.workerId]:'link', updatedAt:new Date().toISOString()});
+      await db.collection('trainSigs').doc(t.id).delete(); }
+    catch(e){ console.warn('training signature', e); trsSigBusy.delete(t.id); } }
+}
+function trsLinkPayload(pid){
+  const out={}, now=Date.now(); if(!regState.trs) return out;
+  for(const r of regActive('trs')){ if(!r.signOpen || r.projectId!==pid || !(Number(r.signUntil)>now) || r.status==='Completed') continue;
+    out[r.id]={t:String(r.topic||'').slice(0,120), d:r.date||'', tr:String(r.trainer||'').slice(0,60), m:Number(r.durationMin)||0, c:String(r.contents||'').slice(0,400), until:Number(r.signUntil), ws:(r.attIds||[]).filter(w=>!trsSigned(r,w)), sg:(r.attIds||[]).filter(w=>trsSigned(r,w))}; }
+  return out;
+}
+/* ---- deep link from the QR code on the paper sheet: #trs=<id> opens the session's Files tab, #trs=new starts one ---- */
+let trsDeepDone=false;
+function trsDeepLink(){ if(trsDeepDone) return; const m=/#trs=([A-Za-z0-9_-]+)/.exec(location.hash||''); if(!m){ trsDeepDone=true; return; }
+  if(m[1]==='new'){ trsDeepDone=true; const b=document.querySelector('.sidenav-btn[data-section="trs"]'); if(b) b.click(); if(canEdit()) openRegAdd('trs'); return; }
+  const r=regState.trs.list.find(x=>x.id===m[1]); if(!r) return; trsDeepDone=true; openRegDrawer('trs', r.id, canEdit()&&r.status!=='Completed'?'files':'att'); }
+/* ---- PDFs: attendance record (F0723-05) and the paper sheet with a QR code ---- */
+function trsUrl(id){ return location.origin+location.pathname+'#trs='+(id||'new'); }
+async function trsPdfBody(doc, r, blank, qr){
+  const g=compGrid(doc, 32), CW=g.CW, K=96, hw=(CW-2*K)/2, LBL=g.LBL, v=t=>blank&&!t?{t:'', blank:true}:{t:t||'—'};
+  g.title('TRAINING ATTENDANCE RECORD', blank?'Sign below':(r.status==='Completed'?'COMPLETED':'DRAFT'), blank?g.SUB:r.status==='Completed'?[15,118,80]:g.RED);
+  if(qr){ g.row([{t:`Scan to attach the photo of this signed sheet in the HSE tracker${r&&r.trsNo?' — '+r.trsNo:''}`, w:CW-90, size:8, color:g.SUB},{img:qr, w:90}], 78); }
+  const L=(a,b,c,d)=>g.row([{t:a, w:K, bold:true, fill:LBL},{...b, w:hw},{t:c, w:K, bold:true, fill:LBL},{...d, w:hw}], blank?20:15);
+  L('TRAINING', v(r.topic), 'SESSION NO.', v(r.trsNo)); L('DATE / TIME', v([isoToDmy(r.date), r.startTime].filter(Boolean).join('  ')), 'DURATION', v(r.durationMin?r.durationMin+' minutes':''));
+  L('TRAINER', v(r.trainer), 'COMPANY', v(r.provider||(r.trainer?'Burhan (internal)':''))); L('VENUE / PROJECT', v([r.projectId?projectName(r.projectId):'', r.venue].filter(Boolean).join(' · ')), 'METHOD / LANGUAGE', v([r.method, r.language].filter(Boolean).join(' · ')));
+  g.head('CONTENTS COVERED'); g.row([{t:r.contents||'', blank:true, w:CW}], blank?60:18);
+  const keys=blank?[]:trsKeys(r), pre=blank?(r.attIds||[]).map(id=>({id, n:trsName(r,id), ds:(workers.find(x=>x.id===id)||{}).designation||''})):[], extra=blank?Math.max(4, (qr?15:19)-pre.length):0;
+  g.head(`ATTENDEES${blank?'':' ('+keys.length+')'}`);
+  const C=[['#',24],['Name',170],['Designation / company',CW-24-170-150],['Signature',150]];
+  g.row(C.map(([t,w])=>({t, w, bold:true, fill:LBL})), 16);
+  if(blank){ pre.forEach((p,i)=>g.row([{t:String(i+1), w:24, center:true},{t:p.n, w:170},{t:p.ds, w:C[2][1]},{t:'', blank:true, w:150}], 26)); for(let i=0;i<extra;i++) g.row([{t:String(pre.length+i+1), w:24, center:true},{t:'', blank:true, w:170},{t:'', blank:true, w:C[2][1]},{t:'', blank:true, w:150}], 24); }
+  else keys.forEach((k,i)=>{ const vis=(r.visitors||[]).find(x=>x.id===k), w=workers.find(x=>x.id===k), sg=(r.sigs||{})[k];
+    g.row([{t:String(i+1), w:24, center:true},{t:trsName(r,k), w:170, bold:true},{t:vis?'Visitor'+(vis.co?' — '+vis.co:''):(w?[w.designation, w.civilId?'Civil ID …'+String(w.civilId).replace(/\D/g,'').slice(-4):''].filter(Boolean).join(' · '):''), w:C[2][1], size:7.8},sg?{img:sg, w:150}:{t:r.paper?'Signed on the paper sheet (attached)':'NOT SIGNED', w:150, size:7.6, color:r.paper?g.SUB:g.RED}], 28); });
+  g.head('UNDERSTANDING CHECK & TRAINER');
+  g.row([{t:'CHECK', w:K, bold:true, fill:LBL},{...v(r.checkMethod&&r.checkMethod!=='None'?r.checkMethod:(blank?'':'Not done')), w:hw},{t:'RESULT', w:K, bold:true, fill:LBL},{...v(r.checkResult), w:hw}], blank?22:15);
+  g.row([{t:'TRAINER', w:K, bold:true, fill:LBL},{...v(r.trainer), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},!blank&&r.trainerSig?{img:r.trainerSig, w:hw}:{t:'', blank:true, w:hw}], 40);
+  if(!blank){ const st=trsStats(r), late=trsLate(r);
+    g.y+=6; g.row([{t:`Recorded in the HSE tracker on ${isoToDmy(isoToLocalDate(r.createdAt||''))} by ${r.createdBy||'—'}${late?` — ${late} days after the training (entered later${r.paper?' from the signed paper sheet':''})`:''}. Signatures: ${st.signed-st.link} on screen, ${st.link} on the attendee's own phone (project link)${r.paper?', paper sheet photo attached':''}.${r.status==='Completed'?` Completed by ${r.completedBy||''} on ${isoToDmy(isoToLocalDate(r.completedAt||''))}.`:''}`, w:CW, size:7.4, color:g.SUB}]); }
+}
+async function trsPdf(r){ if(!compPdfReady()) return; const doc=pdfDoc({unit:'pt', format:'a4', docKey:'trs', docSub:`${r.trsNo||''} · ${r.topic||''}`}); await trsPdfBody(doc, r, false, null); doc.save(`Training_${compSafeName(r.trsNo)}_${compSafeName(r.topic)}.pdf`); }
+async function trsSheetPdf(r){
+  if(!compPdfReady()) return; let qr=null; try{ qr=(await qrCanvas(trsUrl(r&&r.id), 300)).toDataURL('image/png'); }catch(e){ console.warn('QR', e); }
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'trs', docSub:r&&r.trsNo?`${r.trsNo} · paper sheet`:'Blank attendance sheet'}); await trsPdfBody(doc, r||{}, true, qr);
+  doc.save(r&&r.trsNo?`Attendance_sheet_${compSafeName(r.trsNo)}.pdf`:'Attendance_sheet_blank.pdf');
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#trsBlankBtn,[data-trs-sheet],[data-trs-tickall],[data-trs-attsave],[data-trs-vis],[data-trs-visadd],[data-trs-sign],[data-trs-padcancel],[data-trs-padclr],[data-trs-padsave],[data-trs-mysig],[data-trs-unsign],[data-trs-link],[data-trs-complete],[data-trs-reopen]');
+  if(!b || b.disabled) return; const D=b.dataset;
+  if(b.id==='trsBlankBtn'){ await trsSheetPdf(null); return; }
+  if(D.trsSheet){ const r=regState.trs.list.find(x=>x.id===D.trsSheet); if(r) await trsSheetPdf(r); return; }
+  if(!canEdit()) return; const r=regCurrent(); if(!r || activeReg!=='trs') return;
+  const redraw=()=>{ const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); if(trsUi.pad) trsWirePad(); };
+  if(D.trsTickall){ document.querySelectorAll('#regDrawerBody [data-trs-w]').forEach(c=>{ c.checked=true; trsUi.sel.add(c.dataset.trsW); }); redraw(); return; }
+  if(D.trsAttsave){ b.disabled=true; const ids=[...trsUi.sel]; const ok=await trsUpd(r.id, {attIds:ids}, 'Attendees saved'); b.disabled=false; if(ok){ r.attIds=ids; redraw(); } return; }
+  if('trsVis' in D){ trsUi.vis=D.trsVis==='1'; redraw(); return; }
+  if(D.trsVisadd){ const n=String((document.getElementById('trsVn')||{}).value||'').trim(), co=String((document.getElementById('trsVc')||{}).value||'').trim(); if(!n){ toast('Write the visitor\'s name'); return; }
+    const vis=[...(r.visitors||[]), {id:'v'+genId().slice(0,8), n:n.slice(0,60), co:co.slice(0,60)}]; trsUi.vis=false; if(await trsUpd(r.id, {visitors:vis}, 'Visitor added')){ r.visitors=vis; redraw(); } return; }
+  if(D.trsSign){ trsUi.pad=D.trsSign; redraw(); return; }
+  if(D.trsPadcancel){ trsUi.pad=''; redraw(); return; }
+  if(D.trsPadclr){ trsWirePad(); const cv=document.getElementById('trsPad'); if(cv){ const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); } return; }
+  if(D.trsPadsave){ if(!trsPadImg){ toast('Sign in the box first'); return; } const k=D.trsPadsave, img=trsPadImg; b.disabled=true;
+    const ok=k==='__trainer' ? await trsUpd(r.id, {trainerSig:img}, 'Trainer signature saved') : await trsUpd(r.id, {['sigs.'+k]:img, ['sigVia.'+k]:'device'}, 'Signed — '+trsName(r,k));
+    b.disabled=false; if(ok){ trsUi.pad=''; if(k==='__trainer') r.trainerSig=img; else { r.sigs={...(r.sigs||{}), [k]:img}; r.sigVia={...(r.sigVia||{}), [k]:'device'}; } redraw(); } return; }
+  if(D.trsMysig){ const hs=hseSigOf((auth.currentUser||{}).email); if(!hs||!hs.img) return; if(await trsUpd(r.id, {trainerSig:hs.img}, 'Your saved signature added')){ r.trainerSig=hs.img; redraw(); } return; }
+  if(D.trsUnsign){ if(!compArm(b,'tap again')) return; const k=D.trsUnsign, FV=fsFieldValue();
+    const ok=k==='__trainer'?await trsUpd(r.id, {trainerSig:''}):await trsUpd(r.id, FV?{['sigs.'+k]:FV.delete(), ['sigVia.'+k]:FV.delete()}:{sigs:Object.fromEntries(Object.entries(r.sigs||{}).filter(([x])=>x!==k))});
+    if(ok){ if(k==='__trainer') r.trainerSig=''; else { const s={...(r.sigs||{})}; delete s[k]; r.sigs=s; } redraw(); } return; }
+  if(D.trsLink){ const on=D.trsLink==='on'; if(on && !(r.attIds||[]).length){ toast('Tick and save the attendees first'); return; }
+    if(await trsUpd(r.id, on?{signOpen:true, signUntil:Date.now()+24*3600e3}:{signOpen:false}, on?'Signing open on the project link for 24 hours':'Signing on the link closed')){ r.signOpen=on; if(on) r.signUntil=Date.now()+24*3600e3; ppeLinkSyncSoon(); redraw(); } return; }
+  if(D.trsComplete){ b.disabled=true; await trsComplete(D.trsComplete); b.disabled=false; return; }
+  if(D.trsReopen){ if(!compArm(b,'Tap again — re-open (records are removed until completed again)')) return; const data={status:'Draft'}; if(await trsUpd(r.id, data, 'Re-opened')) await trsSyncRecords({...r, ...data}); return; }
+});
+document.addEventListener('change', async e=>{ const el=e.target; if(!el || !el.dataset) return;
+  if(el.dataset.trsW && trsUi.sel){ if(el.checked) trsUi.sel.add(el.dataset.trsW); else trsUi.sel.delete(el.dataset.trsW); const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); return; }
+  if(el.dataset.trsPaper && canEdit()){ await trsUpd(el.dataset.trsPaper, {paper:el.checked}, el.checked?'Marked as signed on paper — attach the photo in Files':'Paper sheet removed'); return; } });
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='trsQ'){ trsUi.q=e.target.value; renderRegDrawer(); const s=document.getElementById('trsQ'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } } });
+
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
 const MOC_STATUSES=['Requested','Under review','Approved','Rejected','Implemented','Closed'];
@@ -9130,7 +9347,7 @@ async function ppeLinkPayload(token, pid){
     : [...new Set([site&&site.location, ...prevLocs].filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,100);
   const clients=[...new Set([site&&site.clientName, ...(div==='Scaffolding'?scaffClientList():[])].filter(Boolean))].slice(0,60);
   const vs=vehicles.filter(v=>!v.deleted && v.vehicleNumber), vehs=[...new Set([...vs.filter(v=>v.projectId===pid), ...vs.filter(v=>v.projectId!==pid)].map(v=>String(v.vehicleNumber).trim()))].slice(0,300);
-  return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, vehs, incTypes:INC_SITE_TYPES[div]||INC_SITE_TYPES.Civil, comp:compLinkPayload(pid), workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
+  return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, vehs, incTypes:INC_SITE_TYPES[div]||INC_SITE_TYPES.Civil, comp:compLinkPayload(pid), train:typeof trsLinkPayload==='function'?trsLinkPayload(pid):{}, workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
 }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
@@ -13994,6 +14211,7 @@ function stopDataListeners(){
   stopIncRepData();
   stopCompData();
   stopIndData();   // Batch 87
+  stopTrsSigData();   // Batch 95
   if(unsubscribeWorkers){ unsubscribeWorkers(); unsubscribeWorkers=null; }
   if(unsubscribeVehicles){ unsubscribeVehicles(); unsubscribeVehicles=null; }
   if(unsubscribeSiteEquipment){ unsubscribeSiteEquipment(); unsubscribeSiteEquipment=null; }
@@ -14033,6 +14251,7 @@ auth.onAuthStateChanged(user=>{
     startIncRepData();   // Batch 83
     startCompData();   // Batch 84
     startIndData();   // Batch 87
+    startTrsSigData();   // Batch 95
   } else {
     stopDataListeners();
     document.getElementById('dbUnavailableBanner').hidden=true;
@@ -16221,10 +16440,13 @@ function renderReportTable(entries){
     const fromIncident = e.source==='incident' && e.sourceIncidentId && activeIncidents().some(x=>x.id===e.sourceIncidentId);
     const fromAudit = e.source==='audit' && e.sourceAuditId && activeAudits().some(x=>x.id===e.sourceAuditId);
     const fromObs = e.source==='observation' && e.sourceObsId && regState.obs && regActive('obs').some(x=>x.id===e.sourceObsId);
+    const fromTrs = e.source==='trainingSession' && e.sourceTrsId && regState.trs && regActive('trs').some(x=>x.id===e.sourceTrsId);   // Batch 95
     const fromDrill = e.source==='drill' && e.sourceDrillId && regState.drills && regActive('drills').some(x=>x.id===e.sourceDrillId);   // Batch 93
     const fromInd = e.source==='inductionForm' && e.sourceIndId && (!indLoaded || indList.some(x=>x.id===e.sourceIndId));   // Batch 87
     const fromAutoMh = e.source==='autoManHours', fromVeh = e.source==='vehicleInspection' && e.sourceVehicleId && activeVehicles().some(x=>x.id===e.sourceVehicleId);
-    const actions = fromDrill
+    const actions = fromTrs
+      ? `<button type="button" class="btn btn-sm" data-reg-row="trs:${esc(e.sourceTrsId)}" title="Recorded in Training Records — edit it there">Open training</button>`
+      : fromDrill
       ? `<button type="button" class="btn btn-sm" data-reg-row="drills:${esc(e.sourceDrillId)}" title="Recorded in Emergency Drills — edit it there">Open drill</button>`
       : fromInd
       ? `<button type="button" class="btn btn-sm" data-ropen-ind="${esc(e.sourceIndId)}" title="Recorded with the induction form — Workforce → Induction">Open induction</button>`
@@ -16329,6 +16551,7 @@ function openReportEntryForm(entryId, presetProjectId, presetCategory){
   if(audSynced){ openAudDrawer(audSynced.sourceAuditId); return; }
   const obsSynced = entryId && regState.obs && reportEntries.find(x=>x.id===entryId && x.source==='observation' && regActive('obs').some(o=>o.id===x.sourceObsId));
   if(obsSynced){ openRegDrawer('obs', obsSynced.sourceObsId); return; }
+  { const ts=entryId && regState.trs && reportEntries.find(x=>x.id===entryId && x.source==='trainingSession' && regActive('trs').some(d=>d.id===x.sourceTrsId)); if(ts){ openRegDrawer('trs', ts.sourceTrsId); return; } }   // Batch 95
   { const dr=entryId && regState.drills && reportEntries.find(x=>x.id===entryId && x.source==='drill' && regActive('drills').some(d=>d.id===x.sourceDrillId)); if(dr){ openRegDrawer('drills', dr.sourceDrillId); return; } }   // Batch 93
   if(entryId && reportEntries.some(x=>x.id===entryId && x.source==='inductionForm')){ const b=document.querySelector('.sidenav-btn[data-section="workforce"]'); if(b) b.click(); setWorkforceView('induction'); return; }   // Batch 87
   editingReportEntryId = entryId || null;
