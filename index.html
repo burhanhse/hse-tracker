@@ -1125,6 +1125,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .trs-sigimg{height:44px; max-width:180px; background:#fff; border-radius:6px; border:1px solid var(--line); padding:2px;} .trs-trainer{border-top:2px solid var(--line); margin-top:6px;}
 .trs-link{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 10px; border:1px dashed var(--line); border-radius:8px; margin-bottom:8px;} .trs-link.on{border-style:solid; border-color:var(--ok); background:var(--ok-bg);}
 .rec-remind{border-left:3px solid var(--warn);} .pack-g{max-width:640px;}
+.mtg-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px;} .mtg-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--line);border-radius:14px;font-size:13px;background:var(--surface-2);color:var(--ink);max-width:100%;} .mtg-chip.std{color:var(--ink-muted);background:var(--surface);} .mtg-x{border:0;background:none;color:var(--danger,#b91c1c);cursor:pointer;font-size:12px;padding:0 2px;} .mtg-add{display:flex;gap:8px;flex-wrap:wrap;} .mtg-add input{flex:1 1 220px;min-width:0;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
@@ -2975,6 +2976,7 @@ function startSettingsData(){
       renderTiles();   // Batch 40: training bars on the Workforce dashboard depend on the roles / training groups
       renderStarStrip(); renderRecognition(); renderCalendar(); renderCcExtras();   // Batch 42
       if(typeof cmxRender==='function') cmxRender();   // Batch 88
+      if(typeof mtgTypesRefresh==='function') mtgTypesRefresh();   // Batch 97
       renderPpe(true);   // Batch 49
       if(canEdit()) ppeLinkSyncSoon();   // Batch 73: approved PPE list / photos → worker link
       renderComp(); if(compUi.panel) compRenderTop(); renderCcComp();   // Batch 84
@@ -2990,7 +2992,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b96';
+const APP_BUILD='b97';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -6825,12 +6827,15 @@ regDefine({
 
 /* =============================== MEETINGS =============================== */
 const MEETING_TYPES=['HSE committee meeting','Management review (ISO 9.3)','Client HSE meeting','Project kick-off / pre-job HSE meeting','Incident review meeting','Other'];
+/* Batch 97: own meeting types (settings/meetingTypes.types) — the 6 standard types stay; own types go before "Other" */
+function mtgOwnTypes(){ const t=((settingsDocs.meetingTypes||{}).types)||[]; return Array.isArray(t)?t.filter(x=>typeof x==='string'&&x.trim()):[]; }
+function mtgTypes(){ return [...MEETING_TYPES.slice(0,-1), ...mtgOwnTypes().filter(x=>!MEETING_TYPES.includes(x)), MEETING_TYPES[MEETING_TYPES.length-1]]; }
 const MR_INPUTS=['Status of actions from previous reviews','Changes in external & internal issues','Changes in needs of workers & interested parties','Legal & other requirements — compliance evaluation','Risks & opportunities','Extent objectives were met','HSE performance: incidents, NCs, corrective actions, monitoring results','Audit results','Consultation & participation of workers','Adequacy of resources','Communications with interested parties','Opportunities for continual improvement'];
 function mtgStatusBadge(r){ const s=r.status||'Scheduled'; return `<span class="badge ${s==='Minutes issued'?'ok':s==='Scheduled'?'muted':'warn'}">${esc(s)}</span>`; }
 regDefine({
   key:'meetings', collection:'meetings', singular:'Meeting', title:'Meetings & Management Review', tagline:'Consult · Decide · Act',
   addLabel:'+ New meeting', noField:'mtgNo', noPrefix:'MTG', noYear:true, dateField:'date', yearFilter:true, statuses:['Scheduled','Held — minutes draft','Minutes issued'],
-  headerButtons:'<button class="btn btn-sm" type="button" id="momBlankBtn">'+ic('printer')+' Blank MOM sheet</button><button class="btn btn-sm" type="button" data-pack-toggle="meetings">'+ic('download')+' MOM pack</button>',
+  headerButtons:'<button class="btn btn-sm" type="button" id="momBlankBtn">'+ic('printer')+' Blank MOM sheet</button><button class="btn btn-sm" type="button" data-pack-toggle="meetings">'+ic('download')+' MOM pack</button><button class="btn btn-sm" type="button" id="mtgTypesBtn">'+ic('gear')+' Meeting types</button>',
   topPanel:()=>{ const el=document.getElementById('meetingsTop'); if(el && typeof packTopHtml==='function') el.innerHTML=packTopHtml('meetings'); },
   onData:()=>{ if(typeof momDeepLink!=='function') return; if(canEdit()){ ppeLinkSyncSoon(); trsProcessSigs(); } momDeepLink(); },
   pdf:r=>momPdf(r), pdfLabel:'MOM PDF',
@@ -6841,7 +6846,7 @@ regDefine({
   segs:[{key:'com', label:'HSE committee', match:r=>r.type===MEETING_TYPES[0]},{key:'mr', label:'Management review', match:r=>r.type===MEETING_TYPES[1]},{key:'cl', label:'Client', match:r=>r.type===MEETING_TYPES[2]},{key:'oth', label:'Other', match:r=>!MEETING_TYPES.slice(0,3).includes(r.type)}], segAllLabel:'All meetings',
   tabs:[{key:'main', label:'Meeting', groups:[{fields:[
       {key:'mtgNo', label:'Meeting no.', required:true},
-      {key:'type', label:'Meeting type', type:'select', options:MEETING_TYPES, required:true},
+      {key:'type', label:'Meeting type', type:'select', options:()=>mtgTypes(), required:true},
       {key:'status', label:'Status', type:'select', options:['Scheduled','Held — minutes draft','Minutes issued']},
       {key:'date', label:'Date', type:'date', required:true},
       {key:'time', label:'Time', type:'time'},
@@ -8261,10 +8266,35 @@ function momDeepLink(){ if(momDeepDone) return; const m=/#mtg=([A-Za-z0-9_-]+)/.
   const r=regState.meetings.list.find(x=>x.id===m[1]); if(!r) return; momDeepDone=true; openRegDrawer('meetings', r.id, canEdit()?'files':'att'); }
 /* ---- reminders + record packs (training sessions / meetings) ---- */
 let packUi={trs:{open:false, from:'', to:'', project:'all'}, meetings:{open:false, from:'', to:'', project:'all'}};
+let mtgTypesOpen=false;
+function mtgTypesHtml(){ if(!mtgTypesOpen) return ''; const ed=canEdit(), own=mtgOwnTypes(), used=t=>regActive('meetings').filter(r=>r.type===t).length;
+  return `<div class="panel mtg-types"><div class="section-head"><h3>${ic('gear')} Meeting types</h3><button type="button" class="btn btn-sm" id="mtgTypesClose">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">The standard types always stay. Add your own: they show in the <strong>Meeting type</strong> list on new and old meetings, and in the "Other" filter.</p>
+    <div class="subhead">Standard</div><div class="mtg-chips">${MEETING_TYPES.map(t=>`<span class="mtg-chip std">${esc(t)}</span>`).join('')}</div>
+    <div class="subhead">Your types (${own.length})</div><div class="mtg-chips">${own.length?own.map((t,i)=>{ const n=used(t); return `<span class="mtg-chip">${esc(t)}${n?` <span class="wsub">· ${n} meeting${n===1?'':'s'}</span>`:''}${ed?`<button type="button" class="mtg-x" data-mtg-del="${i}" title="Remove from the list">✕</button>`:''}</span>`; }).join(''):'<span class="wsub">None yet.</span>'}</div>
+    ${ed?`<div class="mtg-add"><input id="mtgTypeNew" maxlength="60" placeholder="e.g. Monthly site HSE meeting"><button type="button" class="btn btn-sm btn-primary" id="mtgTypeAdd">+ Add type</button></div>
+    <p class="wsub" style="margin:6px 0 0;">Removing a type only takes it off the list. Meetings already saved with it keep the name.</p>`:''}</div>`; }
+async function mtgTypesSave(list){ return saveSettings('meetingTypes', {types:list}, settingsStamp('meetingTypes')); }
+function mtgTypesRefresh(){ if(mtgTypesOpen && regState.meetings) renderRegAll('meetings'); }
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#mtgTypesBtn,#mtgTypesClose,#mtgTypeAdd,[data-mtg-del]'); if(!b || b.disabled) return;
+  if(b.id==='mtgTypesBtn' || b.id==='mtgTypesClose'){ mtgTypesOpen=b.id==='mtgTypesBtn'?!mtgTypesOpen:false; renderRegAll('meetings'); if(mtgTypesOpen){ const i=document.getElementById('mtgTypeNew'); if(i) i.focus(); } return; }
+  if(!canEdit()) return; const own=mtgOwnTypes();
+  if(b.id==='mtgTypeAdd'){ const inp=document.getElementById('mtgTypeNew'); const t=String(inp&&inp.value||'').replace(/\s+/g,' ').trim();
+    if(!t){ toast('Type the name of the meeting first'); return; }
+    if([...MEETING_TYPES, ...own].some(x=>x.toLowerCase()===t.toLowerCase())){ toast('“'+t+'” is already in the list'); return; }
+    b.disabled=true; const ok=await mtgTypesSave([...own, t]); b.disabled=false; if(ok){ settingsDocs.meetingTypes={...(settingsDocs.meetingTypes||{}), types:[...own, t]}; renderRegAll('meetings'); } return; }
+  if(b.dataset.mtgDel!==undefined){ const i=+b.dataset.mtgDel; if(!(i>=0 && i<own.length)) return; if(!compArm(b,'Remove?')) return;
+    const nl=own.filter((_,k)=>k!==i); b.disabled=true; if(await mtgTypesSave(nl)){ settingsDocs.meetingTypes={...(settingsDocs.meetingTypes||{}), types:nl}; } renderRegAll('meetings'); return; }
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target && e.target.id==='mtgTypeNew'){ e.preventDefault(); const b=document.getElementById('mtgTypeAdd'); if(b) b.click(); } });
 function remindersOf(kind){ const lim=localDatePlus(-3);
   if(kind==='trs') return regActive('trs').filter(r=>(r.status||'Draft')!=='Completed' && r.date && r.date<=lim).map(r=>({r, why:`${trsStats(r).missing} signature${trsStats(r).missing===1?'':'s'} missing — not completed`}));
   return regActive('meetings').filter(r=>r.date && r.date<=lim).map(r=>{ const st=momStats(r), why=[]; if((r.status||'Scheduled')!=='Minutes issued') why.push(r.status==='Scheduled'?'meeting date passed — still "Scheduled"':'minutes not issued'); if(st.missing && !r.paper) why.push(`${st.missing} signature${st.missing===1?'':'s'} missing`); return {r, why:why.join(' · ')}; }).filter(x=>x.why); }
 function packTopHtml(kind){
+  if(kind==='meetings' && mtgTypesOpen) return mtgTypesHtml()+packTopHtml2(kind);
+  return packTopHtml2(kind); }
+function packTopHtml2(kind){
   const P=packUi[kind], rem=remindersOf(kind).sort((a,b)=>String(a.r.date).localeCompare(String(b.r.date))), noF=kind==='trs'?'trsNo':'mtgNo', label=kind==='trs'?'training session':'meeting';
   const sites=activeSites().slice().sort((a,b)=>String(a.siteName).localeCompare(String(b.siteName)));
   if(!P.from){ const t=localToday(); P.from=t.slice(0,4)+'-01-01'; P.to=t; }
