@@ -1125,6 +1125,12 @@ details.icam-grp .cause-list{margin:6px 0;}
 .trs-sigimg{height:44px; max-width:180px; background:#fff; border-radius:6px; border:1px solid var(--line); padding:2px;} .trs-trainer{border-top:2px solid var(--line); margin-top:6px;}
 .trs-link{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 10px; border:1px dashed var(--line); border-radius:8px; margin-bottom:8px;} .trs-link.on{border-style:solid; border-color:var(--ok); background:var(--ok-bg);}
 .rec-remind{border-left:3px solid var(--warn);} .pack-g{max-width:640px;}
+.ptw-yn{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:2px 16px;} .ptw-ynr{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:5px 0; border-bottom:1px dashed var(--line); font-size:13.5px;} .ptw-ynr.open>span:first-child{color:var(--warn);}
+.ptw-ynb{display:flex; gap:4px; flex:none;} .ptw-b{border:1px solid var(--line); background:var(--surface-2); color:var(--ink); border-radius:8px; padding:4px 10px; font:inherit; font-size:12.5px; cursor:pointer;} .ptw-b.on.y{background:var(--ok-bg); border-color:var(--ok); color:var(--ok); font-weight:700;} .ptw-b.on.na{background:var(--muted-bg); border-color:var(--ink-muted); font-weight:700;} .ptw-b:disabled{cursor:default; opacity:.8;}
+.ptw-ticks{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:2px 12px;} .ptw-steps{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;}
+.ptw-tbl-wrap{overflow-x:auto; max-width:100%;} .ptw-tbl{width:100%; border-collapse:collapse; font-size:13px;} .ptw-tbl th,.ptw-tbl td{border-bottom:1px solid var(--line); padding:4px 6px; text-align:left; vertical-align:middle;} .ptw-tbl input{width:100%; min-width:70px;} .ptw-tbl tr.ptw-bad td{background:var(--danger-bg);}
+.ptw-signed{display:flex; gap:10px; align-items:center; margin:4px 0;} .ptw-padbox{margin:6px 0;} .ptw-inline{display:flex; gap:6px; flex-wrap:wrap;} .ptw-inline input{flex:1 1 240px; min-width:0;} .ptw-close{display:grid; gap:6px;} .ptw-cancel summary{cursor:pointer; color:var(--ink-muted); margin:8px 0;}
+.ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .ptw-exp{border-left-color:var(--danger);} .ptw-sigt td{vertical-align:top;}
 .mtg-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px;} .mtg-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--line);border-radius:14px;font-size:13px;background:var(--surface-2);color:var(--ink);max-width:100%;} .mtg-chip.std{color:var(--ink-muted);background:var(--surface);} .mtg-x{border:0;background:none;color:var(--danger,#b91c1c);cursor:pointer;font-size:12px;padding:0 2px;} .mtg-add{display:flex;gap:8px;flex-wrap:wrap;} .mtg-add input{flex:1 1 220px;min-width:0;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
@@ -1193,6 +1199,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
     <button type="button" class="sidenav-btn" data-section="scaff">Scaffolding Jobs</button>
     <button type="button" class="sidenav-btn" data-section="civil">Civil Progress</button>
     <button type="button" class="sidenav-btn" data-section="lift">Lift Plans</button>
+    <button type="button" class="sidenav-btn" data-section="ptw">Work Permits</button>
     <button type="button" class="sidenav-btn" data-section="subcons">Subcontractors</button>
     <div class="nav-group">Safety</div>
     <button type="button" class="sidenav-btn" data-section="incidents">Incident Register</button>
@@ -2287,7 +2294,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2409,7 +2416,7 @@ function deltaize(current, data){
 }
 
 /* ---------------- change history: every add / update / set / delete is written to activityLog ---------------- */
-const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log', hra:'Health Risk Assessment', drills:'Emergency Drills', trainSessions:'Training Records'};
+const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log', hra:'Health Risk Assessment', drills:'Emergency Drills', trainSessions:'Training Records', permits:'Work Permits'};
 const LOG_IGNORE_KEYS = new Set(['updatedAt','updatedBy','createdAt','createdBy']);
 function logCacheFind(col, id){
   try{
@@ -2977,6 +2984,7 @@ function startSettingsData(){
       renderStarStrip(); renderRecognition(); renderCalendar(); renderCcExtras();   // Batch 42
       if(typeof cmxRender==='function') cmxRender();   // Batch 88
       if(typeof mtgTypesRefresh==='function') mtgTypesRefresh();   // Batch 97
+      if(typeof ptwSettingsRefresh==='function') ptwSettingsRefresh();   // Batch 98
       renderPpe(true);   // Batch 49
       if(canEdit()) ppeLinkSyncSoon();   // Batch 73: approved PPE list / photos → worker link
       renderComp(); if(compUi.panel) compRenderTop(); renderCcComp();   // Batch 84
@@ -2992,7 +3000,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b97';
+const APP_BUILD='b98';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4492,7 +4500,7 @@ const IMS_BHN_EXTRA=[
   ['F0811-13','Scaffold Inspection & Handover Record','Form','P0811-03','','Inspections are recorded in the tracker — Scaffolding Jobs → Inspections'],
   ['P0811-04','Working at Height Procedure','Procedure','','','Based on PDO SP-1257'],
   ['P0811-05','Permit to Work Procedure','Procedure','','',''],
-  ['F0811-14','Permit to Work','PTW','P0811-05','',''],
+  ['F0811-14','Permit to Work','PTW','P0811-05','ptw','Made by the tracker — Work Permits → permit → Permit PDF'],
   ['P0811-06','Confined Space Entry Procedure','Procedure','','',''],
   ['F0811-15','Confined Space Entry Permit & Gas Test Record','PTW','P0811-06','',''],
   ['P0811-07','Hot Work Procedure','Procedure','','',''],
@@ -4529,7 +4537,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', ptw:'BHN-F0811-14', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -6525,6 +6533,7 @@ function renderRegDrawer(){
   if(activeReg==='lift') updateLiftCalc(b);
   if(activeReg==='trs' && typeof trsUi!=='undefined' && trsUi.pad) trsWirePad();   // Batch 95
   if(activeReg==='meetings' && typeof momUi!=='undefined' && momUi.pad) momWirePad();   // Batch 96
+  if(activeReg==='ptw' && typeof ptwUi!=='undefined' && ptwUi.pad) ptwWirePad();   // Batch 98
 }
 function regFormTabHtml(cfg, r, t){
   const head = t.key==='main' ? `${cfg.badgesOf?`<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">${cfg.badgesOf(r)}</div>`:''}${updatedNoteHtml(r)}` : '';
@@ -8350,6 +8359,418 @@ document.addEventListener('change', async e=>{ const el=e.target; if(!el || !el.
   if(el.dataset.momPaper && canEdit()){ await momUpd(el.dataset.momPaper, {paper:el.checked}, el.checked?'Marked as signed on paper — attach the photo in Files':'Paper sheet removed'); return; }
   if(el.dataset.packF){ const [k,f]=el.dataset.packF.split('|'); packUi[k][f]=el.value; renderRegAll(k); return; } });
 document.addEventListener('input', e=>{ if(e.target && e.target.id==='momQ'){ momUi.q=e.target.value; renderRegDrawer(); const s=document.getElementById('momQ'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } } });
+
+/* =============================== WORK PERMITS (PTW) — Batch 98 ===============================
+   Own Burhan permit (HSG250-based): main permit Hot / Cold work + additional permits.
+   Steps are stored as write-once maps so the project link (b99) can add them under tight rules:
+   issue · hse (countersign) · accept · sigs (crew briefing) · gas · reval · susp/res · closeH · closeI · cancel. Status is derived. */
+const PTW_ADDS=[['wah','Work at height'],['cse','Confined space entry'],['iso','Isolation (LOTO)'],['exc','Excavation'],['lift','Lifting']];
+const PTW_GEN=[['site','Worksite visited and checked by the issuer'],['jsa','JSA / TRIC card done and explained to the crew'],['barr','Area barricaded, warning signs posted'],['simops','No other work nearby that conflicts (checked)'],['tools','Tools & equipment inspected, colour code valid'],['ext','Fire extinguisher at the worksite'],['fa','First aid kit and emergency numbers known'],['muster','Muster point and escape route known'],['comm','Phone / radio communication available'],['light','Access and lighting adequate'],['heat','Heat stress controls (water, shade, rest)'],['comp','Crew competent / licensed for the task']];
+const PTW_HOT=[['comb','Combustibles removed or covered within 11 m'],['blank','Fire blanket / welding screens in place'],['watch','Fire watch named — stays 30 min after work ends'],['gas','Gas test done before start (table below)'],['cyl','Cylinders upright, chained, flashback arrestors fitted'],['earth','Welding machine earthed, cables in good condition'],['drain','Drains / openings near the work covered'],['hweq','Hot work equipment inspected']];
+const PTW_WX=[['wind','Wind checked — stop above the limit for the job'],['sand','No sandstorm, visibility good'],['heat','Heat index checked, work-rest plan agreed'],['storm','No rain / lightning — stop if it starts']];
+const PTW_HAZ=['Fire / explosion','Hot surfaces / sparks','Fall from height','Falling objects','Toxic gas / H2S','Oxygen deficiency','Electricity','Stored energy / pressure','Moving machinery','Manual handling','Heat stress','Noise','Chemicals','Ground collapse','Vehicles / traffic','Other'];
+const PTW_PPE=['Safety helmet','Safety shoes','Coverall (FRC)','Gloves','Goggles / face shield','Welding mask','Ear protection','Full body harness','Respirator / BA','Personal gas monitor','Other'];
+const PTW_ADD_ITEMS={
+  wah:[['tag','Scaffold green-tagged and inspected within 7 days'],['mewp','MEWP inspected, certificate valid, operator certified'],['harn','Harness inspected, 100% tie-off, anchor point suitable'],['edge','Edge protection / guardrails in place'],['excl','Area below closed off (exclusion zone)'],['teth','Tools tethered, toe boards fitted'],['resc','Rescue plan and rescue kit at site, crew knows it'],['wind','Wind checked — stop in strong wind'],['fit','Workers trained for work at height and fit']],
+  cse:[['isol','Space isolated (Isolation permit issued)'],['clean','Space cleaned, purged and ventilated'],['gas','Gas test before entry and at set intervals'],['stand','Standby man named — stays at the entry, never enters'],['resc','Rescue plan + equipment at entry (tripod, BA)'],['comm','Communication between entrant and standby'],['light','Low-voltage / intrinsically safe lighting'],['log','Entry log kept (names in / out)'],['train','Entrants and standby trained for confined space']],
+  iso:[['ident','All energy sources identified (electrical, pressure, mechanical, chemical)'],['before','Isolation done BEFORE the permit is issued'],['lock','Lock and tag fitted at every point'],['own','Each worker has his own lock on the lock box'],['stored','Stored energy released (bled, discharged, blocked)'],['proof','Zero energy proved (try / test) before work'],['keep','Isolation stays until this permit is closed'],['train','Isolations done by a trained person']],
+  exc:[['draw','Underground services drawing checked'],['scan','Cable / pipe detector scan done, services marked'],['hand','Hand digging near known services'],['shore','Shoring / benching / slope where deeper than 1.2 m'],['edge','Spoil and machines kept at least 1 m from the edge'],['barr','Barricade and night lights around the excavation'],['access','Safe ladder access / exit'],['insp','Inspected every day and after rain'],['gas','Gas test if deeper than 1.2 m or near pipelines']],
+  lift:[['plan','Lift plan done (Lift plan no. recorded)'],['cert','Crane / HIAB third-party certificate valid'],['oper','Operator and rigger certified'],['gear','Lifting gear inspected, colour code valid'],['load','Load weight known, within the load chart'],['ground','Ground checked, outriggers on pads'],['excl','Exclusion zone, nobody under the load'],['wind','Wind within the crane limit'],['bank','Banksman named, one signaller only']]};
+const PTW_ADD_FIELDS={wah:[['height','Height of work'],['access','Access (scaffold / MEWP / ladder)'],['tag','Scaffold tag no.'],['mewp','MEWP cert. no.']], cse:[['space','Space / vessel'],['iso','Isolation permit no.'],['standby','Standby man'],['every','Gas test every']], iso:[], exc:[['size','Depth / size'],['services','Services found']], lift:[['plan','Lift plan no.'],['crane','Crane / HIAB'],['load','Heaviest load'],['bank','Banksman']]};
+const PTW_STATUSES=['Requested','Awaiting HSE','Awaiting holder','Live','Suspended','Expired','Closing','Closed','Cancelled'];
+const PTW_ST_CLS={Requested:'muted','Awaiting HSE':'warn','Awaiting holder':'warn',Live:'ok',Suspended:'warn',Expired:'danger',Closing:'warn',Closed:'muted',Cancelled:'muted'};
+const PTW_TRAIN={h:{codes:['PTW-H','PTWH-R'], re:/permit to work|\bptw\b/i, lbl:'Permit holder'}, i:{codes:['PTW-S','PTWS-R'], re:/signator/i, lbl:'Issuer'}, g:{codes:['AGT','AGT-R'], re:/gas test/i, lbl:'Gas tester'}};
+function ptwCfg(){ const s=settingsDocs.ptw||{}; return {roles:s.roles||{}, maxLive:Number(s.maxLive)||3, maxDays:Number(s.maxDays)||7, lim:{o2a:19.5, o2b:23.5, lelHot:0, lel:10, h2s:10, co:25, ...(s.limits||{})}}; }
+function ptwAt(x){ if(!x) return null; if(typeof x.toDate==='function') return x.toDate(); if(x.seconds) return new Date(x.seconds*1000); const d=new Date(x); return isNaN(d)?null:d; }
+function ptwFmt(x){ const d=ptwAt(x); if(!d) return ''; const p=n=>String(n).padStart(2,'0'); return `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}  ${p(d.getHours())}:${p(d.getMinutes())}`; }
+function ptwMs(date, time){ if(!date) return 0; const d=new Date(date+'T'+(time||'00:00')+':00'); return isNaN(d)?0:d.getTime(); }
+function ptwStartMs(r){ return ptwMs(r.startDate, r.startTime||'00:00'); }
+function ptwCapMs(r){ const s=ptwStartMs(r); return s? s+ptwCfg().maxDays*864e5 : 0; }
+function ptwUntilMs(r){ let u=ptwMs(r.untilDate||r.startDate, r.untilTime||'23:59'); for(const v of Object.values(r.reval||{})){ const m=ptwMs(v.ud, v.ut); if(m>u) u=m; } const cap=ptwCapMs(r); return cap&&u>cap?cap:u; }
+function ptwMsTxt(ms){ if(!ms) return '—'; return ptwFmt(new Date(ms)); }
+function ptwSuspOpen(r){ const s=r.susp||{}, res=r.res||{}; return Object.keys(s).filter(k=>!res[k]).sort().pop()||''; }
+function ptwStatus(r){ if(r.cancel) return 'Cancelled'; if(r.closeI) return 'Closed'; if(r.closeH) return 'Closing'; if(!r.issue) return 'Requested'; if(!r.hse) return 'Awaiting HSE'; if(!r.accept) return 'Awaiting holder'; if(ptwSuspOpen(r)) return 'Suspended'; if(Date.now()>ptwUntilMs(r)) return 'Expired'; return 'Live'; }
+function ptwBadge(r){ const s=ptwStatus(r); return `<span class="badge ${PTW_ST_CLS[s]||'muted'}">${esc(s)}</span>`; }
+const ptwOpenSt=s=>!['Closed','Cancelled'].includes(s);
+function ptwWName(id){ const w=workers.find(x=>x.id===id); return w?(w.fullName||'—'):''; }
+function ptwHolderName(r){ return ptwWName(r.holderId)||r.holderName||''; }
+function ptwAddLbl(k){ return (PTW_ADDS.find(a=>a[0]===k)||[k,k])[1]; }
+function ptwTypeTxt(r){ return [(r.ptwType||'Cold work'), ...(r.adds||[]).map(ptwAddLbl)].join(' + '); }
+const ptwNorm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+function ptwClash(r){ if(!ptwOpenSt(ptwStatus(r))) return []; const L=ptwNorm(r.location); if(L.length<3) return []; const a=ptwStartMs(r), b=ptwUntilMs(r)||a;
+  return regActive('ptw').filter(x=>{ if(x.id===r.id || (x.projectId||'')!==(r.projectId||'')) return false; const s=ptwStatus(x); if(!ptwOpenSt(s)) return false;
+    const X=ptwNorm(x.location); if(!(X===L || (X.length>=4 && L.includes(X)) || (L.length>=4 && X.includes(L)))) return false;
+    const xa=ptwStartMs(x), xb=ptwUntilMs(x)||xa; return xa<=b && a<=xb; }); }
+function ptwLiveOf(wid, exceptId){ return regActive('ptw').filter(x=>x.id!==exceptId && x.holderId===wid && ['Awaiting holder','Live','Suspended','Expired'].includes(ptwStatus(x))); }
+function ptwRoleIds(k){ const R=ptwCfg().roles; return Object.keys(R).filter(id=>R[id] && R[id][k] && workers.some(w=>w.id===id && !w.deleted)); }
+function ptwRoleOpts(k, excl){ const ids=ptwRoleIds(k); const pool=ids.length?ids.map(id=>workers.find(w=>w.id===id)).filter(Boolean):activeWorkers().filter(w=>(w.status||'active')==='active');
+  return pool.filter(w=>w.id!==excl).sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||''))).map(w=>({value:w.id, label:`${w.fullName||'—'}${w.designation?' — '+w.designation:''}`})); }
+function ptwTrain(w, k){ const T=PTW_TRAIN[k], d=localToday(); let best=null;
+  for(const r of (w&&w.trainings)||[]){ const c=pdoCourseOf(r.name); if(!((c && T.codes.includes(c.code)) || T.re.test(String(r.name||'')))) continue; if(r.date && r.date>d) continue; if(!best || String(r.expiry||'9999')>String(best.expiry||'9999')) best=r; }
+  if(!best) return {st:'none'}; if(best.expiry && best.expiry<d) return {st:'expired', exp:best.expiry}; return {st:'ok', exp:best.expiry||''}; }
+function ptwTrainBadge(w, k){ const t=ptwTrain(w,k); return t.st==='ok'?`<span class="badge ok" title="${esc(PTW_TRAIN[k].lbl)} training on record">trained${t.exp?' · till '+esc(isoToDmy(t.exp)):''}</span>`:t.st==='expired'?`<span class="badge danger">training expired ${esc(isoToDmy(t.exp))}</span>`:'<span class="badge warn">no training on record</span>'; }
+function ptwGasBad(r, x){ const L=ptwCfg().lim, n=v=>v===''||v===undefined||v===null?null:Number(v), hotOrCse=r.ptwType==='Hot work'||(r.adds||[]).includes('cse');
+  const out=[]; const o2=n(x.o2), lel=n(x.lel), h2s=n(x.h2s), co=n(x.co);
+  if(o2!==null && (o2<L.o2a || o2>L.o2b)) out.push('O2'); if(lel!==null && lel>(hotOrCse?L.lelHot:L.lel)) out.push('LEL'); if(h2s!==null && h2s>=L.h2s) out.push('H2S'); if(co!==null && co>=L.co) out.push('CO'); return out; }
+function ptwGasList(r){ return Object.entries(r.gas||{}).map(([id,x])=>({id,...x})).sort((a,b)=>String(a.d+a.t).localeCompare(String(b.d+b.t))); }
+function ptwNeedsGas(r){ return r.ptwType==='Hot work' || (r.adds||[]).includes('cse'); }
+function ptwOpenChecks(r){ const miss=[]; const chk=(items, ans, lbl)=>{ const n=items.filter(([k])=>!(ans||{})[k]).length; if(n) miss.push(`${n} in ${lbl}`); };
+  chk(PTW_GEN, r.gen, 'precautions'); if(r.ptwType==='Hot work') chk(PTW_HOT, r.hotAns, 'hot work'); chk(PTW_WX, r.wx, 'weather');
+  for(const k of r.adds||[]) chk(PTW_ADD_ITEMS[k], ((r.xp||{})[k]||{}).ans, ptwAddLbl(k).toLowerCase());
+  if(!(r.haz||[]).length) miss.push('hazards not ticked'); if(!(r.ppe||[]).length) miss.push('PPE not ticked');
+  if(r.ptwType==='Hot work' && !String(r.fireWatch||'').trim()) miss.push('fire watch name');
+  if(ptwNeedsGas(r)){ const g=ptwGasList(r); if(!g.length) miss.push('gas test'); else if(ptwGasBad(r, g[g.length-1]).length) miss.push('last gas test outside limits'); }
+  return miss; }
+
+regDefine({
+  key:'ptw', collection:'permits', singular:'Work permit', title:'Work Permits (PTW)', tagline:'Request · Issue · Countersign · Accept · Close',
+  addLabel:'+ New permit', noField:'ptwNo', noPrefix:'PTW', noYear:true, dateField:'startDate', yearFilter:true, statuses:PTW_STATUSES, statusOf:r=>ptwStatus(r),
+  headerButtons:'<button class="btn btn-sm" type="button" id="ptwBlankBtn">'+ic('printer')+' Blank permit form</button><button class="btn btn-sm" type="button" id="ptwSigBtn">'+ic('users')+' Permit signatories</button>',
+  topPanel:()=>{ const el=document.getElementById('ptwTop'); if(el) el.innerHTML=ptwTopHtml(); },
+  searchPlaceholder:'Search permit no., location, work, holder…', emptyEditor:'No permits yet — click “+ New permit”. The supervisor is the permit holder, the engineer issues it after checking the site, and HSE countersigns every permit before work starts.',
+  titleOf:r=>r.location||'Work permit', subOf:r=>[ptwTypeTxt(r), isoToDmy(r.startDate), ptwHolderName(r)?'holder '+ptwHolderName(r):'', r.projectId?projectName(r.projectId):''].filter(Boolean).join(' · '),
+  badgesOf:r=>{ const c=ptwClash(r); return `${ptwBadge(r)}${r.ptwType==='Hot work'?' <span class="badge danger">Hot work</span>':''}${(r.adds||[]).map(k=>` <span class="badge muted">${esc(ptwAddLbl(k))}</span>`).join('')}${c.length?` <span class="badge danger" title="${esc(c.map(x=>x.ptwNo||'').join(', '))}">⚠ ${c.length} other permit${c.length===1?'':'s'} at this location</span>`:''}${r.paper?' <span class="badge muted">Paper permit</span>':''}`; },
+  searchText:r=>[r.ptwNo, r.location, r.work, r.equip, ptwHolderName(r), r.clientPermit, r.company, ptwTypeTxt(r)].join(' '),
+  addFields:['ptwType','projectId','location','work','holderId','startDate','startTime','untilTime'], addDefaults:{ptwType:'Cold work', startDate:()=>localToday(), startTime:'07:00', untilTime:'17:00'},
+  validate:d=>!String(d.location||'').trim()?'Write the exact work location':!String(d.work||'').trim()?'Describe the work to be done':!d.holderId?'Choose the permit holder (the supervisor at the job)':(d.untilDate && d.untilDate<d.startDate)?'"Valid until" is before the start date':'',
+  prepare:d=>{ if(!d.untilDate) d.untilDate=d.startDate; if(!Array.isArray(d.adds)) d.adds=d.adds||[]; },
+  segs:[{key:'live', label:'Live', match:r=>['Live','Suspended'].includes(ptwStatus(r))},{key:'wait', label:'Waiting', match:r=>['Requested','Awaiting HSE','Awaiting holder'].includes(ptwStatus(r))},{key:'exp', label:'Expired / closing', match:r=>['Expired','Closing'].includes(ptwStatus(r))},{key:'done', label:'Closed', match:r=>['Closed','Cancelled'].includes(ptwStatus(r))}], segAllLabel:'All permits',
+  tabs:[{key:'main', label:'Work details', pre:r=>ptwMainPre(r), groups:[{fields:[
+      {key:'ptwNo', label:'Permit no.', required:true},
+      {key:'ptwType', label:'Permit type', type:'select', options:['Cold work','Hot work'], required:true},
+      {key:'projectId', label:'Project / site', type:'project'},
+      {key:'clientPermit', label:'Client permit no. (if any)', placeholder:'blank = own yard / no client permit'},
+      {key:'location', label:'Exact location', required:true, placeholder:'e.g. Workshop bay 2 — rack R-04'},
+      {key:'equip', label:'Equipment / tag', placeholder:'e.g. Storage rack R-04, Tank T-12'},
+      {key:'work', label:'Work to be done & limits', type:'textarea', wide:true, required:true, placeholder:'What exactly will be done — and what is NOT included'},
+      {key:'startDate', label:'Start date', type:'date', required:true}, {key:'startTime', label:'Start time', type:'time'},
+      {key:'untilDate', label:'Valid until (date)', type:'date'}, {key:'untilTime', label:'Valid until (time)', type:'time'},
+      {key:'holderId', label:'Permit holder (supervisor at the job)', type:'pick', options:()=>ptwRoleOpts('h'), required:true},
+      {key:'company', label:'Crew company', placeholder:'Burhan / subcontractor name'},
+      {key:'crewSize', label:'Crew size', type:'number', min:1, max:200},
+      {key:'jsa', label:'JSA / TRIC no.'}, {key:'linked', label:'Linked permits / lift plan', placeholder:'e.g. PTW-2026-012, LP-2026-004'},
+      {key:'hours', label:'Working hours', placeholder:'e.g. Day — 07:00 to 17:00'},
+    ]}], intro:'Fill the work details, tick any <strong>additional permits</strong> above, then go to <strong>Hazards & precautions</strong> and <strong>Gas test & signatures</strong>. Work may start only when the permit is <strong>Live</strong>.'},
+    {key:'checks', label:'Hazards & precautions', html:r=>ptwChecksHtml(r)},
+    {key:'adds', label:'Additional permits', showIf:r=>(r.adds||[]).length>0, html:r=>ptwAddsHtml(r)},
+    {key:'sign', label:'Gas test & signatures', html:r=>ptwSignHtml(r)},
+    {key:'run', label:'Revalidate · suspend · close', showIf:r=>!!r.accept||!!r.cancel, html:r=>ptwRunHtml(r)}],
+  files:[{key:'paperFile', label:'Photo of the signed paper permit'},{key:'photoFile', label:'Worksite photo'}],
+  pdf:r=>ptwPdf(r), pdfLabel:'Permit PDF',
+  columns:[
+    {label:'No.', cls:'mono', html:r=>`<strong>${esc(r.ptwNo||'—')}</strong><div class="wsub">${esc(isoToDmy(r.startDate)||'')}</div>`},
+    {label:'Work', html:r=>`<div class="wname">${esc(r.location||'—')}</div><div class="wsub">${esc(ptwTypeTxt(r))}${r.projectId?' · '+esc(projectName(r.projectId)||''):''}</div>`},
+    {label:'Holder', html:r=>esc(ptwHolderName(r)||'—')},
+    {label:'Valid until', cls:'mono', html:r=>{ const s=ptwStatus(r); return ptwOpenSt(s)?esc(ptwMsTxt(ptwUntilMs(r))):'<span class="wsub">—</span>'; }},
+    {label:'Status', html:r=>{ const c=ptwClash(r); return ptwBadge(r)+(c.length?' <span class="badge danger" title="Another permit at the same location">⚠</span>':''); }},
+  ],
+  tiles:list=>{ const st=list.map(r=>ptwStatus(r)), mo=localToday().slice(0,7);
+    const live=st.filter(s=>s==='Live').length, susp=st.filter(s=>s==='Suspended').length, hse=st.filter(s=>s==='Awaiting HSE').length, wait=st.filter(s=>['Requested','Awaiting HSE','Awaiting holder'].includes(s)).length, exp=st.filter(s=>s==='Expired'||s==='Closing').length;
+    const closed=list.filter(r=>r.closeI && String(isoToLocalDate((ptwAt(r.closeI.at)||new Date(0)).toISOString())).startsWith(mo)).length;
+    return [{label:'Live permits now', num:live, sub:susp?`${susp} suspended`:'work allowed now', icon:'checkcircle', cls:live?'ok':''},
+      {label:'Waiting', num:wait, cls:hse?'warn':'', sub:hse?`${hse} need your countersign`:'request → issue → countersign → accept', icon:'pencil'},
+      {label:'Expired — not closed', num:exp, cls:exp?'danger':'ok', sub:exp?'revalidate or close them':'none', icon:'clock'},
+      {label:'Closed this month', num:closed, sub:`${list.length} permits in total`, icon:'clipcheck'}]; },
+});
+/* ---- drawer UI ---- */
+let ptwUi={id:'', pad:'', iss:'', iss2:'', draft:null, crewQ:'', crewSel:null, form:''};
+const ptwEd=r=>canEdit() && !r.hse && !r.cancel && !r.closeI;          // details & precautions: until HSE countersigns
+const ptwLive=r=>canEdit() && !r.cancel && !r.closeI;
+function ptwYN(path, items, ans, ed){ return `<div class="ptw-yn">${items.map(([k,l])=>{ const a=(ans||{})[k]||''; return `<div class="ptw-ynr ${a?'':'open'}"><span>${esc(l)}</span><span class="ptw-ynb">${['y','na'].map(v=>`<button type="button" class="ptw-b ${a===v?'on '+v:''}" ${ed?`data-ptw-yn="${path}|${k}|${v}"`:'disabled'}>${v==='y'?'Yes':'N/A'}</button>`).join('')}</span></div>`; }).join('')}</div>`; }
+function ptwTicks(group, items, sel, ed){ return `<div class="ptw-ticks" data-ptw-group="${group}">${items.map(l=>`<label class="chk"><input type="checkbox" ${ed?`data-ptw-tk="${group}"`:'disabled'} value="${esc(l)}" ${(sel||[]).includes(l)?'checked':''}> ${esc(l)}</label>`).join('')}</div>`; }
+function ptwTxt(path, label, val, ed, ph){ return `<label>${esc(label)}<input data-ptw-t="${esc(path)}" value="${esc(val||'')}" maxlength="140" ${ed?'':'disabled'} placeholder="${esc(ph||'')}"></label>`; }
+function ptwPadHtml(key, label){ return `<div class="ptw-padbox"><div class="wsub">${esc(label)}</div><div class="hse-sig-pad"><canvas id="ptwPad" width="600" height="200"></canvas></div><div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;"><button type="button" class="btn btn-sm" data-ptw-padcancel="1">Cancel</button><button type="button" class="btn btn-sm" data-ptw-padclr="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-ptw-padsave="${esc(key)}">Save signature</button></div></div>`; }
+function ptwSigShow(x, extra){ return x?`<div class="ptw-signed"><img src="${esc(x.sig||'')}" alt="signature" class="trs-sigimg"><div><strong>${esc(x.n||'')}</strong><div class="wsub">${esc(ptwFmt(x.at))}${x.via==='link'?' · on own phone':''}${extra||''}</div></div></div>`:''; }
+function ptwMainPre(r){ const ed=ptwEd(r), c=ptwClash(r), s=ptwStatus(r);
+  return `<div class="panel ptw-adds"><div class="subhead" style="margin-top:0;">Additional permits</div><div class="ptw-ticks">${PTW_ADDS.map(([k,l])=>`<label class="chk"><input type="checkbox" ${ed?'data-ptw-add="1"':'disabled'} value="${k}" ${(r.adds||[]).includes(k)?'checked':''}> ${esc(l)}</label>`).join('')}</div>
+    <p class="wsub" style="margin:4px 0 0;">Each ticked one adds its own page to the permit PDF and its checks to the <strong>Additional permits</strong> tab.</p></div>
+    ${c.length?`<div class="notice warn">⚠ <strong>Another permit is open at the same location and time:</strong> ${c.map(x=>`<button type="button" class="att-link" data-reg-row="ptw:${esc(x.id)}">${esc(x.ptwNo||'')} — ${esc(ptwTypeTxt(x))} (${esc(ptwStatus(x))})</button>`).join(', ')}. Check the two jobs cannot affect each other (e.g. hot work next to a confined space), or change the time.</div>`:''}
+    ${s==='Expired'?`<div class="notice danger">This permit has <strong>expired</strong> (${esc(ptwMsTxt(ptwUntilMs(r)))}). Work must stop — revalidate it for today or close it (tab <strong>Revalidate · suspend · close</strong>).</div>`:''}
+    ${r.hse && canEdit() && !r.closeI && !r.cancel?'<p class="wsub">Countersigned by HSE — details and precautions are locked. To change them, remove the HSE countersign first (tab Gas test & signatures).</p>':''}`; }
+function ptwChecksHtml(r){ const ed=ptwEd(r);
+  return `${ed?'':`<p class="wsub">${r.hse?'Locked after the HSE countersign.':'View only.'}</p>`}
+    <div class="panel"><div class="subhead" style="margin-top:0;">Hazards</div>${ptwTicks('haz', PTW_HAZ, r.haz, ed)}</div>
+    <div class="panel"><div class="subhead" style="margin-top:0;">Precautions — checked on site by the issuer</div>${ptwYN('gen', PTW_GEN, r.gen, ed)}</div>
+    ${r.ptwType==='Hot work'?`<div class="panel"><div class="subhead" style="margin-top:0;">Hot work precautions</div>${ptwYN('hotAns', PTW_HOT, r.hotAns, ed)}
+      <div class="form-grid" style="margin-top:8px;">${ptwTxt('fireWatch','Fire watch (name) *', r.fireWatch, ed)}${ptwTxt('extinguisher','Extinguisher at the work', r.extinguisher, ed, 'e.g. 2 × 9 kg DCP')}</div></div>`:''}
+    <div class="panel"><div class="subhead" style="margin-top:0;">PPE required</div>${ptwTicks('ppe', PTW_PPE, r.ppe, ed)}</div>
+    <div class="panel"><div class="subhead" style="margin-top:0;">Emergency & weather</div><div class="form-grid">${ptwTxt('emPhone','Emergency phone', r.emPhone, ed)}${ptwTxt('clinic','Nearest clinic / hospital', r.clinic, ed)}${ptwTxt('assembly','Assembly point', r.assembly, ed)}${ptwTxt('firstAider','First aider', r.firstAider, ed)}</div>${ptwYN('wx', PTW_WX, r.wx, ed)}</div>`; }
+function ptwAddsHtml(r){ const ed=ptwEd(r), xp=r.xp||{};
+  return (r.adds||[]).map(k=>{ const X=xp[k]||{}, F=PTW_ADD_FIELDS[k]||[];
+    let extra='';
+    if(k==='iso'){ const P=X.pts||{}; extra=`<div class="subhead">Isolation points</div><div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>#</th><th>Equipment / point</th><th>Lock no.</th><th>Tag no.</th><th>Isolated by</th><th>Zero energy proved by</th><th>De-isolated by / time</th></tr></thead><tbody>${[1,2,3,4,5,6].map(i=>{ const p=P[i]||{}; return `<tr><td>${i}</td>${['p','lock','tag','by','proof','de'].map(c=>`<td><input data-ptw-t="xp.iso.pts.${i}.${c}" value="${esc(p[c]||'')}" maxlength="60" ${c==='de'?(canEdit()&&!r.closeI&&!r.cancel?'':'disabled'):(ed?'':'disabled')}></td>`).join('')}</tr>`; }).join('')}</tbody></table></div>`; }
+    if(k==='cse'){ const Lg=X.log||{}, ok=canEdit()&&!r.closeI&&!r.cancel; extra=`<div class="subhead">Entry log</div><div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>#</th><th>Name of entrant</th><th>In</th><th>Out</th><th>In</th><th>Out</th></tr></thead><tbody>${[1,2,3,4,5,6,7,8].map(i=>{ const p=Lg[i]||{}; return `<tr><td>${i}</td>${['n','i1','o1','i2','o2'].map(c=>`<td><input data-ptw-t="xp.cse.log.${i}.${c}" value="${esc(p[c]||'')}" maxlength="50" ${ok?'':'disabled'} ${c==='n'?'':'placeholder="hh:mm"'}></td>`).join('')}</tr>`; }).join('')}</tbody></table></div><p class="wsub">Gas tests for the entry are recorded in <strong>Gas test & signatures</strong> and printed on this page too.</p>`; }
+    return `<div class="panel"><div class="subhead" style="margin-top:0;">Additional permit — ${esc(ptwAddLbl(k))}</div>
+      ${F.length?`<div class="form-grid">${F.map(([f,l])=>ptwTxt(`xp.${k}.${f}`, l, X[f], ed)).join('')}</div>`:''}
+      ${ptwYN(`xp.${k}.ans`, PTW_ADD_ITEMS[k], X.ans, ed)}${extra}</div>`; }).join('') || '<p class="wsub">No additional permits ticked.</p>'; }
+function ptwSignHtml(r){ ptwUiFor(r); const live=ptwLive(r), L=ptwCfg().lim, gl=ptwGasList(r), hs=hseSigOf((auth.currentUser||{}).email)||{}, hot=ptwNeedsGas(r);
+  const pad=(k,l)=>ptwUi.pad===k?ptwPadHtml(k,l):'';
+  const gasRows=gl.map(x=>{ const bad=ptwGasBad(r,x); return `<tr class="${bad.length?'ptw-bad':''}"><td>${esc(isoToDmy(x.d)||'')}</td><td>${esc(x.t||'')}</td><td>${esc(x.o2??'')}</td><td>${esc(x.lel??'')}</td><td>${esc(x.h2s??'')}</td><td>${esc(x.co??'')}</td><td>${esc(x.n||'')}${bad.length?` <span class="badge danger">outside limits: ${esc(bad.join(', '))}</span>`:''}</td><td>${x.sig?`<img src="${esc(x.sig)}" alt="" class="trs-sigimg">`:live?`<button type="button" class="btn btn-sm" data-ptw-sign="gas:${esc(x.id)}">✍ Tester signs</button>`:'—'}${live&&!r.hse?` <button type="button" class="att-link" data-ptw-gasdel="${esc(x.id)}" data-armed="0">remove</button>`:''}</td></tr>`; }).join('');
+  const gasPad=ptwUi.pad.startsWith('gas:')?ptwPadHtml(ptwUi.pad, 'Gas tester signs'):'';
+  const miss=ptwOpenChecks(r), crew=r.crewIds||[];
+  ptwUiFor(r);
+  const q=ptwUi.crewQ.trim().toLowerCase(), sel=ptwUi.crewSel||new Set(crew);
+  const pool=activeWorkers().filter(w=>sel.has(w.id) || ((w.status||'active')==='active' && (!r.projectId || w.projectId===r.projectId || q))).filter(w=>!q || String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q)).sort((a,b)=>(sel.has(b.id)-sel.has(a.id)) || String(a.fullName||'').localeCompare(String(b.fullName||''))).slice(0,120);
+  const changed=JSON.stringify([...sel].sort())!==JSON.stringify([...crew].sort()), now=new Date(), pd=n=>String(n).padStart(2,'0');
+  return `<div class="ptw-steps">${ptwBadge(r)} <span class="wsub">Request → <b>${r.issue?'✓ ':''}Issue</b> → <b>${r.hse?'✓ ':''}HSE countersign</b> → <b>${r.accept?'✓ ':''}Holder accepts</b> → Live</span></div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">Gas tests${hot?' <span class="badge warn">required — '+esc(r.ptwType==='Hot work'?'hot work':'confined space')+'</span>':''}</div>
+    <p class="wsub" style="margin:-2px 0 6px;">Limits: O2 ${L.o2a}–${L.o2b} % · LEL ${L.lelHot} % for hot work / entry, below ${L.lel} % otherwise · H2S below ${L.h2s} ppm · CO below ${L.co} ppm (change in Permit signatories → Settings).</p>
+    ${gl.length?`<div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>Date</th><th>Time</th><th>O2 %</th><th>LEL %</th><th>H2S ppm</th><th>CO ppm</th><th>Tested by</th><th>Signature</th></tr></thead><tbody>${gasRows}</tbody></table></div>`:'<p class="wsub">No gas test recorded.</p>'}${gasPad}
+    ${live?`<form class="ptw-gasform" data-ptw-form="gas"><div class="form-grid ptw-g6"><label>Date<input type="date" name="d" value="${esc(localToday())}" required></label><label>Time<input type="time" name="t" value="${pd(now.getHours())}:${pd(now.getMinutes())}" required></label><label>O2 %<input name="o2" type="number" step="0.1" min="0" max="30" required></label><label>LEL %<input name="lel" type="number" step="0.1" min="0" max="100" required></label><label>H2S ppm<input name="h2s" type="number" step="0.1" min="0" max="500"></label><label>CO ppm<input name="co" type="number" step="0.1" min="0" max="1000"></label>
+      <label class="span-all">Tested by<select name="by" required><option value="">Select…</option>${ptwRoleOpts('g').map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join('')}</select></label></div><div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">+ Save gas reading</button></div></form>`:''}</div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">1. Issue — site engineer / manager (after checking the site)</div>
+    ${r.issue?ptwSigShow(r.issue)+(canEdit()&&!r.hse?`<button type="button" class="att-link" data-ptw-unsign="issue" data-armed="0">remove issue</button>`:'')
+      :pad('issue','Issuer signs — '+ptwWName(ptwUi.iss))||(live?(miss.length?`<div class="notice warn">Before the permit can be issued: <strong>${esc(miss.join(' · '))}</strong>.</div>`:'')+`<div class="form-grid"><label>Issuer<select id="ptwIss"><option value="">Select…</option>${ptwRoleOpts('i', r.holderId).map(o=>`<option value="${esc(o.value)}" ${o.value===ptwUi.iss?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label></div><p class="wsub">The issuer cannot be the permit holder (${esc(ptwHolderName(r)||'—')}).</p><button type="button" class="btn btn-sm btn-primary" data-ptw-sign="issue" ${miss.length?'disabled':''}>✍ Issuer signs</button>`:'<span class="badge warn">Not issued</span>')}</div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">2. HSE countersign</div>
+    ${r.hse?ptwSigShow(r.hse)+(canEdit()&&!r.accept?`<button type="button" class="att-link" data-ptw-unsign="hse" data-armed="0">remove countersign</button>`:'')
+      :pad('hse','HSE countersign')||(!r.issue?'<span class="wsub">After the issuer signs.</span>':live?`${hs.img?'<button type="button" class="btn btn-sm btn-primary" data-ptw-hsemy="1">Use my saved signature</button> ':''}<button type="button" class="btn btn-sm" data-ptw-sign="hse">✍ Sign here</button>`:'<span class="badge warn">Waiting for HSE</span>')}</div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">3. Acceptance — permit holder ${esc(ptwHolderName(r))}</div>
+    <p class="wsub" style="margin:-2px 0 6px;">“I understand the work, hazards and precautions. I have briefed my crew. I stay at the worksite while work goes on; if I leave, work stops. I stop the work if conditions change or an alarm sounds.”</p>
+    ${r.accept?ptwSigShow(r.accept)+(canEdit()&&!Object.keys(r.reval||{}).length&&!r.closeH&&!Object.keys(r.susp||{}).length?`<button type="button" class="att-link" data-ptw-unsign="accept" data-armed="0">remove acceptance</button>`:'')
+      :pad('accept','Permit holder signs — '+ptwHolderName(r))||(!r.hse?'<span class="wsub">After the HSE countersign.</span>':live?(()=>{ const n=ptwLiveOf(r.holderId, r.id).length, mx=ptwCfg().maxLive; return `${n>=mx?`<div class="notice warn">${esc(ptwHolderName(r))} already holds ${n} live permit${n===1?'':'s'} (limit ${mx}). He must be able to watch every job — close one first or choose another holder.</div>`:''}<button type="button" class="btn btn-sm btn-primary" data-ptw-sign="accept" ${n>=mx?'disabled':''}>✍ Holder signs — permit goes live</button>`; })():'')}</div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">4. Crew briefed on this permit (${crew.length})</div>
+    ${live?`<div class="toolbar" style="margin-bottom:6px;"><input type="search" id="ptwCrewQ" placeholder="Search name (any project)…" value="${esc(ptwUi.crewQ)}">${changed?`<button type="button" class="btn btn-sm btn-primary" data-ptw-crewsave="1">Save crew (${sel.size})</button>`:''}</div>
+      <div class="drill-people">${pool.length?pool.map(w=>`<label class="chk drill-pp"><input type="checkbox" data-ptw-cw="${esc(w.id)}" ${sel.has(w.id)?'checked':''}> ${esc(w.fullName||'—')} <span class="wsub">${esc(w.designation||'')}</span></label>`).join(''):'<p class="wsub">Nobody to show — search a name.</p>'}</div>`:''}
+    ${crew.map(id=>{ const s=(r.sigs||{})[id], w=workers.find(x=>x.id===id); return `<div class="trs-row"><div class="trs-who"><strong>${esc(w?w.fullName:'(removed)')}</strong> <span class="wsub">${esc(w?w.designation||'':'')}</span></div><div class="trs-sig">${s?`<img src="${esc(s)}" alt="" class="trs-sigimg"><span class="wsub">${(r.sigVia||{})[id]==='link'?'on own phone':'on screen'}</span>`:ptwUi.pad==='crew:'+id?ptwPadHtml('crew:'+id, 'Briefed — '+(w?w.fullName:'')):r.hse&&live?`<button type="button" class="btn btn-sm" data-ptw-sign="crew:${esc(id)}">✍ Sign here</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`; }).join('')}
+    ${live?`<label class="chk" style="margin-top:8px;"><input type="checkbox" data-ptw-paper="1" ${r.paper?'checked':''}> Signed on a <strong>paper permit</strong> (attach the photo in <strong>Files</strong>)</label>`:''}</div>`; }
+function ptwUiFor(r){ if(ptwUi.id!==r.id){ ptwUi={id:r.id, pad:'', iss:'', iss2:'', draft:null, crewQ:'', crewSel:new Set(r.crewIds||[]), form:''}; } }
+function ptwRunHtml(r){ ptwUiFor(r); const live=ptwLive(r), s=ptwStatus(r), cap=ptwCapMs(r), pd=n=>String(n).padStart(2,'0'), now=new Date();
+  const rv=Object.entries(r.reval||{}).sort((a,b)=>a[0].localeCompare(b[0]));
+  const sp=Object.entries(r.susp||{}).sort((a,b)=>a[0].localeCompare(b[0])), open=ptwSuspOpen(r);
+  const issOpts=sel=>ptwRoleOpts('i', r.holderId).map(o=>`<option value="${esc(o.value)}" ${o.value===sel?'selected':''}>${esc(o.label)}</option>`).join('');
+  const C=r.closeH||{};
+  return `<div class="ptw-steps">${ptwBadge(r)} <span class="wsub">Valid until <strong>${esc(ptwMsTxt(ptwUntilMs(r)))}</strong> · longest possible: ${esc(ptwMsTxt(cap))} (${ptwCfg().maxDays} days from the start)</span></div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">Daily revalidation / shift handover</div>
+    ${rv.length?`<div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>Date</th><th>Time</th><th>Gas test OK</th><th>Holder</th><th>Issuer</th><th>Valid until</th><th>Signature</th></tr></thead><tbody>${rv.map(([d,x])=>`<tr><td>${esc(isoToDmy(d))}</td><td>${esc(x.t||'')}</td><td>${esc(x.gas||'')}</td><td>${esc(x.h||'')}</td><td>${esc(x.n||'')}</td><td>${esc(isoToDmy(x.ud)+' '+(x.ut||''))}</td><td>${x.sig?`<img src="${esc(x.sig)}" alt="" class="trs-sigimg">`:''}</td></tr>`).join('')}</tbody></table></div>`:'<p class="wsub">Not revalidated yet. Each new day (or new shift) the issuer checks the site and signs here before work restarts.</p>'}
+    ${ptwUi.pad==='reval'?ptwPadHtml('reval','Issuer signs the revalidation — '+ptwWName((ptwUi.draft||{}).by))
+      :live&&!r.closeH&&['Live','Expired'].includes(s)?`<form data-ptw-form="reval"><div class="form-grid"><label>Date<input type="date" name="d" value="${esc(localToday())}" required></label><label>Time<input type="time" name="t" value="${pd(now.getHours())}:${pd(now.getMinutes())}" required></label><label>Gas test OK?<select name="gas" required><option value="">Select…</option><option>Yes</option><option>No</option><option>Not needed</option></select></label><label>Incoming holder<input name="h" value="${esc(ptwHolderName(r))}" maxlength="60"></label><label>Issuer<select name="by" required><option value="">Select…</option>${issOpts('')}</select></label><label>Valid until (date)<input type="date" name="ud" value="${esc(localToday())}" required></label><label>Valid until (time)<input type="time" name="ut" value="${esc(r.untilTime||'17:00')}" required></label></div><div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">✍ Revalidate — issuer signs</button></div></form>`:''}</div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">Suspension</div>
+    ${sp.length?sp.map(([id,x])=>{ const re=(r.res||{})[id]; return `<div class="trs-row"><div><strong>Suspended ${esc(ptwFmt(x.at))}</strong> — ${esc(x.r||'')} <span class="wsub">by ${esc(x.n||'')}</span></div><div class="wsub">${re?`Restarted ${esc(ptwFmt(re.at))} by ${esc(re.n||'')}`:'<span class="badge warn">still suspended</span>'}</div></div>`; }).join(''):'<p class="wsub">Never suspended.</p>'}
+    ${live&&!r.closeH?(open?`<button type="button" class="btn btn-sm btn-primary" data-ptw-resume="${esc(open)}">▶ Restart work (site checked again)</button>`
+      :['Live','Expired'].includes(s)?`<form data-ptw-form="susp" class="ptw-inline"><input name="r" maxlength="140" required placeholder="Reason, e.g. gas alarm, sandstorm, prayer break, end of shift"><button type="submit" class="btn btn-sm">⏸ Suspend</button></form>`:''):''}</div>
+  <div class="panel"><div class="subhead" style="margin-top:0;">Close-out</div>
+    ${r.closeH?`<div class="ptw-closeinfo"><strong>${C.done?'Work complete':'Work NOT complete — continues on permit '+esc(C.contNo||'—')}</strong> · ${['tools','clean','iso','fw'].filter(k=>C[k]).map(k=>({tools:'tools removed',clean:'area clean',iso:'isolations removed',fw:'fire watch done'+(C.fwUntil?' until '+C.fwUntil:'')})[k]).join(' · ')}</div>${ptwSigShow(C, ' · holder')}`
+      :ptwUi.pad==='closeH'?ptwPadHtml('closeH','Permit holder signs the close-out — '+ptwHolderName(r))
+      :live&&r.accept?`<form data-ptw-form="close"><div class="ptw-close"><label class="chk"><input type="radio" name="done" value="1" checked> Work complete</label><label class="chk"><input type="radio" name="done" value="0"> Not complete — continues on permit no. <input name="contNo" maxlength="30" style="max-width:150px;"></label>
+        <label class="chk"><input type="checkbox" name="tools"> Tools, materials and waste removed</label><label class="chk"><input type="checkbox" name="clean"> Area left clean and safe</label><label class="chk"><input type="checkbox" name="iso"> Isolations removed / handed back (or none)</label>${r.ptwType==='Hot work'?`<label class="chk"><input type="checkbox" name="fw"> Fire watch completed until <input type="time" name="fwUntil" style="max-width:120px;"></label>`:''}</div>
+        <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">✍ Holder signs the close-out</button></div></form>`:'<span class="wsub">After the holder accepts the permit.</span>'}
+    ${r.closeI?ptwSigShow(r.closeI, ' · issuer — permit closed')
+      :r.closeH?(ptwUi.pad==='closeI'?ptwPadHtml('closeI','Issuer checks the site and closes — '+ptwWName(ptwUi.iss2))
+        :live?`<div class="form-grid" style="margin-top:8px;"><label>Issuer<select id="ptwIss2"><option value="">Select…</option>${issOpts(ptwUi.iss2)}</select></label></div><button type="button" class="btn btn-sm btn-primary" data-ptw-sign="closeI">✍ Issuer signs — permit closed</button>`:''):''}</div>
+  ${r.cancel?`<div class="notice">Cancelled ${esc(ptwFmt(r.cancel.at))} by ${esc(r.cancel.n||'')} — ${esc(r.cancel.r||'')}</div>`
+    :live&&!r.closeH?`<details class="ptw-cancel"><summary>Cancel this permit</summary><form data-ptw-form="cancel" class="ptw-inline"><input name="r" maxlength="140" required placeholder="Reason, e.g. job postponed, wrong permit type"><button type="submit" class="btn btn-sm">Cancel permit</button></form></details>`:''}`; }
+function ptwPdfDoc(P, blank){
+  const LM=ptwCfg().lim, MD=ptwCfg().maxDays;
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'ptw', docSub:blank?'Blank form — Permit + additional permits':`${P.no} · ${P.hot?'Hot work':'Cold work'}${P.adds.length?' + '+P.adds.map(ptwAddLbl).join(' + '):''}`});
+  const g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL, K=92, hw=(CW-2*K)/2;
+  const v=t=>blank?{t:'', blank:true}:{t:t||'—'};
+  const L=(a,b,c,d,h)=>g.row([{t:a, w:K, bold:true, fill:LBL, size:7.8},{...b, w:hw},{t:c, w:K, bold:true, fill:LBL, size:7.8},{...d, w:hw}], h||(blank?20:15));
+  const ynGrid=(items, ans)=>{ const half=CW/2, lw=half-60; g.row([{t:'Check', w:lw, bold:true, fill:LBL, size:7.6},{t:'Yes', w:30, bold:true, fill:LBL, size:7.6, center:true},{t:'N/A', w:30, bold:true, fill:LBL, size:7.6, center:true},{t:'Check', w:lw, bold:true, fill:LBL, size:7.6},{t:'Yes', w:30, bold:true, fill:LBL, size:7.6, center:true},{t:'N/A', w:30, bold:true, fill:LBL, size:7.6, center:true}], 14);
+    for(let i=0;i<items.length;i+=2){ const cells=[]; [items[i], items[i+1]].forEach(it=>{ if(!it){ cells.push({t:'', blank:true, w:lw},{t:'', blank:true, w:30},{t:'', blank:true, w:30}); return; } const a=blank?'':(ans||{})[it[0]]; cells.push({t:it[1], w:lw, size:7.6},{check:a==='y', w:30},{check:a==='na', w:30}); }); g.row(cells, 17); } };
+  const tickRow=(labels, on, per)=>{ const cw=CW/per; for(let i=0;i<labels.length;i+=per){ const cells=[]; for(let j=0;j<per;j++){ const l=labels[i+j]; if(l===undefined){ cells.push({t:'', blank:true, w:cw}); continue; } cells.push({check:!blank&&on.includes(l), w:18},{t:l, w:cw-18, size:7.6}); } g.row(cells, 15); } };
+  const sigCell=(s,w)=>!blank&&s?{img:s, w}:{t:'', blank:true, w};
+
+  /* ---------------- PERMIT ---------------- */
+  g.title('PERMIT TO WORK', blank?'No. ____________':`${P.no} · ${String(P.status||'').toUpperCase()}`, blank?g.SUB:(P.status==='Live'?[15,118,80]:g.RED));
+  g.row([{t:'PERMIT TYPE', w:K, bold:true, fill:LBL, size:7.8},{check:!blank&&P.hot, w:22},{t:'HOT WORK', w:hw-22, bold:true, color:g.RED},{check:!blank&&!P.hot, w:22},{t:'COLD WORK', w:hw-22+K, bold:true}], 18);
+  g.row([{t:'ADDITIONAL PERMITS', w:K, bold:true, fill:LBL, size:7.8}, ...PTW_ADDS.flatMap(([k,l])=>[{check:!blank&&P.adds.includes(k), w:18},{t:l, w:(CW-K)/5-18, size:7.6}])], 18);
+  g.row([{t:'Only valid when signed by the issuer and accepted by the permit holder. A copy stays displayed at the worksite.', w:CW, size:7.6, color:g.SUB}], 15);
+  g.head('1. WORK DETAILS — filled by the applicant (supervisor of the crew)');
+  L('PROJECT / SITE', v(P.project), 'CLIENT PERMIT NO.', v(P.clientPermit));
+  L('EXACT LOCATION', v(P.location), 'EQUIPMENT / TAG', v(P.equip));
+  g.row([{t:'WORK TO BE DONE & LIMITS', w:K, bold:true, fill:LBL, size:7.8},{t:blank?'':P.work, blank:true, w:CW-K, size:8}], blank?40:28);
+  L('START', v(P.start), 'VALID UNTIL', v(P.until));
+  L('CREW COMPANY', v(P.company), 'CREW SIZE', v(P.crew));
+  L('JSA / TRIC NO.', v(P.jsa), 'LINKED PERMITS', v(P.linked));
+  L('APPLIED BY', v(P.applicant), 'WORKING HOURS', v(P.hours));
+  g.head('2. HAZARDS — tick all that apply');
+  tickRow(PTW_HAZ, P.haz||[], 4);
+  g.head('3. PRECAUTIONS — checked on site by the issuer');
+  ynGrid(PTW_GEN, P.gen);
+  if(blank || P.hot){ g.head('4. HOT WORK PRECAUTIONS'+(blank?' — only for hot work':'')); ynGrid(PTW_HOT, P.hotAns); L('FIRE WATCH (NAME)', v(P.fireWatch), 'EXTINGUISHER', v(P.extinguisher)); }
+  g.head('EMERGENCY & WEATHER');
+  L('EMERGENCY PHONE', v(P.emPhone), 'NEAREST CLINIC', v(P.clinic));
+  L('ASSEMBLY POINT', v(P.assembly), 'FIRST AIDER', v(P.firstAider));
+  ynGrid(PTW_WX, P.wx);
+  g.head('PPE REQUIRED');
+  tickRow(PTW_PPE, P.ppe||[], 4);
+  const gasN=blank?4:(P.gas||[]).length;
+  if(blank || gasN){ g.ensure(50+22*Math.min(gasN,4)); g.head(`GAS TEST — limits: O2 ${LM.o2a}–${LM.o2b} % · LEL ${LM.lelHot} % for hot work / entry, else below ${LM.lel} % · H2S below ${LM.h2s} ppm · CO below ${LM.co} ppm`);
+    const gw=[52,52,58,58,58,58,CW-52-52-58*4-90,90];
+    g.row(['Date','Time','O2 %','LEL %','H2S ppm','CO ppm','Tested by (name)','Signature'].map((t,i)=>({t, w:gw[i], bold:true, fill:LBL, size:7.4})), 14);
+    for(let i=0;i<gasN;i++){ const x=blank?{}:P.gas[i]; g.row([x.d,x.t,x.o2,x.lel,x.h2s,x.co,x.by].map((t,j)=>blank?{t:'', blank:true, w:gw[j]}:{t, w:gw[j], size:7.8}).concat([sigCell(x.sig, gw[7])]), blank?20:22); } }
+  g.ensure(130); g.head('5. ISSUE — the issuer cannot issue a permit for his own work');
+  g.row([{t:'', blank:true, w:K, fill:LBL},{t:'Name', w:hw*0.9, bold:true, fill:LBL, size:7.6},{t:'Signature', w:hw*0.7, bold:true, fill:LBL, size:7.6},{t:'Date / time', w:CW-K-hw*1.6, bold:true, fill:LBL, size:7.6}], 14);
+  const role=(lbl, sub, x)=>g.row([{t:lbl, sub, w:K, bold:true, fill:LBL, size:7.6},{t:blank?'':x.n, blank:true, w:hw*0.9, bold:true},sigCell(x.s, hw*0.7),{t:blank?'':x.dt, blank:true, w:CW-K-hw*1.6, size:7.8}], 30);
+  role('ISSUED BY', 'Site engineer / manager', P.issuer||{});
+  role('HSE COUNTERSIGN', 'Every permit', P.hse||{});
+  g.ensure(110); g.head('6. ACCEPTANCE — permit holder');
+  g.row([{t:'I understand the work, hazards and precautions. I have briefed my crew. I will stay at the worksite while work goes on; if I leave, work stops. I will stop work if conditions change or an alarm sounds.', w:CW, size:7.8}], 22);
+  role('PERMIT HOLDER', 'Supervisor at site', P.holder||{});
+  const crew=blank?Array(8).fill({}):((P.crewList||[]).length?P.crewList:Array(4).fill({blankRow:true}));
+  g.row([{t:'#', w:22, bold:true, fill:LBL, size:7.4, center:true},{t:'Crew briefed on this permit — name', w:190, bold:true, fill:LBL, size:7.4},{t:'Designation', w:CW-22-190-130, bold:true, fill:LBL, size:7.4},{t:'Signature', w:130, bold:true, fill:LBL, size:7.4}], 14);
+  crew.forEach((c,i)=>g.row([{t:String(i+1), w:22, center:true, size:7.6},{t:blank?'':c.n, blank:true, w:190, size:7.8},{t:blank?'':c.ds, blank:true, w:CW-22-190-130, size:7.6},blank||c.blankRow||!c.s?{t:blank||c.blankRow?'':(P.paper?'Signed on the paper permit':'NOT SIGNED'), blank:true, w:130, size:7.4, color:P.paper?g.SUB:g.RED}:{img:c.s, w:130}], 20));
+  g.head(`7. DAILY REVALIDATION / SHIFT HANDOVER — up to ${MD} days, new expiry each day`);
+  const rw=[56,40,52,(CW-56-40-52-80-70)/2,(CW-56-40-52-80-70)/2,80,70];
+  g.row(['Date','Time','Gas OK','Permit holder (incoming)','Issuer','Valid until','Issuer sign'].map((t,i)=>({t, w:rw[i], bold:true, fill:LBL, size:7.4})), 14);
+  const rv=blank?Array(5).fill(null):(P.reval||[]).concat(Array(Math.max(0,2-(P.reval||[]).length)).fill(null));
+  rv.forEach(x=>g.row(x?[{t:x.d,w:rw[0],size:7.6},{t:x.t,w:rw[1],size:7.6},{t:x.gas,w:rw[2],size:7.6},{t:x.h,w:rw[3],size:7.6},{t:x.i,w:rw[4],size:7.6},{t:x.u,w:rw[5],size:7.6},sigCell(x.sig, rw[6])]:rw.map(w=>({t:'', blank:true, w})), 22));
+  g.head('8. SUSPENSION — work stopped (permit stays live, isolations stay)');
+  const sw=[90,CW-90-110-110,110,110];
+  g.row(['Date / time','Reason','Suspended by','Restarted (date / by)'].map((t,i)=>({t, w:sw[i], bold:true, fill:LBL, size:7.4})), 14);
+  (blank||!(P.susp||[]).length?Array(2).fill(null):P.susp).forEach(x=>g.row(x?[{t:x.dt,w:sw[0],size:7.8},{t:x.r,w:sw[1],size:7.8},{t:x.by,w:sw[2],size:7.8},{t:x.re,w:sw[3],size:7.8}]:sw.map(w=>({t:'', blank:true, w})), 20));
+  g.ensure(170); g.head('9. CLOSE-OUT');
+  const C=P.close||{};
+  ynGrid([['done','Work complete'],['cont',`Work NOT complete — continues on permit no. ${!blank&&C.contNo?C.contNo:'________'}`],['tools','Tools, materials and waste removed'],['clean','Area left clean and safe'],['iso','Isolations removed / handed back'],['fw',`Fire watch completed until ${!blank&&C.fwUntil?C.fwUntil:'____:____'}`]], C.ans);
+  role('PERMIT HOLDER', 'Work finished / stopped', C.holder||{});
+  role('ISSUER', 'Site checked, permit closed', C.issuer||{});
+
+  /* ---------------- ADDITIONAL PERMITS ---------------- */
+  const addList=blank?PTW_ADDS.map(c=>c[0]):P.adds;
+  for(const k of addList){ const lbl=ptwAddLbl(k), X=(P.xp||{})[k]||{};
+    doc.addPage(); g.y=32;
+    g.title(`ADDITIONAL PERMIT — ${lbl.toUpperCase()}`, blank?'Main permit no. ________':'Main permit '+P.no, blank?g.SUB:g.RED);
+    g.row([{t:'This additional permit goes with the main permit. It is only valid with the main permit and is closed together with it.', w:CW, size:7.8, color:g.SUB}], 15);
+    if(k==='wah'){ L('HEIGHT OF WORK', v(X.height), 'ACCESS', v(X.access)); L('SCAFFOLD TAG NO.', v(X.tag), 'MEWP CERT. NO.', v(X.mewp)); }
+    if(k==='cse'){ L('SPACE / VESSEL', v(X.space), 'ISOLATION PERMIT', v(X.iso)); L('STANDBY MAN', v(X.standby), 'GAS TEST EVERY', v(X.every)); }
+    if(k==='exc'){ L('DEPTH / SIZE', v(X.size), 'SERVICES FOUND', v(X.services)); }
+    if(k==='lift'){ L('LIFT PLAN NO.', v(X.plan), 'CRANE / HIAB', v(X.crane)); L('HEAVIEST LOAD', v(X.load), 'BANKSMAN', v(X.bank)); }
+    g.head('CHECKS');
+    ynGrid(PTW_ADD_ITEMS[k], X.ans);
+    if(k==='iso'){ g.head('ISOLATION POINTS');
+      const iw=[20,(CW-20-56-56-90-90-90),56,56,90,90,90];
+      g.row(['#','Equipment / isolation point','Lock no.','Tag no.','Isolated by / sign','Zero energy proved by','De-isolated by / time'].map((t,i)=>({t, w:iw[i], bold:true, fill:LBL, size:7.2})), 14);
+      for(let i=1;i<=6;i++){ const p=blank?{}:((X.pts||{})[i]||{}); g.row(iw.map((w,j)=>({t:j===0?String(i):(p[['','p','lock','tag','by','proof','de'][j]]||''), blank:j>0, w, size:7.4, center:j===0})), 22); } }
+    if(k==='cse'){ g.head('GAS TEST LOG — before entry and at the set interval');
+      const gw=[52,52,58,58,58,58,CW-52-52-58*4-90,90];
+      g.row(['Date','Time','O2 %','LEL %','H2S ppm','CO ppm','Tested by (name)','Signature'].map((t,i)=>({t, w:gw[i], bold:true, fill:LBL, size:7.4})), 14);
+      const GL=blank?[]:(P.gas||[]); GL.forEach(x=>g.row([x.d,x.t,x.o2,x.lel,x.h2s,x.co,x.by].map((t,j)=>({t, w:gw[j], size:7.8})).concat([sigCell(x.sig, gw[7])]), 22)); for(let i=GL.length;i<Math.max(3,GL.length+2);i++) g.row(gw.map(w=>({t:'', blank:true, w})), 20); }
+    if(k==='cse'){ g.head('ENTRY LOG');
+      const ew=[20,CW-20-4*62,62,62,62,62];
+      g.row(['#','Name of entrant','In','Out','In','Out'].map((t,i)=>({t, w:ew[i], bold:true, fill:LBL, size:7.4})), 14);
+      for(let i=1;i<=8;i++){ const p=blank?{}:((X.log||{})[i]||{}); g.row(ew.map((w,j)=>({t:j===0?String(i):(p[['','n','i1','o1','i2','o2'][j]]||''), blank:j>0, w, size:7.6, center:j===0})), 20); } }
+    g.head('SIGN-OFF');
+    g.row([{t:'', blank:true, w:K, fill:LBL},{t:'Name', w:hw*0.9, bold:true, fill:LBL, size:7.6},{t:'Signature', w:hw*0.7, bold:true, fill:LBL, size:7.6},{t:'Date / time', w:CW-K-hw*1.6, bold:true, fill:LBL, size:7.6}], 14);
+    role('CHECKED BY ISSUER', '', X.issuer||{}); role('PERMIT HOLDER', '', X.holder||{});
+  }
+  return doc;
+}
+function ptwPdfData(r){ const dt=x=>x?ptwFmt(x.at):'', S=x=>x?{n:x.n||'', s:x.sig||'', dt:dt(x)}:{};
+  const gas=ptwGasList(r).map(x=>({d:isoToDmy(x.d), t:x.t||'', o2:x.o2??'', lel:x.lel??'', h2s:x.h2s??'', co:x.co??'', by:x.n||'', sig:x.sig||''}));
+  const C=r.closeH||{}, yn=v=>v?'y':'na';
+  return {no:r.ptwNo||'', status:ptwStatus(r), hot:r.ptwType==='Hot work', adds:r.adds||[], paper:!!r.paper,
+    project:r.projectId?projectName(r.projectId):'Office / yard / camp', clientPermit:r.clientPermit||'Not applicable', location:r.location, equip:r.equip, work:r.work,
+    start:`${isoToDmy(r.startDate)}  ${r.startTime||''}`, until:`${ptwMsTxt(ptwUntilMs(r))}${Object.keys(r.reval||{}).length?' (revalidated)':''}`,
+    company:r.company, crew:String(r.crewSize||(r.crewIds||[]).length||''), jsa:r.jsa, linked:r.linked, applicant:ptwHolderName(r), hours:r.hours,
+    haz:r.haz||[], gen:r.gen||{}, hotAns:r.hotAns||{}, ppe:r.ppe||[], fireWatch:r.fireWatch, extinguisher:r.extinguisher, emPhone:r.emPhone, clinic:r.clinic, assembly:r.assembly, firstAider:r.firstAider, wx:r.wx||{}, gas,
+    issuer:S(r.issue), hse:S(r.hse), holder:S(r.accept),
+    crewList:(r.crewIds||[]).map(id=>{ const w=workers.find(x=>x.id===id)||{}; return {n:w.fullName||'(removed)', ds:w.designation||'', s:(r.sigs||{})[id]||''}; }),
+    reval:Object.entries(r.reval||{}).sort((a,b)=>a[0].localeCompare(b[0])).map(([d,x])=>({d:isoToDmy(d), t:x.t||'', gas:x.gas||'', h:x.h||'', i:x.n||'', u:`${isoToDmy(x.ud)} ${x.ut||''}`, sig:x.sig||''})),
+    susp:Object.entries(r.susp||{}).sort((a,b)=>a[0].localeCompare(b[0])).map(([id,x])=>{ const re=(r.res||{})[id]; return {dt:ptwFmt(x.at), r:x.r||'', by:x.n||'', re:re?`${ptwFmt(re.at)} · ${re.n||''}`:'still suspended'}; }),
+    close:r.closeH?{ans:{done:C.done?'y':'na', cont:C.done?'na':'y', tools:yn(C.tools), clean:yn(C.clean), iso:yn(C.iso), fw:r.ptwType==='Hot work'?yn(C.fw):'na'}, contNo:C.contNo, fwUntil:C.fwUntil, holder:S(r.closeH), issuer:S(r.closeI)}:(r.cancel?{contNo:'', holder:{n:'CANCELLED: '+(r.cancel.r||''), dt:dt(r.cancel)}}:{}),
+    xp:Object.fromEntries((r.adds||[]).map(k=>[k, {...((r.xp||{})[k]||{}), issuer:S(r.issue), holder:S(r.accept)}]))}; }
+async function ptwPdf(r){ if(!compPdfReady()) return; const doc=ptwPdfDoc(ptwPdfData(r), false); doc.save(`PTW_${compSafeName(r.ptwNo)}_${r.startDate||''}.pdf`); }
+async function ptwBlankPdf(){ if(!compPdfReady()) return; const doc=ptwPdfDoc({adds:[]}, true); doc.save('PTW_blank_form.pdf'); }
+
+/* ---- top panel: reminders + signatories ---- */
+let ptwSigOpen=false, ptwSigQ='';
+function ptwSettingsRefresh(){ if(!regState.ptw) return; const sec=document.getElementById('ptwSection'); if(sec && !sec.hidden) renderRegAll('ptw'); }
+function ptwMe(){ const u=auth.currentUser||{}; return (hseSigOf(u.email)||{}).name||u.email||'HSE'; }
+function ptwTopHtml(){ if(!regState.ptw) return ''; const L=regActive('ptw'), hse=L.filter(r=>ptwStatus(r)==='Awaiting HSE'), exp=L.filter(r=>ptwStatus(r)==='Expired'), cl=L.filter(r=>['Live','Suspended'].includes(ptwStatus(r)) && ptwClash(r).length);
+  const item=(r,why)=>`<div class="ind-mrow"><span><strong>${esc(r.ptwNo||'')}</strong> ${esc(r.location||'')} <span class="wsub">· ${esc(ptwTypeTxt(r))} · ${esc(why)}</span></span><button type="button" class="btn btn-sm" data-reg-row="ptw:${esc(r.id)}">Open</button></div>`;
+  return `${ptwSigOpen?ptwSigHtml():''}${hse.length?`<div class="panel rec-remind"><div class="subhead" style="margin-top:0;">✍ ${hse.length} permit${hse.length===1?'':'s'} waiting for your countersign</div>${hse.slice(0,10).map(r=>item(r, 'issued by '+((r.issue||{}).n||'')+' '+ptwFmt((r.issue||{}).at))).join('')}</div>`:''}
+    ${exp.length?`<div class="panel rec-remind ptw-exp"><div class="subhead" style="margin-top:0;">⛔ ${exp.length} permit${exp.length===1?'':'s'} expired but not closed — work must stop</div>${exp.slice(0,10).map(r=>item(r, 'expired '+ptwMsTxt(ptwUntilMs(r)))).join('')}</div>`:''}
+    ${cl.length?`<div class="panel rec-remind"><div class="subhead" style="margin-top:0;">⚠ Live permits at the same location</div>${cl.slice(0,10).map(r=>item(r, 'same place as '+ptwClash(r).map(x=>x.ptwNo).join(', '))).join('')}</div>`:''}`; }
+function ptwSigHtml(){ const C=ptwCfg(), R=C.roles, ed=canEdit(), ids=Object.keys(R).filter(id=>R[id] && R[id].on!==false && workers.some(w=>w.id===id && !w.deleted));
+  const rows=ids.map(id=>workers.find(w=>w.id===id)).sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  const cell=(w,k)=>{ const on=!!(R[w.id]||{})[k]; return `<td><button type="button" class="ptw-b ${on?'on y':''}" ${ed?`data-ptw-role="${esc(w.id)}|${k}"`:'disabled'}>${on?'✓ ':''}${esc(PTW_TRAIN[k].lbl)}</button>${on?'<div>'+ptwTrainBadge(w,k)+'</div>':''}</td>`; };
+  return `<div class="panel ptw-sigs"><div class="section-head"><h3>${ic('users')} Permit signatories</h3><button type="button" class="btn btn-sm" id="ptwSigClose">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Only people on this list can be chosen as <strong>permit holder</strong> (supervisor), <strong>issuer</strong> (engineer / manager) or <strong>gas tester</strong>. While the list is empty, anybody can be chosen. Training is read from the worker records: PTW holder (PTW-H), PTW signatory (PTW-S), gas tester (AGT) or a training named "Permit to Work".</p>
+    ${rows.length?`<div class="ptw-tbl-wrap"><table class="ptw-tbl ptw-sigt"><thead><tr><th>Name</th><th>Holder</th><th>Issuer</th><th>Gas tester</th>${ed?'<th></th>':''}</tr></thead><tbody>${rows.map(w=>`<tr><td><strong>${esc(w.fullName||'—')}</strong><div class="wsub">${esc([w.designation, w.projectId?projectName(w.projectId):''].filter(Boolean).join(' · '))}</div></td>${cell(w,'h')}${cell(w,'i')}${cell(w,'g')}${ed?`<td><button type="button" class="att-link" data-ptw-sigdel="${esc(w.id)}" data-armed="0">remove</button></td>`:''}</tr>`).join('')}</tbody></table></div>`:'<p class="wsub">Nobody on the list yet.</p>'}
+    ${ed?`<div class="toolbar" style="margin-top:8px;"><input type="search" id="ptwSigQ" placeholder="Add a person — search name or designation…" value="${esc(ptwSigQ)}"></div><div id="ptwSigRes">${ptwSigResHtml()}</div>
+    <form data-ptw-form="cfg" style="margin-top:10px;"><div class="subhead">Settings</div><div class="form-grid ptw-g6"><label>Live permits per holder (max)<input type="number" name="maxLive" min="1" max="20" value="${C.maxLive}"></label><label>Longest validity (days)<input type="number" name="maxDays" min="1" max="28" value="${C.maxDays}"></label>
+      <label>O2 min %<input type="number" step="0.1" name="o2a" value="${C.lim.o2a}"></label><label>O2 max %<input type="number" step="0.1" name="o2b" value="${C.lim.o2b}"></label><label>LEL % hot work / entry<input type="number" step="0.1" name="lelHot" value="${C.lim.lelHot}"></label><label>LEL % other work (below)<input type="number" step="0.1" name="lel" value="${C.lim.lel}"></label><label>H2S ppm (below)<input type="number" step="0.1" name="h2s" value="${C.lim.h2s}"></label><label>CO ppm (below)<input type="number" step="0.1" name="co" value="${C.lim.co}"></label></div>
+      <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">Save settings</button></div></form>`:''}</div>`; }
+function ptwSigResHtml(){ const q=ptwSigQ.trim().toLowerCase(); if(q.length<2) return ''; const R=ptwCfg().roles;
+  const L=activeWorkers().filter(w=>(w.status||'active')==='active' && !(R[w.id] && R[w.id].on!==false) && (String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q))).slice(0,10);
+  return L.length?L.map(w=>`<div class="ind-mrow"><span>${esc(w.fullName||'—')} <span class="wsub">${esc(w.designation||'')}</span></span><button type="button" class="btn btn-sm" data-ptw-sigadd="${esc(w.id)}">+ Add</button></div>`).join(''):'<p class="wsub">No match.</p>'; }
+/* ---- saving ---- */
+async function ptwUpd(id, data, msg){ try{ await db.collection('permits').doc(id).update(stamp(data)); if(msg) toast(msg); return true; }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save — '+((e&&e.code)||'error')); return false; } }
+function ptwSetPath(r, path, val){ const p=path.split('.'); if(p.length===1) return {[p[0]]:val}; const top=JSON.parse(JSON.stringify(r[p[0]]||{})); let o=top;
+  for(let i=1;i<p.length-1;i++){ if(!o[p[i]] || typeof o[p[i]]!=='object' || Array.isArray(o[p[i]])) o[p[i]]={}; o=o[p[i]]; } o[p[p.length-1]]=val; return {[p[0]]:top}; }
+let ptwPadImg='';
+function ptwWirePad(){ const cv=document.getElementById('ptwPad'); ptwPadImg=''; if(cv) compPadWire(cv, img=>{ ptwPadImg=img; }); }
+function ptwRedraw(){ const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); }
+function ptwCur(){ if(activeReg!=='ptw') return null; const r=regCurrent(); return r||null; }
+async function ptwSave(r, data, msg){ if(await ptwUpd(r.id, data, msg)){ Object.assign(r, data); ptwRedraw(); return true; } return false; }
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#ptwBlankBtn,#ptwSigBtn,#ptwSigClose,[data-ptw-role],[data-ptw-sigadd],[data-ptw-sigdel],[data-ptw-yn],[data-ptw-sign],[data-ptw-padcancel],[data-ptw-padclr],[data-ptw-padsave],[data-ptw-hsemy],[data-ptw-unsign],[data-ptw-gasdel],[data-ptw-crewsave],[data-ptw-resume]');
+  if(!b || b.disabled) return; const D=b.dataset;
+  if(b.id==='ptwBlankBtn'){ await ptwBlankPdf(); return; }
+  if(b.id==='ptwSigBtn' || b.id==='ptwSigClose'){ ptwSigOpen=b.id==='ptwSigBtn'?!ptwSigOpen:false; renderRegAll('ptw'); return; }
+  if(!canEdit()) return;
+  if(D.ptwRole){ const [id,k]=D.ptwRole.split('|'), cur=(ptwCfg().roles[id]||{}); b.disabled=true; await saveSettings('ptw', {roles:{[id]:{on:true, [k]:!cur[k]}}}, settingsStamp('ptw')); return; }
+  if(D.ptwSigadd){ b.disabled=true; ptwSigQ=''; await saveSettings('ptw', {roles:{[D.ptwSigadd]:{on:true}}}, settingsStamp('ptw')); return; }
+  if(D.ptwSigdel){ if(!compArm(b,'tap again')) return; await saveSettings('ptw', {roles:{[D.ptwSigdel]:{on:false, h:false, i:false, g:false}}}, settingsStamp('ptw')); return; }
+  const r=ptwCur(); if(!r) return; ptwUiFor(r); const at=new Date().toISOString();
+  if(D.ptwYn){ if(!ptwEd(r)) return; const [path,k,v]=D.ptwYn.split('|'); const cur=path.split('.').reduce((o,p)=>(o||{})[p], r)||{}; await ptwSave(r, ptwSetPath(r, path+'.'+k, cur[k]===v?'':v)); return; }
+  if(D.ptwPadcancel){ ptwUi.pad=''; ptwUi.draft=null; ptwRedraw(); return; }
+  if(D.ptwPadclr){ ptwRedraw(); return; }
+  if(D.ptwSign){ const k=D.ptwSign;
+    if(k==='issue'){ const iss=(document.getElementById('ptwIss')||{}).value||''; if(!iss){ toast('Choose the issuer first'); return; } if(iss===r.holderId){ toast('The issuer cannot be the permit holder'); return; } const m=ptwOpenChecks(r); if(m.length){ toast('Not ready to issue — '+m.join(' · ')); return; } ptwUi.iss=iss; }
+    if(k==='closeI'){ const iss=(document.getElementById('ptwIss2')||{}).value||''; if(!iss){ toast('Choose the issuer first'); return; } if(iss===r.holderId){ toast('The issuer cannot be the permit holder'); return; } ptwUi.iss2=iss; }
+    if(k==='accept'){ const n=ptwLiveOf(r.holderId, r.id).length; if(n>=ptwCfg().maxLive){ toast('This holder already has the maximum number of live permits'); return; } }
+    ptwUi.pad=k; ptwRedraw(); return; }
+  if(D.ptwPadsave){ const k=D.ptwPadsave, img=ptwPadImg; if(!img){ toast('Sign in the box first'); return; } let data=null;
+    if(k==='issue'){ if(!ptwUi.iss) return; data={issue:{by:ptwUi.iss, n:ptwWName(ptwUi.iss), sig:img, at, via:'device'}}; }
+    else if(k==='hse') data={hse:{n:ptwMe(), email:(auth.currentUser||{}).email||'', sig:img, at}};
+    else if(k==='accept') data={accept:{by:r.holderId, n:ptwHolderName(r), sig:img, at, via:'device'}};
+    else if(k.startsWith('crew:')){ const id=k.slice(5); data={sigs:{...(r.sigs||{}), [id]:img}, sigVia:{...(r.sigVia||{}), [id]:'device'}}; }
+    else if(k.startsWith('gas:')){ const id=k.slice(4); if(!(r.gas||{})[id]) return; data={gas:{...r.gas, [id]:{...r.gas[id], sig:img}}}; }
+    else if(k==='reval'){ const d=ptwUi.draft; if(!d) return; data={reval:{...(r.reval||{}), [d.d]:{...d, sig:img, at}}}; }
+    else if(k==='closeH'){ const d=ptwUi.draft; if(!d) return; data={closeH:{...d, by:r.holderId, n:ptwHolderName(r), sig:img, at, via:'device'}}; }
+    else if(k==='closeI'){ if(!ptwUi.iss2) return; data={closeI:{by:ptwUi.iss2, n:ptwWName(ptwUi.iss2), sig:img, at, via:'device'}}; }
+    if(!data) return; b.disabled=true; const ok=await ptwUpd(r.id, data, k==='accept'?'Accepted — the permit is LIVE':k==='closeI'?'Permit closed':k==='hse'?'Countersigned':'Signature saved'); b.disabled=false;
+    if(ok){ Object.assign(r, data); ptwUi.pad=''; ptwUi.draft=null; ptwRedraw(); } return; }
+  if(D.ptwHsemy){ const hs=hseSigOf((auth.currentUser||{}).email); if(!hs||!hs.img||!r.issue) return; await ptwSave(r, {hse:{n:hs.name||ptwMe(), email:(auth.currentUser||{}).email||'', sig:hs.img, at}}, 'Countersigned'); return; }
+  if(D.ptwUnsign){ if(!compArm(b,'tap again to remove')) return; const k=D.ptwUnsign; if(k==='issue'&&r.hse) return; if(k==='hse'&&r.accept) return; await ptwSave(r, {[k]:null}, 'Removed'); return; }
+  if(D.ptwGasdel){ if(!compArm(b,'tap again')) return; const g={...(r.gas||{})}; delete g[D.ptwGasdel]; await ptwUpd(r.id, {gas:g}); r.gas=g; ptwRedraw(); return; }
+  if(D.ptwCrewsave){ const ids=[...(ptwUi.crewSel||new Set())]; await ptwSave(r, {crewIds:ids, crewSize:r.crewSize||ids.length}, `Crew saved (${ids.length})`); return; }
+  if(D.ptwResume){ await ptwSave(r, {res:{...(r.res||{}), [D.ptwResume]:{at, n:ptwMe()}}}, 'Work restarted'); return; }
+});
+document.addEventListener('change', async e=>{
+  const t=e.target; if(!t || !t.closest || !canEdit()) return;
+  if(t.id==='ptwIss'){ ptwUi.iss=t.value; return; } if(t.id==='ptwIss2'){ ptwUi.iss2=t.value; return; }
+  if(!(t.matches('[data-ptw-tk],[data-ptw-add],[data-ptw-t],[data-ptw-cw],[data-ptw-paper]'))) return;
+  const r=ptwCur(); if(!r) return; ptwUiFor(r);
+  if(t.dataset.ptwCw){ const s=ptwUi.crewSel||new Set(); if(t.checked) s.add(t.dataset.ptwCw); else s.delete(t.dataset.ptwCw); ptwUi.crewSel=s; ptwRedraw(); return; }
+  if(t.dataset.ptwPaper){ await ptwSave(r, {paper:t.checked}); return; }
+  if(t.dataset.ptwTk){ if(!ptwEd(r)) return; const g=t.dataset.ptwTk, vals=[...document.querySelectorAll(`[data-ptw-tk="${g}"]:checked`)].map(x=>x.value); await ptwSave(r, {[g]:vals}); return; }
+  if(t.dataset.ptwAdd){ if(!ptwEd(r)) return; const vals=[...document.querySelectorAll('[data-ptw-add]:checked')].map(x=>x.value); await ptwSave(r, {adds:PTW_ADDS.map(a=>a[0]).filter(k=>vals.includes(k))}); return; }
+  if(t.dataset.ptwT){ const path=t.dataset.ptwT, v=String(t.value||'').trim(); await ptwUpd(r.id, ptwSetPath(r, path, v)); Object.assign(r, ptwSetPath(r, path, v)); return; }
+});
+document.addEventListener('input', e=>{ const t=e.target; if(!t) return;
+  if(t.id==='ptwCrewQ'){ ptwUi.crewQ=t.value; ptwRedraw(); const n=document.getElementById('ptwCrewQ'); if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); } return; }
+  if(t.id==='ptwSigQ'){ ptwSigQ=t.value; const el=document.getElementById('ptwSigRes'); if(el) el.innerHTML=ptwSigResHtml(); }
+});
+document.addEventListener('submit', async e=>{
+  const f=e.target; if(!(f instanceof HTMLFormElement) || !f.dataset.ptwForm) return; e.preventDefault(); if(!canEdit()) return;
+  const k=f.dataset.ptwForm, F=Object.fromEntries(new FormData(f).entries()), at=new Date().toISOString(), num=v=>v===''||v===undefined?'':Number(v);
+  if(k==='cfg'){ const n=x=>Number(F[x]); await saveSettings('ptw', {maxLive:Math.max(1,n('maxLive')||3), maxDays:Math.max(1,n('maxDays')||7), limits:{o2a:n('o2a'), o2b:n('o2b'), lelHot:n('lelHot'), lel:n('lel'), h2s:n('h2s'), co:n('co')}}, settingsStamp('ptw')); return; }
+  const r=ptwCur(); if(!r) return; ptwUiFor(r);
+  if(k==='gas'){ const id='g'+Date.now().toString(36), x={d:F.d, t:F.t, o2:num(F.o2), lel:num(F.lel), h2s:num(F.h2s), co:num(F.co), by:F.by, n:ptwWName(F.by), at};
+    const bad=ptwGasBad(r, x); if(await ptwSave(r, {gas:{...(r.gas||{}), [id]:x}}, bad.length?`Saved — OUTSIDE LIMITS (${bad.join(', ')}): do not start work`:'Gas reading saved')){ ptwUi.pad='gas:'+id; ptwRedraw(); } return; }
+  if(k==='reval'){ if((r.reval||{})[F.d]){ toast('Already revalidated for that date'); return; } if(F.gas==='No'){ toast('Gas test not OK — work cannot continue. Suspend the permit.'); return; }
+    if(ptwNeedsGas(r) && F.gas!=='Yes'){ toast('Hot work / confined space: a good gas test is needed before revalidation'); return; }
+    if(F.by===r.holderId){ toast('The issuer cannot be the permit holder'); return; }
+    let ud=F.ud, ut=F.ut; const cap=ptwCapMs(r); if(cap && ptwMs(ud,ut)>cap){ const c=new Date(cap), p=n=>String(n).padStart(2,'0'); ud=`${c.getFullYear()}-${p(c.getMonth()+1)}-${p(c.getDate())}`; ut=`${p(c.getHours())}:${p(c.getMinutes())}`; toast(`Limited to ${ptwCfg().maxDays} days from the start — valid until ${isoToDmy(ud)} ${ut}`); }
+    ptwUi.draft={d:F.d, t:F.t, gas:F.gas, h:F.h||ptwHolderName(r), by:F.by, n:ptwWName(F.by), ud, ut}; ptwUi.pad='reval'; ptwRedraw(); return; }
+  if(k==='susp'){ const id='s'+Date.now().toString(36); await ptwSave(r, {susp:{...(r.susp||{}), [id]:{at, n:ptwMe(), r:String(F.r||'').trim()}}}, 'Permit suspended — work stopped'); return; }
+  if(k==='close'){ const done=F.done==='1'; if(!done && !String(F.contNo||'').trim()){ toast('Write the permit no. the work continues on'); return; }
+    if(r.ptwType==='Hot work' && done && !F.fw){ toast('Hot work: confirm the fire watch finished (30 min after the work)'); return; }
+    ptwUi.draft={done, contNo:String(F.contNo||'').trim(), tools:!!F.tools, clean:!!F.clean, iso:!!F.iso, fw:!!F.fw, fwUntil:F.fwUntil||''}; ptwUi.pad='closeH'; ptwRedraw(); return; }
+  if(k==='cancel'){ await ptwSave(r, {cancel:{at, n:ptwMe(), r:String(F.r||'').trim()}}, 'Permit cancelled'); return; }
+});
 
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
