@@ -1124,6 +1124,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .trs-row{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:8px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;} .trs-who{min-width:180px;} .trs-sig{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
 .trs-sigimg{height:44px; max-width:180px; background:#fff; border-radius:6px; border:1px solid var(--line); padding:2px;} .trs-trainer{border-top:2px solid var(--line); margin-top:6px;}
 .trs-link{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 10px; border:1px dashed var(--line); border-radius:8px; margin-bottom:8px;} .trs-link.on{border-style:solid; border-color:var(--ok); background:var(--ok-bg);}
+.rec-remind{border-left:3px solid var(--warn);} .pack-g{max-width:640px;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
@@ -2285,7 +2286,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2989,7 +2990,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b95';
+const APP_BUILD='b96';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4519,13 +4520,14 @@ const IMS_BHN_EXTRA=[
   ['F0723-07','Employee HSE Record','Form','P0723-01','workerProfile','Made by the tracker — Workforce → worker profile PDF'],
   ['F0740-02','Toolbox Talk Record','Form','P0740-01','',''],
   ['F0740-03','Safety Alert','Form','P0740-01','alert','Made by the tracker — Safety Alerts → Alert PDF'],
+  ['F0740-04','Minutes of Meeting (MOM)','Form','P0740-01','mom','Made by the tracker — Meetings → meeting → MOM PDF'],
   ['F0913-04','Yearly HSE Report','Form','P0913-02','yearlyReport','Made by the tracker — Monthly Report → yearly PDF'],
   ['F0913-05','Client Monthly HSE Report','Form','P0913-02','clientPack','Made by the tracker — Monthly Report → client report'],
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -6520,6 +6522,7 @@ function renderRegDrawer(){
   applyShowWhen(b); if(activeReg==='scaff'){ updateScaffKm(b); updateCrewCheck(b); }
   if(activeReg==='lift') updateLiftCalc(b);
   if(activeReg==='trs' && typeof trsUi!=='undefined' && trsUi.pad) trsWirePad();   // Batch 95
+  if(activeReg==='meetings' && typeof momUi!=='undefined' && momUi.pad) momWirePad();   // Batch 96
 }
 function regFormTabHtml(cfg, r, t){
   const head = t.key==='main' ? `${cfg.badgesOf?`<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">${cfg.badgesOf(r)}</div>`:''}${updatedNoteHtml(r)}` : '';
@@ -6827,6 +6830,10 @@ function mtgStatusBadge(r){ const s=r.status||'Scheduled'; return `<span class="
 regDefine({
   key:'meetings', collection:'meetings', singular:'Meeting', title:'Meetings & Management Review', tagline:'Consult · Decide · Act',
   addLabel:'+ New meeting', noField:'mtgNo', noPrefix:'MTG', noYear:true, dateField:'date', yearFilter:true, statuses:['Scheduled','Held — minutes draft','Minutes issued'],
+  headerButtons:'<button class="btn btn-sm" type="button" id="momBlankBtn">'+ic('printer')+' Blank MOM sheet</button><button class="btn btn-sm" type="button" data-pack-toggle="meetings">'+ic('download')+' MOM pack</button>',
+  topPanel:()=>{ const el=document.getElementById('meetingsTop'); if(el && typeof packTopHtml==='function') el.innerHTML=packTopHtml('meetings'); },
+  onData:()=>{ if(typeof momDeepLink!=='function') return; if(canEdit()){ ppeLinkSyncSoon(); trsProcessSigs(); } momDeepLink(); },
+  pdf:r=>momPdf(r), pdfLabel:'MOM PDF',
   searchPlaceholder:'Search meeting, chair, agenda…', emptyEditor:'No meetings yet — record HSE committee meetings and management reviews here with their minutes and actions.',
   titleOf:r=>r.type||'Meeting', subOf:r=>[r.date, r.chair?'chair '+r.chair:'', r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), badgesOf:r=>mtgStatusBadge(r),
   searchText:r=>[r.mtgNo,r.type,r.chair,r.agenda,r.minutes].join(' '),
@@ -6855,6 +6862,7 @@ regDefine({
       {key:'mrChanges', label:'Changes needed to the HSE management system / policy / objectives', type:'textarea', wide:true},
       {key:'mrResources', label:'Resources needed', type:'textarea', wide:true},
     ]},
+    {key:'att', label:'Attendance & signatures', html:r=>momAttHtml(r)},
     {key:'sub:actions', label:'Actions', sub:'actions'}],
   subs:{actions:actionSub('Actions from this meeting')},
   files:[{key:'minutesFile', label:'Signed minutes'},{key:'attendanceFile', label:'Attendance sheet'},{key:'presentationFile', label:'Presentation / supporting pack'}],
@@ -7989,7 +7997,8 @@ async function trsSyncRecords(r){
 regDefine({
   key:'trs', collection:'trainSessions', singular:'Training session', title:'Training Records', tagline:'Train · Sign · Record — on the spot',
   addLabel:'+ New training session', noField:'trsNo', noPrefix:'TRS', noYear:true, dateField:'date', yearFilter:true, statuses:['Draft','Completed'], statusOf:r=>r.status||'Draft',
-  headerButtons:'<button class="btn btn-sm" type="button" id="trsBlankBtn">'+ic('printer')+' Blank attendance sheet</button>',
+  headerButtons:'<button class="btn btn-sm" type="button" id="trsBlankBtn">'+ic('printer')+' Blank attendance sheet</button><button class="btn btn-sm" type="button" data-pack-toggle="trs">'+ic('download')+' Records pack</button>',
+  topPanel:()=>{ const el=document.getElementById('trsTop'); if(el && typeof packTopHtml==='function') el.innerHTML=packTopHtml('trs'); },
   searchPlaceholder:'Search topic, trainer, attendee…', emptyEditor:'No training sessions yet — create one before or during the training; attendees sign on your phone or on their own phone (project link).',
   titleOf:r=>r.topic||'Training', subOf:r=>[isoToDmy(r.date), r.trainer?'by '+r.trainer:'', r.projectId?projectName(r.projectId):r.venue].filter(Boolean).join(' · '),
   badgesOf:r=>{ const s=trsStats(r), late=trsLate(r); return `${trsStatusBadge(r)} <span class="badge ${s.missing&&!r.paper?'warn':'ok'}">${s.signed}/${s.n} signed${r.paper?' + paper sheet':''}</span>${late?` <span class="badge muted" title="Recorded in the tracker ${late} days after the training">entered ${late} days later</span>`:''}`; },
@@ -8092,9 +8101,10 @@ function startTrsSigData(){ stopTrsSigData(); if(!auth.currentUser || !canEdit()
 function stopTrsSigData(){ if(unsubTrsSigs){ try{ unsubTrsSigs(); }catch(e){} } unsubTrsSigs=null; trsSigList=[]; }
 async function trsProcessSigs(){
   if(!canEdit() || !regState.trs) return;
-  for(const t of trsSigList){ if(trsSigBusy.has(t.id)) continue; const r=regState.trs.list.find(x=>x.id===t.sesId); if(!r) continue; trsSigBusy.add(t.id);
-    try{ if((r.attIds||[]).includes(t.workerId) && !trsSigned(r, t.workerId) && typeof t.sig==='string' && t.sig.startsWith('data:image/') && r.status!=='Completed')
-        await db.collection('trainSessions').doc(r.id).update({['sigs.'+t.workerId]:t.sig, ['sigVia.'+t.workerId]:'link', updatedAt:new Date().toISOString()});
+  for(const t of trsSigList){ if(trsSigBusy.has(t.id)) continue; const isM=String(t.sesId||'').startsWith('m_');   // Batch 96: 'm_<meetingId>' = a meeting
+    const r=isM ? (regState.meetings && regState.meetings.list.find(x=>x.id===String(t.sesId).slice(2))) : regState.trs.list.find(x=>x.id===t.sesId); if(!r) continue; trsSigBusy.add(t.id);
+    try{ if((r.attIds||[]).includes(t.workerId) && !trsSigned(r, t.workerId) && typeof t.sig==='string' && t.sig.startsWith('data:image/') && (isM || r.status!=='Completed'))
+        await db.collection(isM?'meetings':'trainSessions').doc(r.id).update({['sigs.'+t.workerId]:t.sig, ['sigVia.'+t.workerId]:'link', updatedAt:new Date().toISOString()});
       await db.collection('trainSigs').doc(t.id).delete(); }
     catch(e){ console.warn('training signature', e); trsSigBusy.delete(t.id); } }
 }
@@ -8102,7 +8112,7 @@ function trsLinkPayload(pid){
   const out={}, now=Date.now(); if(!regState.trs) return out;
   for(const r of regActive('trs')){ if(!r.signOpen || r.projectId!==pid || !(Number(r.signUntil)>now) || r.status==='Completed') continue;
     out[r.id]={t:String(r.topic||'').slice(0,120), d:r.date||'', tr:String(r.trainer||'').slice(0,60), m:Number(r.durationMin)||0, c:String(r.contents||'').slice(0,400), until:Number(r.signUntil), ws:(r.attIds||[]).filter(w=>!trsSigned(r,w)), sg:(r.attIds||[]).filter(w=>trsSigned(r,w))}; }
-  return out;
+  return typeof momLinkPayload==='function' ? {...out, ...momLinkPayload(pid)} : out;   // Batch 96: meetings use the same signing
 }
 /* ---- deep link from the QR code on the paper sheet: #trs=<id> opens the session's Files tab, #trs=new starts one ---- */
 let trsDeepDone=false;
@@ -8169,6 +8179,147 @@ document.addEventListener('change', async e=>{ const el=e.target; if(!el || !el.
   if(el.dataset.trsW && trsUi.sel){ if(el.checked) trsUi.sel.add(el.dataset.trsW); else trsUi.sel.delete(el.dataset.trsW); const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); return; }
   if(el.dataset.trsPaper && canEdit()){ await trsUpd(el.dataset.trsPaper, {paper:el.checked}, el.checked?'Marked as signed on paper — attach the photo in Files':'Paper sheet removed'); return; } });
 document.addEventListener('input', e=>{ if(e.target && e.target.id==='trsQ'){ trsUi.q=e.target.value; renderRegDrawer(); const s=document.getElementById('trsQ'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } } });
+
+/* =============================== Batch 96: Minutes of meeting (MOM) with signatures + record packs + reminders =============================== */
+// Meetings get the same attendance as training sessions: attIds + visitors, sigs/sigVia ('device' | 'link'), signOpen/signUntil (the project link
+// lists it as train['m_'+id] with k:'mom' — signatures arrive through trainSigs and are merged by trsProcessSigs), chairSig + minutesSig, paper sheet.
+const momKeys=r=>[...(r.attIds||[]), ...(r.visitors||[]).map(v=>v.id)];
+function momStats(r){ const ks=momKeys(r), s=ks.filter(k=>trsSigned(r,k)).length; return {n:ks.length, signed:s, missing:ks.length-s, link:Object.values(r.sigVia||{}).filter(v=>v==='link').length}; }
+const momHeld=r=>!!r.date && r.date<=localToday() && (r.status||'Scheduled')!=='Scheduled';
+function momLate(r){ const c=isoToLocalDate(r.createdAt||''); if(!c || !r.date) return 0; const d=(new Date(c+'T00:00:00')-new Date(r.date+'T00:00:00'))/864e5; return d>1?Math.round(d):0; }
+let momUi={id:'', q:'', pad:'', sel:null, vis:false};
+async function momUpd(id, data, msg){ try{ await db.collection('meetings').doc(id).update(stamp(data)); if(msg) toast(msg); return true; }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save — '+((e&&e.code)||'error')); return false; } }
+function momAttHtml(r){
+  if(momUi.id!==r.id){ momUi={id:r.id, q:'', pad:'', sel:new Set(r.attIds||[]), vis:false}; }
+  const ed=canEdit(), st=momStats(r), hs=hseSigOf((auth.currentUser||{}).email)||{}, link=r.projectId?ppeLinkOf(r.projectId):null, q=momUi.q.trim().toLowerCase();
+  const changed=JSON.stringify([...momUi.sel].sort())!==JSON.stringify([...(r.attIds||[])].sort());
+  const pool=activeWorkers().filter(w=>momUi.sel.has(w.id) || ((w.status||'active')==='active' && (q || (r.projectId?w.projectId===r.projectId:workerDivKey(w)==='Office staff')))).filter(w=>!q || String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q)).sort((a,b)=>(momUi.sel.has(b.id)-momUi.sel.has(a.id)) || String(a.fullName||'').localeCompare(String(b.fullName||''))).slice(0,150);
+  const pad=k=>`<div class="hse-sig-pad"><canvas id="momPad" width="600" height="200"></canvas></div><div style="display:flex; gap:6px; margin-top:4px;"><button type="button" class="btn btn-sm" data-mom-padcancel="1">Cancel</button><button type="button" class="btn btn-sm" data-mom-padclr="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-mom-padsave="${esc(k)}">Save signature</button></div>`;
+  const row=(k,name,sub)=>{ const s=(r.sigs||{})[k], via=(r.sigVia||{})[k];
+    return `<div class="trs-row"><div class="trs-who"><strong>${esc(name)}</strong> <span class="wsub">${esc(sub||'')}</span></div><div class="trs-sig">${s?`<img src="${esc(s)}" alt="signature" class="trs-sigimg"><span class="wsub">${via==='link'?'on own phone':'on screen'}</span>${ed?` <button type="button" class="att-link" data-mom-unsign="${esc(k)}" data-armed="0">remove</button>`:''}`
+      :momUi.pad===k?pad(k):(ed?`<button type="button" class="btn btn-sm" data-mom-sign="${esc(k)}">✍ Sign here</button>`:'<span class="badge warn">Not signed</span>')+(r.paper?' <span class="wsub">signed on the paper sheet</span>':'')}</div></div>`; };
+  const role=(k,label,img)=>`<div class="trs-row trs-trainer"><div class="trs-who"><strong>${esc(label)}</strong></div><div class="trs-sig">${img?`<img src="${esc(img)}" alt="" class="trs-sigimg">${ed?` <button type="button" class="att-link" data-mom-unsign="${k}" data-armed="0">remove</button>`:''}`
+    :momUi.pad===k?pad(k):ed?`${hs.img?`<button type="button" class="btn btn-sm btn-primary" data-mom-mysig="${k}">Use my saved signature</button> `:''}<button type="button" class="btn btn-sm" data-mom-sign="${k}">✍ Sign here</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`;
+  return `<div class="trs-head">${mtgStatusBadge(r)} <span class="badge ${st.n&&st.missing&&!r.paper?'warn':'ok'}">${st.signed} of ${st.n} signed</span>${r.paper?' <span class="badge muted">Paper sheet</span>':''}${momLate(r)?` <span class="badge muted">entered ${momLate(r)} days later</span>`:''}
+      <span style="margin-left:auto; display:flex; gap:6px; flex-wrap:wrap;"><button type="button" class="btn btn-sm" data-mom-sheet="${esc(r.id)}">${ic('printer')} Print MOM sheet (QR)</button><button type="button" class="btn btn-sm btn-primary" data-mom-pdf="${esc(r.id)}">${ic('download')} MOM PDF</button></span></div>
+    ${ed?`<div class="panel trs-pick"><div class="subhead" style="margin-top:0;">1. Who attended?</div>
+      <div class="toolbar" style="margin-bottom:6px;"><input type="search" id="momQ" placeholder="Search name or designation…" value="${esc(momUi.q)}"><button type="button" class="btn btn-sm" data-mom-tickall="1">Tick all shown</button>${changed?`<button type="button" class="btn btn-sm btn-primary" data-mom-attsave="${esc(r.id)}">Save attendees (${momUi.sel.size})</button>`:''}</div>
+      <div class="drill-people">${pool.length?pool.map(w=>`<label class="chk drill-pp"><input type="checkbox" data-mom-w="${esc(w.id)}" ${momUi.sel.has(w.id)?'checked':''}> ${esc(w.fullName||'—')} <span class="wsub">${esc(w.designation||'')}</span></label>`).join(''):'<p class="wsub">Search a name to add people.</p>'}</div>
+      ${momUi.vis?`<div class="form-grid" style="margin-top:8px;"><label>Name<input id="momVn" maxlength="60"></label><label>Company / role<input id="momVc" maxlength="60" placeholder="e.g. PDO — Contract holder"></label></div><div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm" data-mom-vis="0">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-mom-visadd="${esc(r.id)}">Add</button></div>`
+        :`<button type="button" class="att-link" data-mom-vis="1" style="margin-top:6px;">+ Add a person who is not in the register (client, visitor, management)</button>`}</div>`:''}
+    <div class="panel"><div class="subhead" style="margin-top:0;">2. Signatures</div>
+      ${ed&&r.projectId?`<div class="trs-link ${r.signOpen?'on':''}">${!link?`<span class="wsub">The project has no project link — attendees sign on this phone.</span>`:r.signOpen?`<span>📱 <strong>Signing is open on the project link</strong> until ${esc(new Date(Number(r.signUntil)).toLocaleString('en-GB',{day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}))}.</span><button type="button" class="btn btn-sm" data-mom-link="off">Close signing</button>`
+        :`<span class="wsub">Attendees of ${esc(projectName(r.projectId)||'')} can sign on their own phone (project link).</span><button type="button" class="btn btn-sm btn-primary" data-mom-link="on">📱 Open signing on the project link (24 h)</button>`}</div>`:''}
+      ${momKeys(r).length?`${(r.attIds||[]).map(id=>{ const w=workers.find(x=>x.id===id); return row(id, w?w.fullName:'(removed)', w?w.designation||'':''); }).join('')}${(r.visitors||[]).map(v=>row(v.id, v.n, v.co||'guest')).join('')}`:`<p class="wsub">${r.attendees?'Attendees are written as text on the Meeting tab — tick them here to collect signatures.':'Tick the attendees above first.'}</p>`}
+      ${role('__minutes', 'Minutes recorded by'+(r.minutesSig&&r.minutesBy?' — '+r.minutesBy:' (HSE)'), r.minutesSig)}${role('__chair', 'Chaired by — '+(r.chair||''), r.chairSig)}
+      ${ed?`<label class="chk" style="margin-top:8px;"><input type="checkbox" data-mom-paper="${esc(r.id)}" ${r.paper?'checked':''}> Attendees signed a <strong>paper sheet</strong> (attach the photo in <strong>Files → Attendance sheet</strong>)</label>`:''}</div>
+    <p class="wsub">Recorded in the tracker on ${esc(isoToDmy(isoToLocalDate(r.createdAt||''))||'—')} by ${esc(r.createdBy||'—')}. Set the status to <strong>Minutes issued</strong> on the Meeting tab when the minutes are final.</p>`;
+}
+let momPadImg='';
+function momWirePad(){ const cv=document.getElementById('momPad'); momPadImg=''; if(cv) compPadWire(cv, img=>{ momPadImg=img; }); }
+function momLinkPayload(pid){ const out={}, now=Date.now(); if(!regState.meetings) return out;
+  for(const r of regActive('meetings')){ if(!r.signOpen || r.projectId!==pid || !(Number(r.signUntil)>now)) continue;
+    out['m_'+r.id]={k:'mom', t:String(r.type||'Meeting').slice(0,80)+(r.mtgNo?' · '+r.mtgNo:''), d:r.date||'', tr:String(r.chair||'').slice(0,60), m:0, c:String(r.agenda||'').slice(0,400), until:Number(r.signUntil), ws:(r.attIds||[]).filter(w=>!trsSigned(r,w)), sg:(r.attIds||[]).filter(w=>trsSigned(r,w))}; }
+  return out; }
+/* ---- MOM PDF (BHN-F0740-04) — also the paper sheet with a QR code ---- */
+async function momPdfBody(doc, r, blank, qr){
+  const g=compGrid(doc, 32), CW=g.CW, K=96, hw=(CW-2*K)/2, LBL=g.LBL, v=t=>blank&&!t?{t:'', blank:true}:{t:t||'—'};
+  g.title('MINUTES OF MEETING (MOM)', blank?'Sign below':((r.status||'')==='Minutes issued'?'ISSUED':'DRAFT'), blank?g.SUB:(r.status==='Minutes issued'?[15,118,80]:g.RED));
+  if(qr) g.row([{t:`Scan to attach the photo of this signed sheet in the HSE tracker${r&&r.mtgNo?' — '+r.mtgNo:''}`, w:CW-90, size:8, color:g.SUB},{img:qr, w:90}], 78);
+  const L=(a,b,c,d)=>g.row([{t:a, w:K, bold:true, fill:LBL},{...b, w:hw},{t:c, w:K, bold:true, fill:LBL},{...d, w:hw}], blank?20:15);
+  L('MEETING', v(r.type), 'MEETING NO.', v(r.mtgNo)); L('DATE / TIME', v([isoToDmy(r.date), r.time].filter(Boolean).join('  ')), 'LOCATION', v([r.projectId?projectName(r.projectId):'', r.location].filter(Boolean).join(' · ')));
+  L('CHAIRED BY', v(r.chair), 'NEXT MEETING', v(isoToDmy(r.nextMeeting)));
+  const keys=blank?[]:momKeys(r);
+  g.head(`ATTENDANCE${keys.length?' ('+keys.length+')':''}`);
+  g.row([{t:'#', w:24, bold:true, fill:LBL, center:true},{t:'Name', w:170, bold:true, fill:LBL},{t:'Designation / company', w:CW-24-170-150, bold:true, fill:LBL},{t:'Signature', w:150, bold:true, fill:LBL}], 16);
+  if(blank){ const pre=(r.attIds||[]).map(id=>({n:trsName(r,id), ds:(workers.find(x=>x.id===id)||{}).designation||''})); pre.forEach((p,i)=>g.row([{t:String(i+1), w:24, center:true},{t:p.n, w:170},{t:p.ds, w:CW-24-170-150},{t:'', blank:true, w:150}], 22));
+    for(let i=0;i<Math.max(3, (qr?8:11)-pre.length);i++) g.row([{t:String(pre.length+i+1), w:24, center:true},{t:'', blank:true, w:170},{t:'', blank:true, w:CW-24-170-150},{t:'', blank:true, w:150}], 22); }
+  else if(keys.length) keys.forEach((k,i)=>{ const vis=(r.visitors||[]).find(x=>x.id===k), w=workers.find(x=>x.id===k), sg=(r.sigs||{})[k];
+    g.row([{t:String(i+1), w:24, center:true},{t:trsName(r,k), w:170, bold:true},{t:vis?(vis.co||'Guest'):(w?w.designation||'':''), w:CW-24-170-150, size:7.8},sg?{img:sg, w:150}:{t:r.paper?'Signed on the paper sheet (attached)':'NOT SIGNED', w:150, size:7.6, color:r.paper?g.SUB:g.RED}], 26); });
+  else g.row([{t:r.attendees||'—', w:CW, size:8}]);
+  if(r.apologies) g.row([{t:'APOLOGIES / ABSENT', w:K, bold:true, fill:LBL, size:7.8},{t:r.apologies, w:CW-K, size:8}]);
+  g.head('AGENDA'); g.row([{t:r.agenda||'', blank:true, w:CW, size:8.2}], blank?34:16);
+  g.head('DISCUSSION / MINUTES'); g.row([{t:r.minutes||'', blank:true, w:CW, size:8.2}], blank?76:16);
+  g.head('DECISIONS'); g.row([{t:r.decisions||'', blank:true, w:CW, size:8.2}], blank?34:16);
+  const acts=r.actions||[];
+  const actBlank=blank&&!acts.length; g.head(`ACTIONS${acts.length?' ('+acts.length+')':''}`);
+  g.row([{t:'#', w:24, bold:true, fill:LBL, center:true},{t:'Action', w:CW-24-120-70-70, bold:true, fill:LBL},{t:'Owner', w:120, bold:true, fill:LBL},{t:'Target', w:70, bold:true, fill:LBL},{t:'Status', w:70, bold:true, fill:LBL}]);
+  if(actBlank) for(let i=0;i<3;i++) g.row([{t:String(i+1), w:24, center:true},{t:'', blank:true, w:CW-24-120-70-70},{t:'', blank:true, w:120},{t:'', blank:true, w:70},{t:'', blank:true, w:70}], 20);
+  else if(acts.length) acts.forEach((a,i)=>g.row([{t:String(i+1), w:24, center:true},{t:a.action||'', w:CW-24-120-70-70, size:8},{t:a.owner||'—', w:120, size:8},{t:isoToDmy(a.targetDate)||'—', w:70, size:8},{t:a.status||'Open', w:70, size:8}]));
+  else g.row([{t:'No actions.', w:CW, color:g.SUB}]);
+  g.ensure(blank?84:100); g.y+=6; const hs=hseSigOf((auth.currentUser||{}).email)||{};
+  g.row([{t:'MINUTES BY', w:K, bold:true, fill:LBL},{...v(blank?'':(r.minutesBy||(r.minutesSig?hs.name:''))), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},!blank&&r.minutesSig?{img:r.minutesSig, w:hw}:{t:'', blank:true, w:hw}], blank?38:40);
+  g.row([{t:'CHAIRED BY', w:K, bold:true, fill:LBL},{...v(r.chair), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},!blank&&r.chairSig?{img:r.chairSig, w:hw}:{t:'', blank:true, w:hw}], blank?38:40);
+  if(!blank){ const st=momStats(r), late=momLate(r); g.y+=6; g.row([{t:`Recorded in the HSE tracker on ${isoToDmy(isoToLocalDate(r.createdAt||''))} by ${r.createdBy||'—'}${late?` — ${late} days after the meeting (entered later${r.paper?' from the signed paper sheet':''})`:''}.${st.n?` Signatures: ${st.signed-st.link} on screen, ${st.link} on the attendee's own phone (project link)${r.paper?', paper sheet photo attached':''}.`:''}`, w:CW, size:7.4, color:g.SUB}]); }
+}
+async function momPdf(r){ if(!compPdfReady()) return; const doc=pdfDoc({unit:'pt', format:'a4', docKey:'mom', docSub:`${r.mtgNo||''} · ${r.type||''}`}); await momPdfBody(doc, r, false, null); doc.save(`MOM_${compSafeName(r.mtgNo)}_${r.date||''}.pdf`); }
+async function momSheetPdf(r){ if(!compPdfReady()) return; let qr=null; try{ qr=(await qrCanvas(location.origin+location.pathname+'#mtg='+((r&&r.id)||'new'), 300)).toDataURL('image/png'); }catch(e){ console.warn('QR', e); }
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'mom', docSub:r&&r.mtgNo?`${r.mtgNo} · paper sheet`:'Blank MOM sheet'}); await momPdfBody(doc, r||{}, true, qr); doc.save(r&&r.mtgNo?`MOM_sheet_${compSafeName(r.mtgNo)}.pdf`:'MOM_sheet_blank.pdf'); }
+let momDeepDone=false;
+function momDeepLink(){ if(momDeepDone) return; const m=/#mtg=([A-Za-z0-9_-]+)/.exec(location.hash||''); if(!m){ momDeepDone=true; return; }
+  if(m[1]==='new'){ momDeepDone=true; const b=document.querySelector('.sidenav-btn[data-section="meetings"]'); if(b) b.click(); if(canEdit()) openRegAdd('meetings'); return; }
+  const r=regState.meetings.list.find(x=>x.id===m[1]); if(!r) return; momDeepDone=true; openRegDrawer('meetings', r.id, canEdit()?'files':'att'); }
+/* ---- reminders + record packs (training sessions / meetings) ---- */
+let packUi={trs:{open:false, from:'', to:'', project:'all'}, meetings:{open:false, from:'', to:'', project:'all'}};
+function remindersOf(kind){ const lim=localDatePlus(-3);
+  if(kind==='trs') return regActive('trs').filter(r=>(r.status||'Draft')!=='Completed' && r.date && r.date<=lim).map(r=>({r, why:`${trsStats(r).missing} signature${trsStats(r).missing===1?'':'s'} missing — not completed`}));
+  return regActive('meetings').filter(r=>r.date && r.date<=lim).map(r=>{ const st=momStats(r), why=[]; if((r.status||'Scheduled')!=='Minutes issued') why.push(r.status==='Scheduled'?'meeting date passed — still "Scheduled"':'minutes not issued'); if(st.missing && !r.paper) why.push(`${st.missing} signature${st.missing===1?'':'s'} missing`); return {r, why:why.join(' · ')}; }).filter(x=>x.why); }
+function packTopHtml(kind){
+  const P=packUi[kind], rem=remindersOf(kind).sort((a,b)=>String(a.r.date).localeCompare(String(b.r.date))), noF=kind==='trs'?'trsNo':'mtgNo', label=kind==='trs'?'training session':'meeting';
+  const sites=activeSites().slice().sort((a,b)=>String(a.siteName).localeCompare(String(b.siteName)));
+  if(!P.from){ const t=localToday(); P.from=t.slice(0,4)+'-01-01'; P.to=t; }
+  return `${rem.length?`<div class="panel rec-remind"><div class="subhead" style="margin-top:0;">⏰ ${rem.length} ${label}${rem.length===1?'':'s'} older than 3 days need finishing</div>${rem.slice(0,12).map(x=>`<div class="ind-mrow"><span><strong>${esc(x.r[noF]||'')}</strong> ${esc(kind==='trs'?(x.r.topic||''):(x.r.type||''))} <span class="wsub">· ${esc(isoToDmy(x.r.date))} · ${esc(x.why)}</span></span><button type="button" class="btn btn-sm" data-reg-row="${kind}:${esc(x.r.id)}" data-reg-tab="${kind==='trs'?'att':'main'}">Open</button></div>`).join('')}${rem.length>12?`<p class="wsub">…and ${rem.length-12} more</p>`:''}</div>`:''}
+    ${P.open?`<div class="panel"><div class="section-head"><h3>${ic('download')} ${kind==='trs'?'Training records pack':'MOM pack'}</h3><button type="button" class="btn btn-sm" data-pack-toggle="${kind}">Close</button></div>
+      <p class="wsub" style="margin:-4px 0 8px;">One PDF for the client or the auditor: a list of every ${label} in the period, then each ${kind==='trs'?'attendance record':'MOM'} with its signatures.</p>
+      <div class="form-grid pack-g"><label>From<input type="date" data-pack-f="${kind}|from" value="${esc(P.from)}"></label><label>To<input type="date" data-pack-f="${kind}|to" value="${esc(P.to)}"></label>
+        <label>Project<select data-pack-f="${kind}|project"><option value="all">All projects</option><option value="none" ${P.project==='none'?'selected':''}>No project (office)</option>${sites.map(s=>`<option value="${esc(s.id)}" ${P.project===s.id?'selected':''}>${esc(s.siteName)}</option>`).join('')}</select></label></div>
+      <div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm btn-primary" data-pack-go="${kind}">${ic('download')} Download pack (${packList(kind).length})</button></div></div>`:''}`;
+}
+function packList(kind){ const P=packUi[kind]; return regActive(kind).filter(r=>r.date && r.date>=P.from && r.date<=P.to && (P.project==='all' || (P.project==='none'?!r.projectId:r.projectId===P.project)) && (kind==='trs' || (r.status||'Scheduled')!=='Scheduled')).sort((a,b)=>String(a.date).localeCompare(String(b.date))); }
+async function packPdf(kind){
+  const list=packList(kind); if(!list.length){ toast('Nothing in this period'); return; } if(!compPdfReady()) return; const P=packUi[kind];
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:kind==='trs'?'trs':'mom', docSub:`${kind==='trs'?'Training records':'Minutes of meetings'} · ${isoToDmy(P.from)} – ${isoToDmy(P.to)}${P.project==='all'?'':' · '+(P.project==='none'?'office':projectName(P.project))}`}), g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL;
+  g.title(kind==='trs'?'TRAINING RECORDS — PACK':'MINUTES OF MEETINGS — PACK', `${list.length} record${list.length===1?'':'s'}`);
+  if(kind==='trs'){ g.row([{t:'No.', w:80, bold:true, fill:LBL},{t:'Date', w:62, bold:true, fill:LBL},{t:'Training', w:CW-80-62-110-60-70, bold:true, fill:LBL},{t:'Trainer', w:110, bold:true, fill:LBL},{t:'People', w:60, bold:true, fill:LBL},{t:'Status', w:70, bold:true, fill:LBL}]);
+    list.forEach(r=>{ const s=trsStats(r); g.row([{t:r.trsNo||'', w:80, size:8},{t:isoToDmy(r.date), w:62, size:8},{t:r.topic||'', w:CW-80-62-110-60-70, size:8},{t:r.trainer||'', w:110, size:8},{t:`${s.signed}/${s.n}${r.paper?' +paper':''}`, w:60, size:8},{t:r.status==='Completed'?'Completed':'Draft', w:70, size:8, color:r.status==='Completed'?[15,118,80]:g.RED}]); }); }
+  else { g.row([{t:'No.', w:80, bold:true, fill:LBL},{t:'Date', w:62, bold:true, fill:LBL},{t:'Meeting', w:CW-80-62-110-60-80, bold:true, fill:LBL},{t:'Chair', w:110, bold:true, fill:LBL},{t:'Signed', w:60, bold:true, fill:LBL},{t:'Status', w:80, bold:true, fill:LBL}]);
+    list.forEach(r=>{ const s=momStats(r); g.row([{t:r.mtgNo||'', w:80, size:8},{t:isoToDmy(r.date), w:62, size:8},{t:[r.type, r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), w:CW-80-62-110-60-80, size:8},{t:r.chair||'', w:110, size:8},{t:s.n?`${s.signed}/${s.n}`:'—', w:60, size:8},{t:r.status||'', w:80, size:8}]); }); }
+  for(const r of list){ doc.addPage(); if(kind==='trs') await trsPdfBody(doc, r, false, null); else await momPdfBody(doc, r, false, null); }
+  doc.save(`${kind==='trs'?'Training_Records':'MOM'}_pack_${P.from}_${P.to}.pdf`);
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#momBlankBtn,[data-mom-sheet],[data-mom-pdf],[data-pack-toggle],[data-pack-go],[data-mom-tickall],[data-mom-attsave],[data-mom-vis],[data-mom-visadd],[data-mom-sign],[data-mom-padcancel],[data-mom-padclr],[data-mom-padsave],[data-mom-mysig],[data-mom-unsign],[data-mom-link]');
+  if(!b || b.disabled) return; const D=b.dataset;
+  if(b.id==='momBlankBtn'){ await momSheetPdf(null); return; }
+  if(D.momSheet){ const r=regState.meetings.list.find(x=>x.id===D.momSheet); if(r) await momSheetPdf(r); return; }
+  if(D.momPdf){ const r=regState.meetings.list.find(x=>x.id===D.momPdf); if(r) await momPdf(r); return; }
+  if(D.packToggle){ packUi[D.packToggle].open=!packUi[D.packToggle].open; renderRegAll(D.packToggle); return; }
+  if(D.packGo){ b.disabled=true; try{ await packPdf(D.packGo); } finally{ b.disabled=false; } return; }
+  if(!canEdit()) return; const r=regCurrent(); if(!r || activeReg!=='meetings') return;
+  const redraw=()=>{ const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); if(momUi.pad) momWirePad(); };
+  if(D.momTickall){ document.querySelectorAll('#regDrawerBody [data-mom-w]').forEach(c=>{ c.checked=true; momUi.sel.add(c.dataset.momW); }); redraw(); return; }
+  if(D.momAttsave){ b.disabled=true; const ids=[...momUi.sel]; const ok=await momUpd(r.id, {attIds:ids}, 'Attendees saved'); b.disabled=false; if(ok){ r.attIds=ids; redraw(); } return; }
+  if('momVis' in D){ momUi.vis=D.momVis==='1'; redraw(); return; }
+  if(D.momVisadd){ const n=String((document.getElementById('momVn')||{}).value||'').trim(), co=String((document.getElementById('momVc')||{}).value||'').trim(); if(!n){ toast('Write the name'); return; }
+    const vis=[...(r.visitors||[]), {id:'v'+genId().slice(0,8), n:n.slice(0,60), co:co.slice(0,60)}]; momUi.vis=false; if(await momUpd(r.id, {visitors:vis}, 'Added')){ r.visitors=vis; redraw(); } return; }
+  if(D.momSign){ momUi.pad=D.momSign; redraw(); return; }
+  if(D.momPadcancel){ momUi.pad=''; redraw(); return; }
+  if(D.momPadclr){ momWirePad(); const cv=document.getElementById('momPad'); if(cv){ const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); } return; }
+  if(D.momPadsave){ if(!momPadImg){ toast('Sign in the box first'); return; } const k=D.momPadsave, img=momPadImg, role={__chair:'chairSig', __minutes:'minutesSig'}[k]; b.disabled=true;
+    const mb=role==='minutesSig'?{minutesBy:(hseSigOf((auth.currentUser||{}).email)||{}).name||(auth.currentUser||{}).email||''}:{}; const ok=role?await momUpd(r.id, {[role]:img, ...mb}, 'Signature saved'):await momUpd(r.id, {['sigs.'+k]:img, ['sigVia.'+k]:'device'}, 'Signed — '+trsName(r,k)); b.disabled=false;
+    if(ok){ momUi.pad=''; if(role){ r[role]=img; Object.assign(r, mb); } else { r.sigs={...(r.sigs||{}), [k]:img}; r.sigVia={...(r.sigVia||{}), [k]:'device'}; } redraw(); } return; }
+  if(D.momMysig){ const hs=hseSigOf((auth.currentUser||{}).email); if(!hs||!hs.img) return; const role={__chair:'chairSig', __minutes:'minutesSig'}[D.momMysig]; const mb=role==='minutesSig'?{minutesBy:hs.name||''}:{}; if(await momUpd(r.id, {[role]:hs.img, ...mb}, 'Your saved signature added')){ r[role]=hs.img; Object.assign(r, mb); redraw(); } return; }
+  if(D.momUnsign){ if(!compArm(b,'tap again')) return; const k=D.momUnsign, role={__chair:'chairSig', __minutes:'minutesSig'}[k], FV=fsFieldValue();
+    const ok=role?await momUpd(r.id, {[role]:''}):await momUpd(r.id, FV?{['sigs.'+k]:FV.delete(), ['sigVia.'+k]:FV.delete()}:{sigs:Object.fromEntries(Object.entries(r.sigs||{}).filter(([x])=>x!==k))});
+    if(ok){ if(role) r[role]=''; else { const s={...(r.sigs||{})}; delete s[k]; r.sigs=s; } redraw(); } return; }
+  if(D.momLink){ const on=D.momLink==='on'; if(on && !(r.attIds||[]).length){ toast('Tick and save the attendees first'); return; }
+    if(await momUpd(r.id, on?{signOpen:true, signUntil:Date.now()+24*3600e3}:{signOpen:false}, on?'Signing open on the project link for 24 hours':'Signing on the link closed')){ r.signOpen=on; if(on) r.signUntil=Date.now()+24*3600e3; ppeLinkSyncSoon(); redraw(); } return; }
+});
+document.addEventListener('change', async e=>{ const el=e.target; if(!el || !el.dataset) return;
+  if(el.dataset.momW && momUi.sel){ if(el.checked) momUi.sel.add(el.dataset.momW); else momUi.sel.delete(el.dataset.momW); const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); return; }
+  if(el.dataset.momPaper && canEdit()){ await momUpd(el.dataset.momPaper, {paper:el.checked}, el.checked?'Marked as signed on paper — attach the photo in Files':'Paper sheet removed'); return; }
+  if(el.dataset.packF){ const [k,f]=el.dataset.packF.split('|'); packUi[k][f]=el.value; renderRegAll(k); return; } });
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='momQ'){ momUi.q=e.target.value; renderRegDrawer(); const s=document.getElementById('momQ'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } } });
 
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
