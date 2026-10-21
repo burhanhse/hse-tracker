@@ -1130,7 +1130,11 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ptw-ticks{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:2px 12px;} .ptw-steps{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;}
 .ptw-tbl-wrap{overflow-x:auto; max-width:100%;} .ptw-tbl{width:100%; border-collapse:collapse; font-size:13px;} .ptw-tbl th,.ptw-tbl td{border-bottom:1px solid var(--line); padding:4px 6px; text-align:left; vertical-align:middle;} .ptw-tbl input{width:100%; min-width:70px;} .ptw-tbl tr.ptw-bad td{background:var(--danger-bg);}
 .ptw-signed{display:flex; gap:10px; align-items:center; margin:4px 0;} .ptw-padbox{margin:6px 0;} .ptw-inline{display:flex; gap:6px; flex-wrap:wrap;} .ptw-inline input{flex:1 1 240px; min-width:0;} .ptw-close{display:grid; gap:6px;} .ptw-cancel summary{cursor:pointer; color:var(--ink-muted); margin:8px 0;}
-.ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .ptw-exp{border-left-color:var(--danger);} .ptw-sigt td{vertical-align:top;}
+.ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+.ptw-cc{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; padding:6px 2px;} .ptw-cc-n{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2);} .ptw-cc-n strong{display:block; font-size:24px; line-height:1.1;} .ptw-cc-n span{font-size:12px; color:var(--ink-muted);}
+.ptw-cc-n.ok strong{color:var(--ok);} .ptw-cc-n.warn strong{color:var(--warn);} .ptw-cc-n.danger strong{color:var(--danger);} .ptw-cc-n.danger{border-color:var(--danger);}
+.ptw-cc-line{font-size:13px; color:var(--ink-muted); margin:6px 2px;} .ptw-cc-list{display:grid; gap:4px; margin-top:6px;} .ptw-cc-row{display:grid; grid-template-columns:1fr auto; gap:2px 8px; align-items:center; text-align:left; background:none; border:0; border-top:1px dashed var(--line); padding:6px 2px; color:inherit; font:inherit; font-size:13px; cursor:pointer;} .ptw-cc-row:hover{background:var(--surface-2);}
+.ptw-cc-w{grid-column:1/-1; min-width:0;} .ptw-today{margin-bottom:14px;} .ptw-exp{border-left-color:var(--danger);} .ptw-sigt td{vertical-align:top;}
 .mtg-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px;} .mtg-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--line);border-radius:14px;font-size:13px;background:var(--surface-2);color:var(--ink);max-width:100%;} .mtg-chip.std{color:var(--ink-muted);background:var(--surface);} .mtg-x{border:0;background:none;color:var(--danger,#b91c1c);cursor:pointer;font-size:12px;padding:0 2px;} .mtg-add{display:flex;gap:8px;flex-wrap:wrap;} .mtg-add input{flex:1 1 220px;min-width:0;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
@@ -1545,6 +1549,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 
       <div class="tiles tiles-4" id="siteTiles"></div>
       <div id="tbtTodaySite"></div>
+      <div id="ptwTodaySite"></div>
 
       <div class="panel" id="addSitePanel" hidden>
         <h3>Add a project</h3>
@@ -1685,6 +1690,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
           <div class="cc-panel"><div class="cc-title">Safe man-hours <small>last 12 months</small></div><div class="cc-chart" id="ccLine"></div></div>
           <div class="cc-panel"><div class="cc-title">Proactive activities <small>TBTs, training, inductions, visits, audits, inspections</small></div><div class="cc-chart" id="ccBars"></div></div>
           <div class="cc-panel"><div class="cc-title">Compliance now <small id="ccMiniScope">company-wide</small></div><div class="cc-mini" id="ccMini"></div></div>
+          <div class="cc-panel" id="ccPtw"></div>
           <div class="cc-panel" id="ccDrvTrend"></div>
           <div class="cc-panel" id="ccExtras"></div>
         </div>
@@ -3000,7 +3006,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b98';
+const APP_BUILD='b99';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -8457,6 +8463,7 @@ regDefine({
     {key:'run', label:'Revalidate · suspend · close', showIf:r=>!!r.accept||!!r.cancel, html:r=>ptwRunHtml(r)}],
   files:[{key:'paperFile', label:'Photo of the signed paper permit'},{key:'photoFile', label:'Worksite photo'}],
   pdf:r=>ptwPdf(r), pdfLabel:'Permit PDF',
+  onData:()=>{ if(typeof renderCcPtw==='function'){ renderCcPtw(); ptwTodayRender(); } },
   columns:[
     {label:'No.', cls:'mono', html:r=>`<strong>${esc(r.ptwNo||'—')}</strong><div class="wsub">${esc(isoToDmy(r.startDate)||'')}</div>`},
     {label:'Work', html:r=>`<div class="wname">${esc(r.location||'—')}</div><div class="wsub">${esc(ptwTypeTxt(r))}${r.projectId?' · '+esc(projectName(r.projectId)||''):''}</div>`},
@@ -8771,6 +8778,42 @@ document.addEventListener('submit', async e=>{
     ptwUi.draft={done, contNo:String(F.contNo||'').trim(), tools:!!F.tools, clean:!!F.clean, iso:!!F.iso, fw:!!F.fw, fwUntil:F.fwUntil||''}; ptwUi.pad='closeH'; ptwRedraw(); return; }
   if(k==='cancel'){ await ptwSave(r, {cancel:{at, n:ptwMe(), r:String(F.r||'').trim()}}, 'Permit cancelled'); return; }
 });
+
+/* ---- Batch 99: work permit stats on the Dashboard and Project Details ---- */
+function ptwInScope(r, division, project){
+  if(project && project!=='all'){ if(project==='none'){ if(r.projectId) return false; } else if(r.projectId!==project) return false; }
+  if(!division || division==='all') return true; const s=r.projectId?activeSites().find(x=>x.id===r.projectId):null; return ((s&&s.division)||'Office staff')===division; }
+function ptwDay(x){ const d=ptwAt(x); return d?isoToLocalDate(d.toISOString()):''; }
+function ptwStats(list, key){ const S={live:0, susp:0, hse:0, req:0, hold:0, exp:0, closing:0, closedP:0, cancelP:0, startedP:0, hot:0, cold:0, adds:{}};
+  for(const r of list){ const s=ptwStatus(r);
+    if(s==='Live') S.live++; else if(s==='Suspended') S.susp++; else if(s==='Awaiting HSE') S.hse++; else if(s==='Requested') S.req++; else if(s==='Awaiting holder') S.hold++; else if(s==='Expired') S.exp++; else if(s==='Closing') S.closing++;
+    if(String(r.startDate||'').startsWith(key)){ S.startedP++; if(r.ptwType==='Hot work') S.hot++; else S.cold++; for(const k of r.adds||[]) S.adds[k]=(S.adds[k]||0)+1; }
+    if(r.closeI && ptwDay(r.closeI.at).startsWith(key)) S.closedP++; if(r.cancel && ptwDay(r.cancel.at).startsWith(key)) S.cancelP++; }
+  return S; }
+function ptwOpenRows(list, max){ const ord={Expired:0, Suspended:1, Live:2, Closing:3, 'Awaiting HSE':4, 'Awaiting holder':5, Requested:6};
+  const L=list.filter(r=>ptwOpenSt(ptwStatus(r))).sort((a,b)=>(ord[ptwStatus(a)]-ord[ptwStatus(b)]) || (ptwUntilMs(a)-ptwUntilMs(b)));
+  return L.length?`<div class="ptw-cc-list">${L.slice(0,max).map(r=>`<button type="button" class="ptw-cc-row" data-reg-row="ptw:${esc(r.id)}"><span class="mono"><strong>${esc(r.ptwNo||'—')}</strong> <span class="wsub">${['Live','Suspended','Expired'].includes(ptwStatus(r))?'until '+esc(ptwMsTxt(ptwUntilMs(r))):''}</span></span><span>${ptwBadge(r)}</span><span class="ptw-cc-w">${esc(r.location||'')}<span class="wsub"> · ${esc(ptwTypeTxt(r))}${ptwHolderName(r)?' · '+esc(ptwHolderName(r)):''}</span></span></button>`).join('')}${L.length>max?`<p class="wsub" style="margin:4px 0 0;">+ ${L.length-max} more — open Work Permits</p>`:''}</div>`:'<p class="wsub" style="margin:6px 0 0;">No open permits.</p>'; }
+function ptwCounters(S, periodWord){ const box=(n,l,cls,t)=>`<div class="ptw-cc-n ${cls||''}" ${t?`title="${esc(t)}"`:''}><strong>${n}</strong><span>${esc(l)}</span></div>`;
+  return `<div class="ptw-cc">${box(S.live,'Live now',S.live?'ok':'')}${box(S.hse,'Need HSE countersign',S.hse?'warn':'')}${box(S.req+S.hold,'Waiting — issue / holder','', `${S.req} not issued yet · ${S.hold} waiting for the holder`)}${box(S.susp,'Suspended',S.susp?'warn':'')}${box(S.exp+S.closing,'Expired / closing',S.exp?'danger':S.closing?'warn':'', 'Expired permits must be revalidated or closed')}${box(S.closedP,'Closed '+periodWord)}</div>`; }
+function renderCcPtw(){
+  const el=document.getElementById('ccPtw'); if(!el || !auth.currentUser) return; if(!regState.ptw){ el.innerHTML=''; return; }
+  const division=reportDivision, project=reportProject, key=reportPeriodKey(), periodWord=key.length===4?'this year':'this month';
+  const list=regActive('ptw').filter(r=>ptwInScope(r, division, project)), S=ptwStats(list, key);
+  const adds=PTW_ADDS.filter(([k])=>S.adds[k]).map(([k,l])=>`${esc(l)} ${S.adds[k]}`).join(' · ');
+  el.innerHTML=`<div class="cc-title">Work permits (PTW) <small>open now · ${esc(periodWord)} for the division / project in view</small><button type="button" class="btn btn-sm" data-ptw-goto="1">${ic('clipcheck')} Open</button></div>
+    ${ptwCounters(S, periodWord)}
+    <div class="ptw-cc-line">Permits started ${esc(periodWord)}: <b>${S.startedP}</b>${S.startedP?` — Hot work ${S.hot} · Cold work ${S.cold}${adds?' · '+adds:''}`:''}${S.cancelP?` · ${S.cancelP} cancelled`:''}</div>
+    ${ptwOpenRows(list, 6)}`; }
+function ptwTodayRender(){ const el=document.getElementById('ptwTodaySite'); if(!el || !auth.currentUser) return; const sec=el.closest('main'); if(sec && sec.hidden) return;
+  if(!regState.ptw){ el.innerHTML=''; return; } const L=regActive('ptw'), open=L.filter(r=>ptwOpenSt(ptwStatus(r)));
+  if(!L.length){ el.innerHTML=''; return; }
+  const S=ptwStats(L, localToday().slice(0,7)), byP=new Map();
+  for(const r of open){ const k=r.projectId||''; if(!byP.has(k)) byP.set(k, []); byP.get(k).push(r); }
+  const rows=[...byP].sort((a,b)=>String(a[0]?projectName(a[0]):'~').localeCompare(String(b[0]?projectName(b[0]):'~'))).map(([pid,rs])=>{ const c=s=>rs.filter(r=>ptwStatus(r)===s).length; const live=c('Live'), wait=c('Requested')+c('Awaiting HSE')+c('Awaiting holder'), bad=c('Expired')+c('Suspended');
+    return `<div class="ind-mrow"><span><strong>${esc(pid?projectName(pid)||'—':'Office / yard / camp')}</strong></span><span class="ptw-cc-chips">${live?`<span class="badge ok">${live} live</span>`:''}${wait?` <span class="badge warn">${wait} waiting</span>`:''}${bad?` <span class="badge danger">${bad} expired / suspended</span>`:''}</span></div>`; }).join('');
+  el.innerHTML=`<div class="panel ptw-today"><div class="section-head"><h3>${ic('clipcheck')} Work permits now <span class="wsub">${esc(isoToDmy(localToday()))}</span></h3><button type="button" class="btn btn-sm" data-ptw-goto="1">Open Work Permits</button></div>
+    ${ptwCounters(S, 'this month')}${rows?`<div style="margin-top:8px;">${rows}</div>`:'<p class="wsub" style="margin:6px 0 0;">No open permits on any project.</p>'}</div>`; }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-ptw-goto]'); if(!b) return; const n=document.querySelector('.sidenav-btn[data-section="ptw"]'); if(n) n.click(); });
 
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
@@ -16833,6 +16876,7 @@ function renderCommandCentre(entries, m, key){
       + (noRoleN ? `<p class="wsub" style="grid-column:1/-1; margin:6px 4px;">${noRoleN} worker${noRoleN===1?'':'s'} in this view ${noRoleN===1?'has':'have'} no role yet and ${noRoleN===1?'is':'are'} not counted — set roles in each worker's Profile.</p>` : '')
     : `<p class="wsub" style="grid-column:1/-1; margin:6px 4px;">${!trainingRoles().length ? (canEdit()?'Set the roles and their required trainings in <strong>Workforce → Training matrix → Roles &amp; required trainings</strong>, then give each worker their role(s).':'The HSE team has not set the required trainings yet.') : (scopeWs.length ? 'No worker in this view has a role with required trainings yet — set roles in each worker\'s Profile.' : 'No active workers in this view.')}</p>`;
   renderCcComp();   // Batch 84: competency dials
+  if(typeof renderCcPtw==='function') renderCcPtw();   // Batch 99: work permits
   // compliance right now — for the division / project in view (QHSE documents are company-wide)
   const pct=(a,b)=> b ? Math.round(a*100/b) : null;
   const aw=scopeWs;
@@ -18725,7 +18769,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       for(const [k,id] of Object.entries(SECTIONS)) document.getElementById(id).hidden = section!==k;
       if(section==='objectives' || section==='assurance') refreshLinkedPanels();
       if(section==='comp'){ renderComp(); compRenderTop(); }   // Batch 84
-      if(section==='site') tbtTodayRender();   // Batch 92
+      if(section==='site'){ tbtTodayRender(); if(typeof ptwTodayRender==='function') ptwTodayRender(); }   // Batch 92 / 99
     });
   });
 
