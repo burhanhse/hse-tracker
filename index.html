@@ -1116,6 +1116,9 @@ details.icam-grp .cause-list{margin:6px 0;}
 .tbt-today-n{border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--surface-2);} .tbt-today-n strong{display:block; font-size:22px; line-height:1.1;} .tbt-today-n span{font-size:11.5px; color:var(--ink-muted);}
 .tbt-today-n.ok strong{color:var(--ok);} .tbt-today-n.warn strong{color:var(--warn);} .tbt-today-n.bad strong{color:var(--danger);}
 .tbt-today-rows{margin-top:10px;} .tbt-today-row{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;}
+.drill-plan .section-head{flex-wrap:wrap; gap:8px;} .drill-grid th, .drill-grid td{padding:4px 5px; font-size:12px;} .drill-grid select{font-size:12px; padding:3px 4px;} .drill-c{text-align:center; min-width:30px; font-weight:700;}
+.drill-c.ok{background:var(--ok-bg); color:var(--ok);} .drill-c.warn{background:var(--warn-bg); color:var(--warn);} .drill-c.danger{background:var(--danger-bg); color:var(--danger);} .drill-c.muted{color:var(--ink-muted);}
+.drill-cb{background:none; border:0; color:inherit; font:inherit; cursor:pointer; padding:0 4px;} .drill-people{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:2px 12px; max-height:420px; overflow:auto;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
@@ -1189,6 +1192,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
     <button type="button" class="sidenav-btn" data-section="obs">Observations</button>
     <button type="button" class="sidenav-btn" data-section="insp">Inspections</button>
     <button type="button" class="sidenav-btn" data-section="heat">Heat Stress</button>
+    <button type="button" class="sidenav-btn" data-section="drills">Emergency Drills</button>
     <button type="button" class="sidenav-btn" data-section="actions">Action Tracker</button>
     <button type="button" class="sidenav-btn" data-section="calendar">Safety Calendar</button>
     <div class="nav-group">Environment</div>
@@ -2275,7 +2279,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2397,7 +2401,7 @@ function deltaize(current, data){
 }
 
 /* ---------------- change history: every add / update / set / delete is written to activityLog ---------------- */
-const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log', hra:'Health Risk Assessment'};
+const LOG_COLLECTION_LABELS = {workers:'Workforce', vehicles:'Fleet', siteEquipment:'Projects', equipment:'Plant & Equipment', hseLogs:'Monthly Report', qhseDocs:'QHSE Library', settings:'Settings', incidents:'Incident Register', audits:'Audits', objectives:'Objectives', safetyAlerts:'Safety Alerts', legalReqs:'Legal Register', meetings:'Meetings', subcontractors:'Subcontractors', hira:'Risk Register', moc:'Management of Change', observations:'Observations', heatLogs:'Heat Stress', inspections:'Inspections', scaffJobs:'Scaffolding Jobs', civilWorks:'Civil Progress', aspects:'Environmental Aspects', wasteLogs:'Waste Log', hra:'Health Risk Assessment', drills:'Emergency Drills'};
 const LOG_IGNORE_KEYS = new Set(['updatedAt','updatedBy','createdAt','createdBy']);
 function logCacheFind(col, id){
   try{
@@ -2979,7 +2983,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b92';
+const APP_BUILD='b93';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4504,6 +4508,8 @@ const IMS_BHN_EXTRA=[
   ['F0713-07','Vehicle Inspection Checklist','Form','P0713-01','vehInsp','Made by the tracker — Plant & Equipment → vehicle → Inspections (SP-2000)'],
   ['F0713-08','HSE-Critical Equipment Register','Register / log','P0713-01','critEquip','Made by the tracker — Plant & Equipment → HSE-critical'],
   ['F0811-24','Health Risk Assessment (HRA) Register','Register / log','P0811-01','hra','Made by the tracker — Health Risks (HRA)'],
+  ['F0870-08','Emergency Drill Report','Form','P0870-03','drill','Made by the tracker — Emergency Drills → drill → PDF'],
+  ['F0870-09','Emergency Drill Plan','Register / log','P0870-03','drillPlan','Made by the tracker — Emergency Drills → Drill plan PDF'],
   ['F0723-07','Employee HSE Record','Form','P0723-01','workerProfile','Made by the tracker — Workforce → worker profile PDF'],
   ['F0740-02','Toolbox Talk Record','Form','P0740-01','',''],
   ['F0740-03','Safety Alert','Form','P0740-01','alert','Made by the tracker — Safety Alerts → Alert PDF'],
@@ -4513,7 +4519,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -7029,7 +7035,7 @@ function collectAllActions(){
   for(const v of activeVehicles()) for(const x of (v.inspections||[])) if(x.result==='A' || x.result==='B'){ const cl=viClose(v,x), d=viDefects(x);
     out.push({src:'vehicle', projectId:x.projectId||v.projectId||'', ref:v.vehicleNumber||'Vehicle', where:`Inspection ${x.date} · Class ${x.result}${x.result==='A'?' — do not use':''}`, text:d.map(z=>z.text+(z.note?' ('+z.note+')':'')).join('; ')||'Rectify defects', owner:x.actionOwner, targetDate:x.targetDate, status:cl.closed?'Closed':'Open', closedDate:cl.closed?cl.date:'', tag:'Class '+x.result,
       open:()=>{ document.querySelector('.sidenav-btn[data-section="vehicles"]').click(); openVehicleDrawer(v.id); activeVehicleTab='inspections'; renderVehicleDrawer(); }}); }
-  const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat', aspects:'aspect', hra:'hra'};
+  const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat', aspects:'aspect', hra:'hra', drills:'drill'};
   if(REG.obs) for(const r of regActive('obs')) if(r.obsType!=='Positive' && (r.owner||r.targetDate)) out.push({src:'obs', projectId:r.projectId||'', ref:r.obsNo||'Observation', where:[r.category, r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), text:r.description, owner:r.owner, targetDate:r.targetDate, status:r.status||'Open', closedDate:r.closedDate, tag:r.obsType, open:()=>openRegDrawer('obs', r.id)});
   for(const [k,src] of Object.entries(regSrc)){ const cfg=REG[k]; if(!cfg) continue;
     for(const r of regActive(k)) for(const [sk,sc] of Object.entries(cfg.subs||{})) if(sc.isAction) for(const x of (r[sk]||[])) out.push({src, projectId:r.projectId||'', ref:r[cfg.noField]||cfg.singular, where:cfg.titleOf(r), text:x.action, owner:x.owner, targetDate:x.targetDate, status:x.status||'Open', closedDate:x.closedDate, open:()=>openRegDrawer(k, r.id, 'sub:'+sk)}); }
@@ -7630,6 +7636,222 @@ document.addEventListener('click', async e=>{
   if(b.id==='hraTypicalBtn'){ if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent=`Tap again — add ${HRA_TYPICAL.length} typical health risks`; setTimeout(()=>{ if(b.dataset.armed==='1'){ b.dataset.armed='0'; b.textContent='Load typical health risks'; } },4000); return; }
     b.disabled=true; b.dataset.armed='0'; b.textContent='Adding…'; await hraLoadTypical(); b.disabled=false; b.textContent='Load typical health risks'; }
 });
+
+/* =============================== Batch 93: Emergency Drills — drill reports + yearly drill plan =============================== */
+const DRILL_TYPES=['Fire evacuation','H2S release','Medical emergency / casualty','Spill response','Vehicle accident','Rescue from height','Confined space rescue','Muster / head count','Other'];
+const DRILL_PLACES=['Head office','Camp','Yard / workshop'];
+const DRILL_RESULTS=['Satisfactory','Satisfactory — improvements needed','Unsatisfactory — repeat the drill'];
+const drillMonthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function drillPlaceKey(r){ return r.projectId?'p:'+r.projectId:(r.placeOther?'o:'+r.placeOther:''); }
+function drillPlaceLabel(k){ if(!k) return '—'; if(k.startsWith('p:')) return projectName(k.slice(2))||'Project (deleted)'; return k.slice(2); }
+function drillMin(t){ const m=/^(\d{1,2}):(\d{2})/.exec(t||''); return m?(+m[1])*60+(+m[2]):null; }
+function drillDiff(a,b){ const x=drillMin(a), y=drillMin(b); if(x===null||y===null) return null; let d=y-x; if(d<0) d+=1440; return d; }
+function drillTimes(r){ const muster=drillDiff(r.alarmTime, r.musterTime), total=drillDiff(r.alarmTime, r.headcountTime||r.musterTime), target=Number(r.targetMin)||5;
+  return {muster, total, target, met: total===null?null:total<=target}; }
+function drillMetBadge(r){ const t=drillTimes(r); return t.met===null?'<span class="badge muted">Times not recorded</span>':`<span class="badge ${t.met?'ok':'danger'}">${t.total} min — target ${t.target} ${t.met?'met':'NOT met'}</span>`; }
+function drillPeople(r){ return Math.max(Number(r.participants)||0, (r.attendeeIds||[]).length); }
+async function syncDrillToReport(r){
+  const id='drl_'+r.id;
+  if(r.deleted || !r.date){ try{ await db.collection('hseLogs').doc(id).delete(); }catch(e){} return; }
+  const site=siteEquipmentList.find(s=>s.id===r.projectId), t=drillTimes(r);
+  const type=r.drillType==='Fire evacuation'?'Fire evacuation':r.drillType==='Spill response'?'Spill response':r.drillType==='Muster / head count'?'Muster point drill':'Emergency response';
+  try{ await db.collection('hseLogs').doc(id).set(stamp({category:'mockDrill', date:r.date, division:(site&&site.division)||'Office staff', projectId:r.projectId||null, type, participants:drillPeople(r)||null,
+    hours:t.total!==null?Math.round(t.total/60*100)/100:null, conductedBy:r.conductedBy||'', notes:`${r.drillNo||''} ${r.drillType||''}${r.scenario?' — '+String(r.scenario).slice(0,120):''}`.trim(), source:'drill', sourceDrillId:r.id})); }
+  catch(e){ console.error(e); toast('Drill saved, but the Monthly Report could not be updated — '+((e&&e.code)||'error')); }
+}
+regDefine({
+  key:'drills', collection:'drills', singular:'Drill', title:'Emergency Drills', tagline:'Plan · Practise · Time · Improve',
+  addLabel:'+ Record a drill', noField:'drillNo', noPrefix:'DRL', noYear:true, dateField:'date', yearFilter:true, statuses:DRILL_RESULTS, statusOf:r=>r.result||'',
+  headerButtons:'<button class="btn btn-sm" type="button" id="drillPlanPdfBtn">'+ic('download')+' Drill plan PDF</button>',
+  searchPlaceholder:'Search drill no., type, scenario, place…', emptyEditor:'No drills recorded yet — record each drill with the scenario, the times and what to improve. Each drill also counts in the Monthly Report.',
+  titleOf:r=>r.drillType||'Drill', subOf:r=>[isoToDmy(r.date), drillPlaceLabel(drillPlaceKey(r)), r.announced].filter(Boolean).join(' · '),
+  badgesOf:r=>`${drillMetBadge(r)} ${r.result?`<span class="badge ${r.result===DRILL_RESULTS[0]?'ok':r.result===DRILL_RESULTS[1]?'warn':'danger'}">${esc(r.result)}</span>`:''} <span class="badge muted">${drillPeople(r)} people</span>${r.expected&&r.accounted!==undefined&&r.accounted!==''&&Number(r.accounted)<Number(r.expected)?` <span class="badge danger">${Number(r.expected)-Number(r.accounted)} not accounted for</span>`:''}`,
+  searchText:r=>[r.drillNo,r.drillType,r.scenario,r.location,drillPlaceLabel(drillPlaceKey(r)),r.conductedBy,r.problems].join(' '),
+  addFields:['date','drillType','projectId','placeOther','announced','scenario'], addDefaults:{announced:'Announced'},
+  validate:d=>!d.drillType?'Choose the drill type':(!d.projectId && !d.placeOther?'Choose the project — or Head office / Camp / Yard':''),
+  segs:[{key:'notmet', label:'Target not met', match:r=>drillTimes(r).met===false},{key:'repeat', label:'To repeat', match:r=>r.result===DRILL_RESULTS[2]},{key:'unann', label:'Unannounced', match:r=>r.announced==='Unannounced'}], segAllLabel:'All drills',
+  tabs:[{key:'main', label:'Drill', groups:[
+    {fields:[
+      {key:'drillNo', label:'Drill no.', required:true},
+      {key:'date', label:'Date', type:'date', required:true},
+      {key:'startTime', label:'Start time', type:'time'},
+      {key:'drillType', label:'Drill type', type:'select', options:DRILL_TYPES, required:true},
+      {key:'projectId', label:'Project', type:'project'},
+      {key:'placeOther', label:'Or: office / camp / yard', type:'select', options:['',...DRILL_PLACES]},
+      {key:'location', label:'Location details', placeholder:'e.g. Tank farm muster point B'},
+      {key:'announced', label:'Announced / unannounced', type:'select', options:['Announced','Unannounced']},
+      {key:'scenario', label:'Scenario', type:'textarea', wide:true, required:true, placeholder:'e.g. H2S alarm at the well pad — wind from the north, one casualty at the scaffold'},
+      {key:'conductedBy', label:'Drill co-ordinator'},
+      {key:'observers', label:'Observers', placeholder:'e.g. HSE Engineer, client HSE'},
+    ]},
+    {title:'Response times (24 h clock)', fields:[
+      {key:'alarmTime', label:'Alarm raised', type:'time'},
+      {key:'musterTime', label:'Everyone at the muster point', type:'time'},
+      {key:'headcountTime', label:'Head count complete', type:'time'},
+      {key:'targetMin', label:'Target (minutes)', type:'number', min:1, max:120, default:5},
+      {key:'expected', label:'People expected (on site)', type:'number', min:0},
+      {key:'accounted', label:'People accounted for', type:'number', min:0},
+      {key:'participants', label:'People who took part', type:'number', min:0},
+    ]},
+    {title:'Evaluation', fields:[
+      {key:'wentWell', label:'What went well', type:'textarea', wide:true},
+      {key:'problems', label:'Problems found', type:'textarea', wide:true, placeholder:'e.g. alarm not heard at the far end of the yard · two workers went to the wrong muster point'},
+      {key:'result', label:'Overall result', type:'select', options:['',...DRILL_RESULTS]},
+    ]}],
+    intro:'Times: from the alarm to the head count complete (or to everyone at the muster point if there was no head count). Actions for the problems go in the Actions tab — they appear in the Action Tracker.'},
+    {key:'people', label:'People', html:r=>drillPeopleHtml(r)},
+    {key:'sub:actions', label:'Actions', sub:'actions'}],
+  subs:{actions:actionSub('Actions from the drill')},
+  multiFiles:{key:'photos', label:'Photos of the drill', accept:'image/*', hint:'The first two photos are printed in the drill report PDF.'},
+  files:[{key:'attendanceFile', label:'Signed attendance sheet (scan)'}],
+  pdf:r=>drillPdf(r), pdfLabel:'Drill report PDF',
+  afterSave:r=>syncDrillToReport(r),
+  columns:[
+    {label:'Drill no.', cls:'mono', html:r=>`<strong>${esc(r.drillNo||'—')}</strong>`},
+    {label:'Date', cls:'mono', html:r=>esc(isoToDmy(r.date)||'—')},
+    {label:'Drill', html:r=>`<div class="wname">${esc(r.drillType||'—')}</div><div class="wsub">${esc(String(r.scenario||'').slice(0,90))}</div>`},
+    {label:'Where', html:r=>esc(drillPlaceLabel(drillPlaceKey(r)))+(r.announced==='Unannounced'?' <span class="badge muted">Unannounced</span>':'')},
+    {label:'People', cls:'mono', html:r=>String(drillPeople(r)||'—')},
+    {label:'Response', html:r=>drillMetBadge(r)},
+    {label:'Result', html:r=>r.result?`<span class="badge ${r.result===DRILL_RESULTS[0]?'ok':r.result===DRILL_RESULTS[1]?'warn':'danger'}">${esc(r.result.split(' — ')[0])}</span>`:'<span class="wsub">—</span>'},
+  ],
+  tiles:()=>{ const y=drillPlanYear(), list=regActive('drills').filter(r=>String(r.date||'').slice(0,4)===y), slots=drillSlots(y), timed=list.filter(r=>drillTimes(r).met!==null), met=timed.filter(r=>drillTimes(r).met).length;
+    const done=slots.filter(s=>s.st==='done'||s.st==='late').length, od=slots.filter(s=>s.st==='overdue').length, due=slots.filter(s=>s.st==='due').length;
+    return [{label:'Drills done '+y, num:list.length, sub:`${list.reduce((n,r)=>n+drillPeople(r),0)} people took part`, icon:'siren'},
+      {label:'Drill plan '+y, num:`${done}/${slots.length}`, cls:slots.length&&done===slots.length?'ok':'', sub:`${due} due this month`, icon:'flag'},
+      {label:'Overdue drills', num:od, cls:od?'danger':'ok', sub:'planned month passed, no drill', icon:'alert'},
+      {label:'Response target met', num:timed.length?Math.round(met*100/timed.length)+'%':'—', cls:!timed.length?'':met===timed.length?'ok':'warn', sub:`${met} of ${timed.length} timed drills`, icon:'clock'}]; },
+  topPanel:()=>renderDrillPlan(),
+});
+ACT_SOURCES.push({key:'drill', label:'Emergency drills'});
+
+/* ---- people who took part (ticked from the Workforce register) ---- */
+let drillPick={id:'', q:'', sel:null};
+function drillPeopleHtml(r){
+  if(drillPick.id!==r.id){ drillPick={id:r.id, q:'', sel:new Set(r.attendeeIds||[])}; }
+  const ed=canEdit(), sel=drillPick.sel, q=drillPick.q.trim().toLowerCase();
+  const ws=activeWorkers().filter(w=>sel.has(w.id) || ((w.status||'active')==='active' && (!r.projectId || w.projectId===r.projectId))).filter(w=>!q || String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q)).sort((a,b)=>(sel.has(b.id)-sel.has(a.id)) || String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  return `<p class="wsub" style="margin:0 0 8px;">Tick the people who took part${r.projectId?' — the crew of '+esc(projectName(r.projectId)||'the project')+' is listed (search to add others)':''}. <strong>${sel.size}</strong> ticked${Number(r.participants)>sel.size?` · total entered on the Drill tab: ${Number(r.participants)}`:''}.</p>
+    ${ed?`<div class="toolbar" style="margin-bottom:6px;"><input type="search" id="drillPickQ" placeholder="Search name or designation…" value="${esc(drillPick.q)}"><button type="button" class="btn btn-sm" data-drill-all="1">Tick all shown</button><button type="button" class="btn btn-sm btn-primary" data-drill-save="${esc(r.id)}">Save people</button></div>`:''}
+    <div class="drill-people">${ws.length?ws.map(w=>`<label class="chk drill-pp"><input type="checkbox" data-drill-w="${esc(w.id)}" ${sel.has(w.id)?'checked':''} ${ed?'':'disabled'}> ${esc(w.fullName||'—')} <span class="wsub">${esc(w.designation||'')}</span></label>`).join(''):'<p class="wsub">No employees to show.</p>'}</div>`;
+}
+
+/* ---- yearly drill plan (settings/drillPlan.years[YYYY] = {rows:[{id, type, place, months:[1..12]}], savedBy, savedAt}) ---- */
+let drillPlanUi={edit:false, rows:null};
+function drillPlanYear(){ const f=regState.drills.f.year; return f&&f!=='all'?f:String(new Date().getFullYear()); }
+function drillPlanSuggested(){
+  const rows=[], idOf=(t,pl)=>'s_'+compKey(t+'_'+pl);   // stable ids, so the plan and its slots always match
+  for(const s of activeSites().slice().sort((a,b)=>String(a.siteName).localeCompare(String(b.siteName)))){
+    rows.push({id:idOf('fire','p:'+s.id), type:'Fire evacuation', place:'p:'+s.id, months:[4,10]});
+    if(/pdo|\boq\b|oxy|daleel|ccc|oil|gas|well|field/i.test(String(s.clientName||'')+' '+String(s.siteName||''))) rows.push({id:idOf('h2s','p:'+s.id), type:'H2S release', place:'p:'+s.id, months:[2,5,8,11]});
+  }
+  rows.push({id:idOf('fire','office'), type:'Fire evacuation', place:'o:Head office', months:[3,9]});
+  rows.push({id:idOf('med','office'), type:'Medical emergency / casualty', place:'o:Head office', months:[9]});
+  rows.push({id:idOf('fire','camp'), type:'Fire evacuation', place:'o:Camp', months:[5,11]});
+  rows.push({id:idOf('spill','yard'), type:'Spill response', place:'o:Yard / workshop', months:[6]});
+  return rows;
+}
+function drillPlanData(y){ const d=(((settingsDocs.drillPlan||{}).years)||{})[y]; return d && Array.isArray(d.rows) ? {...d, saved:true} : {rows:drillPlanSuggested(), saved:false}; }
+function drillSlots(y){
+  const rows=drillPlanData(y).rows, list=regActive('drills'), today=localToday(), curM=today.slice(0,4)===y?Number(today.slice(5,7)):(y<today.slice(0,4)?13:0), out=[];
+  for(const r of rows){ const ms=(r.months||[]).map(Number).filter(m=>m>=1&&m<=12).sort((a,b)=>a-b);
+    ms.forEach((m,i)=>{ const from=`${y}-${String(m).padStart(2,'0')}-01`, to=i+1<ms.length?`${y}-${String(ms[i+1]).padStart(2,'0')}-01`:`${Number(y)+1}-01-01`;
+      const hit=list.filter(d=>d.drillType===r.type && drillPlaceKey(d)===r.place && d.date>=from && d.date<to).sort((a,b)=>String(a.date).localeCompare(String(b.date)))[0];
+      const st=hit?(Number(String(hit.date).slice(5,7))===m?'done':'late'):m===curM?'due':m<curM?'overdue':'plan';
+      out.push({row:r, m, st, hit}); }); }
+  return out;
+}
+const DRILL_ST={done:['✓','Done','ok'], late:['✓','Done late','warn'], due:['●','Due this month','warn'], overdue:['✗','Overdue','danger'], plan:['○','Planned','muted']};
+function renderDrillPlan(){
+  const el=document.getElementById('drillsTop'); if(!el) return; const y=drillPlanYear(), pd=drillPlanData(y), ed=canEdit();
+  if(drillPlanUi.edit && drillPlanUi.rows){
+    const places=[...activeSites().map(s=>({v:'p:'+s.id, l:s.siteName||'Project'})), ...DRILL_PLACES.map(p=>({v:'o:'+p, l:p}))];
+    el.innerHTML=`<div class="panel drill-plan"><div class="section-head"><h3>${ic('flag')} Drill plan ${esc(y)} — edit</h3><span style="display:flex; gap:6px;"><button type="button" class="btn btn-sm" data-dplan="cancel">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-dplan="save">Save plan</button></span></div>
+      <div class="table-wrap"><table class="drill-grid"><thead><tr><th>Drill</th><th>Where</th>${drillMonthNames.map(m=>`<th>${m}</th>`).join('')}<th></th></tr></thead><tbody>
+      ${drillPlanUi.rows.map((r,i)=>`<tr><td><select data-dpr="${i}|type">${DRILL_TYPES.map(t=>`<option ${r.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select></td>
+        <td><select data-dpr="${i}|place">${places.some(p=>p.v===r.place)?'':`<option value="${esc(r.place)}" selected>${esc(drillPlaceLabel(r.place))}</option>`}${places.map(p=>`<option value="${esc(p.v)}" ${r.place===p.v?'selected':''}>${esc(p.l)}</option>`).join('')}</select></td>
+        ${drillMonthNames.map((m,j)=>`<td class="drill-c"><input type="checkbox" data-dpm="${i}|${j+1}" ${(r.months||[]).includes(j+1)?'checked':''} aria-label="${m}"></td>`).join('')}
+        <td><button type="button" class="icon-btn danger" data-dplan="del|${i}" aria-label="Remove">${ic('trash')}</button></td></tr>`).join('')}</tbody></table></div>
+      <div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm" data-dplan="add">+ Add a drill to the plan</button><button type="button" class="btn btn-sm btn-ghost" data-dplan="suggest" data-armed="0">Use the suggested plan</button></div></div>`;
+    return;
+  }
+  const slots=drillSlots(y), byRow=new Map(); for(const s of slots){ if(!byRow.has(s.row.id)) byRow.set(s.row.id, {}); byRow.get(s.row.id)[s.m]=s; }
+  el.innerHTML=`<div class="panel drill-plan"><div class="section-head"><h3>${ic('flag')} Drill plan ${esc(y)}${pd.saved?'':' <span class="badge warn">Suggested — not saved yet</span>'}</h3>${ed?`<button type="button" class="btn btn-sm" data-dplan="edit">${ic('pencil')} ${pd.saved?'Edit plan':'Review & save the plan'}</button>`:''}</div>
+    ${pd.rows.length?`<div class="table-wrap"><table class="drill-grid"><thead><tr><th>Drill</th><th>Where</th>${drillMonthNames.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>
+    ${pd.rows.map(r=>{ const c=byRow.get(r.id)||{}; return `<tr><td><strong>${esc(r.type)}</strong></td><td>${esc(drillPlaceLabel(r.place))}</td>${drillMonthNames.map((m,j)=>{ const s=c[j+1]; if(!s) return '<td class="drill-c"></td>'; const D=DRILL_ST[s.st];
+      return `<td class="drill-c ${D[2]}" title="${esc(D[1]+(s.hit?' — '+s.hit.drillNo+' on '+isoToDmy(s.hit.date):''))}">${s.hit?`<button type="button" class="drill-cb" data-reg-row="drills:${esc(s.hit.id)}">${D[0]}</button>`:D[0]}</td>`; }).join('')}</tr>`; }).join('')}</tbody></table></div>`
+      :'<p class="wsub">No drills planned.</p>'}
+    <p class="wsub" style="margin:6px 0 0;">○ planned · ● due this month · ✓ done (amber = done late) · ✗ overdue. A drill counts for the planned month when its type and place match and it is done before the next planned month. Suggested: fire evacuation every 6 months per project, office and camp; H2S every 3 months on oil &amp; gas projects; spill and medical drills once a year.</p></div>`;
+}
+async function drillPlanSave(){
+  const y=drillPlanYear(), rows=(drillPlanUi.rows||[]).map(r=>({id:r.id||('d'+Math.random().toString(36).slice(2,8)), type:r.type, place:r.place, months:(r.months||[]).map(Number).filter(m=>m>=1&&m<=12).sort((a,b)=>a-b)})).filter(r=>r.type && r.place);
+  if(rows.some(r=>!r.months.length)){ toast('Tick at least one month for every drill — or remove the row'); return; }
+  const u=auth.currentUser;
+  if(await saveSettings('drillPlan', {years:{[y]:{rows, savedBy:(u&&u.email)||'', savedAt:new Date().toISOString()}}}, settingsStamp('drillPlan'))){
+    settingsDocs.drillPlan={...(settingsDocs.drillPlan||{}), years:{...(((settingsDocs.drillPlan||{}).years)||{}), [y]:{rows}}}; drillPlanUi={edit:false, rows:null}; clearDirtyForms(); renderRegAll('drills'); }
+}
+async function drillPlanPdf(){
+  if(!compPdfReady()) return; const y=drillPlanYear(), pd=drillPlanData(y), slots=drillSlots(y), byRow=new Map(); for(const s of slots){ if(!byRow.has(s.row.id)) byRow.set(s.row.id, {}); byRow.get(s.row.id)[s.m]=s; }
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'drillPlan', docSub:'Year '+y}), g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL, hs=hseSigOf((auth.currentUser||{}).email)||{};
+  const done=slots.filter(s=>s.st==='done'||s.st==='late').length;
+  g.title('EMERGENCY DRILL PLAN '+y, `${done} of ${slots.length} done`);
+  const W1=150, W2=150, MW=(CW-W1-W2)/12;
+  g.row([{t:'Drill', w:W1, bold:true, fill:LBL},{t:'Where', w:W2, bold:true, fill:LBL},...drillMonthNames.map(m=>({t:m, w:MW, bold:true, fill:LBL, center:true, size:7.6}))], 16);
+  pd.rows.forEach(r=>{ const c=byRow.get(r.id)||{}; g.row([{t:r.type, w:W1, bold:true, size:7.8},{t:drillPlaceLabel(r.place), w:W2, size:7.8},...drillMonthNames.map((m,j)=>{ const s=c[j+1]; if(!s) return {t:'', blank:true, w:MW};
+    const lab={done:'DONE', late:'LATE', due:'DUE', overdue:'OVERDUE', plan:'PLAN'}[s.st]; return {t:lab, sub:s.hit?isoToDmy(s.hit.date).slice(0,5):'', w:MW, size:s.st==='overdue'?5.6:6.6, bold:true, center:true, color:s.st==='done'?[15,118,80]:s.st==='overdue'?g.RED:s.st==='plan'?g.SUB:[180,83,9]}; })], 20); });
+  if(!pd.rows.length) g.row([{t:'No drills planned.', w:CW, color:g.SUB}]);
+  g.y+=6; g.row([{t:'A drill counts for the planned month when its type and place match and it is done before the next planned month. Drill reports (scenario, times, problems, actions) are kept in the HSE tracker — Emergency Drills.', w:CW, size:7.4, color:g.SUB}]);
+  g.ensure(50); g.y+=6;
+  g.row([{t:'PREPARED BY (HSE)', w:130, bold:true, fill:LBL},{t:hs.name||'', blank:true, sub:[hs.role, isoToDmy(localToday())].filter(Boolean).join('  ·  '), w:(CW-260)/2, bold:true},{t:'SIGNATURE', w:130, bold:true, fill:LBL},hs.img?{img:hs.img, w:(CW-260)/2}:{t:'', blank:true, w:(CW-260)/2}], 40);
+  doc.save(`Drill_Plan_${y}.pdf`);
+}
+async function drillPdf(r){
+  if(!compPdfReady()) return;
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'drill', docSub:`${r.drillNo||''} · ${r.drillType||''}`}), g=compGrid(doc, 32), CW=g.CW, K=110, hw=(CW-2*K)/2, LBL=g.LBL, t=drillTimes(r), hs=hseSigOf((auth.currentUser||{}).email)||{};
+  g.title('EMERGENCY DRILL REPORT', t.met===null?(r.result||''):t.met?'TARGET MET':'TARGET NOT MET', t.met===false?g.RED:[15,118,80]);
+  const L=(a,b,c,d)=>g.row([{t:a, w:K, bold:true, fill:LBL},{t:b, w:hw},{t:c, w:K, bold:true, fill:LBL},{t:d, w:hw}]);
+  L('DRILL NO.', r.drillNo||'', 'DATE / START', [isoToDmy(r.date), r.startTime].filter(Boolean).join('  ')); L('DRILL TYPE', r.drillType||'', 'WHERE', [drillPlaceLabel(drillPlaceKey(r)), r.location].filter(Boolean).join(' — '));
+  L('ANNOUNCED?', r.announced||'', 'CO-ORDINATOR', r.conductedBy||''); L('OBSERVERS', r.observers||'', 'PEOPLE TOOK PART', String(drillPeople(r)||'—'));
+  g.head('SCENARIO'); g.row([{t:r.scenario||'—', w:CW}], 24);
+  g.head('RESPONSE TIMES');
+  g.row([{t:'Alarm raised', w:CW/5, bold:true, fill:LBL, center:true},{t:'At the muster point', w:CW/5, bold:true, fill:LBL, center:true},{t:'Head count complete', w:CW/5, bold:true, fill:LBL, center:true},{t:'Total (target)', w:CW/5, bold:true, fill:LBL, center:true},{t:'Accounted for', w:CW/5, bold:true, fill:LBL, center:true}]);
+  g.row([{t:r.alarmTime||'—', w:CW/5, center:true},{t:(r.musterTime||'—')+(t.muster!==null?`  (${t.muster} min)`:''), w:CW/5, center:true},{t:r.headcountTime||'—', w:CW/5, center:true},{t:t.total===null?'—':`${t.total} min (${t.target})`, w:CW/5, center:true, bold:true, color:t.met===false?g.RED:t.met?[15,118,80]:g.INK},{t:r.expected?`${r.accounted??'—'} of ${r.expected}`:'—', w:CW/5, center:true, bold:true, color:r.expected&&Number(r.accounted)<Number(r.expected)?g.RED:g.INK}], 20);
+  g.head('EVALUATION');
+  g.row([{t:'WHAT WENT WELL', w:K, bold:true, fill:LBL},{t:r.wentWell||'—', w:CW-K}], 22); g.row([{t:'PROBLEMS FOUND', w:K, bold:true, fill:LBL},{t:r.problems||'—', w:CW-K}], 22);
+  g.row([{t:'OVERALL RESULT', w:K, bold:true, fill:LBL},{t:r.result||'—', w:CW-K, bold:true, color:r.result===DRILL_RESULTS[2]?g.RED:g.INK}]);
+  const acts=r.actions||[];
+  g.head(`ACTIONS (${acts.length})`);
+  if(acts.length){ g.row([{t:'Action', w:CW-260, bold:true, fill:LBL},{t:'Owner', w:110, bold:true, fill:LBL},{t:'Target', w:70, bold:true, fill:LBL},{t:'Status', w:80, bold:true, fill:LBL}]); acts.forEach(a=>g.row([{t:a.action||'', w:CW-260},{t:a.owner||'—', w:110},{t:isoToDmy(a.targetDate)||'—', w:70},{t:a.status||'Open', w:80}])); }
+  else g.row([{t:'No actions.', w:CW, color:g.SUB}]);
+  const ids=r.attendeeIds||[]; if(ids.length){ g.head(`PEOPLE WHO TOOK PART (${ids.length})`); g.row([{t:ids.map(id=>{ const w=workers.find(x=>x.id===id); return w?w.fullName:'(removed)'; }).join(', '), w:CW, size:7.8}]); }
+  const ph=(r.photos||[]).filter(f=>/^image\//.test(f.contentType||'')).slice(0,2);
+  if(ph.length){ g.head('PHOTOS'); g.ensure(170); const imgs=[]; for(const f of ph){ try{ const d=await fetchImageDataUrl(f.url).catch(()=>null); if(d) imgs.push(d); }catch(e){} }
+    if(imgs.length){ const w=(CW-10)/2; imgs.forEach((d,i)=>{ try{ let iw=w, ih=160; try{ const pr=doc.getImageProperties(d); const k=Math.min(w/pr.width, 160/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(d, /^data:image\/jpe?g/i.test(d)?'JPEG':'PNG', g.M+i*(w+10), g.y+4, iw, ih); }catch(e){} }); g.y+=168; } }
+  g.ensure(50); g.y+=6;
+  g.row([{t:'REPORT BY (HSE)', w:K, bold:true, fill:LBL},{t:hs.name||'', blank:true, sub:[hs.role, isoToDmy(localToday())].filter(Boolean).join('  ·  '), w:hw, bold:true},{t:'SIGNATURE', w:K, bold:true, fill:LBL},hs.img?{img:hs.img, w:hw}:{t:'', blank:true, w:hw}], 40);
+  doc.save(`Drill_${compSafeName(r.drillNo)}_${r.date||''}.pdf`);
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('[data-dplan],#drillPlanPdfBtn,[data-drill-save],[data-drill-all]'); if(!b || b.disabled) return;
+  if(b.id==='drillPlanPdfBtn'){ await drillPlanPdf(); return; }
+  if(!canEdit()) return;
+  if(b.dataset.drillAll){ document.querySelectorAll('#regDrawerBody [data-drill-w]').forEach(c=>{ c.checked=true; drillPick.sel.add(c.dataset.drillW); }); return; }
+  if(b.dataset.drillSave){ const id=b.dataset.drillSave; b.disabled=true; const ok=await regUpdate('drills', id, {attendeeIds:[...(drillPick.sel||[])]}, true); b.disabled=false; if(ok){ toast('People saved'); const r=regState.drills.list.find(x=>x.id===id); if(r) syncDrillToReport({...r, attendeeIds:[...drillPick.sel]}); } return; }
+  const a=b.dataset.dplan||'';
+  if(a==='edit'){ drillPlanUi={edit:true, rows:JSON.parse(JSON.stringify(drillPlanData(drillPlanYear()).rows))}; renderDrillPlan(); return; }
+  if(a==='cancel'){ drillPlanUi={edit:false, rows:null}; renderDrillPlan(); return; }
+  if(a==='save'){ b.disabled=true; await drillPlanSave(); b.disabled=false; return; }
+  if(a==='add'){ drillPlanUi.rows.push({id:'', type:'Fire evacuation', place:activeSites()[0]?'p:'+activeSites()[0].id:'o:Head office', months:[]}); renderDrillPlan(); return; }
+  if(a==='suggest'){ if(!compArm(b,'Tap again — replace with the suggested plan')) return; drillPlanUi.rows=drillPlanSuggested(); renderDrillPlan(); return; }
+  if(a.startsWith('del|')){ drillPlanUi.rows.splice(Number(a.slice(4)),1); renderDrillPlan(); return; }
+});
+document.addEventListener('change', e=>{
+  const el=e.target; if(!el || !el.dataset) return;
+  if(el.dataset.dpr && drillPlanUi.rows){ const [i,k]=el.dataset.dpr.split('|'); if(drillPlanUi.rows[+i]) drillPlanUi.rows[+i][k]=el.value; return; }
+  if(el.dataset.dpm && drillPlanUi.rows){ const [i,m]=el.dataset.dpm.split('|').map(Number), r=drillPlanUi.rows[i]; if(!r) return; const s=new Set(r.months||[]); if(el.checked) s.add(m); else s.delete(m); r.months=[...s].sort((a,b)=>a-b); return; }
+  if(el.dataset.drillW && drillPick.sel){ if(el.checked) drillPick.sel.add(el.dataset.drillW); else drillPick.sel.delete(el.dataset.drillW); return; }
+});
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='drillPickQ'){ drillPick.q=e.target.value; const r=regState.drills.list.find(x=>x.id===drillPick.id); const body=document.getElementById('regDrawerBody'); if(r && body){ body.innerHTML=drillPeopleHtml(r); const s=document.getElementById('drillPickQ'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } } } });
 
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
@@ -15899,9 +16121,12 @@ function renderReportTable(entries){
     const fromIncident = e.source==='incident' && e.sourceIncidentId && activeIncidents().some(x=>x.id===e.sourceIncidentId);
     const fromAudit = e.source==='audit' && e.sourceAuditId && activeAudits().some(x=>x.id===e.sourceAuditId);
     const fromObs = e.source==='observation' && e.sourceObsId && regState.obs && regActive('obs').some(x=>x.id===e.sourceObsId);
+    const fromDrill = e.source==='drill' && e.sourceDrillId && regState.drills && regActive('drills').some(x=>x.id===e.sourceDrillId);   // Batch 93
     const fromInd = e.source==='inductionForm' && e.sourceIndId && (!indLoaded || indList.some(x=>x.id===e.sourceIndId));   // Batch 87
     const fromAutoMh = e.source==='autoManHours', fromVeh = e.source==='vehicleInspection' && e.sourceVehicleId && activeVehicles().some(x=>x.id===e.sourceVehicleId);
-    const actions = fromInd
+    const actions = fromDrill
+      ? `<button type="button" class="btn btn-sm" data-reg-row="drills:${esc(e.sourceDrillId)}" title="Recorded in Emergency Drills — edit it there">Open drill</button>`
+      : fromInd
       ? `<button type="button" class="btn btn-sm" data-ropen-ind="${esc(e.sourceIndId)}" title="Recorded with the induction form — Workforce → Induction">Open induction</button>`
       : fromAutoMh
       ? `<button type="button" class="btn btn-sm" data-ropen-mh="${esc(e.projectId)}" title="Counted automatically from the project team — change it in the project's HSE statistics">Open project</button>`
@@ -16004,6 +16229,7 @@ function openReportEntryForm(entryId, presetProjectId, presetCategory){
   if(audSynced){ openAudDrawer(audSynced.sourceAuditId); return; }
   const obsSynced = entryId && regState.obs && reportEntries.find(x=>x.id===entryId && x.source==='observation' && regActive('obs').some(o=>o.id===x.sourceObsId));
   if(obsSynced){ openRegDrawer('obs', obsSynced.sourceObsId); return; }
+  { const dr=entryId && regState.drills && reportEntries.find(x=>x.id===entryId && x.source==='drill' && regActive('drills').some(d=>d.id===x.sourceDrillId)); if(dr){ openRegDrawer('drills', dr.sourceDrillId); return; } }   // Batch 93
   if(entryId && reportEntries.some(x=>x.id===entryId && x.source==='inductionForm')){ const b=document.querySelector('.sidenav-btn[data-section="workforce"]'); if(b) b.click(); setWorkforceView('induction'); return; }   // Batch 87
   editingReportEntryId = entryId || null;
   const editing = entryId ? reportEntries.find(e=>e.id===entryId) : null;
