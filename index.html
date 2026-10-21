@@ -1131,6 +1131,8 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ptw-tbl-wrap{overflow-x:auto; max-width:100%;} .ptw-tbl{width:100%; border-collapse:collapse; font-size:13px;} .ptw-tbl th,.ptw-tbl td{border-bottom:1px solid var(--line); padding:4px 6px; text-align:left; vertical-align:middle;} .ptw-tbl input{width:100%; min-width:70px;} .ptw-tbl tr.ptw-bad td{background:var(--danger-bg);}
 .ptw-signed{display:flex; gap:10px; align-items:center; margin:4px 0;} .ptw-padbox{margin:6px 0;} .ptw-inline{display:flex; gap:6px; flex-wrap:wrap;} .ptw-inline input{flex:1 1 240px; min-width:0;} .ptw-close{display:grid; gap:6px;} .ptw-cancel summary{cursor:pointer; color:var(--ink-muted); margin:8px 0;}
 .ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+.ck-sec{margin:12px 0 4px; padding:6px 10px; border-radius:8px; background:var(--surface-2); font-weight:800; font-size:13px; letter-spacing:.02em; text-transform:uppercase;} .ck-headline{margin-bottom:8px;} .ck-num{display:flex; gap:6px; align-items:center;} .ck-num input{max-width:140px;}
+.ck-fit{display:flex; gap:8px; flex-wrap:wrap;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
 .ptw-cc{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; padding:6px 2px;} .ptw-cc-n{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2);} .ptw-cc-n strong{display:block; font-size:24px; line-height:1.1;} .ptw-cc-n span{font-size:12px; color:var(--ink-muted);}
 .ptw-cc-n.ok strong{color:var(--ok);} .ptw-cc-n.warn strong{color:var(--warn);} .ptw-cc-n.danger strong{color:var(--danger);} .ptw-cc-n.danger{border-color:var(--danger);}
 .ptw-cc-line{font-size:13px; color:var(--ink-muted); margin:6px 2px;} .ptw-cc-list{display:grid; gap:4px; margin-top:6px;} .ptw-cc-row{display:grid; grid-template-columns:1fr auto; gap:2px 8px; align-items:center; text-align:left; background:none; border:0; border-top:1px dashed var(--line); padding:6px 2px; color:inherit; font:inherit; font-size:13px; cursor:pointer;} .ptw-cc-row:hover{background:var(--surface-2);}
@@ -2300,9 +2302,9 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'}, ck_veh:{title:'Vehicle Inspection Checklist'}, ck_cut14:{title:'14-inch Cutting Machine Inspection Checklist'}, ck_blower:{title:'Air Blower Inspection Checklist'}, ck_boom:{title:'Boom Lift Inspection Checklist'}, ck_drill:{title:'Drilling Machine Inspection Checklist'}, ck_vib:{title:'Concrete Vibrator Inspection Checklist'}, ck_fire:{title:'Fire Extinguisher Inspection Checklist'}, ck_whm:{title:'Well Head Maintenance Checklist'}, ck_harness:{title:'Full Body Harness Inspection Checklist'}, ck_grind:{title:'Grinding Machine Inspection Checklist'}, ck_ply:{title:'Plywood Cutting Machine Inspection Checklist'}, ck_scissor:{title:'Scissor Lift Inspection Checklist'},
 };
-function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
+function docControl(key){ const d=(((settingsDocs||{}).docControl||{}).docs||{})[key]; if(d && String(d.no||'').trim()) return d; const t=typeof ckDocDefault==='function'?ckDocDefault(key):null; return t?{...t, ...(d||{}), no:t.no}:(d||{}); }
 let pdfLogoData=null;
 let docCtlBase='';
 function renderDocCtl(){
@@ -3006,7 +3008,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b99';
+const APP_BUILD='b100';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4537,13 +4539,25 @@ const IMS_BHN_EXTRA=[
   ['F0740-02','Toolbox Talk Record','Form','P0740-01','',''],
   ['F0740-03','Safety Alert','Form','P0740-01','alert','Made by the tracker — Safety Alerts → Alert PDF'],
   ['F0740-04','Minutes of Meeting (MOM)','Form','P0740-01','mom','Made by the tracker — Meetings → meeting → MOM PDF'],
+  ['VH-CH-12','Vehicle Inspection Checklist','Checklist','','ck_veh','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['CM-CH-01','14-inch Cutting Machine Inspection Checklist','Checklist','','ck_cut14','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['AM-CH-02','Air Blower Inspection Checklist','Checklist','','ck_blower','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['BLT-CH-03','Boom Lift Inspection Checklist','Checklist','','ck_boom','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['DM-CH-04','Drilling Machine Inspection Checklist','Checklist','','ck_drill','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['VM-CH-05','Concrete Vibrator Inspection Checklist','Checklist','','ck_vib','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['FE-CH-06','Fire Extinguisher Inspection Checklist','Checklist','','ck_fire','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['WHM-CH-07','Well Head Maintenance Checklist','Checklist','','ck_whm','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['FBH-CH-08','Full Body Harness Inspection Checklist','Checklist','','ck_harness','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['GM-CH-09','Grinding Machine Inspection Checklist','Checklist','','ck_grind','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['CM-CH-10','Plywood Cutting Machine Inspection Checklist','Checklist','','ck_ply','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['SLT-CH-11','Scissor Lift Inspection Checklist','Checklist','','ck_scissor','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
   ['F0913-04','Yearly HSE Report','Form','P0913-02','yearlyReport','Made by the tracker — Monthly Report → yearly PDF'],
   ['F0913-05','Client Monthly HSE Report','Form','P0913-02','clientPack','Made by the tracker — Monthly Report → client report'],
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', ptw:'BHN-F0811-14', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', ptw:'BHN-F0811-14', ck_veh:'BHN-VH-CH-12', ck_cut14:'BHN-CM-CH-01', ck_blower:'BHN-AM-CH-02', ck_boom:'BHN-BLT-CH-03', ck_drill:'BHN-DM-CH-04', ck_vib:'BHN-VM-CH-05', ck_fire:'BHN-FE-CH-06', ck_whm:'BHN-WHM-CH-07', ck_harness:'BHN-FBH-CH-08', ck_grind:'BHN-GM-CH-09', ck_ply:'BHN-CM-CH-10', ck_scissor:'BHN-SLT-CH-11', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -4588,7 +4602,7 @@ async function imsLoadMasterList(btn){
   const have=new Set(libDocs.map(d=>String(d.docNo||'').trim().toLowerCase()));
   const todo=imsMasterList().filter(x=>!have.has(x.docNo.toLowerCase()));
   const cur=((settingsDocs.docControl||{}).docs)||{}, upd={};
-  for(const [k,no] of Object.entries(IMS_PDF_NUMBERS)) if(PDF_DOCS[k] && !String((cur[k]||{}).no||'').trim()) upd[k]={no, rev:(cur[k]||{}).rev||'00', date:(cur[k]||{}).date||''};
+  for(const [k,no] of Object.entries(IMS_PDF_NUMBERS)) if(PDF_DOCS[k] && !String((cur[k]||{}).no||'').trim()) upd[k]={no, rev:(cur[k]||{}).rev||(/^ck_/.test(k)?'01':'00'), date:(cur[k]||{}).date||''};
   if(!todo.length && !Object.keys(upd).length){ toast('The BHN master list is already in the library and every PDF has its number'); return; }
   if(btn && btn.dataset.armed!=='1'){ btn.dataset.armed='1'; const old=btn.innerHTML; btn.textContent=`Click again — add ${todo.length} documents${Object.keys(upd).length?' + '+Object.keys(upd).length+' PDF numbers':''}`; setTimeout(()=>{ btn.dataset.armed='0'; btn.innerHTML=old; }, 4000); return; }
   if(btn){ btn.dataset.armed='0'; }
@@ -6540,6 +6554,7 @@ function renderRegDrawer(){
   if(activeReg==='trs' && typeof trsUi!=='undefined' && trsUi.pad) trsWirePad();   // Batch 95
   if(activeReg==='meetings' && typeof momUi!=='undefined' && momUi.pad) momWirePad();   // Batch 96
   if(activeReg==='ptw' && typeof ptwUi!=='undefined' && ptwUi.pad) ptwWirePad();   // Batch 98
+  if(activeReg==='insp' && typeof ckUi!=='undefined' && ckUi.pad) ckWirePad();   // Batch 100
 }
 function regFormTabHtml(cfg, r, t){
   const head = t.key==='main' ? `${cfg.badgesOf?`<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">${cfg.badgesOf(r)}</div>`:''}${updatedNoteHtml(r)}` : '';
@@ -8815,6 +8830,77 @@ function ptwTodayRender(){ const el=document.getElementById('ptwTodaySite'); if(
     ${ptwCounters(S, 'this month')}${rows?`<div style="margin-top:8px;">${rows}</div>`:'<p class="wsub" style="margin:6px 0 0;">No open permits on any project.</p>'}</div>`; }
 document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-ptw-goto]'); if(!b) return; const n=document.querySelector('.sidenav-btn[data-section="ptw"]'); if(n) n.click(); });
 
+/* ---- Batch 100: the form for Burhan checklists (inside the inspection drawer) ---- */
+let ckUi={id:'', pad:''};
+function ckFormHtml(r, cl){
+  const T=cl.bhn, ed=canEdit(), H=r.ckH||{}, a=r.answers||{}, cm=r.comments||{}, vals=r.values||{}, C=T.cols||['OK','Not OK','N/A'];
+  if(ckUi.id!==r.id) ckUi={id:r.id, pad:''};
+  const ppe=r.ckPpe||T.ppe||[], eq=r.ckEq||[], next=r.nextDate||(r.date?compAddMonths(r.date,1):'');
+  const hf=f=>{ const [k,l]=f, list=k==='veh'?'ckVehList':k==='driver'||k==='op'?'ckWkList':''; return `<label>${esc(l)}<input data-ckh="${k}" value="${esc(H[k]||(k===ckSubjKey(T)?r.subject||'':''))}" maxlength="80" ${list?`list="${list}"`:''} ${ed?'':'disabled'}></label>`; };
+  let last=null, rows='';
+  for(const it of ckItems(T)){ const i=it.n-1;
+    if(it.sec!==last){ last=it.sec; if(it.sec) rows+=`<div class="ck-sec">${esc(it.sec)}</div>`; }
+    if(it.num){ rows+=`<div class="ck-item ck-numrow"><div class="ck-q"><span class="ck-n">${it.n}</span>${esc(it.t)}</div><label class="ck-num"><input type="number" step="any" data-ck-val="${i}" value="${esc(vals[i]??'')}" ${ed?'':'disabled'}> <span class="wsub">${esc(it.num.u||'')}</span></label><input type="text" class="ck-comment" data-ck-comment="${i}" value="${esc(cm[i]||'')}" placeholder="Remarks" ${ed?'':'disabled'}></div>`; continue; }
+    rows+=`<div class="ck-item ${a[i]==='No'?'ck-no':a[i]==='Yes'?'ck-yes':''}"><div class="ck-q"><span class="ck-n">${it.n}</span>${esc(it.t)}</div>
+      <div class="ck-ans">${['Yes','No','N/A'].map((v,j)=>`<label class="ck-opt ck-${v==='N/A'?'na':v.toLowerCase()}"><input type="radio" name="ck${i}" value="${v}" ${a[i]===v?'checked':''} ${ed?'':'disabled'}><span>${esc(C[j])}</span></label>`).join('')}</div>
+      <input type="text" class="ck-comment" data-ck-comment="${i}" value="${esc(cm[i]||'')}" placeholder="${a[i]==='No'?'What is wrong?':'Remarks'}" ${ed?'':'disabled'}></div>`; }
+  const sigs=r.ckSigns||{}, hs=hseSigOf((auth.currentUser||{}).email)||{};
+  return `<datalist id="ckVehList">${vehicles.filter(v=>!v.deleted&&v.vehicleNumber).map(v=>`<option value="${esc(v.vehicleNumber)}">`).join('')}</datalist><datalist id="ckWkList">${activeWorkers().slice(0,400).map(w=>`<option value="${esc(w.fullName||'')}">`).join('')}</datalist>
+  <form data-reg-custom="checklist" class="ck-form"><div class="ck-headline"><strong>${esc(T.title)}</strong> <span class="wsub">${esc(T.no)} · Rev 01 · monthly — next inspection <b>${esc(isoToDmy(next)||'—')}</b></span></div>
+    <div class="panel"><div class="form-grid">${T.head.map(hf).join('')}</div></div>
+    ${T.ppe?`<div class="panel"><div class="subhead" style="margin-top:0;">PPE to be worn while using the machine</div><div class="ptw-ticks">${T.ppe.map(p=>`<label class="chk"><input type="checkbox" data-ck-ppe value="${esc(p)}" ${ppe.includes(p)?'checked':''} ${ed?'':'disabled'}> ${esc(p)}</label>`).join('')}</div></div>`:''}
+    ${T.eq?`<div class="panel"><div class="subhead" style="margin-top:0;">${esc(T.eq.title)}</div><div class="ptw-tbl-wrap"><table class="ptw-tbl ck-eq"><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Result</th><th>Expiry / due date</th><th>Remarks</th></tr></thead><tbody>${T.eq.items.map(([l,hint],i)=>{ const x=eq[i]||{}; return `<tr><td>${i+1}</td><td>${esc(l)}</td><td><input data-cke="${i}|q" value="${esc(x.q||'')}" maxlength="6" style="max-width:60px;" ${ed?'':'disabled'}></td><td><select data-cke="${i}|r" ${ed?'':'disabled'}><option value="">—</option>${[['ok','OK'],['no','Not OK'],['na','N/A']].map(([v,t])=>`<option value="${v}" ${x.r===v?'selected':''}>${t}</option>`).join('')}</select></td><td><input data-cke="${i}|d" value="${esc(x.d||'')}" maxlength="30" placeholder="${esc(hint||'')}" ${ed?'':'disabled'}></td><td><input data-cke="${i}|rm" value="${esc(x.rm||'')}" maxlength="80" ${ed?'':'disabled'}></td></tr>`; }).join('')}</tbody></table></div></div>`:''}
+    ${ed?`<div class="toolbar" style="margin:6px 0;"><button type="button" class="btn btn-sm" data-ck-allok="1">✓ Mark all unanswered as ${esc(C[0])}</button></div>`:''}
+    <div class="ck-list">${rows}</div>
+    <div class="panel" style="margin-top:10px;"><div class="subhead" style="margin-top:0;">Result</div>
+      <div class="ck-fit"><label class="ck-opt ck-yes"><input type="radio" name="ckFit" value="1" ${r.fit===true?'checked':''} ${ed?'':'disabled'}><span>${esc(T.result?T.result+' — Yes':'Fit for use')}</span></label><label class="ck-opt ck-no"><input type="radio" name="ckFit" value="0" ${r.fit===false?'checked':''} ${ed?'':'disabled'}><span>${esc(T.result?'No':'NOT fit — do not use')}</span></label></div>
+      <label style="display:block; margin-top:8px;">Defects / action needed<textarea data-ck-defects rows="2" maxlength="600" ${ed?'':'disabled'}>${esc(r.defects||'')}</textarea></label></div>
+    ${ed?`<div class="form-actions"><button type="submit" class="btn btn-primary">Save checklist</button></div>`:''}</form>
+  <div class="panel"><div class="subhead" style="margin-top:0;">Sign-off</div>${(T.signs||[]).map((l,i)=>{ const x=sigs[i]; return `<div class="trs-row"><div class="trs-who"><strong>${esc(l)}</strong>${x?` <span class="wsub">${esc(x.n||'')} · ${esc(isoToDmy(x.d)||'')}</span>`:''}</div><div class="trs-sig">${x&&x.s?`<img src="${esc(x.s)}" alt="" class="trs-sigimg">${ed?` <button type="button" class="att-link" data-ck-unsign="${i}" data-armed="0">remove</button>`:''}`
+      :ckUi.pad===String(i)?`<div style="flex:1 1 280px;"><input id="ckSignN" placeholder="Name" maxlength="60" value="${esc(i===0?(r.inspector||''):(/HSE/.test(l)?(hs.name||''):''))}" style="margin-bottom:4px; width:100%;"><div class="hse-sig-pad"><canvas id="ckPad" width="600" height="200"></canvas></div><div style="display:flex; gap:6px; margin-top:4px;"><button type="button" class="btn btn-sm" data-ck-padcancel="1">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-ck-padsave="${i}">Save signature</button></div></div>`
+      :ed?`${/HSE/.test(l)&&hs.img?`<button type="button" class="btn btn-sm btn-primary" data-ck-mysig="${i}">Use my saved signature</button> `:''}<button type="button" class="btn btn-sm" data-ck-sign="${i}">✍ Sign</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`; }).join('')}</div>`; }
+let ckPadImg='';
+function ckWirePad(){ const cv=document.getElementById('ckPad'); ckPadImg=''; if(cv) compPadWire(cv, img=>{ ckPadImg=img; }); }
+function ckCollect(r, form){ const T=r.ckSnap, out={answers:{}, comments:{}, values:{}, ckH:{}, ckEq:[]};
+  for(const it of ckItems(T)){ const i=it.n-1; const v=form.querySelector(`input[name="ck${i}"]:checked`); if(v) out.answers[i]=v.value; const c=form.querySelector(`[data-ck-comment="${i}"]`); if(c && c.value.trim()) out.comments[i]=c.value.trim(); const nv=form.querySelector(`[data-ck-val="${i}"]`); if(nv && nv.value!=='') out.values[i]=nv.value; }
+  form.querySelectorAll('[data-ckh]').forEach(el=>{ const v=el.value.trim(); if(v) out.ckH[el.dataset.ckh]=v; });
+  if(T.ppe) out.ckPpe=[...form.querySelectorAll('[data-ck-ppe]:checked')].map(x=>x.value);
+  if(T.eq){ out.ckEq=T.eq.items.map((_,i)=>{ const o={}; form.querySelectorAll(`[data-cke^="${i}|"]`).forEach(el=>{ const k=el.dataset.cke.split('|')[1]; if(el.value.trim()) o[k]=el.value.trim(); }); return o; }); }
+  const f=form.querySelector('input[name="ckFit"]:checked'); out.fit=f?f.value==='1':null; const d=form.querySelector('[data-ck-defects]'); out.defects=d?d.value.trim():'';
+  const sk=ckSubjKey(T); if(out.ckH[sk]) out.subject=out.ckH[sk];
+  out.nextDate=r.date?compAddMonths(r.date,1):'';
+  return out; }
+async function inspPdf(r){ if(!compPdfReady()) return; const cl=checklistOf(r); if(!cl) return;
+  if(r.ckSnap){ const doc=ckPdfDoc(r.ckSnap, ckRecData(r), false); doc.save(`${compSafeName(r.ckSnap.no)}_${compSafeName(r.subject||r.inspNo)}_${r.date||''}.pdf`); return; }
+  const T={key:'gen', title:cl.name||'Inspection checklist', head:[['subject', cl.subjectLabel||'Item / area inspected'],['proj','Project'],['insp','Inspected by']], secs:[[null, cl.items]], signs:['Inspected by']};
+  const A={Yes:'ok', No:'no', 'N/A':'na'}, ans={}, rm={}; cl.items.forEach((_,i)=>{ const a=(r.answers||{})[i]; if(a) ans[i+1]=A[a]; const c=(r.comments||{})[i]; if(c) rm[i+1]=c; });
+  const c=inspCounts(r); const doc=ckPdfDoc(T, {h:{subject:r.subject, proj:r.projectId?projectName(r.projectId):'', insp:r.inspector}, date:r.date, next:'', ans, rm, fit:c.done?!c.no:undefined, defects:(r.actions||[]).map(a=>a.action).join(' · ')||r.notes||'', signs:[{n:r.inspector||'', d:r.date}]}, false);
+  doc.save(`Inspection_${compSafeName(r.inspNo)}_${r.date||''}.pdf`); }
+async function ckBlankPdf(key){ if(!compPdfReady()) return; const T=CK_TPL.find(t=>t.key===key); if(!T) return; ckPdfDoc(T, {}, true).save(`${compSafeName(T.no)}_blank.pdf`); }
+/* ---- due list: each item's last Burhan checklist + 1 month ---- */
+function ckDueRows(){ const m=new Map();
+  for(const r of regActive('insp')){ if(!r.ckSnap || !r.date) continue; const subj=String(r.subject||'').trim(); if(!subj) continue; const k=r.ckSnap.key+'|'+subj.toLowerCase(); const cur=m.get(k); if(!cur || String(r.date)>String(cur.date)) m.set(k, r); }
+  const t=localToday(), soon=localDatePlus(7);
+  return [...m.values()].map(r=>{ const next=r.nextDate||compAddMonths(r.date,1); return {r, next, st:next<t?'over':next<=soon?'due':'ok'}; }).sort((a,b)=>String(a.next).localeCompare(String(b.next))); }
+function ckTopHtml(){ if(!regState.insp) return ''; const rows=ckDueRows(), over=rows.filter(x=>x.st==='over'), due=rows.filter(x=>x.st==='due'), ed=canEdit();
+  const item=x=>`<div class="ind-mrow"><span><strong>${esc(x.r.ckSnap.title.replace(/ Inspection Checklist| Checklist/,''))}</strong> — ${esc(x.r.subject||'')} <span class="wsub">· last ${esc(isoToDmy(x.r.date))} · next ${esc(isoToDmy(x.next))}</span></span><span>${x.st==='over'?'<span class="badge danger">overdue</span>':'<span class="badge warn">due this week</span>'} <button type="button" class="btn btn-sm" data-reg-row="insp:${esc(x.r.id)}">Open last</button></span></div>`;
+  return `${over.length||due.length?`<div class="panel rec-remind ${over.length?'ptw-exp':''}"><div class="subhead" style="margin-top:0;">📅 Monthly checklists — ${over.length?over.length+' overdue':''}${over.length&&due.length?' · ':''}${due.length?due.length+' due this week':''}</div>${[...over, ...due].slice(0,15).map(item).join('')}</div>`:''}
+    <div class="panel ck-blank"><span class="wsub">Blank checklist for paper:</span> <select id="ckBlankSel">${CK_TPL.map(t=>`<option value="${t.key}">${esc(t.title)} (${esc(t.no)})</option>`).join('')}</select> <button type="button" class="btn btn-sm" id="ckBlankBtn">${ic('printer')} Blank PDF</button>
+      <span class="wsub">· ${rows.length} item${rows.length===1?'':'s'} on monthly inspection${rows.length?` — ${rows.filter(x=>x.st==='ok').length} in date`:''}</span></div>`; }
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('#ckBlankBtn,[data-ck-allok],[data-ck-sign],[data-ck-padcancel],[data-ck-padsave],[data-ck-mysig],[data-ck-unsign]'); if(!b || b.disabled) return; const D=b.dataset;
+  if(b.id==='ckBlankBtn'){ const s=document.getElementById('ckBlankSel'); if(s) await ckBlankPdf(s.value); return; }
+  if(!canEdit() || activeReg!=='insp') return; const r=regCurrent(); if(!r || !r.ckSnap) return;
+  const redraw=()=>{ const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); };
+  if(D.ckAllok){ const f=b.closest('form'); if(!f) return; f.querySelectorAll('.ck-item').forEach(row=>{ const rs=row.querySelectorAll('input[type="radio"]'); if(rs.length && ![...rs].some(x=>x.checked)) rs[0].checked=true; }); f.dataset.dirty='1'; toast('Unanswered items marked OK — check them, then Save'); return; }
+  if(D.ckSign!==undefined){ if(formDirtyIn('regDrawerBody')){ toast('Save the checklist first'); return; } ckUi.pad=D.ckSign; redraw(); return; }
+  if(D.ckPadcancel){ ckUi.pad=''; redraw(); return; }
+  const save=async(i, x)=>{ const sg={...(r.ckSigns||{}), [i]:x}; if(await regUpdate('insp', r.id, {ckSigns:sg}, true)){ r.ckSigns=sg; ckUi.pad=''; toast('Signed'); redraw(); } };
+  if(D.ckPadsave!==undefined){ if(!ckPadImg){ toast('Sign in the box first'); return; } const n=(document.getElementById('ckSignN')||{}).value||''; if(!n.trim()){ toast('Write the name first'); return; } await save(D.ckPadsave, {n:n.trim(), s:ckPadImg, d:localToday()}); return; }
+  if(D.ckMysig!==undefined){ const hs=hseSigOf((auth.currentUser||{}).email); if(!hs||!hs.img) return; await save(D.ckMysig, {n:hs.name||'', s:hs.img, d:localToday()}); return; }
+  if(D.ckUnsign!==undefined){ if(!compArm(b,'tap again')) return; const sg={...(r.ckSigns||{})}; delete sg[D.ckUnsign]; if(await regUpdate('insp', r.id, {ckSigns:sg}, true)){ r.ckSigns=sg; redraw(); } return; }
+});
+
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
 const MOC_STATUSES=['Requested','Under review','Approved','Rejected','Implemented','Closed'];
@@ -9040,7 +9126,107 @@ regDefine({
 });
 
 /* =============================== INSPECTION CHECKLISTS =============================== */
-const BUILTIN_CHECKLISTS=[
+/* =============================== BURHAN EQUIPMENT CHECKLISTS — Batch 100 ===============================
+   The user's 12 own checklists (cleaned wording, OK = good), monthly, each with a PDF. Old built-in checklists stay only for old records. */
+/* Burhan equipment checklists — own wording (cleaned from the user's forms). OK = good for every check. */
+const CK_PPE_TOOL=['Leather gloves','Safety helmet','Goggles','Ear plugs / muffs','Safety shoes','Apron','Face shield'];
+const CK_HEAD_TOOL=[['comp','Company / project'],['type','Equipment type'],['make','Make & model no.'],['eqno','Equipment / serial no.'],['loc','Location']];
+const CK_TOOL_COMMON={cable:'Power cable free from damage — connected through an industrial plug', sleeve:'Cable protected (flexible cord / sleeve) where it can be damaged', dms:'Dead-man (hold-to-run) switch working', dbl:'Machine double insulated (marked on the rating plate)', body:'Body, guards and covers free from damage — cable sleeve not cut', comp:'Operator competent / trained for this machine'};
+const CK_WORKPLACE=['No drop-offs or holes in the travel / work area','No bumps or ground obstructions','Area clear of debris','No overhead obstructions','Safe distance from energised power lines','Not a hazardous (classified) area — or controls in place','Ground firm and level enough to support the lift','Pedestrian / vehicle traffic controlled','Wind and weather within the lift limits'];
+const CK_TPL=[
+ {key:'veh', no:'BHN-VH-CH-12', title:'Vehicle Inspection Checklist', short:'Vehicle',
+  head:[['veh','Vehicle no.'],['model','Vehicle model / type'],['owner','Company / owner'],['loc','Project / location'],['driver','Driver name'],['km','Odometer (km)']],
+  eq:{title:'Safety equipment in the vehicle', items:[['Fire extinguisher','qty · expiry / next service'],['First aid box (complete, in date)','expiry'],['Warning triangles (2)',''],['Jack and wheel spanner',''],['Wheel chocks (wheel stopper)',''],['H2S personal monitor — H2S areas only','calibration due'],['Escape breathing set (NH-15 / 15-min) — H2S areas only','next inspection']]},
+  secs:[['Driver cabin',['Cabin clean and tidy — no loose items (everything secured)','Air conditioning working','Dashboard gauges and warning lights working (speed, fuel, oil, temperature)','Brakes, parking brake, clutch and accelerator working properly','Steering in good condition (no excessive play)','Seat belts working on every seat (3-point / 2-point)','Seats in good condition and secure','Doors open, close and lock properly (front and rear)','Speed limit alarm working','Horn working']],
+   ['Lights',['Headlights — high and low beam','Indicators / turn signals — front, rear, left and right','Beacon light clean and working','Tail lights and brake lights working, lenses not broken','Reverse lights working','Reverse alarm working and audible','Cabin and dashboard lights working','Fog lights working','Number plate lights working']],
+   ['IVMS / DFMS monitoring',['IVMS working','DFMS (driver fatigue monitoring) working','IVMS / DFMS units fixed securely — stickers in place and readable']],
+   ['Mirrors, glass and wipers',['Side mirrors in good condition and adjusted','Front blind-spot mirror clean and in good condition','Windscreen and windows free from cracks or breakage','Wiper blades and washer working']],
+   ['Tyres and wheels',['Tyres free from deep cuts, cracks, bulges and dry rot','No nails, glass or sharp stones in the tread','Tyres suitable for the road / graded-road conditions','Tread depth not less than 1 mm','Tyre pressure label marked at the wheel arch','Valve caps fitted on all valves','Wheel nuts present and tight','Spare tyre secured, inflated, good tread, no damage']],
+   ['Documents',['Mulkiya (ROP registration) valid','RAS card valid and in the vehicle','Insurance valid',"Driver's ROP licence valid for this vehicle type","Driver's defensive driving permit valid",'Service record up to date (as per schedule)']],
+   ['Engine, battery and body',['Engine oil, coolant and brake fluid levels OK — radiator clean','Battery firmly secured in its tray','Battery terminals clean, tight, no corrosion','Battery free from leaks, swelling or damage','Cables insulated and kept away from hot / moving parts','No fuel or oil leaks — no mud build-up around the fuel tank','Body free from dents, corrosion and sharp edges','Reflective stickers fitted in all required places']]],
+  signs:['Inspected by (HSE)','Driver','Reviewed by (Operations Manager)']},
+ {key:'cut14', no:'BHN-CM-CH-01', title:'14-inch Cutting Machine Inspection Checklist', short:'14-inch cutting machine', head:CK_HEAD_TOOL, ppe:CK_PPE_TOOL,
+  secs:[[null,['Machine in good working condition', CK_TOOL_COMMON.cable, CK_TOOL_COMMON.sleeve,'Machine speed (RPM) marked on the rating plate', CK_TOOL_COMMON.dms,'Handles fitted and free from damage','Wheel guard fitted and secure — covers at least half of the wheel','Cutting wheel free from cracks or defects — max. RPM marked on the wheel','Wheel max. RPM is higher than the machine RPM', CK_TOOL_COMMON.dbl, CK_TOOL_COMMON.body, CK_TOOL_COMMON.comp,'Work area free from flammable materials','Fire extinguisher available at the work location']]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'blower', no:'BHN-AM-CH-02', title:'Air Blower Inspection Checklist', short:'Air blower', head:CK_HEAD_TOOL,
+  secs:[[null,['Blower in good working condition', CK_TOOL_COMMON.cable, CK_TOOL_COMMON.sleeve,'All body frame screws in place','Runs without unusual noise or vibration','Handles fitted and free from damage', CK_TOOL_COMMON.body, CK_TOOL_COMMON.dbl, CK_TOOL_COMMON.comp]]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'boom', no:'BHN-BLT-CH-03', title:'Boom Lift Inspection Checklist', short:'Boom lift',
+  head:[['op','Operator'],['comp','Company'],['proj','Project'],['model','Model'],['unit','Unit no.'],['loc','Location']],
+  secs:[['1. Walk-around (engine off)',['Wheels, tyres and axles — condition / inflation','Hydraulic components — condition, no leaks','Data plate accurate and legible','Annual (third-party) inspection valid — certificate seen','Battery tray opens, closes and latches','Turntable — gears, lock pin and stops','Counterweight secure','Cover panels open, close and lock','Engine — fluids, filters, belts and hoses','Batteries — clean, dry, secure, cables and level OK','Fuel level / tank','Hydraulic oil level','Lights and strobes working','Placards, labels and decals legible','Boom valley — no leaks or debris','Accessory plugs and cables','Boom — general condition and wear','Hydraulic cylinders and pin locks','Articulated joints — no wear or cracks','Power track — lines and hoses','Platform — guard rails, toe board and anchor points','Operator manual in the weather-proof storage box','All controls clearly marked and hold-to-run']],
+   ['2. Powered checks (from ground and platform controls)',['Engine starts — oil pressure OK','Battery charge level','Gauges and instruments — hour meter, warning lights','Boom — raise / lower / extend / retract','Turret rotate','Drive — forward and reverse','Steer — left and right','Platform — tilt / rotate','Horn','Outriggers / stabilisers / pothole protection','Extendable axles','Function-enable (dead-man) devices','Manual / auxiliary lowering controls','Safety interlocks']],
+   ['3. Workplace — free of hazards', CK_WORKPLACE]], signs:['Operator','HSE Engineer']},
+ {key:'drill', no:'BHN-DM-CH-04', title:'Drilling Machine Inspection Checklist', short:'Drilling machine', head:CK_HEAD_TOOL, ppe:['Leather gloves','Safety helmet','Goggles','Ear plugs / muffs','Safety shoes','Dust mask','Face shield'],
+  secs:[[null,['Drill in good working condition', CK_TOOL_COMMON.cable, CK_TOOL_COMMON.sleeve,'No joints in the power cable','Drill bit in good condition, free from defects', CK_TOOL_COMMON.dms,'Side handle fitted for good control','Anti-vibration handle / control working','No unusual sparking from inside the machine','Internal connections secure','No leakage current on the body (tested)', CK_TOOL_COMMON.dbl,'Chuck key / designated key used to change the bit', CK_TOOL_COMMON.body, CK_TOOL_COMMON.comp]]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'vib', no:'BHN-VM-CH-05', title:'Concrete Vibrator Inspection Checklist', short:'Concrete vibrator', head:[['comp','Company / project'],['type','Equipment type'],['make','Make & model no.'],['eqno','Equipment / serial no.'],['loc','Location']],
+  secs:[[null,['Vibrator physically sound and in good working condition','Motor junction box free from damage and closed','Switch properly insulated and working','Power cable free from damage','Electrical connection through an industrial plug only','Guard around rotating parts fixed properly','Needle free from damage and tightly connected to the motor','Proper handle provided for moving the vibrator']]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'fire', no:'BHN-FE-CH-06', title:'Fire Extinguisher Inspection Checklist', short:'Fire extinguisher',
+  head:[['comp','Company / project'],['eqno','Extinguisher no.'],['type','Type (DCP / CO2 / foam / water)'],['cap','Capacity'],['loc','Location'],['svc','Last annual service (month / year)']],
+  secs:[[null,['In its designated place — on the wall bracket or stand, with signage','Clearly visible and easy to reach (nothing blocking it)','Operating instructions legible, clean and facing outwards','Safety pin and tamper seal in place — not broken','No sign of use (no discharge on the hose or horn)','Pressure gauge in the green (within the safe range)','No physical damage — dents, rust, corrosion or leaks; hose, horn and nozzle not cracked or blocked','Wheeled units: wheels, carriage, hose and nozzle in working order','Service tag shows the last annual service — still in date']]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'whm', no:'BHN-WHM-CH-07', title:'Well Head Maintenance Checklist', short:'Well head maintenance (WHM)', cols:['Done','Not done','N/A'],
+  head:[['client','Client name'],['well','Well head name / no.'],['loc','Well head location'],['proj','Project']],
+  secs:[['Pre-job safety and preparation',['Well file, last WHM report and permits reviewed','Toolbox talk and JSA done','Lockout / tagout (LOTO) and pressure isolation verified','PPE, fire extinguisher and spill kit on site','Calibrated pressure gauge available']],
+   ['External inspection',['No visible leaks (oil / gas / grease)','Rust, corrosion and paint condition checked','Bolts, nuts and guards intact and tight','Signage, tags and pressure rating plates in place']],
+   ['Valve maintenance and function test',['Master valve operated (open → close → open)','Wing valve operated (open → close → open)','Swab valve operated (open → close → open)','Choke valve operated (open → close → open)','Valve stems and seats lubricated with the recommended grease','Valve packing checked for leaks (replaced if needed)']],
+   ['Seals and gaskets',['Flange gaskets — no leaks or damage','Bonnet seals and O-rings checked','Seal condition recorded (OK / needs replacement — write in remarks)']],
+   ['Lubrication and greasing',['Grease injected into all valve bodies until clean grease returns','Anti-seize applied on exposed threads, caps and bolts','Grease relief valves working','Tree cap operated and greased (open → close)']],
+   ['Pressure monitoring and testing',[{n:'Tubing pressure', u:'psi / bar'},{n:'Annulus pressure', u:'psi / bar'},{n:'Casing pressure', u:'psi / bar'},'Pressure gauges verified against the calibrated gauge','Low-pressure function test done (if feasible)']],
+   ['Choke and control components',['Choke bean / orifice checked for erosion or scaling','Choke cleaned / replaced as required','Hydraulic actuators — no leaks, function tested','Actuator lines intact and properly connected']],
+   ['Safety and control checks',['Emergency shutdown (ESD) valve response tested','Pressure safety valves (PSV) — condition and tagging checked','Fire safety equipment available near the well head','Barriers / guards around the well head intact']],
+   ['Documentation and handover',['All valve operations logged','Pressures recorded and signed off','Grease volumes recorded','Observations and anomalies noted','Supervisor informed of any issues']]],
+  result:'Well head left in a safe condition', signs:['Technician','Supervisor']},
+ {key:'harness', no:'BHN-FBH-CH-08', title:'Full Body Harness Inspection Checklist', short:'Full body harness',
+  head:[['comp','Company / project'],['eqno','Serial no.'],['make','Make / model'],['cap','Standard & capacity (e.g. EN 361, 140 kg)'],['loc','Location / user']],
+  secs:[[null,['Fall indicator not showing (harness has not stopped a fall)','Labels and markings legible and attached','Inspection tag / record in date','Metal parts (D-rings, buckles, hooks) free from cracks, sharp edges, deformation and corrosion','Springs and gates on hooks and buckles working','Quick-connect buckles engage properly (tug test)','Buckle attachments free from unusual wear, frayed or cut fibres','Stitching and sewn terminations complete — no pulled, cut or missing stitches','Webbing checked along its full length (bend into a "U") — no cuts, tears, fraying, burns, holes, hardness or discolouration','Webbing hidden under pads, keepers and D-ring checked','Lanyard / shock absorber free from cuts and damage — shock pack not opened']]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'grind', no:'BHN-GM-CH-09', title:'Grinding Machine Inspection Checklist', short:'Grinding machine', head:CK_HEAD_TOOL, ppe:CK_PPE_TOOL,
+  secs:[[null,['Grinder in good working condition', CK_TOOL_COMMON.cable, CK_TOOL_COMMON.sleeve,'Machine speed (RPM) marked on the rating plate', CK_TOOL_COMMON.dms,'Side handle fitted for good control','Wheel guard fitted and secure — covers at least half of the wheel','Grinding / cutting disc free from cracks or defects — max. RPM marked','Disc max. RPM is higher than the machine RPM','Correct key / spanner used to change the disc', CK_TOOL_COMMON.dbl, CK_TOOL_COMMON.body, CK_TOOL_COMMON.comp,'Work area free from flammable materials','Fire extinguisher available at the work location']]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'ply', no:'BHN-CM-CH-10', title:'Plywood Cutting Machine Inspection Checklist', short:'Plywood cutting machine', head:CK_HEAD_TOOL, ppe:CK_PPE_TOOL,
+  secs:[[null,['Machine in good working condition', CK_TOOL_COMMON.cable, CK_TOOL_COMMON.sleeve,'Machine speed (RPM) marked on the rating plate', CK_TOOL_COMMON.dms,'Handles fitted and free from damage','Upper guard fixed — lower retractable guard moves freely and springs back','Saw blade free from defects and corrosion — max. RPM marked','Saw blade tightened properly', CK_TOOL_COMMON.dbl, CK_TOOL_COMMON.body, CK_TOOL_COMMON.comp]]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'scissor', no:'BHN-SLT-CH-11', title:'Scissor Lift Inspection Checklist', short:'Scissor lift',
+  head:[['op','Operator'],['comp','Company'],['proj','Project'],['model','Model'],['unit','Unit no.'],['loc','Location']],
+  secs:[['1. Walk-around (engine off)',['Wheels, tyres and axles — condition / inflation','Hydraulic components — condition, no leaks','Data plate accurate and legible','Annual (third-party) inspection valid — certificate seen','Battery tray opens, closes and latches','Cover panels open, close and lock','Engine — fluids, filters, belts and hoses','Batteries — clean, dry, secure, cables and level OK','Fuel level / tank','Hydraulic oil level','Lights and strobes working','Placards, labels and decals legible','Top of base — no leaks or debris','Accessory plugs and cables','Elevating section — general condition and wear','Hydraulic cylinders and pin locks','Pivot pins — no wear, secured','Power track — lines and hoses','Platform — guard rails, toe board and extension deck','Operator manual in the weather-proof storage box','All controls clearly marked and hold-to-run']],
+   ['2. Powered checks (from ground and platform controls)',['Engine starts — oil pressure OK','Battery charge level','Gauges and instruments — hour meter, warning lights','Elevating section — raise / lower','Drive — forward and reverse','Steer — left and right','Horn','Outriggers / stabilisers','Pothole protection','Function-enable device','Manual lowering system','Safety interlocks']],
+   ['3. Workplace — free of hazards', CK_WORKPLACE]], signs:['Operator','HSE Engineer']},
+];
+const CK_ORDER=['veh','cut14','blower','boom','drill','vib','fire','whm','harness','grind','ply','scissor'];
+function ckItems(T){ const out=[]; let n=0; for(const [sec, items] of T.secs) for(const it of items){ n++; out.push({n, sec, num:typeof it==='object'?it:null, t:typeof it==='object'?it.n:it}); } return out; }
+function ckPdfDoc(T, D, blank){
+  D=D||{}; const H=D.h||{};
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'ck_'+T.key, docTitle:T.title, docSub:blank?'Monthly inspection · blank form':[H.eqno||H.veh||H.unit||H.well||'', D.date?isoToDmy(D.date):''].filter(Boolean).join(' · ')});
+  const g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL, K=100, hw=(CW-2*K)/2, v=t=>blank?{t:'', blank:true}:{t:t||'—'};
+  const resTxt=blank?' ':(D.fit===true?(T.result?'YES':'FIT FOR USE'):D.fit===false?(T.result?'NO':'NOT FIT FOR USE'):' ');
+  g.title(T.title.toUpperCase(), resTxt, D.fit?[15,118,80]:g.RED);
+  const hf=[...T.head, ['__d','Inspection date'], ['__n','Next inspection (monthly)']]; const val=k=>k==='__d'?isoToDmy(D.date):k==='__n'?isoToDmy(D.next):H[k];
+  for(let i=0;i<hf.length;i+=2){ const a=hf[i], b=hf[i+1]; g.row([{t:a[1].toUpperCase(), w:K, bold:true, fill:LBL, size:7.4},{...v(val(a[0])), w:hw},{t:b?b[1].toUpperCase():'', blank:true, w:K, bold:true, fill:LBL, size:7.4},{...(b?v(val(b[0])):{t:'', blank:true}), w:hw}], blank?20:15); }
+  if(T.ppe){ g.head('PPE TO BE WORN WHILE USING THE MACHINE'); const per=4, cw=CW/per, on=blank?[]:(D.ppe||T.ppe);
+    for(let i=0;i<T.ppe.length;i+=per){ const cells=[]; for(let j=0;j<per;j++){ const l=T.ppe[i+j]; if(l===undefined){ cells.push({t:'', blank:true, w:cw}); continue; } cells.push({check:on.includes(l), w:18},{t:l, w:cw-18, size:7.6}); } g.row(cells, 15); } }
+  if(T.eq){ g.head(T.eq.title.toUpperCase()); const ew=[22, 210, 34, 40, 40, 90, CW-22-210-34-40-40-90];
+    g.row(['#','Item','Qty','OK','Not OK','Expiry / due date','Remarks'].map((t,i)=>({t, w:ew[i], bold:true, fill:LBL, size:7.4, center:i>=2&&i<=4})), 14);
+    T.eq.items.forEach(([l],i)=>{ const x=blank?{}:((D.eq||[])[i]||{}); g.row([{t:String(i+1), w:ew[0], center:true, size:7.6},{t:l, w:ew[1], size:7.6},{t:x.q||'', blank:true, w:ew[2], center:true, size:7.6},{check:x.r==='ok', w:ew[3]},{check:x.r==='no', cross:true, w:ew[4]},{t:x.d||'', blank:true, w:ew[5], size:7.6},{t:x.rm||(x.r==='na'?'N/A':''), blank:true, w:ew[6], size:7.4}], 17); }); }
+  const C=T.cols||['OK','Not OK','N/A'], qw=[22, CW-22-40-44-34-130, 40, 44, 34, 130];
+  g.head(T.eq?'VEHICLE CHECKS':'CHECKS'); g.row(['#','Check',...C,'Remarks'].map((t,i)=>({t, w:qw[i], bold:true, fill:LBL, size:7.4, center:i>=2&&i<=4})), 14);
+  let last=null;
+  for(const it of ckItems(T)){ if(it.sec!==last){ last=it.sec; if(it.sec){ g.ensure(36); g.row([{t:it.sec.toUpperCase(), w:CW, bold:true, size:7.6, fill:[214,226,240]}], 13); } }
+    const a=blank?'':((D.ans||{})[it.n]||''), rm=blank?'':((D.rm||{})[it.n]||'');
+    if(it.num){ const vv=blank?'':((D.val||{})[it.n]||''); g.row([{t:String(it.n), w:qw[0], center:true, size:7.6},{t:`${it.t}:  ${vv||'______________'}  ${it.num.u||''}`, w:qw[1]+qw[2]+qw[3]+qw[4], size:7.6, bold:!!vv},{t:rm, blank:true, w:qw[5], size:7.2}], 16); continue; }
+    g.row([{t:String(it.n), w:qw[0], center:true, size:7.6},{t:it.t, w:qw[1], size:7.6},{check:a==='ok', w:qw[2]},{check:a==='no', cross:true, w:qw[3]},{check:a==='na', w:qw[4]},{t:rm, blank:true, w:qw[5], size:7.2, color:a==='no'?g.RED:g.INK}], 16); }
+  g.ensure(90); g.head('RESULT');
+  g.row([{t:(T.result||'Fit for use').toUpperCase(), w:K+60, bold:true, fill:LBL, size:7.6},{check:!blank&&D.fit===true, w:22},{t:T.result?'Yes':'Fit for use', w:110, size:8},{check:!blank&&D.fit===false, cross:true, w:22},{t:T.result?'No':'NOT fit — do not use', w:CW-K-60-22-110-22, size:8, bold:true, color:g.RED}], 18);
+  g.row([{t:'DEFECTS / ACTION NEEDED', w:K+60, bold:true, fill:LBL, size:7.6},{t:blank?'':(D.defects||'None'), blank:true, w:CW-K-60, size:8}], blank?40:22);
+  g.ensure(40+T.signs.length*30); g.head('SIGN-OFF');
+  g.row([{t:'', blank:true, w:K+20, fill:LBL},{t:'Name', w:150, bold:true, fill:LBL, size:7.6},{t:'Signature', w:150, bold:true, fill:LBL, size:7.6},{t:'Date', w:CW-K-20-300, bold:true, fill:LBL, size:7.6}], 14);
+  T.signs.forEach((l,i)=>{ const x=blank?{}:((D.signs||[])[i]||{}); g.row([{t:l.toUpperCase(), w:K+20, bold:true, fill:LBL, size:7.4},{t:x.n||'', blank:true, w:150, bold:true},x.s?{img:x.s, w:150}:{t:'', blank:true, w:150},{t:x.d?isoToDmy(x.d):'', blank:true, w:CW-K-20-300, size:7.8}], 30); });
+  return doc; }
+const CK_GROUP='Burhan checklists (monthly)';
+function ckToEngine(T){ const key=(T.head.find(h=>['veh','eqno','unit','well'].includes(h[0]))||T.head[0]);
+  return {key:'bhn_'+T.key, group:CK_GROUP, name:T.title, no:T.no, subjectLabel:key[1], items:ckItems(T).map(it=>it.num?`${it.t} (${it.num.u})`:it.t), bhn:T}; }
+function ckDocDefault(key){ if(!/^ck_/.test(String(key||''))) return null; const T=CK_TPL.find(t=>'ck_'+t.key===key); return T?{no:T.no, rev:'01', date:''}:null; }
+function ckSubjKey(T){ return (T.head.find(h=>['veh','eqno','unit','well'].includes(h[0]))||T.head[0])[0]; }
+function ckQTotal(cl){ return cl&&cl.bhn ? ckItems(cl.bhn).filter(it=>!it.num).length : (cl?cl.items.length:0); }
+function ckRecData(r){ const T=r.ckSnap, A={Yes:'ok', No:'no', 'N/A':'na'}, ans={}, rm={}, val={};
+  for(const it of ckItems(T)){ const a=(r.answers||{})[it.n-1]; if(a) ans[it.n]=A[a]; const c=(r.comments||{})[it.n-1]; if(c) rm[it.n]=c; const v=(r.values||{})[it.n-1]; if(v!==undefined && v!=='') val[it.n]=v; }
+  return {h:{...(r.ckH||{}), ...(r.projectId && !(r.ckH||{}).loc?{}:{})}, date:r.date, next:r.nextDate||(r.date?compAddMonths(r.date,1):''), ppe:r.ckPpe||T.ppe, eq:r.ckEq||[], ans, rm, val, fit:r.fit===true?true:r.fit===false?false:undefined, defects:r.defects||'', signs:(T.signs||[]).map((_,i)=>(r.ckSigns||{})[i]||{})}; }
+
+// Old built-in checklists — kept only so inspections saved with them still open (not offered for new inspections any more)
+const LEGACY_CHECKLISTS=[
   {key:'scaffold', group:'Scaffold & fall protection', name:'Scaffold inspection (tag check)', subjectLabel:'Scaffold no. / location', items:['Scaffold tag present, current and signed (green)','Base plates / sole boards on firm level ground','Standards plumb, ledgers & transoms secure','Bracing in place and undamaged','Working platform fully boarded, boards secured','Guardrails (top & mid) and toe boards fitted','Safe access ladder secured, extends 1 m above platform','Ties / anchors in place as per design','No overloading of materials on platform','Gaps to structure ≤ 300 mm or protected','Inspected within the last 7 days and after any alteration / bad weather — recorded on the tag','Tag holder at every access point; tag insert completed by the Scaffold Inspector (English)','Red "Scaffold incomplete — do not use" sign shown while erecting / altering','Maximum load sign on loading bays, towers and lifting frames','Danger area barricaded with warning signs during erection / dismantling','Scaffold built as per design / drawing (complex or non-standard scaffolds)']},
   {key:'harness', group:'Scaffold & fall protection', name:'Full body harness & lanyard', subjectLabel:'Harness serial no.', items:['Webbing free of cuts, burns, fraying or chemical damage','Stitching intact','D-rings and buckles free of cracks, rust or distortion','Lanyard / shock absorber pack intact and not deployed','Snap hooks and karabiners lock properly','Label / serial number legible and within service life','Six-monthly inspection by competent person current']},
   {key:'ladder', group:'Scaffold & fall protection', name:'Ladder inspection', subjectLabel:'Ladder no. / type', items:['Stiles straight and undamaged','Rungs / steps secure, clean and undamaged','Anti-slip feet present','Locking bars / spreaders work (step ladders)','Correct type and height for the task','Inspection tag current']},
@@ -9054,14 +9240,17 @@ const BUILTIN_CHECKLISTS=[
   {key:'vehicle', group:'Site & vehicle', name:'Vehicle pre-trip check', subjectLabel:'Vehicle no.', items:['Tyres (incl. spare) — pressure and tread OK','Lights, indicators and horn working','Brakes working','Seat belts working','Mirrors and windscreen clean, no cracks','Fluids — no leaks','First aid kit, fire extinguisher, warning triangle on board','IVMS working and driver logged in','Registration, insurance and permits valid','Driver licence and defensive driving valid']},
   {key:'welfare', group:'Site & vehicle', name:'Welfare facilities (water, shade, rest)', subjectLabel:'Site / camp', items:['Cool drinking water available','Shaded rest area with seating','Toilets clean and sufficient','Hand washing facilities with soap','Eating area clean and separate from work area','Waste bins available and emptied','First aid facilities available']},
 ];
+const BUILTIN_CHECKLISTS=CK_TPL.map(ckToEngine);   // Batch 100: the 12 Burhan checklists
 let customChecklists=[];
 function allChecklists(){ return BUILTIN_CHECKLISTS.concat(customChecklists.map(c=>({...c, group:'Custom checklists', custom:true}))); }
 // An inspection keeps its own copy of the questions (itemsSnapshot), so later edits to a custom checklist never shift old answers.
-function checklistOf(r){ if(r.itemsSnapshot && r.itemsSnapshot.length) return {key:r.template, name:r.templateName||'Checklist', items:r.itemsSnapshot}; return allChecklists().find(c=>c.key===r.template) || null; }
+function checklistOf(r){ if(r.ckSnap) return {key:r.template, name:r.templateName||r.ckSnap.title, items:(r.itemsSnapshot&&r.itemsSnapshot.length)?r.itemsSnapshot:ckItems(r.ckSnap).map(it=>it.t), bhn:r.ckSnap}; if(r.itemsSnapshot && r.itemsSnapshot.length) return {key:r.template, name:r.templateName||'Checklist', items:r.itemsSnapshot}; return allChecklists().find(c=>c.key===r.template) || LEGACY_CHECKLISTS.find(c=>c.key===r.template) || null; }
 function inspCounts(r){ const a=r.answers||{}, v=Object.values(a); return {yes:v.filter(x=>x==='Yes').length, no:v.filter(x=>x==='No').length, na:v.filter(x=>x==='N/A').length, done:v.length}; }
-function inspResultBadge(r){ const cl=checklistOf(r), c=inspCounts(r), total=cl?cl.items.length:0; if(!c.done) return '<span class="badge muted">Not started</span>'; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; return c.no?`<span class="badge danger">${c.no} defect${c.no===1?'':'s'}</span>`:'<span class="badge ok">Pass</span>'; }
+function ckBadge(r, cl){ const c=inspCounts(r), total=ckQTotal(cl); if(!c.done && r.fit===undefined) return '<span class="badge muted">Not started</span>'; if(r.fit===false) return '<span class="badge danger">NOT fit for use</span>'; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; if(r.fit===true) return `<span class="badge ok">${cl.bhn.result?'Done — safe':'Fit for use'}</span>${c.no?` <span class="badge warn">${c.no} not OK</span>`:''}`; return '<span class="badge warn">Choose the result</span>'; }
+function inspResultBadge(r){ const cl=checklistOf(r); if(cl && cl.bhn) return ckBadge(r, cl); const c=inspCounts(r), total=cl?cl.items.length:0; if(!c.done) return '<span class="badge muted">Not started</span>'; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; return c.no?`<span class="badge danger">${c.no} defect${c.no===1?'':'s'}</span>`:'<span class="badge ok">Pass</span>'; }
 function inspChecklistHtml(r){
   const cl=checklistOf(r); if(!cl) return '<p class="wsub">This checklist template no longer exists.</p>';
+  if(cl.bhn) return ckFormHtml(r, cl);   // Batch 100
   const a=r.answers||{}, cm=r.comments||{}, ed=canEdit();
   return `<form data-reg-custom="checklist"><p class="wsub" style="margin:0 0 10px;">${esc(cl.name)} — tap Yes, No or N/A for each item. Every “No” creates an action to fix it.</p>
     <div class="ck-list">${cl.items.map((it,n)=>`<div class="ck-item ${a[n]==='No'?'ck-no':a[n]==='Yes'?'ck-yes':''}"><div class="ck-q"><span class="ck-n">${n+1}</span>${esc(it)}</div>
@@ -9074,11 +9263,13 @@ regDefine({
   key:'insp', collection:'inspections', singular:'Inspection', title:'Inspection Checklists', tagline:'Check · Record · Fix',
   addLabel:'+ New inspection', noField:'inspNo', noPrefix:'INS', noYear:true, dateField:'date', yearFilter:true,
   headerButtons:'<button class="btn btn-sm reg-edit-only" type="button" id="ckTemplatesBtn">My checklists</button>',
+  topPanel:()=>{ const el=document.getElementById('inspTop'); if(el && typeof ckTopHtml==='function') el.innerHTML=ckTopHtml(); },
+  pdf:r=>inspPdf(r), pdfLabel:'Checklist PDF',
   searchPlaceholder:'Search checklist, item inspected, inspector…', emptyEditor:'No inspections yet — click “+ New inspection”, choose a checklist, then tick each item on your phone.',
   titleOf:r=>{ const c=checklistOf(r); return `${c?c.name:'Inspection'}${r.subject?' — '+r.subject:''}`; }, subOf:r=>[r.date, r.projectId?projectName(r.projectId):'', r.inspector?'by '+r.inspector:''].filter(Boolean).join(' · '),
   badgesOf:r=>inspResultBadge(r), searchText:r=>{ const c=checklistOf(r); return [r.inspNo, c&&c.name, r.subject, r.inspector].join(' '); },
   addFields:['template','subject','date','projectId','inspector'], addDefaults:{answers:{}, comments:{}},
-  segs:[{key:'fail', label:'With defects', match:r=>inspCounts(r).no>0},{key:'pass', label:'Passed', match:r=>{ const c=checklistOf(r); return c && inspCounts(r).done===c.items.length && !inspCounts(r).no; }},{key:'inc', label:'Not finished', match:r=>{ const c=checklistOf(r); return c && inspCounts(r).done<c.items.length; }}], segAllLabel:'All',
+  segs:[{key:'fail', label:'With defects', match:r=>inspCounts(r).no>0 || r.fit===false},{key:'pass', label:'Passed', match:r=>{ const c=checklistOf(r); return c && inspCounts(r).done===ckQTotal(c) && !inspCounts(r).no && r.fit!==false; }},{key:'inc', label:'Not finished', match:r=>{ const c=checklistOf(r); return c && inspCounts(r).done<ckQTotal(c); }}], segAllLabel:'All',
   tabs:[{key:'checklist', label:'Checklist', html:r=>inspChecklistHtml(r)},
     {key:'main', label:'Details', groups:[{fields:[
       {key:'inspNo', label:'Inspection no.', required:true},
@@ -9106,10 +9297,11 @@ regDefine({
 });
 
 /* ---- inspections: save the checklist, raise an action for every "No" ---- */
-REG.insp.beforeCreate = d=>{ const c=allChecklists().find(x=>x.key===d.template); if(c){ d.itemsSnapshot=c.items.slice(); d.templateName=c.name; } };
+REG.insp.beforeCreate = d=>{ const c=allChecklists().find(x=>x.key===d.template); if(c){ d.itemsSnapshot=c.items.slice(); d.templateName=c.name; if(c.bhn){ d.ckSnap=JSON.parse(JSON.stringify(c.bhn)); d.nextDate=d.date?compAddMonths(d.date,1):''; d.ckH={[ckSubjKey(c.bhn)]:d.subject||''}; } } };
 REG.insp.customSubmit = {
   checklist: async (r, form)=>{
     const cl=checklistOf(r); if(!cl) return;
+    if(r.ckSnap){ const x=ckCollect(r, form); if(await regUpdate('insp', r.id, x, true)) toast(x.fit===false?'Saved — NOT fit for use: do not use it':'Checklist saved'); return; }   // Batch 100: record only, no actions
     const answers={}, comments={};
     cl.items.forEach((_,n)=>{ const v=form.querySelector(`input[name="ck${n}"]:checked`); if(v) answers[n]=v.value; const c=form.querySelector(`[data-ck-comment="${n}"]`); if(c && c.value.trim()) comments[n]=c.value.trim(); });
     const actions=(r.actions||[]).slice(), due=localDatePlus(3); let added=0;
