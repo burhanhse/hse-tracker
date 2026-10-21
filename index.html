@@ -1119,6 +1119,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .drill-plan .section-head{flex-wrap:wrap; gap:8px;} .drill-grid th, .drill-grid td{padding:4px 5px; font-size:12px;} .drill-grid select{font-size:12px; padding:3px 4px;} .drill-c{text-align:center; min-width:30px; font-weight:700;}
 .drill-c.ok{background:var(--ok-bg); color:var(--ok);} .drill-c.warn{background:var(--warn-bg); color:var(--warn);} .drill-c.danger{background:var(--danger-bg); color:var(--danger);} .drill-c.muted{color:var(--ink-muted);}
 .drill-cb{background:none; border:0; color:inherit; font:inherit; cursor:pointer; padding:0 4px;} .drill-people{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:2px 12px; max-height:420px; overflow:auto;}
+.mr-pack{border-left:3px solid var(--accent); margin-bottom:12px;} .mr-pack .section-head{flex-wrap:wrap; gap:8px;} .mr-period{max-width:420px;}
 #compSection.cmx-on .topbar-actions{display:none;} #compTabs{margin-bottom:10px;}
 .cmx-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;} .cmx-tiles{grid-template-columns:repeat(4,1fr) !important;} @media (max-width:900px){ .cmx-tiles{grid-template-columns:repeat(2,1fr) !important;} }
 .cmx-tabs{margin:4px 0 12px;} .cmx-grp{padding-bottom:6px;}
@@ -2279,7 +2280,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'},
 };
 function docControl(key){ return (((settingsDocs||{}).docControl||{}).docs||{})[key]||{}; }
 let pdfLogoData=null;
@@ -2983,7 +2984,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b93';
+const APP_BUILD='b94';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4519,7 +4520,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -6841,7 +6842,7 @@ regDefine({
       {key:'decisions', label:'Decisions made', type:'textarea', wide:true},
       {key:'nextMeeting', label:'Next meeting', type:'date'},
     ]}]},
-    {key:'mr', label:'Review inputs & outputs', showIf:r=>r.type===MEETING_TYPES[1], intro:'ISO 45001 clause 9.3 — tick each input that was reviewed and record the outputs.', fields:[
+    {key:'mr', label:'Review inputs & outputs', showIf:r=>r.type===MEETING_TYPES[1], pre:r=>mrPackBoxHtml(r), intro:'ISO 45001 clause 9.3 — tick each input that was reviewed and record the outputs.', fields:[
       {key:'mrInputs', label:'Inputs reviewed', type:'checks', options:MR_INPUTS},
       {key:'mrSuitability', label:'Conclusion: continuing suitability, adequacy & effectiveness of the HSE system', type:'textarea', wide:true},
       {key:'mrImprovements', label:'Opportunities for continual improvement', type:'textarea', wide:true},
@@ -7852,6 +7853,105 @@ document.addEventListener('change', e=>{
   if(el.dataset.drillW && drillPick.sel){ if(el.checked) drillPick.sel.add(el.dataset.drillW); else drillPick.sel.delete(el.dataset.drillW); return; }
 });
 document.addEventListener('input', e=>{ if(e.target && e.target.id==='drillPickQ'){ drillPick.q=e.target.value; const r=regState.drills.list.find(x=>x.id===drillPick.id); const body=document.getElementById('regDrawerBody'); if(r && body){ body.innerHTML=drillPeopleHtml(r); const s=document.getElementById('drillPickQ'); if(s){ s.focus(); try{ s.setSelectionRange(s.value.length, s.value.length); }catch(x){} } } } });
+
+/* =============================== Batch 94: management review pack (ISO 9.3 inputs, one PDF) =============================== */
+const mrUi={from:'', to:'', id:''};
+function mrDefaultPeriod(r){
+  const to=r.date && r.date<=localToday() ? r.date : localToday();
+  const prev=regActive('meetings').filter(m=>m.id!==r.id && m.type===MEETING_TYPES[1] && m.status!=='Scheduled' && m.date && m.date<(r.date||to)).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  return {from:prev?prev.date:compAddMonths(to,-12), to, prev};
+}
+function mrPeriod(r){ const d=mrDefaultPeriod(r); if(mrUi.id===r.id && mrUi.from && mrUi.to) return {...d, from:mrUi.from, to:mrUi.to, custom:true}; return d; }
+const mrIn=(d,f,t)=>{ const x=String(d||'').slice(0,10); return !!x && x>=f && x<=t; };
+function mrSafe(fn, fb){ try{ return fn(); }catch(e){ console.warn('review pack', e); return fb; } }
+function mrPackData(r){
+  const P=mrPeriod(r), f=P.from, t=P.to, S=[];
+  // 1 previous actions
+  S.push({h:'1. Status of actions from previous reviews', rows:mrSafe(()=>{ const acts=regActive('meetings').filter(m=>m.type===MEETING_TYPES[1] && m.id!==r.id && m.date && m.date<=t).flatMap(m=>(m.actions||[]).map(a=>({...a, mtg:m.mtgNo||'', mdate:m.date})));
+    if(!acts.length) return [['Previous review actions','None recorded']];
+    const open=acts.filter(a=>(a.status||'Open')!=='Closed');
+    return [['Actions from previous reviews', `${acts.length} · ${acts.length-open.length} closed · ${open.length} open${open.filter(a=>complaintOverdueDays(a)).length?` · ${open.filter(a=>complaintOverdueDays(a)).length} overdue`:''}`],
+      ...open.slice(0,12).map(a=>[`${a.mtg} ${isoToDmy(a.mdate)}`, `OPEN — ${a.action||''}${a.owner?' · '+a.owner:''}${a.targetDate?' · target '+isoToDmy(a.targetDate):''}`])]; }, [])});
+  // 2 changes
+  S.push({h:'2. Changes in external & internal issues', rows:mrSafe(()=>{ const out=[]; const moc=REG.moc?regActive('moc').filter(x=>mrIn(x.requestDate||x.createdAt, f, t)):[];
+    out.push(['Changes (MOC) requested', moc.length?`${moc.length} — ${moc.slice(0,6).map(x=>`${x.mocNo||''} ${x.title||''} (${x.status||'Requested'})`).join('; ')}${moc.length>6?'…':''}`:'None']);
+    const newP=activeSites().filter(s=>mrIn(s.createdAt||s.startDate, f, t)); out.push(['New projects / sites', newP.length?newP.map(s=>s.siteName).join(', '):'None']);
+    if(REG.legal){ const L=regActive('legal'), c=k=>L.filter(x=>(x.status||'Not evaluated')===k).length; out.push(['Legal & other requirements', `${L.length} in the register · ${c('Compliant')} compliant · ${c('Partially compliant')} partially · ${c('Non-compliant')} non-compliant · ${c('Not evaluated')} not evaluated`]); }
+    return out; }, [])});
+  // 3 performance
+  S.push({h:'3. HSE performance — lagging & leading indicators', rows:mrSafe(()=>{ const ent=liveReportEntries().filter(e=>{ const d=String(e.date||''); return d.length===7 ? (d>=f.slice(0,7) && d<=t.slice(0,7)) : mrIn(d, f, t); });
+    const m=computeReportMetrics(ent), rate=n=>m.manHours?(n*1e6/m.manHours).toFixed(2):'—';
+    const inc=activeIncidents().filter(i=>mrIn(i.date, f, t)), cls=k=>inc.filter(i=>i.injuryClass===k).length;
+    return [['Man-hours / km driven', `${Math.round(m.manHours).toLocaleString('en-GB')} man-hours · ${Math.round(m.vehicleKm).toLocaleString('en-GB')} km`],
+      ['Incidents (register)', `${inc.length} total · ${cls('Fatality')} fatality · ${cls('Lost time injury (LTI)')} LTI · ${cls('Restricted work case (RWC)')} RWC · ${cls('Medical treatment case (MTC)')} MTC · ${cls('First aid case (FAC)')} FAC · ${inc.filter(i=>i.type==='Near miss').length} near miss · ${inc.filter(i=>typeof incHiPoClass==='function' && incHiPoClass(i)==='HiPo').length} HiPo`],
+      ['Rates (per million man-hours)', `LTIF ${rate(m.lti)} · TRCF ${m.manHours?((m.lti+m.mti)*1e6/m.manHours).toFixed(2):'—'} · days lost ${m.ltiDaysLost}`],
+      ['Vehicle', `${inc.filter(i=>i.type==='Vehicle incident (RTA)').length} vehicle incidents · ${m.ivms||0} IVMS violations · ${m.lsr||0} LSR violations`],
+      ['Open investigations / CAPA', `${inc.filter(i=>!/closed/i.test(i.status||'')).length} incidents not closed · ${activeIncidents().flatMap(i=>i.capa||[]).filter(a=>(a.status||'Open')!=='Closed').length} corrective actions open`],
+      ['Leading activities', `${m.tbt} TBTs (${m.tbtAttendees} attendees) · ${m.training} training sessions · ${m.inductionSessions} induction sessions · ${m.siteVisit||0} site visits · ${m.internalAudit||0} internal audits · ${m.vehicleInspection||0} vehicle inspections · ${m.hseObservation||0} observations · ${m.mockDrill||0} drills`]]; }, [])});
+  // 4 objectives
+  S.push({h:'4. Extent to which objectives were met', rows:mrSafe(()=>{ if(!REG.objectives) return []; const O=regActive('objectives').filter(o=>!o.year || String(o.year)>=f.slice(0,4)); if(!O.length) return [['Objectives','None recorded']];
+    return O.slice(0,14).map(o=>[`${o.objNo||''} ${o.year||''}`, `${String(o.objective||'').slice(0,110)} — ${o.status||'—'}${o.target?' · target '+o.target:''}${o.progress!==undefined&&o.progress!==''?' · '+o.progress+'%':''}`]); }, [])});
+  // 5 audits
+  S.push({h:'5. Audit results', rows:mrSafe(()=>{ const A=activeAudits().filter(a=>mrIn(a.startDate||a.date, f, t)); let open=0, over=0, major=0, minor=0; for(const a of A){ const c=findingCounts(a); open+=c.open; over+=c.overdue; major+=c.major; minor+=c.minor; }
+    const allOpen=activeAudits().reduce((n,a)=>n+findingCounts(a).open,0); const out=[['Audits in the period', A.length?A.map(a=>`${a.auditNo||''} ${a.title||a.auditType||''} (${a.status||''})`).slice(0,8).join('; '):'None'], ['Findings', `${major} major NC · ${minor} minor NC · ${open} open · ${over} overdue (all audits: ${allOpen} open)`]];
+    if(typeof audProgStats==='function'){ const st=audProgStats(t.slice(0,4)); out.push(['Internal audit programme '+t.slice(0,4), `${st.done} of ${st.total} done${st.overdue?` · ${st.overdue} overdue`:''}`]); }
+    return out; }, [])});
+  // 6 consultation
+  S.push({h:'6. Consultation & participation of workers', rows:mrSafe(()=>{ const com=regActive('meetings').filter(m=>m.type===MEETING_TYPES[0] && m.status!=='Scheduled' && mrIn(m.date, f, t)).length;
+    const obs=REG.obs?regActive('obs').filter(o=>mrIn(o.date, f, t)):[]; return [['HSE committee meetings', String(com)], ['Observations raised by the workforce', `${obs.length} (${obs.filter(o=>o.obsType==='Positive').length} positive · ${obs.filter(o=>o.obsType!=='Positive' && (o.status||'Open')!=='Closed').length} still open)`]]; }, [])});
+  // 7 risks & opportunities
+  S.push({h:'7. Risks & opportunities', rows:mrSafe(()=>{ const out=[]; const hi=(s,l)=>(rScore(s,l)||0)>=10;
+    if(REG.hira){ const H=regActive('hira').filter(x=>(x.status||'Current')!=='Obsolete'); out.push(['Hazard & risk register (HIRA)', `${H.length} hazards · ${H.filter(x=>hi(x.resSeverity||x.severity, x.resLikelihood||x.likelihood)).length} still high / extreme after controls · ${H.filter(x=>x.reviewDate&&daysUntil(x.reviewDate)<0).length} reviews overdue`]); }
+    if(REG.hra){ const H=regActive('hra').filter(x=>(x.status||'Current')!=='Obsolete'); out.push(['Health risks (HRA)', `${H.length} health risks · ${H.filter(x=>hi(x.resSeverity||x.severity, x.resLikelihood||x.likelihood)).length} high residual`]); }
+    if(REG.aspects){ const A=regActive('aspects').filter(x=>(x.status||'Current')!=='Obsolete'); out.push(['Environmental aspects', `${A.length} aspects · ${A.filter(x=>aspSig(x).sig).length} significant`]); }
+    return out; }, [])});
+  // 8 competence
+  S.push({h:'8. Competence & awareness', rows:mrSafe(()=>{ const out=[]; if(typeof cmxPairs==='function'){ const st=cmxStats(cmxPairs(activeWorkers())); out.push(['Competency matrix', `${st.pctC===null?'—':st.pctC+'%'} of HSE-critical jobs at the required level (${st.okC}/${st.crit}) · ${st.gaps} gaps open (${st.overdue} overdue)`]); }
+    if(typeof trainingCompliancePct==='function'){ const p=trainingCompliancePct(); out.push(['Training compliance (training matrix)', p===null?'—':p+'%']); }
+    if(typeof indList!=='undefined'){ out.push(['Onboarding inductions in the period', String(indList.filter(x=>mrIn(x.date, f, t)).length)]); }
+    return out; }, [])});
+  // 9 environment
+  S.push({h:'9. Environmental performance', rows:mrSafe(()=>{ const out=[]; if(REG.waste){ const W=regActive('waste').filter(x=>mrIn(x.date, f, t)), st=wasteStats(W); out.push(['Waste', `${st.n} removals · ${st.tonnes} t · ${st.pct===null?'—':st.pct+'%'} reused / recycled · ${st.hazNoNote} hazardous without a transfer note`]); }
+    out.push(['Environmental incidents', String(activeIncidents().filter(i=>mrIn(i.date, f, t) && /environment/i.test(i.type||'')).length)]); return out; }, [])});
+  // 10 emergency
+  S.push({h:'10. Emergency preparedness', rows:mrSafe(()=>{ if(!REG.drills) return []; const D=regActive('drills').filter(x=>mrIn(x.date, f, t)), timed=D.filter(x=>drillTimes(x).met!==null), met=timed.filter(x=>drillTimes(x).met).length, sl=drillSlots(t.slice(0,4));
+    return [['Drills in the period', `${D.length} drills · ${D.reduce((n,x)=>n+drillPeople(x),0)} people · response target met ${timed.length?Math.round(met*100/timed.length)+'%':'—'}`], ['Drill plan '+t.slice(0,4), `${sl.filter(s=>s.st==='done'||s.st==='late').length} of ${sl.length} done · ${sl.filter(s=>s.st==='overdue').length} overdue`]]; }, [])});
+  // 11 resources
+  S.push({h:'11. Adequacy of resources', rows:mrSafe(()=>{ const out=[]; if(typeof critList==='function'){ const C=critList(); out.push(['HSE-critical equipment', `${C.length} items · ${C.filter(e=>critStatusOf(e)==='expired').length} expired · ${C.filter(e=>critStatusOf(e)==='oos').length} out of service`]); }
+    out.push(['Vehicles marked DO NOT USE', String(activeVehicles().filter(v=>vehDoNotUse(v)).length)]); out.push(['Active workforce', `${activeWorkers().filter(w=>(w.status||'active')==='active').length} employees · ${activeSites().length} active projects`]); return out; }, [])});
+  // 12 actions
+  S.push({h:'12. Open actions (all sources)', rows:mrSafe(()=>{ const A=collectAllActions().filter(a=>a.status!=='Closed'), od=A.filter(a=>complaintOverdueDays(a)); const by=new Map(); for(const a of A) by.set(a.src, (by.get(a.src)||0)+1);
+    return [['Open actions', `${A.length} open · ${od.length} overdue`], ['By source', [...by].map(([k,n])=>`${(ACT_SOURCES.find(s=>s.key===k)||{label:k}).label} ${n}`).join(' · ')||'—']]; }, [])});
+  return {P, S};
+}
+function mrPackBoxHtml(r){
+  const P=mrPeriod(r);
+  return `<div class="panel mr-pack"><div class="section-head"><h3>${ic('clipcheck')} Management review pack</h3><button type="button" class="btn btn-sm btn-primary" data-mr-pack="${esc(r.id)}">${ic('download')} Review pack (PDF)</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">One PDF with all the ISO 9.3 inputs collected from the tracker${P.prev?` since the last review (${esc(P.prev.mtgNo||'')} on ${esc(isoToDmy(P.prev.date))})`:' (no earlier review — the last 12 months)'}. Hold the meeting from it, then record the conclusions below and the actions in the Actions tab.</p>
+    <div class="form-grid mr-period"><label>From<input type="date" id="mrFrom" value="${esc(P.from)}"></label><label>To<input type="date" id="mrTo" value="${esc(P.to)}"></label></div></div>`;
+}
+async function mrPackPdf(id){
+  const r=regActive('meetings').find(x=>x.id===id); if(!r){ toast('Meeting not found'); return; } if(!compPdfReady()) return;
+  const {P, S}=mrPackData(r), hs=hseSigOf((auth.currentUser||{}).email)||{};
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'mrPack', docSub:`${r.mtgNo||''} · ${isoToDmy(P.from)} – ${isoToDmy(P.to)}`}), g=compGrid(doc, 32), CW=g.CW, K=170, LBL=g.LBL;
+  g.title('MANAGEMENT REVIEW INPUTS — ISO clause 9.3', `${isoToDmy(P.from)} – ${isoToDmy(P.to)}`);
+  g.row([{t:'MEETING', w:K, bold:true, fill:LBL},{t:`${r.mtgNo||''} · ${isoToDmy(r.date)}${r.time?' '+r.time:''}${r.location?' · '+r.location:''}`, w:CW-K}]);
+  g.row([{t:'CHAIRED BY', w:K, bold:true, fill:LBL},{t:r.chair||'—', w:CW-K}]);
+  if(r.attendees) g.row([{t:'ATTENDEES', w:K, bold:true, fill:LBL},{t:r.attendees, w:CW-K, size:8}]);
+  g.row([{t:'PERIOD REVIEWED', w:K, bold:true, fill:LBL},{t:`${isoToDmy(P.from)} to ${isoToDmy(P.to)}${P.prev&&!P.custom?` — since the last management review ${P.prev.mtgNo||''}`:''}`, w:CW-K}]);
+  for(const s of S){ if(!s.rows.length) continue; g.head(s.h.toUpperCase()); s.rows.forEach(([a,b])=>g.row([{t:a, w:K, bold:true, size:8},{t:b, w:CW-K, size:8}])); }
+  g.head('13. OUTPUTS — DECISIONS OF THE REVIEW');
+  const outs=[['Continuing suitability, adequacy & effectiveness', r.mrSuitability],['Opportunities for continual improvement', r.mrImprovements],['Changes to the system / policy / objectives', r.mrChanges],['Resources needed', r.mrResources],['Other decisions', r.decisions]];
+  outs.forEach(([a,b])=>g.row([{t:a, w:K, bold:true, size:8},{t:b||'', blank:true, w:CW-K, size:8}], b?15:30));
+  const acts=r.actions||[]; if(acts.length){ g.head(`ACTIONS FROM THIS REVIEW (${acts.length})`); g.row([{t:'Action', w:CW-250, bold:true, fill:LBL},{t:'Owner', w:110, bold:true, fill:LBL},{t:'Target', w:70, bold:true, fill:LBL},{t:'Status', w:70, bold:true, fill:LBL}]); acts.forEach(a=>g.row([{t:a.action||'', w:CW-250, size:8},{t:a.owner||'—', w:110, size:8},{t:isoToDmy(a.targetDate)||'—', w:70, size:8},{t:a.status||'Open', w:70, size:8}])); }
+  g.ensure(90); g.y+=6; const hw=(CW-2*110)/2;
+  g.row([{t:'PREPARED BY (HSE)', w:110, bold:true, fill:LBL},{t:hs.name||'', blank:true, sub:[hs.role, isoToDmy(localToday())].filter(Boolean).join('  ·  '), w:hw, bold:true},{t:'SIGNATURE', w:110, bold:true, fill:LBL},hs.img?{img:hs.img, w:hw}:{t:'', blank:true, w:hw}], 40);
+  g.row([{t:'REVIEWED BY (TOP MANAGEMENT)', w:110, bold:true, fill:LBL, size:7.6},{t:r.chair||'', blank:true, sub:'Name / position / date', w:hw, bold:true},{t:'SIGNATURE', w:110, bold:true, fill:LBL},{t:'', blank:true, w:hw}], 40);
+  doc.save(`Management_Review_Pack_${compSafeName(r.mtgNo)}_${P.to}.pdf`);
+}
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-mr-pack]'); if(!b || b.disabled) return; b.disabled=true; try{ await mrPackPdf(b.dataset.mrPack); } finally{ b.disabled=false; } });
+document.addEventListener('change', e=>{ const el=e.target; if(!el || !['mrFrom','mrTo'].includes(el.id)) return; const r=regCurrent(); if(!r) return; const P=mrDefaultPeriod(r);
+  mrUi.id=r.id; mrUi.from=(document.getElementById('mrFrom')||{}).value||P.from; mrUi.to=(document.getElementById('mrTo')||{}).value||P.to; if(mrUi.from>mrUi.to){ toast('"From" is after "To"'); } });
 
 /* =============================== MOC =============================== */
 const MOC_TYPES=['People / organisation','Equipment / plant','Process / method','Materials / chemicals','Site / facility','Procedure / document','Software / systems','Other'];
