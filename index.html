@@ -8861,7 +8861,7 @@ function ckFormHtml(r, cl){
       :ed?`${/HSE/.test(l)&&hs.img?`<button type="button" class="btn btn-sm btn-primary" data-ck-mysig="${i}">Use my saved signature</button> `:''}<button type="button" class="btn btn-sm" data-ck-sign="${i}">✍ Sign</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`; }).join('')}</div>`; }
 let ckPadImg='';
 function ckWirePad(){ const cv=document.getElementById('ckPad'); ckPadImg=''; if(cv) compPadWire(cv, img=>{ ckPadImg=img; }); }
-function ckCollect(r, form){ const T=r.ckSnap, out={answers:{}, comments:{}, values:{}, ckH:{}, ckEq:[]};
+function ckCollect(r, form){ const T=ckSnapOf(r), out={answers:{}, comments:{}, values:{}, ckH:{}, ckEq:[]};
   for(const it of ckItems(T)){ const i=it.n-1; const v=form.querySelector(`input[name="ck${i}"]:checked`); if(v) out.answers[i]=v.value; const c=form.querySelector(`[data-ck-comment="${i}"]`); if(c && c.value.trim()) out.comments[i]=c.value.trim(); const nv=form.querySelector(`[data-ck-val="${i}"]`); if(nv && nv.value!=='') out.values[i]=nv.value; }
   form.querySelectorAll('[data-ckh]').forEach(el=>{ const v=el.value.trim(); if(v) out.ckH[el.dataset.ckh]=v; });
   if(T.ppe) out.ckPpe=[...form.querySelectorAll('[data-ck-ppe]:checked')].map(x=>x.value);
@@ -8871,7 +8871,7 @@ function ckCollect(r, form){ const T=r.ckSnap, out={answers:{}, comments:{}, val
   out.nextDate=r.date?compAddMonths(r.date,1):'';
   return out; }
 async function inspPdf(r){ if(!compPdfReady()) return; const cl=checklistOf(r); if(!cl) return;
-  if(r.ckSnap){ const doc=ckPdfDoc(r.ckSnap, ckRecData(r), false); doc.save(`${compSafeName(r.ckSnap.no)}_${compSafeName(r.subject||r.inspNo)}_${r.date||''}.pdf`); return; }
+  if(ckSnapOf(r)){ const doc=ckPdfDoc(r.ckSnap, ckRecData(r), false); doc.save(`${compSafeName(r.ckSnap.no)}_${compSafeName(r.subject||r.inspNo)}_${r.date||''}.pdf`); return; }
   const T={key:'gen', title:cl.name||'Inspection checklist', head:[['subject', cl.subjectLabel||'Item / area inspected'],['proj','Project'],['insp','Inspected by']], secs:[[null, cl.items]], signs:['Inspected by']};
   const A={Yes:'ok', No:'no', 'N/A':'na'}, ans={}, rm={}; cl.items.forEach((_,i)=>{ const a=(r.answers||{})[i]; if(a) ans[i+1]=A[a]; const c=(r.comments||{})[i]; if(c) rm[i+1]=c; });
   const c=inspCounts(r); const doc=ckPdfDoc(T, {h:{subject:r.subject, proj:r.projectId?projectName(r.projectId):'', insp:r.inspector}, date:r.date, next:'', ans, rm, fit:c.done?!c.no:undefined, defects:(r.actions||[]).map(a=>a.action).join(' · ')||r.notes||'', signs:[{n:r.inspector||'', d:r.date}]}, false);
@@ -8879,7 +8879,7 @@ async function inspPdf(r){ if(!compPdfReady()) return; const cl=checklistOf(r); 
 async function ckBlankPdf(key){ if(!compPdfReady()) return; const T=CK_TPL.find(t=>t.key===key); if(!T) return; ckPdfDoc(T, {}, true).save(`${compSafeName(T.no)}_blank.pdf`); }
 /* ---- due list: each item's last Burhan checklist + 1 month ---- */
 function ckDueRows(){ const m=new Map();
-  for(const r of regActive('insp')){ if(!r.ckSnap || !r.date) continue; const subj=String(r.subject||'').trim(); if(!subj) continue; const k=r.ckSnap.key+'|'+subj.toLowerCase(); const cur=m.get(k); if(!cur || String(r.date)>String(cur.date)) m.set(k, r); }
+  for(const r of regActive('insp')){ if(!ckSnapOf(r) || !r.date) continue; const subj=String(r.subject||'').trim(); if(!subj) continue; const k=r.ckSnap.key+'|'+subj.toLowerCase(); const cur=m.get(k); if(!cur || String(r.date)>String(cur.date)) m.set(k, r); }
   const t=localToday(), soon=localDatePlus(7);
   return [...m.values()].map(r=>{ const next=r.nextDate||compAddMonths(r.date,1); return {r, next, st:next<t?'over':next<=soon?'due':'ok'}; }).sort((a,b)=>String(a.next).localeCompare(String(b.next))); }
 function ckTopHtml(){ if(!regState.insp) return ''; const rows=ckDueRows(), over=rows.filter(x=>x.st==='over'), due=rows.filter(x=>x.st==='due'), ed=canEdit();
@@ -8890,7 +8890,7 @@ function ckTopHtml(){ if(!regState.insp) return ''; const rows=ckDueRows(), over
 document.addEventListener('click', async e=>{
   const b=e.target.closest && e.target.closest('#ckBlankBtn,[data-ck-allok],[data-ck-sign],[data-ck-padcancel],[data-ck-padsave],[data-ck-mysig],[data-ck-unsign]'); if(!b || b.disabled) return; const D=b.dataset;
   if(b.id==='ckBlankBtn'){ const s=document.getElementById('ckBlankSel'); if(s) await ckBlankPdf(s.value); return; }
-  if(!canEdit() || activeReg!=='insp') return; const r=regCurrent(); if(!r || !r.ckSnap) return;
+  if(!canEdit() || activeReg!=='insp') return; const r=regCurrent(); if(!r || !ckSnapOf(r)) return;
   const redraw=()=>{ const y=window.scrollY; renderRegDrawer(); window.scrollTo(0,y); };
   if(D.ckAllok){ const f=b.closest('form'); if(!f) return; f.querySelectorAll('.ck-item').forEach(row=>{ const rs=row.querySelectorAll('input[type="radio"]'); if(rs.length && ![...rs].some(x=>x.checked)) rs[0].checked=true; }); f.dataset.dirty='1'; toast('Unanswered items marked OK — check them, then Save'); return; }
   if(D.ckSign!==undefined){ if(formDirtyIn('regDrawerBody')){ toast('Save the checklist first'); return; } ckUi.pad=D.ckSign; redraw(); return; }
@@ -9221,7 +9221,9 @@ function ckToEngine(T){ const key=(T.head.find(h=>['veh','eqno','unit','well'].i
 function ckDocDefault(key){ if(!/^ck_/.test(String(key||''))) return null; const T=CK_TPL.find(t=>'ck_'+t.key===key); return T?{no:T.no, rev:'01', date:''}:null; }
 function ckSubjKey(T){ return (T.head.find(h=>['veh','eqno','unit','well'].includes(h[0]))||T.head[0])[0]; }
 function ckQTotal(cl){ return cl&&cl.bhn ? ckItems(cl.bhn).filter(it=>!it.num).length : (cl?cl.items.length:0); }
-function ckRecData(r){ const T=r.ckSnap, A={Yes:'ok', No:'no', 'N/A':'na'}, ans={}, rm={}, val={};
+// Batch 100b: the template copy is stored as JSON text (ckSnapJ); read it once per record
+function ckSnapOf(r){ if(!r) return null; if(r.ckSnap) return r.ckSnap; if(r.ckSnapJ){ try{ Object.defineProperty(r, 'ckSnap', {value:JSON.parse(r.ckSnapJ), enumerable:false, configurable:true, writable:true}); }catch(e){ return null; } } return r.ckSnap||null; }
+function ckRecData(r){ const T=ckSnapOf(r), A={Yes:'ok', No:'no', 'N/A':'na'}, ans={}, rm={}, val={};
   for(const it of ckItems(T)){ const a=(r.answers||{})[it.n-1]; if(a) ans[it.n]=A[a]; const c=(r.comments||{})[it.n-1]; if(c) rm[it.n]=c; const v=(r.values||{})[it.n-1]; if(v!==undefined && v!=='') val[it.n]=v; }
   return {h:{...(r.ckH||{}), ...(r.projectId && !(r.ckH||{}).loc?{}:{})}, date:r.date, next:r.nextDate||(r.date?compAddMonths(r.date,1):''), ppe:r.ckPpe||T.ppe, eq:r.ckEq||[], ans, rm, val, fit:r.fit===true?true:r.fit===false?false:undefined, defects:r.defects||'', signs:(T.signs||[]).map((_,i)=>(r.ckSigns||{})[i]||{})}; }
 
@@ -9244,7 +9246,7 @@ const BUILTIN_CHECKLISTS=CK_TPL.map(ckToEngine);   // Batch 100: the 12 Burhan c
 let customChecklists=[];
 function allChecklists(){ return BUILTIN_CHECKLISTS.concat(customChecklists.map(c=>({...c, group:'Custom checklists', custom:true}))); }
 // An inspection keeps its own copy of the questions (itemsSnapshot), so later edits to a custom checklist never shift old answers.
-function checklistOf(r){ if(r.ckSnap) return {key:r.template, name:r.templateName||r.ckSnap.title, items:(r.itemsSnapshot&&r.itemsSnapshot.length)?r.itemsSnapshot:ckItems(r.ckSnap).map(it=>it.t), bhn:r.ckSnap}; if(r.itemsSnapshot && r.itemsSnapshot.length) return {key:r.template, name:r.templateName||'Checklist', items:r.itemsSnapshot}; return allChecklists().find(c=>c.key===r.template) || LEGACY_CHECKLISTS.find(c=>c.key===r.template) || null; }
+function checklistOf(r){ if(ckSnapOf(r)) return {key:r.template, name:r.templateName||r.ckSnap.title, items:(r.itemsSnapshot&&r.itemsSnapshot.length)?r.itemsSnapshot:ckItems(r.ckSnap).map(it=>it.t), bhn:r.ckSnap}; if(r.itemsSnapshot && r.itemsSnapshot.length) return {key:r.template, name:r.templateName||'Checklist', items:r.itemsSnapshot}; return allChecklists().find(c=>c.key===r.template) || LEGACY_CHECKLISTS.find(c=>c.key===r.template) || null; }
 function inspCounts(r){ const a=r.answers||{}, v=Object.values(a); return {yes:v.filter(x=>x==='Yes').length, no:v.filter(x=>x==='No').length, na:v.filter(x=>x==='N/A').length, done:v.length}; }
 function ckBadge(r, cl){ const c=inspCounts(r), total=ckQTotal(cl); if(!c.done && r.fit===undefined) return '<span class="badge muted">Not started</span>'; if(r.fit===false) return '<span class="badge danger">NOT fit for use</span>'; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; if(r.fit===true) return `<span class="badge ok">${cl.bhn.result?'Done — safe':'Fit for use'}</span>${c.no?` <span class="badge warn">${c.no} not OK</span>`:''}`; return '<span class="badge warn">Choose the result</span>'; }
 function inspResultBadge(r){ const cl=checklistOf(r); if(cl && cl.bhn) return ckBadge(r, cl); const c=inspCounts(r), total=cl?cl.items.length:0; if(!c.done) return '<span class="badge muted">Not started</span>'; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; return c.no?`<span class="badge danger">${c.no} defect${c.no===1?'':'s'}</span>`:'<span class="badge ok">Pass</span>'; }
@@ -9297,11 +9299,11 @@ regDefine({
 });
 
 /* ---- inspections: save the checklist, raise an action for every "No" ---- */
-REG.insp.beforeCreate = d=>{ const c=allChecklists().find(x=>x.key===d.template); if(c){ d.itemsSnapshot=c.items.slice(); d.templateName=c.name; if(c.bhn){ d.ckSnap=JSON.parse(JSON.stringify(c.bhn)); d.nextDate=d.date?compAddMonths(d.date,1):''; d.ckH={[ckSubjKey(c.bhn)]:d.subject||''}; } } };
+REG.insp.beforeCreate = d=>{ const c=allChecklists().find(x=>x.key===d.template); if(c){ d.itemsSnapshot=c.items.slice(); d.templateName=c.name; if(c.bhn){ d.ckSnapJ=JSON.stringify(c.bhn);   /* Firestore cannot store arrays inside arrays — the template copy is kept as text */ d.nextDate=d.date?compAddMonths(d.date,1):''; d.ckH={[ckSubjKey(c.bhn)]:d.subject||''}; } } };
 REG.insp.customSubmit = {
   checklist: async (r, form)=>{
     const cl=checklistOf(r); if(!cl) return;
-    if(r.ckSnap){ const x=ckCollect(r, form); if(await regUpdate('insp', r.id, x, true)) toast(x.fit===false?'Saved — NOT fit for use: do not use it':'Checklist saved'); return; }   // Batch 100: record only, no actions
+    if(ckSnapOf(r)){ const x=ckCollect(r, form); if(await regUpdate('insp', r.id, x, true)) toast(x.fit===false?'Saved — NOT fit for use: do not use it':'Checklist saved'); return; }   // Batch 100: record only, no actions
     const answers={}, comments={};
     cl.items.forEach((_,n)=>{ const v=form.querySelector(`input[name="ck${n}"]:checked`); if(v) answers[n]=v.value; const c=form.querySelector(`[data-ck-comment="${n}"]`); if(c && c.value.trim()) comments[n]=c.value.trim(); });
     const actions=(r.actions||[]).slice(), due=localDatePlus(3); let added=0;
