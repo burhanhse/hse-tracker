@@ -389,7 +389,19 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     :`<label>${tr('work')}<textarea ${attr}="job" maxlength="120" placeholder="e.g. Block work — ground floor, Building A">${esc(v)}</textarea></label>`;
   const TB_SHIFT=[['Day','दिन','نهاري'],['Night','रात','ليلي']];
   const TB_CHG={pm:['People changed','लोग बदले','تغيّر الأشخاص'], te:['Tools / equipment changed','औज़ार / उपकरण बदले','تغيّرت الأدوات'], nh:['New hazards','नए खतरे','مخاطر جديدة'], we:['Weather','मौसम','الطقس']};
-  function tbtNew(){ const cl=link.clients||[]; tbtF={veh:'', date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(link.clientName)?link.clientName:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
+  // Batch 104: one TBT = one document. The draft keeps a fixed id (sid) — sending twice (double tap, slow network, page reload) writes the SAME document, never a copy.
+  const newSid=()=>{ const a=new Uint8Array(15); (window.crypto||window.msCrypto).getRandomValues(a); return 'tbt'+[...a].map(x=>(x%36).toString(36)).join(''); };
+  const tnorm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+  const draftKey=()=>'tbtDraft_'+token+'_'+(me?me.id:'');
+  function draftSave(){ try{ if(tbtF) localStorage.setItem(draftKey(), JSON.stringify({...tbtF, dupWarn:null, forceAgain:false, sending:false})); }catch(e){} }
+  function draftClear(){ try{ localStorage.removeItem(draftKey()); }catch(e){} }
+  function sentList(){ try{ return JSON.parse(localStorage.getItem('tbtSent_'+token)||'[]'); }catch(e){ return []; } }
+  function sentAdd(x){ try{ const l=sentList().filter(y=>Date.now()-y.at<36*3600e3 && y.id!==x.id); l.push(x); localStorage.setItem('tbtSent_'+token, JSON.stringify(l.slice(-30))); }catch(e){} }
+  function tbtSameSent(d){ const fp=[me.id, d.date, tnorm(d.shift), tnorm(d.job), tnorm(d.loc)].join('|');
+    const a=sentList().find(y=>y.fp===fp && y.id!==(tbtF&&tbtF.sid)); if(a) return a;
+    const t=tnorm(`TBT · ${d.job} · ${d.loc}`), b=((link.board||{})[me.id]||[]).find(x=>x.k==='tbt' && x.d===d.date && tnorm(x.t)===t && x.id!==(tbtF&&tbtF.sid)); return b?{id:b.id, time:'', t:b.t}:null; }
+  function tbtNew(){ try{ const d=JSON.parse(localStorage.getItem(draftKey())||'null'); if(d && d.sid && d.date===today()){ tbtF={...d, sending:false}; return; } }catch(e){}
+    const cl=link.clients||[]; tbtF={sid:newSid(), veh:'', date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(link.clientName)?link.clientName:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
   const tq=k=>app.querySelector(`[data-b="${k}"]`);
   function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother','veh']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
   function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
@@ -409,7 +421,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <div class="pchips">${t.att.map((a,i)=>`<span class="pchip-w"><span class="pchip ${i===0?'on':''}">${i===0?esc(T.me[0])+' · ':''}${esc(a.n)}${dsOf(a.w)?`<span class="pds">${esc(dsOf(a.w))}</span>`:''}</span>${i?`<button type="button" class="pchip-x" data-tax="${i}" aria-label="Remove ${esc(a.n)}">✕</button>`:''}</span>`).join('')}</div>
         ${t.addOpen?`<div class="addbox">${pickerHtml('b', '')}<div id="berr" class="err hidden"></div><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" class="btn navy" id="bAdd" style="flex:1">${tr('add')}</button><button type="button" class="btn ghost" id="bAddAll" style="flex:1">${tr('addAll')}</button></div><button type="button" class="btn ghost" id="bAddNo" style="margin-top:8px;">${tr('back')}</button></div>`
           :`<button type="button" class="pchip add" id="bAddOpen" style="margin-top:8px;">+ ${esc(T.addP[0])}</button>`}</div>
-      <div class="card"><div id="err" class="err hidden"></div><button class="btn" id="bSend">${tr('tbtNext')}</button></div>
+      <div class="card">${t.dupWarn?`<div class="err" style="display:block;">You already sent this TBT today${t.dupWarn.time?' at '+esc(t.dupWarn.time):''} — ${esc(t.dupWarn.t||'')}. Do not send it again.<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"><button type="button" class="btn navy" id="bDupOpen" style="flex:1">Open the one I sent</button><button type="button" class="btn ghost" id="bDupAgain" style="flex:1">It is a different TBT — send</button></div></div>`:''}<div id="err" class="err hidden"></div><button class="btn" id="bSend">${tr('tbtNext')}</button></div>
       <button class="btn ghost" id="back">${tr('back')}</button>`;
     app.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{ tbtRead(); t.job=b.dataset.job; keepScroll(renderTbtReq); });
     app.querySelectorAll('[data-shift]').forEach(b=>b.onclick=()=>{ tbtRead(); t.shift=b.dataset.shift; keepScroll(renderTbtReq); });
@@ -422,6 +434,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     else $('#bAddOpen').onclick=()=>{ tbtRead(); t.addOpen=true; keepScroll(renderTbtReq); };
     $('#back').onclick=()=>{ tbtRead(); view='home'; render(); window.scrollTo(0,0); };
     $('#bSend').onclick=sendTbt;
+    if(t.dupWarn){ $('#bDupOpen').onclick=()=>{ const id=t.dupWarn.id; tbtF=null; draftClear(); openTbt(id); }; $('#bDupAgain').onclick=()=>{ t.forceAgain=true; t.dupWarn=null; sendTbt(); }; }
   }
   async function sendTbt(){
     tbtRead(); const t=tbtF;
@@ -430,11 +443,18 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.');
     if(nonLatin(t.loc, t.job, t.jp, t.cother, t.veh)) return err(T.engOnly[0]+' / '+T.engOnly[1]);
     const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', job:String(t.job).trim().slice(0,120), att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
-    const b=$('#bSend'); b.disabled=true;
-    try{ const ref=await db.collection('tbtSubmissions').add({token, workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
-      sentLocal.push({id:ref.id, w:me.id, d:t.date, t:`TBT · ${t.job} · ${data.loc}`, k:'tbt'}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
-      tbtF=null; await openTbt(ref.id); }
-    catch(e){ console.warn(e); b.disabled=false; err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Tell HSE.':'Not sent — check the internet and try again.'); }
+    if(!t.forceAgain){ const same=tbtSameSent(data); if(same){ t.dupWarn=same; keepScroll(renderTbtReq); return; } }
+    if(t.sending) return; t.sending=true; if(!t.sid) t.sid=newSid(); draftSave();
+    const b=$('#bSend'); if(b){ b.disabled=true; b.textContent='Sending…'; }
+    const ref=db.collection('tbtSubmissions').doc(t.sid), slow=setTimeout(()=>err('Still sending — the network is slow. Do NOT send it again: it is saved on this phone and goes through by itself.'), 12000);
+    try{
+      try{ await ref.set({token, workerId:me.id, status:'new', open:true, data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()}); }
+      catch(e){ if(e && e.code==='permission-denied'){ let ex=null; try{ ex=await ref.get(); }catch(x){} if(!(ex && ex.exists)) throw e; } else throw e; }   // already sent before (retry / second tap) — open it
+      clearTimeout(slow);
+      sentLocal.push({id:t.sid, w:me.id, d:t.date, t:`TBT · ${t.job} · ${data.loc}`, k:'tbt'}); try{ sessionStorage.setItem('ppeSent_'+token, JSON.stringify(sentLocal.slice(-20))); }catch(e){}
+      sentAdd({id:t.sid, fp:[me.id, data.date, tnorm(data.shift), tnorm(data.job), tnorm(data.loc)].join('|'), at:Date.now(), time:data.time, t:`TBT · ${data.job} · ${data.loc}`});
+      const id=t.sid; tbtF=null; draftClear(); await openTbt(id); }
+    catch(e){ clearTimeout(slow); console.warn(e); t.sending=false; const bb=$('#bSend'); if(bb){ bb.disabled=false; bb.innerHTML=tr('tbtNext'); } err(e&&e.code==='permission-denied'?'Not sent — the link may be switched off. Tell HSE.':'Not sent — check the internet and try again (it will not make a copy).'); }
   }
   async function tbtFetch(id){ const s=await db.collection('tbtSubmissions').doc(id).get(); return s.exists?{id, ...(s.data()||{})}:null; }
   const tbtAllSigned=x=>{ const a=((x.data||{}).att||[]), s=x.sigs||{}; return a.length>0 && a.every(p=>s[p.w]); };

@@ -3014,7 +3014,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b103';
+const APP_BUILD='b104';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10826,12 +10826,15 @@ function startTricData(){
   }catch(e){ console.warn('TBT', e); }
 }
 function stopTricData(){ for(const u of [unsubTric, unsubTricDone]) if(u){ try{ u(); }catch(e){} } unsubTric=unsubTricDone=null; tricSubs=[]; tricDone=[]; tricAlertRender(); }
-function tricChanged(){ tbtTodayRender(); renderTricPanel(); tricAlertRender(); siteTabsRefresh(); if(document.getElementById('siteSection') && !document.getElementById('siteSection').hidden) renderSiteTable(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(tricAutoComplete, 1000); } }
+function tricChanged(){ tbtTodayRender(); renderTricPanel(); tricAlertRender(); siteTabsRefresh(); if(document.getElementById('siteSection') && !document.getElementById('siteSection').hidden) renderSiteTable(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(async()=>{ try{ await tbtAutoDedupe(); }catch(e){} tricAutoComplete(); }, 1000); } }
 function tricAll(){ const seen=new Set(), out=[]; for(const x of [...tricSubs, ...tricDone]) if(!seen.has(x.id) && (x.data||{}).job){ seen.add(x.id); out.push(x); } return out; }
 const tbtAtt=x=>(x.data||{}).att||[];
 /* Batch 92: duplicates & deleting — a crew can send the same TBT twice; HSE deletes the extra copy (waiting for review) or a rejected entry */
 const tbtNorm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
-function tbtDupOf(x){ const d=x.data||{}; const o=tricAll().find(y=>y.id!==x.id && y.status!=='rejected' && tricSiteId(y)===tricSiteId(x) && ((y.data||{}).date||'')===(d.date||'') && tbtNorm((y.data||{}).job)===tbtNorm(d.job) && tbtNorm((y.data||{}).shift)===tbtNorm(d.shift));
+// Batch 104: a real duplicate = same project, date, shift, job AND location, sent by the same person or for mostly the same crew (two crews doing "Rig up" at two wells are NOT duplicates)
+function tbtCrewOverlap(a, b){ const A=new Set(tbtAtt(a).map(p=>p.w)), B=tbtAtt(b).map(p=>p.w); if(!A.size || !B.length) return 0; return B.filter(w=>A.has(w)).length/Math.min(A.size, B.length); }
+function tbtSame(x, y){ const d=x.data||{}, e=y.data||{}; return tricSiteId(y)===tricSiteId(x) && (e.date||'')===(d.date||'') && tbtNorm(e.job)===tbtNorm(d.job) && tbtNorm(e.shift)===tbtNorm(d.shift) && tbtNorm(e.loc)===tbtNorm(d.loc) && (y.workerId===x.workerId || tbtCrewOverlap(x,y)>=0.5); }
+function tbtDupOf(x){ const d=x.data||{}; const o=tricAll().find(y=>y.id!==x.id && y.status!=='rejected' && tbtSame(x, y));
   if(!o) return ''; const t=(o.data||{}).time||''; return `${o.status==='new'?'(also waiting for review)':o.status==='sign'?'(already reviewed, waiting for signatures)':'(already complete)'}${t?' at '+t:''} by ${tbtWho(o.workerId, (o.data||{}).name)}`; }
 async function tbtDelete(id, onlyStatus){
   try{ const ref=db.collection('tbtSubmissions').doc(id), snap=await ref.get(), cur=snap&&snap.exists?snap.data():null;
@@ -10968,6 +10971,24 @@ async function tricReject(id, cancel){
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save'); }
 }
 // everyone signed → complete: project toolbox talk + Monthly Report
+// Batch 104: the same TBT sent twice by the same person (same project, date, shift, job, place, client and crew) — keep the first, copy any signatures over, delete the copy
+const tbtDedupeDone=new Set();
+function tbtTs(x){ const s=x.submittedAt; if(!s) return 0; if(s.seconds) return s.seconds*1000; if(typeof s.toDate==='function') return s.toDate().getTime(); return Date.parse(s)||0; }
+async function tbtAutoDedupe(){
+  if(!canEdit()) return 0; let n=0; const all=tricAll().filter(x=>x.status!=='rejected');
+  for(const dup of tricSubs.filter(x=>x.status==='new' && !(x.jobs||[]).length && tbtTs(x))){
+    if(tbtDedupeDone.has(dup.id)) continue;
+    const crew=x=>JSON.stringify(tbtAtt(x).map(p=>p.w).sort());
+    const orig=all.filter(y=>y.id!==dup.id && y.workerId===dup.workerId && tbtSame(dup, y) && tbtNorm((y.data||{}).client)===tbtNorm((dup.data||{}).client) && crew(y)===crew(dup) && tbtTs(y) && (tbtTs(y)<tbtTs(dup) || (tbtTs(y)===tbtTs(dup) && y.id<dup.id))).sort((a,b)=>tbtTs(a)-tbtTs(b))[0];
+    if(!orig || tbtTs(dup)-tbtTs(orig)>6*3600e3) continue;
+    tbtDedupeDone.add(dup.id);
+    try{ const add={}; for(const [w,sg] of Object.entries(dup.sigs||{})) if(!(orig.sigs||{})[w]) add[w]=sg;
+      if(Object.keys(add).length) await db.collection('tbtSubmissions').doc(orig.id).update({sigs:{...(orig.sigs||{}), ...add}});
+      await db.collection('tbtSubmissions').doc(dup.id).delete(); n++; tricSubs=tricSubs.filter(y=>y.id!==dup.id); delete tricUi.rv[dup.id];
+    }catch(e){ console.warn('TBT duplicate clean-up', e); }
+  }
+  if(n){ toast(`${n} duplicate TBT${n===1?'':'s'} removed automatically — the same TBT was sent twice`); tricChanged(); }
+  return n; }
 async function tricAutoComplete(){
   if(!canEdit() || !workersLoaded || !sitesLoaded) return;   // Batch 85: wait for projects + workers
   for(const x of tricSubs.filter(s=>s.status==='sign' && tbtSignedAll(s))){
@@ -15293,7 +15314,7 @@ function startSiteData(){
     unsubscribeSiteEquipment = db.collection('siteEquipment').orderBy('siteName','asc').onSnapshot(snap=>{
       siteEquipmentList = snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); sitesLoaded=true;
       renderSiteAll();
-      if(typeof renderTricPanel==='function'){ renderTricPanel(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(tricAutoComplete, 1000); } }   // Batch 77: project names on TRIC cards / link
+      if(typeof renderTricPanel==='function'){ renderTricPanel(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(async()=>{ try{ await tbtAutoDedupe(); }catch(e){} tricAutoComplete(); }, 1000); } }   // Batch 77: project names on TRIC cards / link
       renderEquipAll();           // location names come from projects
       renderReportAll();          // project names / filter in the Monthly Report
       if(regState.scaff && !document.getElementById('scaffSection')?.hidden) renderRegAll('scaff');
