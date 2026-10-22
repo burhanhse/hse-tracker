@@ -1134,7 +1134,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ck-sec{margin:12px 0 4px; padding:6px 10px; border-radius:8px; background:var(--surface-2); font-weight:800; font-size:13px; letter-spacing:.02em; text-transform:uppercase;} .ck-headline{margin-bottom:8px;} .ck-num{display:flex; gap:6px; align-items:center;} .ck-num input{max-width:140px;}
 .ck-fit{display:flex; gap:8px; flex-wrap:wrap;}
 .pl-chips{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px;} .pl-chip{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2); text-align:left; color:inherit; font:inherit; cursor:pointer; display:flex; flex-direction:column;} .pl-chip strong{font-size:22px; line-height:1.1;} .pl-chip span{font-size:12.5px;} .pl-chip i{font-style:normal; font-size:11px; color:var(--ink-muted);} .pl-chip.on{outline:2px solid var(--accent);}
-.pl-workshop strong,.pl-yard strong{color:var(--accent);} .pl-standby strong{color:var(--warn);} .pl-camp strong,.pl-sick strong,.pl-leave strong{color:var(--danger);} .pl-proj strong{color:var(--ok);} div.pl-chip{cursor:default;}
+.pl-workshop strong,.pl-yard strong,.pl-office strong{color:var(--accent);} .badge.pl-b-office{background:var(--surface-2); color:var(--accent);} .pl-rel{border:1px solid var(--warn); background:var(--warn-bg); border-radius:12px; padding:10px 12px; margin:0 0 12px;} .pl-rel .ind-mrow{gap:8px; flex-wrap:wrap;} .pl-rel select{max-width:100%;} .pl-cp{border-left:4px solid var(--warn); padding:6px 10px; margin:8px 0; background:var(--warn-bg); border-radius:8px;} .pl-off{border-top:1px dashed var(--line); margin-top:12px; padding-top:8px;} .pl-hl{display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 8px;} .pl-hl span{border:1px solid var(--line); border-radius:999px; padding:2px 8px; font-size:12px; display:inline-flex; gap:6px; align-items:center;} .pl-hl button{border:0; background:none; color:var(--danger); cursor:pointer; font:inherit; padding:0;} .pl-kind{display:flex; flex-wrap:wrap; gap:6px 16px; margin:0 0 8px;} .wk-tot{font-weight:600;} .pl-standby strong{color:var(--warn);} .pl-camp strong,.pl-sick strong,.pl-leave strong{color:var(--danger);} .pl-proj strong{color:var(--ok);} div.pl-chip{cursor:default;}
 .pl-today{margin-bottom:14px;} .pl-list,.pl-mm{margin-top:8px;} .pl-rules{margin-top:10px; border-top:1px dashed var(--line); padding-top:8px;} .pl-counts{display:grid; gap:4px;} .pl-crewbox{margin-bottom:10px;} .pl-tick{display:flex; align-items:center; padding:0 8px 0 2px;} .pl-tick input{width:20px; height:20px;} .pl-day summary{cursor:pointer; color:var(--accent); margin:8px 0;}
 .badge.pl-b-workshop,.badge.pl-b-yard{background:var(--surface-2); color:var(--accent);} .badge.pl-b-standby{background:var(--warn-bg); color:var(--warn);} .badge.pl-b-camp,.badge.pl-b-leave,.badge.pl-b-sick{background:var(--danger-bg); color:var(--danger);}
 .wl-radios{display:flex; gap:4px 16px; flex-wrap:wrap;} .wl-card .record-card-top{flex-wrap:wrap; gap:6px;} .wl-card .record-card-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center;} .wl-sigs{margin-top:8px; border-top:1px dashed var(--line); padding-top:6px;} .wl-refuse{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;} .wl-refuse input[data-wl-witness]{flex:1 1 200px; min-width:0;} .wl-form .subhead{margin-top:10px;}
@@ -2542,8 +2542,22 @@ const TRADE_CATEGORIES = ['Office Staff','Scaffolding Division','Civil Division'
 // the old name is read as the new one when the data loads (nothing is rewritten in the database).
 const RENAMED_LABELS = new Map([['Rental Division','Logistics & Rental Division']]);
 function canonTrade(t){ return RENAMED_LABELS.has(t) ? RENAMED_LABELS.get(t) : t; }
+/* Batch 106: date boxes are DD-MM-YYYY text boxes (Batch 37) — FormData reads the typed text, so forms read with FormData
+   saved DD-MM-YYYY in b98–b105 (permit gas test / revalidation dates, warning letter dates, crew place last day, rules "from").
+   isoFormData() gives the YYYY-MM-DD value; dmyFixRecord() repairs records already saved that way when they are loaded. */
+function isoFormData(f){ const F=new FormData(f); f.querySelectorAll('input.dmy-input[name]').forEach(i=>{ if(!i.disabled) F.set(i.name, i.value); }); return F; }
+const DMY_SAVED_RE=/^\d{2}-\d{2}-\d{4}$/;
+function dmyFixV(v){ return (typeof v==='string' && DMY_SAVED_RE.test(v)) ? (dmyToIso(v)||v) : v; }
+function dmyFixKeys(o, keys){ if(o && typeof o==='object') for(const k of keys) if(k in o) o[k]=dmyFixV(o[k]); return o; }
+function dmyFixRecord(o){
+  if(Array.isArray(o.warnings)) o.warnings=o.warnings.map(x=>dmyFixKeys(x&&typeof x==='object'?{...x}:x, ['date','incDate','invDate']));
+  if(Array.isArray(o.places)) o.places=o.places.map(x=>dmyFixKeys(x&&typeof x==='object'?{...x}:x, ['from','to']));
+  if(o.gas && typeof o.gas==='object' && !Array.isArray(o.gas)){ const g={}; for(const [k,v] of Object.entries(o.gas)) g[k]=dmyFixKeys(v&&typeof v==='object'?{...v}:v, ['d']); o.gas=g; }
+  if(o.reval && typeof o.reval==='object' && !Array.isArray(o.reval)){ const r={}; for(const [k,v] of Object.entries(o.reval)) r[dmyFixV(k)]=dmyFixKeys(v&&typeof v==='object'?{...v}:v, ['d']); o.reval=r; }
+  return o; }
 function renameOldLabels(o){
   if(!o || typeof o!=='object') return o;
+  dmyFixRecord(o);   // Batch 106
   for(const k of Object.keys(o)){
     const v=o[k];
     if(typeof v==='string' && RENAMED_LABELS.has(v)) o[k]=RENAMED_LABELS.get(v);
@@ -3020,7 +3034,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b105';
+const APP_BUILD='b106';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3664,7 +3678,7 @@ let mhCache=null;
 function mhAutoData(){
   const k=[workers, siteEquipmentList, localToday(), settingsDocs.places];
   if(mhCache && mhCache.k.every((x,i)=>x===k[i])) return mhCache;
-  const entries=[], replaced=new Map();
+  const entries=[], replaced=new Map(); let officeFrom='';
   for(const s of siteEquipmentList.filter(mhAuto)){
     const fm=mhFromOf(s).slice(0,7); if(!fm) continue; replaced.set(s.id, fm);
     for(const [ym,o] of Object.entries(mhAutoMonths(s))) if(o.hours>0) entries.push({id:`auto_mh_${s.id}_${ym}`, category:'manHours', date:ym, hours:o.hours, division:s.division||'Civil', projectId:s.id,
@@ -3674,9 +3688,15 @@ function mhAutoData(){
   if(typeof plCfg==='function'){ const C=plCfg(), L=C.locks;
     for(const e of entries){ const lk=L[e.date]; if(lk && lk.proj){ e.hours=Number(lk.proj[e.projectId])||0; e.locked=true; } }
     for(const [ym,lk] of Object.entries(L)) for(const [pid,h] of Object.entries(lk.proj||{})) if(!entries.some(e=>e.projectId===pid && e.date===ym) && h>0 && siteEquipmentList.some(x=>x.id===pid && mhAuto(x))) entries.push({id:`auto_mh_${pid}_${ym}`, category:'manHours', date:ym, hours:Number(h)||0, division:(siteEquipmentList.find(x=>x.id===pid)||{}).division||'Civil', projectId:pid, source:'autoManHours', locked:true});
-    const im=plInternalMonths(), months=new Set([...Object.keys(im), ...Object.keys(L).filter(ym=>L[ym].int && Object.keys(L[ym].int).length)]);
-    for(const ym of months){ const src=L[ym]&&L[ym].int?L[ym].int:(im[ym]||{}); for(const [div,h] of Object.entries(src)) if(h>0) entries.push({id:`auto_int_${div}_${ym}`, category:'manHours', date:ym, hours:Number(h)||0, division:div, projectId:null, source:'autoInternal', notes:'Workshop / yard (counted from crew moves)', locked:!!L[ym]}); } }
-  mhCache={k, entries, replaced}; return mhCache;
+    const IC=plInternalCalc(), im=IC.int, O=C.office;
+    // Batch 106: office staff — automatic from the office "count from" month (manual Office staff man-hours of those months are replaced, not deleted)
+    if(O.on && /^\d{4}-\d{2}-\d{2}$/.test(O.from)) officeFrom=O.from.slice(0,7);
+    const offMonths=new Set([...Object.keys(IC.off), ...Object.keys(L).filter(ym=>L[ym].off!==undefined && L[ym].off!==null)]);
+    for(const ym of offMonths){ const lk=L[ym]&&L[ym].off!==undefined&&L[ym].off!==null, h=lk?Number(L[ym].off)||0:(IC.off[ym]||0);
+      if(h>0) entries.push({id:`auto_off_${ym}`, category:'manHours', date:ym, hours:h, division:'Office staff', projectId:null, source:'autoOffice', autoPeople:IC.offPeople[ym]?IC.offPeople[ym].size:undefined, notes:`Office staff — automatic (${O.hpd} h/day, office working days, public holidays left out)`, locked:!!lk}); }
+    const months=new Set([...Object.keys(im), ...Object.keys(L).filter(ym=>L[ym].int && Object.keys(L[ym].int).length)]);
+    for(const ym of months){ const src=L[ym]&&L[ym].int?L[ym].int:(im[ym]||{}); for(const [div,h] of Object.entries(src)) if(h>0) entries.push({id:`auto_int_${div}_${ym}`, category:'manHours', date:ym, hours:Number(h)||0, division:div, projectId:null, source:'autoInternal', notes:'Workshop / yard (counted from crew moves and home base)', locked:!!L[ym]}); } }
+  mhCache={k, entries, replaced, officeFrom}; return mhCache;
 }
 function mhReplacedManual(s){ const fm=mhFromOf(s).slice(0,7); return reportEntries.filter(e=>e.category==='manHours' && e.projectId===s.id && fm && entryMonth(e)>=fm); }
 function mhPreviewHtml(s, cfg){
@@ -8796,7 +8816,7 @@ document.addEventListener('input', e=>{ const t=e.target; if(!t) return;
 });
 document.addEventListener('submit', async e=>{
   const f=e.target; if(!(f instanceof HTMLFormElement) || !f.dataset.ptwForm) return; e.preventDefault(); if(!canEdit()) return;
-  const k=f.dataset.ptwForm, F=Object.fromEntries(new FormData(f).entries()), at=new Date().toISOString(), num=v=>v===''||v===undefined?'':Number(v);
+  const k=f.dataset.ptwForm, F=Object.fromEntries(isoFormData(f).entries()), at=new Date().toISOString(), num=v=>v===''||v===undefined?'':Number(v);
   if(k==='cfg'){ const n=x=>Number(F[x]); await saveSettings('ptw', {maxLive:Math.max(1,n('maxLive')||3), maxDays:Math.max(1,n('maxDays')||7), limits:{o2a:n('o2a'), o2b:n('o2b'), lelHot:n('lelHot'), lel:n('lel'), h2s:n('h2s'), co:n('co')}}, settingsStamp('ptw')); return; }
   const r=ptwCur(); if(!r) return; ptwUiFor(r);
   if(k==='gas'){ const id='g'+Date.now().toString(36), x={d:F.d, t:F.t, o2:num(F.o2), lel:num(F.lel), h2s:num(F.h2s), co:num(F.co), by:F.by, n:ptwWName(F.by), at};
@@ -9844,7 +9864,7 @@ function wlTabHtml(w){
   return `<div class="section-head"><h3>Warning letters (${wlReal(w).length})${(w.warnings||[]).some(x=>x.level==='Coaching')?` <span class="wsub">+ ${(w.warnings||[]).filter(x=>x.level==='Coaching').length} coaching</span>`:''}</h3><span style="display:flex; gap:6px; flex-wrap:wrap;"><button type="button" class="btn btn-sm" data-wl-blank="1">${ic('printer')} Blank letter</button>${ed&&!wlUi.mode?'<button type="button" class="btn btn-sm btn-primary" data-wl-new="1">+ New warning letter</button>':''}</span></div>
     ${real.length?`<p class="wsub" style="margin:-4px 0 8px;">Last 12 months: ${real.length} letter${real.length===1?'':'s'} — next letter suggested: <b>${esc(WL_LV_LBL[wlSuggest(w,'','',localToday())])}</b></p>`:''}
     ${form}${L.length?L.map(card).join(''):'<p class="wsub">No warning letters.</p>'}`; }
-function wlFromForm(f, w, old){ const F=new FormData(f), g=k=>String(F.get(k)||'').trim();
+function wlFromForm(f, w, old){ const F=isoFormData(f), g=k=>String(F.get(k)||'').trim();
   const x={...(old||{}), date:g('date'), incDate:g('incDate'), time:g('time'), projectId:g('projectId'), loc:g('loc'), types:F.getAll('types').map(String), subj:g('subj'), reportedBy:g('reportedBy'), link:g('link'), sev:g('sev'), why:g('why'), desc:g('desc'), rule:g('rule'), could:g('could'), level:g('level')||'Verbal', must:g('must'), next:g('next'), expl:g('expl'), inv:g('inv'), invDate:g('invDate'), issuedBy:g('issuedBy')};
   x.reason=x.desc.slice(0,300); if(!x.id) x.id='wl'+Date.now().toString(36); if(!x.wlNo) x.wlNo=wlNextNo(x.date); if(wlUi.pre && wlUi.pre.obsId && !x.obsId) x.obsId=wlUi.pre.obsId; return x; }
 async function wlSave(w, list, msg){ try{ await db.collection('workers').doc(w.id).update(stamp({warnings:list})); w.warnings=list; if(msg) toast(msg); return true; }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save — '+((e&&e.code)||'error')); return false; } }
@@ -9921,8 +9941,8 @@ document.addEventListener('change', async e=>{ const t=e.target; if(!t || !t.clo
   if(f){ const w=currentWorker(); if(!w) return;
     if(t.dataset.wlLevel!==undefined){ t.dataset.touched='1'; const nx=f.querySelector('[data-wl-next]'); if(nx && !nx.dataset.touched) nx.value=WL_NEXT[t.value]||''; return; }
     if(t.dataset.wlNext!==undefined){ t.dataset.touched='1'; return; }
-    if(['sev','why','date'].includes(t.name)){ const F=new FormData(f), s=wlSuggest(w, String(F.get('sev')||''), String(F.get('why')||''), String(F.get('date')||localToday()), f.dataset.wlId); const sel=f.querySelector('[data-wl-level]'); if(sel && !sel.dataset.touched){ sel.value=s; const nx=f.querySelector('[data-wl-next]'); if(nx && !nx.dataset.touched) nx.value=WL_NEXT[s]||''; } const sg=document.getElementById('wlSuggest'); if(sg) sg.querySelector('b').textContent=WL_LV_LBL[s]; }
-    if(['date','incDate'].includes(t.name)){ const F=new FormData(f), n=document.getElementById('wl30'); if(n) n.hidden=!wlLate({date:String(F.get('date')||''), incDate:String(F.get('incDate')||'')}); }
+    if(['sev','why','date'].includes(t.name)){ const F=isoFormData(f), s=wlSuggest(w, String(F.get('sev')||''), String(F.get('why')||''), String(F.get('date')||localToday()), f.dataset.wlId); const sel=f.querySelector('[data-wl-level]'); if(sel && !sel.dataset.touched){ sel.value=s; const nx=f.querySelector('[data-wl-next]'); if(nx && !nx.dataset.touched) nx.value=WL_NEXT[s]||''; } const sg=document.getElementById('wlSuggest'); if(sg) sg.querySelector('b').textContent=WL_LV_LBL[s]; }
+    if(['date','incDate'].includes(t.name)){ const F=isoFormData(f), n=document.getElementById('wl30'); if(n) n.hidden=!wlLate({date:String(F.get('date')||''), incDate:String(F.get('incDate')||'')}); }
     return; }
   if(t.dataset.wlRefused || t.dataset.wlWitness){ const w=currentWorker(); if(!w || !canEdit()) return; const list=(w.warnings||[]).map(y=>y.id!==wlUi.open?y:{...y, ...(t.dataset.wlRefused?{refused:t.checked}:{witness:t.value.trim()})}); await wlSave(w, list); }
 });
@@ -9951,7 +9971,14 @@ const PL_PLACES={workshop:{l:'Workshop', s:'Workshop', count:true, internal:true
 const PL_ORDER=['workshop','yard','standby','camp','leave','sick'];
 const PL_REASONS=['Waiting for permit','Client stop-work','No work available','Equipment breakdown','Bad weather','Workshop job','Rest day','Medical','Annual leave','Other'];
 function plCfg(){ const s=settingsDocs.places||{}; const counts={}; for(const k of PL_ORDER) counts[k]=(s.counts&&typeof s.counts[k]==='boolean')?s.counts[k]:PL_PLACES[k].count;
-  return {counts, hpd:Number(s.hpd)||10, dpw:Number(s.dpw)||6, from:s.from||'', locks:s.locks||{}, reopened:s.reopened||[]}; }
+  const o=s.office||{};   // Batch 106: office staff man-hours
+  const office={on:!!o.on, from:o.from||'', hpd:Number(o.hpd)||9, dpw:Number(o.dpw)||5, holidays:Array.isArray(o.holidays)?o.holidays.filter(h=>h&&h.from):[], ramadan:Array.isArray(o.ramadan)?o.ramadan.filter(r=>r&&r.from&&r.to):[]};
+  return {counts, hpd:Number(s.hpd)||10, dpw:Number(s.dpw)||6, from:dmyFixV(s.from||''), locks:s.locks||{}, reopened:s.reopened||[], office}; }
+/* Batch 106: who is office staff — trade "Office Staff", or anyone whose home base is the Office */
+function plIsOfficeTrade(w){ return TRADE_TO_DIV.get(canonTrade((w&&w.trade)||''))==='Office staff'; }
+function plHolidayOn(O, d){ return O.holidays.find(h=>h.from<=d && d<=(h.to||h.from))||null; }
+function plRamadanOn(O, d){ return O.ramadan.find(r=>r.from<=d && d<=r.to)||null; }
+function plOfficeHpd(O, d){ const r=plRamadanOn(O, d); return r ? (Number(r.hpd)||O.hpd) : O.hpd; }
 function plList(w){ return Array.isArray(w&&w.places)?w.places.filter(p=>p && PL_PLACES[p.place] && p.from):[]; }
 function placeOn(w, d){ let best=null; for(const p of plList(w)) if(p.from<=d && (!p.to || d<=p.to) && (!best || String(p.at||'')>String(best.at||''))) best=p; return best; }
 function plLabel(k){ return (PL_PLACES[k]||{}).l||k; }
@@ -9960,15 +9987,36 @@ function plLockedUpto(){ return Object.keys(plCfg().locks).sort().pop()||''; }
 function plMonthLocked(ym){ return !!plCfg().locks[ym]; }
 // count a project-day for this worker? (people away at another place do not count, standby counts if the rule says so)
 function plCountsForProject(w, d){ const p=placeOn(w, d); if(!p) return true; return p.place==='standby' && plCfg().counts.standby; }
-function plInternalMonths(upto){
-  const C=plCfg(); if(!/^\d{4}-\d{2}-\d{2}$/.test(C.from)) return {};
-  const end=upto||localToday(), off=MH_DAYS_OFF[C.dpw]||[], out={}, ws=workers.filter(w=>!w.deleted && plList(w).length); let guard=0;
-  if(!ws.length) return out;
-  for(let d=C.from; d<=end && guard<4000; d=dateAddDays(d,1), guard++){
-    if(off.includes(new Date(d+'T00:00:00Z').getUTCDay())) continue;
-    for(const w of ws){ const p=placeOn(w, d); if(!p || p.place==='standby' || !C.counts[p.place]) continue;
-      const ym=d.slice(0,7), div=workerDivKey(w)||'Office staff', o=(out[ym]=out[ym]||{}); o[div]=(o[div]||0)+C.hpd; } }
+/* Batch 106: one count per worker per day, outside the projects —
+   place of the day (workshop / yard / camp…, b105) → else on a project (the project counts him) → else home base (workshop / yard / office)
+   → else office staff by trade. Workshop / yard use the crew rules (hours/day, working days, from); office uses the office rules
+   (hours/day, office week, public holidays, Ramadan hours). Inactive workers stop on their end date; office staff start on their joining date. */
+function plWorkerLife(w){ const st=String(w.dateOfJoining||'').slice(0,10), inact=(w.status||'active')==='inactive';
+  const stop=inact ? String(w.contractEnded||String(w.updatedAt||'').slice(0,10)||'').slice(0,10) : ''; return {st:/^\d{4}-\d{2}-\d{2}$/.test(st)?st:'', inact, stop}; }
+function plDayKind(w, d){
+  const p=placeOn(w, d); if(p) return {k:'place', place:p.place, p};
+  const pr=projectOn(w, d); if(pr) return {k:'project', pid:pr};
+  const b=baseOn(w, d); if(b) return {k:'base', base:b};
+  if(plIsOfficeTrade(w)) return {k:'base', base:'office', trade:true};
+  return {k:''}; }
+function plInternalCalc(upto){
+  const C=plCfg(), O=C.office, end=upto||localToday(), out={int:{}, off:{}, offPeople:{}};
+  const okD=x=>/^\d{4}-\d{2}-\d{2}$/.test(x||'');
+  const fromI=okD(C.from)?C.from:'', fromO=O.on&&okD(O.from)?O.from:'', start=[fromI, fromO].filter(Boolean).sort()[0]; if(!start) return out;
+  const offI=MH_DAYS_OFF[C.dpw]||[], offO=MH_DAYS_OFF[O.dpw]||[];
+  const ws=workers.filter(w=>!w.deleted && (plList(w).length || w.base || baseHist(w).length || plIsOfficeTrade(w))).map(w=>({w, ...plWorkerLife(w)}));
+  if(!ws.length) return out; let guard=0;
+  for(let d=start; d<=end && guard<4000; d=dateAddDays(d,1), guard++){
+    const dow=new Date(d+'T00:00:00Z').getUTCDay(), ym=d.slice(0,7), dayI=fromI && d>=fromI && !offI.includes(dow), dayO=fromO && d>=fromO && !offO.includes(dow) && !plHolidayOn(O, d);
+    if(!dayI && !dayO) continue;
+    for(const x of ws){ if(x.inact && (!x.stop || d>=x.stop)) continue;
+      const K=plDayKind(x.w, d);
+      if(K.k==='place'){ if(!dayI || K.place==='standby' || !C.counts[K.place]) continue; const div=workerDivKey(x.w)||'Office staff', o=(out.int[ym]=out.int[ym]||{}); o[div]=(o[div]||0)+C.hpd; continue; }
+      if(K.k!=='base') continue;
+      if(K.base==='office'){ if(!dayO || (x.st && d<x.st)) continue; out.off[ym]=(out.off[ym]||0)+plOfficeHpd(O, d); const pp=(out.offPeople[ym]=out.offPeople[ym]||new Set()); pp.add(x.w.id); continue; }
+      if(!dayI || !C.counts[K.base]) continue; const div=workerDivKey(x.w)||'Office staff', o=(out.int[ym]=out.int[ym]||{}); o[div]=(o[div]||0)+C.hpd; } }
   return out; }
+function plInternalMonths(upto){ return plInternalCalc(upto).int; }
 async function plSaveWorker(w, places){ try{ await db.collection('workers').doc(w.id).update(stamp({places:places.slice(-400)})); w.places=places; return true; }catch(e){ console.error(e); toast('Could not save — '+((e&&e.code)||'error')); return false; } }
 function plWho(){ const u=auth.currentUser||{}; return (hseSigOf(u.email)||{}).name||u.email||''; }
 // add a place for several workers; returns how many saved
@@ -9989,8 +10037,8 @@ async function plEndNow(w, id){ const t=localToday(), out=[]; for(const p of plL
 
 /* ---- month close & lock ---- */
 function plMonthFigures(ym){ const proj={}, t=localToday(), end=(ym+'-31')<t?ym+'-31':t; for(const s of siteEquipmentList.filter(mhAuto)){ const o=mhAutoMonths(s, {upto:end})[ym]; if(o && o.hours) proj[s.id]=o.hours; }
-  const int=plInternalMonths(end)[ym]||{}; return {proj, int}; }
-async function plCloseMonth(ym){ const f=plMonthFigures(ym); return saveSettings('places', {locks:{[ym]:{at:new Date().toISOString(), by:plWho(), proj:f.proj, int:f.int}}}, settingsStamp('places')); }
+  const I=plInternalCalc(end); return {proj, int:I.int[ym]||{}, off:I.off[ym]||0}; }
+async function plCloseMonth(ym){ const f=plMonthFigures(ym); return saveSettings('places', {locks:{[ym]:{at:new Date().toISOString(), by:plWho(), proj:f.proj, int:f.int, off:f.off}}}, settingsStamp('places')); }
 async function plReopenMonth(ym, reason){ const FV=fsFieldValue(), C=plCfg(); return saveSettings('places', {locks:{[ym]:FV?FV.delete():null}, reopened:[...C.reopened, {ym, at:new Date().toISOString(), by:plWho(), reason}].slice(-60)}, settingsStamp('places')); }
 /* ---- mismatch: marked at a place / another project, but signed a TBT at a project that day ---- */
 function plIgnored(){ try{ return new Set(JSON.parse(localStorage.getItem('plIgnore')||'[]')); }catch(e){ return new Set(); } }
@@ -9999,19 +10047,26 @@ function plMismatches(){ if(typeof tricAll!=='function') return []; const from=l
     for(const a of tbtAtt(x)){ if(!(x.sigs||{})[a.w]) continue; const w=workers.find(y=>y.id===a.w); if(!w || w.deleted) continue; const k=`${w.id}|${d}|${site}`; if(seen.has(k) || ig.has(k)) continue; seen.add(k);
       const p=placeOn(w, d), pr=projectOn(w, d);
       if(p && p.place!=='standby') out.push({k, w, d, site, kind:'place', p, txt:`marked "${plLabel(p.place)}" but signed a TBT at ${projectName(site)}`});
-      else if(pr && pr!==site) out.push({k, w, d, site, kind:'project', txt:`assigned to ${projectName(pr)} but signed a TBT at ${projectName(site)}`}); } }
+      else if(pr && pr!==site) out.push({k, w, d, site, kind:'project', txt:`assigned to ${projectName(pr)} but signed a TBT at ${projectName(site)}`});
+      else if(!pr && baseOn(w, d)) out.push({k, w, d, site, kind:'project', txt:`based at ${baseLabel(baseOn(w, d))} but signed a TBT at ${projectName(site)}`}); } }
   return out.sort((a,b)=>String(b.d).localeCompare(String(a.d))); }
 /* ---- Project Details: where are the crews today ---- */
 let plUi={open:'', rules:false, sel:null, move:false};
 function plTodayHtml(){
-  const t=localToday(), ws=activeWorkers().filter(w=>(w.status||'active')==='active'), by={}; for(const k of PL_ORDER) by[k]=[];
-  let onProj=0, none=0; for(const w of ws){ const p=placeOn(w, t); if(p) by[p.place].push({w,p}); else if(w.projectId) onProj++; else none++; }
-  const mm=plMismatches(), C=plCfg(), ed=canEdit(), away=PL_ORDER.reduce((n,k)=>n+by[k].length,0);
-  if(!away && !mm.length && !ed) return '';
-  const chip=k=>`<button type="button" class="pl-chip pl-${k} ${plUi.open===k?'on':''}" data-pl-show="${k}"><strong>${by[k].length}</strong><span>${esc(PL_PLACES[k].s)}</span><i>${C.counts[k]?'counts':'0 hours'}</i></button>`;
+  const t=localToday(), ws=activeWorkers().filter(w=>(w.status||'active')==='active'), by={}, bases={workshop:[], yard:[], office:[]}; for(const k of PL_ORDER) by[k]=[];
+  let onProj=0, none=0; for(const w of ws){ const p=placeOn(w, t); if(p){ by[p.place].push({w,p}); continue; } if(w.projectId){ onProj++; continue; }
+    const b=baseOn(w, t)||(plIsOfficeTrade(w)?'office':''); if(b) bases[b].push(w); else none++; }   // Batch 106: home base / office
+  const mm=plMismatches(), C=plCfg(), ed=canEdit(), away=PL_ORDER.reduce((n,k)=>n+by[k].length,0), cps=plCompletedHolding();
+  if(!away && !mm.length && !ed && !cps.length) return '';
+  const nOf=k=>by[k].length+((bases[k]||[]).length);
+  const chip=k=>`<button type="button" class="pl-chip pl-${k} ${plUi.open===k?'on':''}" data-pl-show="${k}"><strong>${nOf(k)}</strong><span>${esc(PL_PLACES[k].s)}</span><i>${C.counts[k]?'counts':'0 hours'}</i></button>`;
+  const offChip=`<button type="button" class="pl-chip pl-office ${plUi.open==='office'?'on':''}" data-pl-show="office"><strong>${bases.office.length}</strong><span>Office</span><i>${C.office.on?'counts':'not counted yet'}</i></button>`;
+  const baseRows=k=>(bases[k]||[]).map(w=>{ const L=baseHist(w).find(b=>b.base===k && !b.to); return `<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')} · ${k==='office'&&!w.base?'office staff':'based at '+esc(baseLabel(k))}${L&&L.from?' since '+esc(isoToDmy(L.from)):''}</span></span><span><button type="button" class="btn btn-sm" data-pl-open="${esc(w.id)}">Open</button></span></div>`; }).join('');
   return `<div class="panel pl-today"><div class="section-head"><h3>${ic('users')} Where are the crews today <span class="wsub">${esc(isoToDmy(t))}</span></h3>${ed?`<button type="button" class="btn btn-sm" data-pl-rules="1">${ic('gear')} Man-hours rules & month close</button>`:''}</div>
-    <div class="pl-chips"><div class="pl-chip pl-proj"><strong>${onProj}</strong><span>On their projects</span><i>counts</i></div>${PL_ORDER.map(chip).join('')}${none?`<div class="pl-chip"><strong>${none}</strong><span>Not assigned</span><i>—</i></div>`:''}</div>
-    ${plUi.open&&by[plUi.open]?`<div class="pl-list">${by[plUi.open].length?by[plUi.open].map(({w,p})=>`<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')}${w.projectId?' · from '+esc(projectName(w.projectId)):''} · ${esc(p.reason||'')}${p.to?` · until ${esc(isoToDmy(p.to))}`:' · open-ended'}</span></span><span>${ed?`<button type="button" class="btn btn-sm" data-pl-back="${esc(w.id)}|${esc(p.id)}">Back on project from today</button> `:''}<button type="button" class="btn btn-sm" data-pl-open="${esc(w.id)}">Open</button></span></div>`).join(''):'<p class="wsub">Nobody.</p>'}</div>`:''}
+    <div class="pl-chips"><div class="pl-chip pl-proj"><strong>${onProj}</strong><span>On their projects</span><i>counts</i></div>${PL_ORDER.map(chip).join('')}${offChip}${none?`<div class="pl-chip"><strong>${none}</strong><span>Not assigned</span><i>—</i></div>`:''}</div>
+    ${cps.length?`<div class="pl-cp"><strong>${ic('alert')} Completed projects still holding people</strong>${cps.map(({s:x,n})=>`<div class="ind-mrow"><span><strong>${esc(x.siteName||'Project')}</strong> <span class="wsub">completed ${esc(isoToDmy(x.actualEnd||''))} · ${n} ${n===1?'person':'people'} still on it</span></span>${ed?`<span><button type="button" class="btn btn-sm btn-primary" data-pl-release="${esc(x.id)}">Release…</button></span>`:''}</div>`).join('')}</div>`:''}
+    ${plUi.open==='office'?`<div class="pl-list">${baseRows('office')||'<p class="wsub">Nobody.</p>'}</div>`:''}
+    ${plUi.open&&by[plUi.open]?`<div class="pl-list">${baseRows(plUi.open)}${!by[plUi.open].length&&(bases[plUi.open]||[]).length?'':by[plUi.open].length?by[plUi.open].map(({w,p})=>`<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')}${w.projectId?' · from '+esc(projectName(w.projectId)):''} · ${esc(p.reason||'')}${p.to?` · until ${esc(isoToDmy(p.to))}`:' · open-ended'}</span></span><span>${ed?`<button type="button" class="btn btn-sm" data-pl-back="${esc(w.id)}|${esc(p.id)}">Back on project from today</button> `:''}<button type="button" class="btn btn-sm" data-pl-open="${esc(w.id)}">Open</button></span></div>`).join(''):'<p class="wsub">Nobody.</p>'}</div>`:''}
     ${mm.length?`<div class="pl-mm"><div class="subhead">⚠ Check these (last 7 days) — ${mm.length}</div>${mm.slice(0,12).map(m=>`<div class="ind-mrow"><span><strong>${esc(m.w.fullName||'')}</strong> <span class="wsub">· ${esc(isoToDmy(m.d))} — ${esc(m.txt)}</span></span><span>${ed?(m.kind==='place'?`<button type="button" class="btn btn-sm btn-primary" data-pl-fix="${esc(m.k)}">He worked at ${esc(projectName(m.site))} — fix</button> `:m.d===t?`<button type="button" class="btn btn-sm btn-primary" data-pl-move="${esc(m.k)}">Move him to ${esc(projectName(m.site))}</button> `:''):''}<button type="button" class="btn btn-sm" data-pl-ignore="${esc(m.k)}">Correct as it is</button></span></div>`).join('')}</div>`:''}
     ${plUi.rules&&ed?plRulesHtml():''}</div>`; }
 function plRulesHtml(){ const C=plCfg(), t=localToday().slice(0,7), months=[]; for(let i=0;i<6;i++){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }
@@ -10021,28 +10076,42 @@ function plRulesHtml(){ const C=plCfg(), t=localToday().slice(0,7), months=[]; f
     <div class="form-grid ptw-g6"><label>Workshop / yard hours per day<input type="number" name="hpd" min="1" max="16" value="${C.hpd}"></label><label>Working days<select name="dpw">${[7,6,5].map(n=>`<option value="${n}" ${C.dpw===n?'selected':''}>${esc(MH_DAY_LABEL[n])}</option>`).join('')}</select></label><label>Count workshop / yard hours from<input type="date" name="from" value="${esc(C.from)}"></label></div>
     <p class="wsub">Projects on <b>automatic man-hours</b> leave out the days their people are at another place (standby at the project still counts there). Workshop / yard hours are added to the company total from the date above — do not also type them by hand in the Monthly Report. Projects on manual man-hours are not changed.</p>
     <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">Save rules</button></div></form>
+    ${plOfficeHtml(C)}
     <div class="subhead">Month close</div><p class="wsub" style="margin:-4px 0 6px;">Closing a month freezes its man-hours. After that, moves and places in that month can only be changed by reopening it with a reason (kept in the log).</p>
-    <div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>Month</th><th>Projects (automatic)</th><th>Workshop / yard</th><th>Status</th><th></th></tr></thead><tbody>${months.map(ym=>{ const L=C.locks[ym], f=L?L:plMonthFigures(ym);
-      return `<tr><td>${esc(periodLabel(ym))}</td><td>${tot(f.proj).toLocaleString()}</td><td>${tot(f.int).toLocaleString()}</td><td>${L?`<span class="badge ok">Closed</span> <span class="wsub">${esc(L.by||'')} · ${esc(isoToDmy(isoToLocalDate(L.at)))}</span>`:ym===t?'<span class="badge muted">This month</span>':'<span class="badge warn">Open</span>'}</td>
+    <div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>Month</th><th>Projects (automatic)</th><th>Workshop / yard</th><th>Office</th><th>Status</th><th></th></tr></thead><tbody>${months.map(ym=>{ const L=C.locks[ym], f=L?L:plMonthFigures(ym);
+      return `<tr><td>${esc(periodLabel(ym))}</td><td>${tot(f.proj).toLocaleString()}</td><td>${tot(f.int).toLocaleString()}</td><td>${(Number(f.off)||0).toLocaleString()}</td><td>${L?`<span class="badge ok">Closed</span> <span class="wsub">${esc(L.by||'')} · ${esc(isoToDmy(isoToLocalDate(L.at)))}</span>`:ym===t?'<span class="badge muted">This month</span>':'<span class="badge warn">Open</span>'}</td>
         <td>${L?`<button type="button" class="att-link" data-pl-reopen="${ym}">Reopen…</button>`:ym<t?`<button type="button" class="btn btn-sm" data-pl-close="${ym}" data-armed="0">Close & lock</button>`:''}</td></tr>`; }).join('')}</tbody></table></div>
     ${plUi.reopen?`<form data-pl-form="reopen" class="ptw-inline" style="margin-top:6px;"><input name="r" required maxlength="160" placeholder="Why reopen ${esc(periodLabel(plUi.reopen))}? (kept in the log)"><button type="submit" class="btn btn-sm">Reopen</button></form>`:''}
     ${C.reopened.length?`<p class="wsub" style="margin-top:6px;">Reopened: ${C.reopened.slice(-5).reverse().map(r=>`${esc(periodLabel(r.ym))} by ${esc(r.by)} — ${esc(r.reason)}`).join(' · ')}</p>`:''}`; }
 function plRender(){ const el=document.getElementById('placesSite'); if(!el || !auth.currentUser) return; const sec=el.closest('main'); if(sec && sec.hidden) return; el.innerHTML=plTodayHtml(); }
 /* ---- crew move form (Project → Team tab) and day form (worker) ---- */
 function plMoveFormHtml(mode, s){ const sites=activeSites().filter(x=>projectStatus(x)!=='Completed' && (!s || x.id!==s.id)).sort((a,b)=>(a.siteName||'').localeCompare(b.siteName||''));
-  return `<form data-pl-form="${mode}" class="pl-move"><div class="form-grid">
-    <label>Where${mode==='crew'?' (selected men)':''}<select name="place" required><option value="">Select…</option><optgroup label="Not on the project">${PL_ORDER.map(k=>`<option value="${k}">${esc(PL_PLACES[k].l)}</option>`).join('')}</optgroup>${mode==='crew'?`<optgroup label="Another project">${sites.map(x=>`<option value="p:${esc(x.id)}">${esc(x.siteName||'Project')}</option>`).join('')}</optgroup>`:''}</select></label>
+  const t=localToday(), leave=mode==='crew' ? `<div data-pl-k="leave" hidden><div class="form-grid">
+      <label>Goes to<select name="dest">${plDestOptions(s&&s.id)}</select></label>
+      <label>First day at the new place<input type="date" name="day" value="${esc(t)}" max="${esc(t)}"></label>
+      <label>Reason<select name="lreason">${['Project completed','Job / scope finished','Transferred','Other'].map(r=>`<option>${esc(r)}</option>`).join('')}</select></label></div>
+      <p class="wsub" style="margin:4px 0 0;">They leave the project team. Their project history keeps the dates they worked here; days away still open end the day before.</p></div>` : '';
+  return `<form data-pl-form="${mode}" class="pl-move">${mode==='crew'?`<div class="pl-kind"><label class="chk"><input type="radio" name="kind" value="away" checked> Away for a while — stays on this project</label><label class="chk"><input type="radio" name="kind" value="leave"> Leaves this project for good</label></div>`:''}${leave}<div data-pl-k="away"><div class="form-grid">
+    <label>Where${mode==='crew'?' (selected men)':''}<select name="place"><option value="">Select…</option><optgroup label="Not on the project">${PL_ORDER.map(k=>`<option value="${k}">${esc(PL_PLACES[k].l)}</option>`).join('')}</optgroup>${mode==='crew'?`<optgroup label="Another project">${sites.map(x=>`<option value="p:${esc(x.id)}">${esc(x.siteName||'Project')}</option>`).join('')}</optgroup>`:''}</select></label>
     <label>For<select name="span"><option value="today">Today only</option><option value="until">Until a date (last day)</option><option value="open">Until further notice</option></select></label>
     <label>Last day<input type="date" name="to" min="${esc(localToday())}"></label>
     <label>Reason<select name="reason">${PL_REASONS.map(r=>`<option>${esc(r)}</option>`).join('')}</select></label>
-    <label class="span-all">Note<input name="note" maxlength="140" placeholder="optional — e.g. permit PTW-123 not issued, client stopped hot work"></label></div>
+    <label class="span-all">Note<input name="note" maxlength="140" placeholder="optional — e.g. permit PTW-123 not issued, client stopped hot work"></label></div></div>
     <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">${mode==='crew'?'Move selected':'Save'}</button>${mode==='crew'?' <button type="button" class="btn btn-sm" data-pl-crewcancel="1">Cancel</button>':''}</div></form>`; }
 function plTimelineHtml(w){ const L=plList(w).sort((a,b)=>String(b.from).localeCompare(String(a.from))).slice(0,30), t=localToday(), ed=canEdit();
   return L.length?L.map(p=>`<div class="rf"><span class="rf-k mono">${esc(isoToDmy(p.from))} → ${p.to?esc(isoToDmy(p.to)):'<strong>open</strong>'}</span><span class="rf-v"><span class="badge pl-b-${p.place}">${esc(PL_PLACES[p.place].s)}</span> ${esc(p.reason||'')}${p.note?' — '+esc(p.note):''} <span class="wsub">· ${esc(p.by||'')}, ${esc(isoToDmy(isoToLocalDate(p.at||'')))}</span>${ed&&p.from<=t&&(!p.to||p.to>=t)?` <button type="button" class="att-link" data-pl-end="${esc(p.id)}">back on the project from today</button>`:''}</span></div>`).join(''):'<p class="wsub" style="margin:4px 0 0;">No days away from the project recorded.</p>'; }
 function plSpanOf(F){ const t=localToday(); const span=String(F.get('span')||'today'), to=String(F.get('to')||''); if(span==='today') return {from:t, to:t}; if(span==='open') return {from:t, to:''}; if(!to || to<t) return null; return {from:t, to}; }
 document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement) || !f.dataset.plForm) return; e.preventDefault(); if(!canEdit()) return;
-  const k=f.dataset.plForm, F=new FormData(f);
+  const k=f.dataset.plForm, F=isoFormData(f);
   if(k==='rules'){ const counts={}; for(const p of PL_ORDER) counts[p]=!!F.get('c_'+p); if(await saveSettings('places', {counts, hpd:Math.max(1,Number(F.get('hpd'))||10), dpw:Number(F.get('dpw'))||6, from:String(F.get('from')||'')}, settingsStamp('places'))){ mhCache=null; renderReportAll(); } return; }
+  if(k==='crew' && F.get('kind')==='leave'){   // Batch 106: leaves this project for good
+    const ids=[...(plUi.sel||new Set())]; if(!ids.length){ toast('Tick the men to move first'); return; }
+    const dest=String(F.get('dest')||''), day=String(F.get('day')||''); if(!dest){ toast('Choose where they go'); return; }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(day) || day>localToday()){ toast('Choose the first day at the new place (today or earlier)'); return; }
+    const s=currentSite(); if(s && s.startDate && day<=s.startDate){ toast('That date is before the project started'); return; }
+    const n=await plRelocate(ids, dest, day); clearDirtyForms();
+    if(n) toast(`${n} left ${s?s.siteName||'the project':'the project'} → ${plDestLabel(dest)} from ${isoToDmy(day)}`);
+    plUi.sel=null; plUi.move=false; renderSiteDrawerBody(); plRender(); return; }
   if(k==='reopen'){ const r=String(F.get('r')||'').trim(); if(!r || !plUi.reopen) return; if(await plReopenMonth(plUi.reopen, r)){ toast(`${periodLabel(plUi.reopen)} reopened`); plUi.reopen=''; mhCache=null; renderReportAll(); plRender(); } return; }
   const place=String(F.get('place')||''); if(!place){ toast('Choose where'); return; } const sp=plSpanOf(F); if(!sp){ toast('Choose the last day'); return; }
   const reason=String(F.get('reason')||''), note=String(F.get('note')||'').trim();
@@ -10070,6 +10139,91 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
   if(D.plReopen){ plUi.reopen=D.plReopen; plRender(); return; } });
 document.addEventListener('change', e=>{ const t=e.target; if(t && t.dataset && t.dataset.plTick!==undefined){ const s=plUi.sel||(plUi.sel=new Set()); if(t.checked) s.add(t.dataset.plTick); else s.delete(t.dataset.plTick); const c=document.getElementById('plSelN'); if(c) c.textContent=s.size; } });
 
+
+/* =============================== Batch 106: leaving a project for good · completed projects · office man-hours ===============================
+   - "Leaves this project for good": closes his project line on the day (history keeps from → to), sends him to another project,
+     a home base (Workshop / Yard / Office) or Not assigned; open-ended days away (b105 places) end the day before.
+   - A completed project cannot keep people: setting Completed asks where they go; the release day is the day after the actual end.
+   - Office staff man-hours: settings/places.office {on, from, hpd 9, dpw 5, holidays[{from,to,name}], ramadan[{from,to,hpd}]}. */
+function plCompletedHolding(){ return activeSites().filter(x=>projectStatus(x)==='Completed').map(x=>({s:x, n:workersAtSite(x.id).length})).filter(o=>o.n>0)
+  .sort((a,b)=>String(a.s.actualEnd||'').localeCompare(String(b.s.actualEnd||''))); }
+function plDestOptions(excl, withNone){ const sites=activeSites().filter(x=>projectStatus(x)!=='Completed' && x.id!==excl).sort((a,b)=>(a.siteName||'').localeCompare(b.siteName||''));
+  return `<option value="">Select…</option><optgroup label="Home base (no project)">${Object.entries(PL_BASES).map(([k,l])=>`<option value="b:${k}">${esc(l)}</option>`).join('')}</optgroup>
+    ${sites.length?`<optgroup label="Another project">${sites.map(x=>`<option value="p:${esc(x.id)}">${esc(x.siteName||'Project')}</option>`).join('')}</optgroup>`:''}${withNone!==false?'<option value="none">Not assigned</option>':''}`; }
+function plDestLabel(v){ return v.startsWith('b:')?baseLabel(v.slice(2)):v.startsWith('p:')?projectName(v.slice(2)):'Not assigned'; }
+// one write per worker: project / base move on a date + open-ended days away cut at that date
+function plRelocateUpdate(w, dest, day){
+  const pid=dest.startsWith('p:')?dest.slice(2):null, base=dest.startsWith('b:')?dest.slice(2):'';
+  const upd=moveWorkerUpdate(w, pid, {date:day, base});
+  const L=plList(w); if(L.some(p=>!p.to || p.to>=day)){ const out=[]; for(const p of L){ if(p.to && p.to<day){ out.push(p); continue; } if(p.from>=day) continue; out.push({...p, to:dateAddDays(day,-1)}); } upd.places=out.slice(-400); }
+  return upd; }
+async function plRelocate(ids, dest, day){ let n=0;
+  for(const id of ids){ const w=workers.find(x=>x.id===id); if(!w) continue;
+    try{ await db.collection('workers').doc(id).update(stamp(plRelocateUpdate(w, dest, day))); n++; }catch(e){ console.error(e); toast('Could not move — '+((e&&e.code)||'error')); } }
+  mhCache=null; return n; }
+/* ---- worked on this project (history) ---- */
+function plWorkedOn(s){ const out=[]; const end=s.actualEnd||localToday();
+  for(const w of workers.filter(x=>!x.deleted)){ let hs=projHistory(w).filter(h=>h.projectId===s.id); if(!hs.length && w.projectId===s.id) hs=[{from:String(w.projectAssignedAt||'').slice(0,10), to:''}]; if(!hs.length) continue;
+    const spans=hs.map(h=>{ const last=h.to?dateAddDays(h.to,-1):end, from=h.from||s.startDate||''; return {from, last:(last>end?end:last), open:!h.to}; }).filter(x=>!x.from || x.from<=x.last);
+    if(!spans.length) continue; let days=0; for(const x of spans) if(x.from) days+=daysBetween(x.from, x.last)+1;
+    out.push({w, spans:spans.sort((a,b)=>String(a.from).localeCompare(String(b.from))), days, hours:mhAuto(s)?plWorkerHoursOn(s, w):null, still:w.projectId===s.id}); }
+  return out.sort((a,b)=>String(b.spans[b.spans.length-1].last).localeCompare(String(a.spans[a.spans.length-1].last)) || String(a.w.fullName||'').localeCompare(String(b.w.fullName||''))); }
+function plWorkerHoursOn(s, w){ const from=mhFromOf(s); if(!/^\d{4}-\d{2}-\d{2}$/.test(from)) return 0; const end=[localToday(), s.actualEnd||'9999-12-31'].sort()[0], off=MH_DAYS_OFF[s.mhDaysPerWeek||7]||[], hpd=Number(s.mhHoursPerDay)||10;
+  const sp=mhWorkerSpans(s.id).filter(x=>x.wid===w.id); let h=0, g=0;
+  for(let d=from; d<=end && g<6000; d=dateAddDays(d,1), g++){ if(off.includes(new Date(d+'T00:00:00Z').getUTCDay())) continue; if(sp.some(x=>(!x.from || x.from<=d) && (!x.to || d<x.to)) && plCountsForProject(w, d)) h+=hpd; }
+  return h; }
+function plWorkedOnHtml(s){ const L=plWorkedOn(s); if(!L.length) return '<div class="subhead">Worked on this project</div><p class="wsub">No one recorded.</p>';
+  const th=L.reduce((n,x)=>n+(x.hours||0),0);
+  return `<div class="subhead">Worked on this project (${L.length})</div><p class="wsub" style="margin:-4px 0 6px;">Dates on the project from the move history${mhAuto(s)?` · <span class="wk-tot">${th.toLocaleString()} man-hours</span> in total (automatic — working days only, days away left out)`:' · man-hours: this project is on manual man-hours'}</p>
+    ${L.map(x=>`<div class="equip-line" data-open-worker="${x.w.id}"><div class="equip-line-main"><div class="equip-line-title">${esc(x.w.fullName||'—')}${x.still?' <span class="badge warn">still assigned</span>':''}</div>
+      <div class="wsub">${esc(x.w.designation||'')} · ${x.spans.map(sp=>`${sp.from?esc(isoToDmy(sp.from)):'?'} → ${esc(isoToDmy(sp.last))}`).join(', ')}</div></div>
+      <div class="equip-line-badges"><span class="badge muted">${x.days} day${x.days===1?'':'s'}</span>${x.hours!==null?`<span class="badge ok">${x.hours.toLocaleString()} h</span>`:''}</div></div>`).join('')}`; }
+/* ---- completed project: where do the people go? ---- */
+function plReleaseHtml(s){ const team=workersAtSite(s.id).slice().sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||'')); if(!team.length) return '';
+  const E=s.actualEnd||localToday(), day=dateAddDays(E,1);
+  if(!canEdit()) return `<div class="pl-rel">${ic('alert')} ${team.length} ${team.length===1?'person is':'people are'} still on this completed project — HSE will release them.</div>`;
+  return `<form data-pl-form="release" data-sid="${esc(s.id)}" class="pl-rel"><div class="subhead" style="margin-top:0;">${ic('alert')} Project completed on ${esc(isoToDmy(E))} — ${team.length} ${team.length===1?'person is':'people are'} still on it. Where do they go?</div>
+    <p class="wsub" style="margin:-4px 0 8px;">Their time on this project ends on ${esc(isoToDmy(E))} (the actual end date). They start at the new place on ${esc(isoToDmy(day))}. The project history keeps that they worked here.</p>
+    <div class="form-grid"><label>Everyone to<select data-pl-relall="1">${plDestOptions(s.id)}</select></label></div>
+    ${team.map(w=>`<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')}</span></span><select name="to_${esc(w.id)}" aria-label="Where ${esc(w.fullName||'')} goes">${plDestOptions(s.id)}</select></div>`).join('')}
+    <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">Release</button> <span class="wsub">People left on "Select…" stay until you choose.</span></div></form>`; }
+/* ---- office staff man-hours settings ---- */
+function plOfficeHtml(C){ const O=C.office, t=localToday(), ym=t.slice(0,7), I=plInternalCalc(), n=activeWorkers().filter(w=>(w.status||'active')==='active' && !w.projectId && (baseOn(w,t)||(plIsOfficeTrade(w)?'office':''))==='office').length;
+  const hol=O.holidays.slice().sort((a,b)=>String(a.from).localeCompare(String(b.from))), ram=O.ramadan.slice().sort((a,b)=>String(a.from).localeCompare(String(b.from)));
+  return `<div class="pl-off"><form data-pl-form="office"><div class="subhead" style="margin-top:0;">Office staff man-hours (automatic)</div>
+    <label class="chk"><input type="checkbox" name="on" ${O.on?'checked':''}> Count office staff man-hours automatically</label>
+    <div class="form-grid ptw-g6"><label>Office hours per day<input type="number" name="hpd" min="1" max="16" step="0.5" value="${esc(O.hpd)}"></label>
+      <label>Office week<select name="dpw">${[5,6,7].map(k=>`<option value="${k}" ${O.dpw===k?'selected':''}>${k===5?'Sun–Thu':k===6?'Sat–Thu':'7 days'}</option>`).join('')}</select></label>
+      <label>Count from<input type="date" name="from" value="${esc(O.from)}"></label></div>
+    <p class="wsub">Office staff = trade "Office Staff" plus anyone whose home base is the Office, while they are not on a project. ${n} today. Leave / sick days you mark count 0 hours, public holidays below count 0 hours, a person counts from his date of joining. From the "count from" month the automatic figure replaces typed "Office staff" man-hours in the Monthly Report (kept, not deleted).${O.on&&O.from?` <b>${periodLabel(ym)} so far: ${(I.off[ym]||0).toLocaleString()} h.</b>`:''}</p>
+    <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">Save office rules</button></div></form>
+    <div class="subhead">Public holidays <span class="wsub">(office — 0 hours)</span></div>
+    <div class="pl-hl">${hol.length?hol.map(h=>`<span>${esc(h.name||'Holiday')} · ${esc(isoToDmy(h.from))}${h.to&&h.to!==h.from?' → '+esc(isoToDmy(h.to)):''} <button type="button" data-pl-hdel="${esc(h.from)}|${esc(h.name||'')}" title="Remove" aria-label="Remove">×</button></span>`).join(''):'<i class="wsub">None entered yet — Eid dates change every year, enter them when announced.</i>'}</div>
+    <form data-pl-form="hol" class="ptw-inline"><input type="date" name="from" required aria-label="First day"><input type="date" name="to" aria-label="Last day (optional)"><input name="name" maxlength="60" placeholder="e.g. Eid Al Fitr" required><button type="submit" class="btn btn-sm">+ Add holiday</button></form>
+    <div class="subhead">Ramadan hours <span class="wsub">(office)</span></div>
+    <div class="pl-hl">${ram.length?ram.map(r=>`<span>Ramadan ${esc(isoToDmy(r.from))} → ${esc(isoToDmy(r.to))} · ${esc(r.hpd)} h/day <button type="button" data-pl-rdel="${esc(r.from)}" title="Remove" aria-label="Remove">×</button></span>`).join(''):'<i class="wsub">Not set.</i>'}</div>
+    <form data-pl-form="ram" class="ptw-inline"><input type="date" name="from" required aria-label="First day"><input type="date" name="to" required aria-label="Last day"><input type="number" name="hpd" min="1" max="12" step="0.5" value="6" required aria-label="Hours per day"><button type="submit" class="btn btn-sm">+ Add Ramadan hours</button></form></div>`; }
+async function plSaveOffice(patch){ const ok=await saveSettings('places', {office:patch}, settingsStamp('places')); if(ok){ mhCache=null; renderReportAll(); plRender(); } return ok; }
+document.addEventListener('change', e=>{ const t=e.target; if(!t) return;
+  if(t.dataset && t.dataset.plRelall){ const f=t.closest('form'); if(f && t.value) f.querySelectorAll('select[name^="to_"]').forEach(x=>{ x.value=t.value; }); return; }
+  if(t.name==='kind' && t.closest && t.closest('form[data-pl-form="crew"]')){ const f=t.closest('form'); f.querySelectorAll('[data-pl-k]').forEach(x=>{ x.hidden=x.dataset.plK!==t.value; }); const sb=f.querySelector('button[type="submit"]'); if(sb) sb.textContent=t.value==='leave'?'Move for good':'Move selected'; } });
+document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement) || !['release','office','hol','ram'].includes(f.dataset.plForm||'')) return; e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return;
+  const k=f.dataset.plForm, F=isoFormData(f), C=plCfg(), O=C.office;
+  if(k==='release'){ const s=activeSites().find(x=>x.id===f.dataset.sid); if(!s) return; const day=dateAddDays(s.actualEnd||localToday(),1), groups=new Map();
+    for(const [n,v] of F.entries()) if(n.startsWith('to_') && v){ const id=n.slice(3); if(!groups.has(v)) groups.set(v,[]); groups.get(v).push(id); }
+    if(!groups.size){ toast('Choose where they go'); return; } let n=0; for(const [dest,ids] of groups) n+=await plRelocate(ids, dest, day);
+    clearDirtyForms(); toast(`${n} released from ${s.siteName||'the project'} — worked there until ${isoToDmy(s.actualEnd||localToday())}`); renderSiteDrawerBody(); plRender(); return; }
+  if(k==='office'){ const from=String(F.get('from')||''); if(F.get('on') && !from){ toast('Enter the date to count office hours from'); return; }
+    if(await plSaveOffice({on:!!F.get('on'), from, hpd:Math.max(1,Number(F.get('hpd'))||9), dpw:Number(F.get('dpw'))||5})) clearDirtyForms(); return; }
+  if(k==='hol'){ const from=String(F.get('from')||''), to=String(F.get('to')||'')||from, name=String(F.get('name')||'').trim(); if(!from || !name) return; if(to<from){ toast('The last day is before the first day'); return; }
+    if(await plSaveOffice({holidays:[...O.holidays.filter(h=>!(h.from===from && (h.name||'')===name)), {from, to, name}]})) clearDirtyForms(); return; }
+  if(k==='ram'){ const from=String(F.get('from')||''), to=String(F.get('to')||''), hpd=Number(F.get('hpd'))||6; if(!from || !to || to<from){ toast('Enter the first and last day of Ramadan'); return; }
+    if(await plSaveOffice({ramadan:[...O.ramadan.filter(r=>r.from!==from), {from, to, hpd}]})) clearDirtyForms(); return; } }, true);
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-pl-release],[data-pl-hdel],[data-pl-rdel]'); if(!b) return; const D=b.dataset;
+  if(D.plRelease){ openSiteDrawer(D.plRelease); activeSiteTab='team'; renderSiteDrawer(); return; }
+  if(!canEdit()) return; const O=plCfg().office;
+  if(D.plHdel){ const [from,name]=D.plHdel.split('|'); await plSaveOffice({holidays:O.holidays.filter(h=>!(h.from===from && (h.name||'')===name))}); return; }
+  if(D.plRdel){ await plSaveOffice({ramadan:O.ramadan.filter(r=>r.from!==D.plRdel)}); return; } });
 
 /* ================= Batch 49: PPE — approved PPE list (standards), issue to crew, PPE dashboard ================= */
 // Suggested starting list — HSE edits it. International standards are the usual EN / ISO / ANSI references; local / client and colours are company choices.
@@ -15115,8 +15269,9 @@ function reportProjectMatch(e, project){
 function deletedProjectIds(){ return new Set(siteEquipmentList.filter(s=>s.deleted).map(s=>s.id)); }
 function liveReportEntries(){
   const del=deletedProjectIds(); let base=del.size ? reportEntries.filter(e=>!(e.projectId && del.has(e.projectId))) : reportEntries;
-  const mh=mhAutoData(); if(!mh.replaced.size) return base;   // Batch 68: automatic man-hours replace manual ones from their start month
-  return base.filter(e=>!(e.category==='manHours' && e.projectId && mh.replaced.has(e.projectId) && entryMonth(e)>=mh.replaced.get(e.projectId))).concat(mh.entries);
+  const mh=mhAutoData(); if(!mh.replaced.size && !mh.entries.length && !mh.officeFrom) return base;   // Batch 68: automatic man-hours replace manual ones from their start month
+  return base.filter(e=>!(e.category==='manHours' && e.projectId && mh.replaced.has(e.projectId) && entryMonth(e)>=mh.replaced.get(e.projectId))
+    && !(mh.officeFrom && e.category==='manHours' && !e.projectId && e.division==='Office staff' && entryMonth(e)>=mh.officeFrom)).concat(mh.entries);   // Batch 106: office staff automatic
 }
 function reportEntriesFor(division, periodKey, project){
   return liveReportEntries().filter(e=> (division==='all' || e.division===division) && entryMonth(e).startsWith(periodKey) && reportProjectMatch(e, project));
@@ -15897,18 +16052,31 @@ function workersAtSite(siteId){ return activeWorkers().filter(w=>w.projectId===s
    worker.projectHistory = [{projectId, name, from:'YYYY-MM-DD', to:'YYYY-MM-DD' | ''(= still there)}]
    worker.returnDate / returnProjectId = a temporary move: reminder to bring them back (never moved automatically). */
 function projHistory(w){ return Array.isArray(w && w.projectHistory) ? w.projectHistory.filter(h=>h && h.projectId).map(h=>({...h})) : []; }
+/* Batch 106: home base when a worker is not on a project — worker.base 'workshop' | 'yard' | 'office' (or '') and
+   worker.baseHistory [{base, from, to ('' = still there; like project history, 'to' is the first day somewhere else)}].
+   opts.date = the day of the move (default today) · opts.base = new base when newId is empty. */
+const PL_BASES={workshop:'Workshop', yard:'Yard', office:'Office'};
+function baseHist(w){ return Array.isArray(w && w.baseHistory) ? w.baseHistory.filter(b=>b && PL_BASES[b.base]).map(b=>({...b})) : []; }
+function baseOn(w, d){ const L=baseHist(w); if(!L.length) return (w && !w.projectId && PL_BASES[w.base]) ? w.base : '';
+  const b=L.filter(b=>(!b.from || b.from<=d) && (!b.to || d<b.to)).sort((a,b)=>String(b.from||'').localeCompare(String(a.from||'')))[0]; return b?b.base:''; }
+function baseLabel(k){ return PL_BASES[k]||''; }
 function moveWorkerUpdate(w, newId, opts){
   opts=opts||{};
-  const today=localToday(), hist=projHistory(w), cur=(w && w.projectId)||null; newId=newId||null;
+  const today=opts.date||localToday(), hist=projHistory(w), cur=(w && w.projectId)||null; newId=newId||null;
   // an assignment made before history existed: start its line from when it was assigned
   if(cur && !hist.some(h=>h.projectId===cur && !h.to)) hist.push({projectId:cur, name:projectName(cur), from:String(w.projectAssignedAt||'').slice(0,10), to:''});
   const upd={};
   if(cur!==newId){
-    hist.forEach(h=>{ if(!h.to) h.to=today; });
+    hist.forEach(h=>{ if(!h.to) h.to=(h.from && h.from>today) ? h.from : today; });
     if(newId) hist.push({projectId:newId, name:projectName(newId), from:today, to:''});
     upd.projectId=newId; upd.projectAssignedAt=newId ? new Date().toISOString() : null;
   }
   upd.projectHistory=hist.slice(-200);
+  // Batch 106: home base (workshop / yard / office) — closes when he goes to a project or somewhere else
+  const curBase=(w && w.base)||'', nb=newId ? '' : (PL_BASES[opts.base] ? opts.base : ''), bh=baseHist(w);
+  if(curBase && !bh.some(b=>b.base===curBase && !b.to)) bh.push({base:curBase, from:'', to:''});
+  if(nb!==curBase){ bh.forEach(b=>{ if(!b.to) b.to=(b.from && b.from>today) ? b.from : today; }); if(nb) bh.push({base:nb, from:today, to:''}); }
+  if(nb!==curBase || bh.length){ upd.base=nb; upd.baseHistory=bh.slice(-100); }
   if(opts.returnDate && newId && opts.returnProjectId && opts.returnProjectId!==newId){ upd.returnDate=opts.returnDate; upd.returnProjectId=opts.returnProjectId; }
   else { upd.returnDate=''; upd.returnProjectId=''; }
   return upd;
@@ -15936,16 +16104,18 @@ function workerProjectHtml(w){
   }
   const sites=activeSites().filter(s=>projectStatus(s)!=='Completed' || s.id===w.projectId).sort((a,b)=>(a.siteName||'').localeCompare(b.siteName||''));
   const mover = canEdit() ? `<div class="wmove" id="workerMoveBox">
-      <label>Move to<select id="wmTo"><option value="">— Not assigned (in store / office) —</option>${sites.map(s=>`<option value="${esc(s.id)}" ${s.id===w.projectId?'selected':''}>${esc(s.siteName||'Project')}</option>`).join('')}</select></label>
+      <label>Move to<select id="wmTo"><option value="">— Not assigned —</option><optgroup label="Home base (no project)">${Object.entries(PL_BASES).map(([k,l])=>`<option value="b:${k}" ${!w.projectId&&w.base===k?'selected':''}>${esc(l)}</option>`).join('')}</optgroup><optgroup label="Projects">${sites.map(s=>`<option value="${esc(s.id)}" ${s.id===w.projectId?'selected':''}>${esc(s.siteName||'Project')}</option>`).join('')}</optgroup></select></label>
+      <label>From<input type="date" id="wmDay" value="${esc(localToday())}" max="${esc(localToday())}"></label>
       <label class="chk" style="align-self:end;"><input type="checkbox" id="wmTemp"> Temporary move</label>
       <label id="wmBackWrap" hidden>Comes back on<input type="date" id="wmBack" min="${esc(localToday())}"></label>
       <button type="button" class="btn btn-sm btn-primary" id="wmGo" style="align-self:end;">Move</button>
     </div>` : '';
-  const rows = hist.length ? hist.slice(0,30).map(h=>`<div class="rf"><span class="rf-k mono">${esc(h.from||'—')} → ${h.to?esc(h.to):'<strong>now</strong>'}</span><span class="rf-v"><strong>${esc(histName(h))}</strong>${histDays(h)?` · ${histDays(h)}`:''}</span></div>`).join('')
+  const allH=hist.map(h=>({...h})).concat(baseHist(w).filter(b=>b.from).map(b=>({...b, isBase:true}))).sort((a,b)=>String(b.from||'').localeCompare(String(a.from||'')));   // Batch 106: home base lines too
+  const rows = allH.length ? allH.slice(0,30).map(h=>`<div class="rf"><span class="rf-k mono">${esc(h.from||'—')} → ${h.to?esc(h.to):'<strong>now</strong>'}</span><span class="rf-v"><strong>${h.isBase?esc(baseLabel(h.base))+' <span class="badge pl-b-'+esc(h.base)+'">home base</span>':esc(histName(h))}</strong>${histDays(h)?` · ${histDays(h)}`:''}</span></div>`).join('')
     : '<p class="wsub" style="margin:4px 0 0;">No moves recorded yet — every move from now on is listed here.</p>';
   return `<div class="panel req-box" style="margin-bottom:16px;">
     <div class="subhead" style="margin-top:0;">Project</div>
-    <div class="rf"><span class="rf-k">${cur && !cur.deleted ? '<span class="badge ok">Assigned</span>' : '<span class="badge muted">Not assigned</span>'}</span><span class="rf-v"><strong>${cur ? esc(locLabel(w.projectId)) : 'No project'}</strong>${cur?since:''}</span></div>
+    <div class="rf"><span class="rf-k">${cur && !cur.deleted ? '<span class="badge ok">Assigned</span>' : w.base&&PL_BASES[w.base] ? `<span class="badge pl-b-${esc(w.base)}">Home base</span>` : '<span class="badge muted">Not assigned</span>'}</span><span class="rf-v"><strong>${cur ? esc(locLabel(w.projectId)) : w.base&&PL_BASES[w.base] ? esc(baseLabel(w.base)) : 'No project'}</strong>${cur?since:(()=>{ const b=baseHist(w).find(x=>x.base===w.base && !x.to); return b&&b.from?' since '+esc(b.from):''; })()}</span></div>
     ${back}${mover}
     <div class="subhead">Project history</div>${rows}
     <div class="subhead">Days away from the project ${(()=>{ const p=placeOn(w, localToday()); return p?`<span class="badge pl-b-${p.place}">today: ${esc(PL_PLACES[p.place].s)}</span>`:''; })()}</div>${plTimelineHtml(w)}
@@ -16771,6 +16941,7 @@ function sitePickerHtml(kind, s){
 }
 
 function siteTeamTabHtml(s){
+  if(projectStatus(s)==='Completed') return `<div class="section-head"><h3>Team — project completed${s.actualEnd?' '+esc(isoToDmy(s.actualEnd)):''}</h3></div>${plReleaseHtml(s)}${plWorkedOnHtml(s)}`;   // Batch 106
   const team=workersAtSite(s.id).slice().sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||''));
   const withIssues=team.filter(w=>workerIssues(w).length).length;
   const head = `<div class="section-head"><h3>Team on this project (${team.length})</h3><span style="display:flex; gap:6px; flex-wrap:wrap;">${canEdit()&&team.length&&!plUi.move?'<button type="button" class="btn btn-sm" data-pl-crew="1">↔ Move crew</button>':''}${sitePickerOpen==='team' ? '' : '<button type="button" class="btn btn-sm" id="sitePickerOpenTeam">+ Assign workers</button>'}</span></div>`
@@ -17619,10 +17790,10 @@ function renderReportTable(entries){
     const fromTrs = e.source==='trainingSession' && e.sourceTrsId && regState.trs && regActive('trs').some(x=>x.id===e.sourceTrsId);   // Batch 95
     const fromDrill = e.source==='drill' && e.sourceDrillId && regState.drills && regActive('drills').some(x=>x.id===e.sourceDrillId);   // Batch 93
     const fromInd = e.source==='inductionForm' && e.sourceIndId && (!indLoaded || indList.some(x=>x.id===e.sourceIndId));   // Batch 87
-    const fromAutoInt = e.source==='autoInternal';   // Batch 105
+    const fromAutoInt = e.source==='autoInternal' || e.source==='autoOffice';   // Batch 105 / 106
     const fromAutoMh = e.source==='autoManHours', fromVeh = e.source==='vehicleInspection' && e.sourceVehicleId && activeVehicles().some(x=>x.id===e.sourceVehicleId);
     const actions = fromAutoInt
-      ? `<button type="button" class="btn btn-sm" data-ropen-pl="1" title="Workshop / yard hours counted from crew moves — Project Details → Where are the crews">Open crew places</button>`
+      ? `<button type="button" class="btn btn-sm" data-ropen-pl="1" title="${e.source==='autoOffice'?'Office staff hours counted automatically':'Workshop / yard hours counted from crew moves'} — Project Details → Where are the crews">${e.source==='autoOffice'?'Open office hours':'Open crew places'}</button>`
       : fromTrs
       ? `<button type="button" class="btn btn-sm" data-reg-row="trs:${esc(e.sourceTrsId)}" title="Recorded in Training Records — edit it there">Open training</button>`
       : fromDrill
@@ -17648,7 +17819,7 @@ function renderReportTable(entries){
       <td>${esc(e.division?divLabel(e.division):'—')}</td>
       <td>${e.projectId ? esc(projectName(e.projectId)) : '<span class="wsub">—</span>'}</td>
       <td>${esc(cfg?cfg.label:e.category)}</td>
-      <td>${esc(reportEntrySummary(e))}${fromAutoMh?`<div class="wsub">counted automatically — ${Number(e.autoWorkerDays||0).toLocaleString()} worker-days × ${esc(e.autoHpd||10)} h</div>`:''}${fromVeh?'<div class="wsub">from the vehicle\'s Inspections tab</div>':''}${fromProject?'<div class="wsub">from the project\'s Toolbox talks register</div>':''}${fromIncident?'<div class="wsub">from the Incident Register</div>':''}</td>
+      <td>${esc(reportEntrySummary(e))}${fromAutoMh?`<div class="wsub">counted automatically — ${Number(e.autoWorkerDays||0).toLocaleString()} worker-days × ${esc(e.autoHpd||10)} h</div>`:''}${fromAutoInt?`<div class="wsub">${esc(e.notes||'')}${e.locked?' · month closed':''}</div>`:''}${fromVeh?'<div class="wsub">from the vehicle\'s Inspections tab</div>':''}${fromProject?'<div class="wsub">from the project\'s Toolbox talks register</div>':''}${fromIncident?'<div class="wsub">from the Incident Register</div>':''}</td>
       <td style="text-align:right; white-space:nowrap;">${actions}</td>
     </tr>`;
   }).join('');
@@ -19164,8 +19335,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('drawerBody').addEventListener('click', async e=>{
     const w=currentWorker(); if(!w) return;
     if(e.target.closest('#wmGo')){
-      const to=document.getElementById('wmTo').value||null, temp=document.getElementById('wmTemp').checked, back=document.getElementById('wmBack').value;
-      if(to===(w.projectId||null) && !temp){ toast('Already there — pick a different project'); return; }
+      const raw=document.getElementById('wmTo').value||'', base=raw.startsWith('b:')?raw.slice(2):'', to=base?null:(raw||null), temp=document.getElementById('wmTemp').checked, back=document.getElementById('wmBack').value;
+      const day=(document.getElementById('wmDay')||{}).value||localToday();   // Batch 106: home base + date of the move
+      if(to===(w.projectId||null) && base===((!w.projectId&&w.base)||'') && !temp){ toast('Already there — pick a different place'); return; }
+      if(day>localToday()){ toast('The move date cannot be in the future'); return; }
+      if(!temp && (base || day!==localToday())){ const dest=base?'b:'+base:to?'p:'+to:'none'; if(await plRelocate([w.id], dest, day)) toast(`Moved to ${plDestLabel(dest)} from ${isoToDmy(day)}`); return; }
       let opts={};
       if(temp){
         if(!w.projectId){ toast('A temporary move needs a current project to come back to'); return; }
@@ -19613,6 +19787,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
       const divisionChanged = data.division && data.division!==(s.division||'Civil');
       if(!(await updateSite(s.id,data))) return;
+      if(data.status==='Completed' && !wasDone && workersAtSite(s.id).length){ clearDirtyForms(); activeSiteTab='team'; renderSiteDrawer(); toast(`Project completed — ${workersAtSite(s.id).length} still on it: choose where they go`); }   // Batch 106
       if(divisionChanged){   // every Monthly Report entry of this project moves to the new division (toolbox talks, man-hours, incidents, observations…)
         const ids=new Set(reportEntries.filter(x=>x.projectId===s.id).map(x=>x.id));
         for(const r of (s.toolboxTalks||[])) ids.add(tbtLogId(s.id, r.id));
