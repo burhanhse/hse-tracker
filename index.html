@@ -1133,7 +1133,11 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
 .ck-sec{margin:12px 0 4px; padding:6px 10px; border-radius:8px; background:var(--surface-2); font-weight:800; font-size:13px; letter-spacing:.02em; text-transform:uppercase;} .ck-headline{margin-bottom:8px;} .ck-num{display:flex; gap:6px; align-items:center;} .ck-num input{max-width:140px;}
 .ck-fit{display:flex; gap:8px; flex-wrap:wrap;}
-.wf-grp td{background:var(--surface-2); font-weight:800; font-size:13.5px; letter-spacing:.02em; text-transform:uppercase; padding:9px 10px; border-top:2px solid var(--line);} .wf-grp td>span b{margin-left:4px; color:var(--accent);} .wf-grp td{position:relative;} .wf-grp .att-link{float:right; text-transform:none; letter-spacing:0;} .wf-grp-tmp td{border-top-color:var(--warn);} .wf-grp-off td{border-top-color:var(--ink-muted); color:var(--ink-muted);} .wf-subgrp td{font-size:12px; font-weight:700; color:var(--ink-muted); padding:5px 10px; background:transparent;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
+.wf-grp td{font-weight:800; font-size:14px; letter-spacing:.03em; text-transform:uppercase; padding:11px 12px; position:relative;} .wf-grp td>span b{margin-left:6px; padding:1px 9px; border-radius:10px; color:var(--bg);} .wf-grp .att-link{float:right; text-transform:none; letter-spacing:0;}
+.wf-grp-act td{background:var(--ok-bg); color:var(--ok); border-left:6px solid var(--ok); border-top:2px solid var(--ok);} .wf-grp-act td>span b{background:var(--ok);}
+.wf-grp-tmp td{background:var(--warn-bg); color:var(--warn); border-left:6px solid var(--warn); border-top:2px solid var(--warn);} .wf-grp-tmp td>span b{background:var(--warn);}
+.wf-grp-off td{background:var(--danger-bg); color:var(--danger); border-left:6px solid var(--danger); border-top:2px solid var(--danger);} .wf-grp-off td>span b{background:var(--danger);}
+.wf-grp td .wsub{color:inherit; opacity:.85;} .wf-subgrp td{font-size:12px; font-weight:700; color:var(--ink-muted); padding:5px 10px; background:transparent;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
 .ptw-cc{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; padding:6px 2px;} .ptw-cc-n{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2);} .ptw-cc-n strong{display:block; font-size:24px; line-height:1.1;} .ptw-cc-n span{font-size:12px; color:var(--ink-muted);}
 .ptw-cc-n.ok strong{color:var(--ok);} .ptw-cc-n.warn strong{color:var(--warn);} .ptw-cc-n.danger strong{color:var(--danger);} .ptw-cc-n.danger{border-color:var(--danger);}
 .ptw-cc-line{font-size:13px; color:var(--ink-muted); margin:6px 2px;} .ptw-cc-list{display:grid; gap:4px; margin-top:6px;} .ptw-cc-row{display:grid; grid-template-columns:1fr auto; gap:2px 8px; align-items:center; text-align:left; background:none; border:0; border-top:1px dashed var(--line); padding:6px 2px; color:inherit; font:inherit; font-size:13px; cursor:pointer;} .ptw-cc-row:hover{background:var(--surface-2);}
@@ -3009,7 +3013,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b101';
+const APP_BUILD='b102';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
