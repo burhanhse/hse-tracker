@@ -1133,6 +1133,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
 .ck-sec{margin:12px 0 4px; padding:6px 10px; border-radius:8px; background:var(--surface-2); font-weight:800; font-size:13px; letter-spacing:.02em; text-transform:uppercase;} .ck-headline{margin-bottom:8px;} .ck-num{display:flex; gap:6px; align-items:center;} .ck-num input{max-width:140px;}
 .ck-fit{display:flex; gap:8px; flex-wrap:wrap;}
+.wl-radios{display:flex; gap:4px 16px; flex-wrap:wrap;} .wl-card .record-card-top{flex-wrap:wrap; gap:6px;} .wl-card .record-card-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center;} .wl-sigs{margin-top:8px; border-top:1px dashed var(--line); padding-top:6px;} .wl-refuse{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;} .wl-refuse input[data-wl-witness]{flex:1 1 200px; min-width:0;} .wl-form .subhead{margin-top:10px;}
 .wf-grp td{font-weight:800; font-size:14px; letter-spacing:.03em; text-transform:uppercase; padding:11px 12px; position:relative;} .wf-grp td>span b{margin-left:6px; padding:1px 9px; border-radius:10px; color:var(--bg);} .wf-grp .att-link{float:right; text-transform:none; letter-spacing:0;}
 .wf-grp-act td{background:var(--ok-bg); color:var(--ok); border-left:6px solid var(--ok); border-top:2px solid var(--ok);} .wf-grp-act td>span b{background:var(--ok);}
 .wf-grp-tmp td{background:var(--warn-bg); color:var(--warn); border-left:6px solid var(--warn); border-top:2px solid var(--warn);} .wf-grp-tmp td>span b{background:var(--warn);}
@@ -2307,7 +2308,7 @@ const PDF_DOCS={
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
-  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'}, ck_veh:{title:'Vehicle Inspection Checklist'}, ck_cut14:{title:'14-inch Cutting Machine Inspection Checklist'}, ck_blower:{title:'Air Blower Inspection Checklist'}, ck_boom:{title:'Boom Lift Inspection Checklist'}, ck_drill:{title:'Drilling Machine Inspection Checklist'}, ck_vib:{title:'Concrete Vibrator Inspection Checklist'}, ck_fire:{title:'Fire Extinguisher Inspection Checklist'}, ck_whm:{title:'Well Head Maintenance Checklist'}, ck_harness:{title:'Full Body Harness Inspection Checklist'}, ck_grind:{title:'Grinding Machine Inspection Checklist'}, ck_ply:{title:'Plywood Cutting Machine Inspection Checklist'}, ck_scissor:{title:'Scissor Lift Inspection Checklist'},
+  liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'}, warnLetter:{title:'HSE Warning Letter'}, ck_veh:{title:'Vehicle Inspection Checklist'}, ck_cut14:{title:'14-inch Cutting Machine Inspection Checklist'}, ck_blower:{title:'Air Blower Inspection Checklist'}, ck_boom:{title:'Boom Lift Inspection Checklist'}, ck_drill:{title:'Drilling Machine Inspection Checklist'}, ck_vib:{title:'Concrete Vibrator Inspection Checklist'}, ck_fire:{title:'Fire Extinguisher Inspection Checklist'}, ck_whm:{title:'Well Head Maintenance Checklist'}, ck_harness:{title:'Full Body Harness Inspection Checklist'}, ck_grind:{title:'Grinding Machine Inspection Checklist'}, ck_ply:{title:'Plywood Cutting Machine Inspection Checklist'}, ck_scissor:{title:'Scissor Lift Inspection Checklist'},
 };
 function docControl(key){ const d=(((settingsDocs||{}).docControl||{}).docs||{})[key]; if(d && String(d.no||'').trim()) return d; const t=typeof ckDocDefault==='function'?ckDocDefault(key):null; return t?{...t, ...(d||{}), no:t.no}:(d||{}); }
 let pdfLogoData=null;
@@ -3013,7 +3014,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b102';
+const APP_BUILD='b103';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4544,6 +4545,7 @@ const IMS_BHN_EXTRA=[
   ['F0740-02','Toolbox Talk Record','Form','P0740-01','',''],
   ['F0740-03','Safety Alert','Form','P0740-01','alert','Made by the tracker — Safety Alerts → Alert PDF'],
   ['F0740-04','Minutes of Meeting (MOM)','Form','P0740-01','mom','Made by the tracker — Meetings → meeting → MOM PDF'],
+  ['HSE-WL-01','HSE Warning Letter','Form','','warnLetter','Made by the tracker — Workforce → worker → Warning letters (suggested number — change it in the document register if you use another)'],
   ['VH-CH-12','Vehicle Inspection Checklist','Checklist','','ck_veh','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
   ['CM-CH-01','14-inch Cutting Machine Inspection Checklist','Checklist','','ck_cut14','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
   ['AM-CH-02','Air Blower Inspection Checklist','Checklist','','ck_blower','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
@@ -4562,7 +4564,7 @@ const IMS_BHN_EXTRA=[
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', ptw:'BHN-F0811-14', ck_veh:'BHN-VH-CH-12', ck_cut14:'BHN-CM-CH-01', ck_blower:'BHN-AM-CH-02', ck_boom:'BHN-BLT-CH-03', ck_drill:'BHN-DM-CH-04', ck_vib:'BHN-VM-CH-05', ck_fire:'BHN-FE-CH-06', ck_whm:'BHN-WHM-CH-07', ck_harness:'BHN-FBH-CH-08', ck_grind:'BHN-GM-CH-09', ck_ply:'BHN-CM-CH-10', ck_scissor:'BHN-SLT-CH-11', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', ptw:'BHN-F0811-14', warnLetter:'BHN-HSE-WL-01', ck_veh:'BHN-VH-CH-12', ck_cut14:'BHN-CM-CH-01', ck_blower:'BHN-AM-CH-02', ck_boom:'BHN-BLT-CH-03', ck_drill:'BHN-DM-CH-04', ck_vib:'BHN-VM-CH-05', ck_fire:'BHN-FE-CH-06', ck_whm:'BHN-WHM-CH-07', ck_harness:'BHN-FBH-CH-08', ck_grind:'BHN-GM-CH-09', ck_ply:'BHN-CM-CH-10', ck_scissor:'BHN-SLT-CH-11', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
@@ -9579,7 +9581,7 @@ function recogScore(w, month){
   if(aggFor(w,'inductions').status==='valid') parts.push({label:'inducted', pts:2});
   const ms=medicalStatus(w).status; if(ms==='valid' || ms==='expiring') parts.push({label:'medically fit', pts:2});
   const winFrom=dateAdd(from, -60), inW=d=>{ d=String(d||'').slice(0,10); return d>=winFrom && d<=to; };
-  const wl=(w.warnings||[]).filter(x=>inW(x.date)).length; if(wl) parts.push({label:`${wl} warning letter${wl===1?'':'s'} (last 3 months)`, pts:-10*wl});
+  const wl=(w.warnings||[]).filter(x=>x.level!=='Coaching' && inW(x.date)).length; if(wl) parts.push({label:`${wl} warning letter${wl===1?'':'s'} (last 3 months)`, pts:-10*wl});
   const vl=(w.violations||[]).filter(x=>inW(x.date)); if(vl.length) parts.push({label:`${vl.length} violation${vl.length===1?'':'s'} (last 3 months)`, pts:-vl.reduce((n,v)=>n+(v.severity==='Critical'?15:10),0)});
   const rt=Number(recogRatings(month)[w.id])||0; if(rt) parts.push({label:`supervisor rating ${rt}/5`, pts:rt*3});
   return {total:parts.reduce((n,p)=>n+p.pts,0), parts, obs, tbt, clean:!wl && !vl.length, train:c};
@@ -9775,6 +9777,156 @@ function renderCcExtras(){
     ${stars.length?`<div class="cc-stars">${stars.map(it=>{ const w=workers.find(x=>x.id===it.workerId); return `<div class="cc-star">${starAvatar(w, it.workerName)}<div><div class="wname">${esc(it.workerName)}</div><div class="wsub">${esc(divShort(it.division))} · ${esc(monthLabel(it.month))}</div></div></div>`; }).join('')}</div>`:`<p class="wsub" style="margin:4px 0 8px;">${m?'No Safety Star chosen for '+esc(monthLabel(m))+' yet — Workforce → Recognition.':''}</p>`}
     ${up.length?up.map(e=>{ const n=daysBetween(localToday(), e.date); return `<div class="cc-upd"><span class="cc-upd-n">${n<=0?'now':'in '+n+'d'}</span><span>${esc(e.title)} <span class="wsub">${esc(e.date)}</span></span></div>`; }).join(''):'<p class="wsub" style="margin:0;">No safety days in the next 30 days.</p>'}`;
 }
+
+
+/* =============================== HSE WARNING LETTERS — Batch 103 ===============================
+   worker.warnings[] keeps the old fields (level, date, reason, issuedBy, notes, attachment) + the letter details. Level 'Coaching' = honest mistake, recorded, not counted as a warning. */
+const WL_TYPES=['Unsafe act','Unsafe condition (created / left by him)','Life-Saving Rule breach','PPE not worn','Permit-to-work breach','Driving violation','Behaviour (horseplay, fighting, alcohol / drugs)'];
+const WL_SEV=['Minor','Serious — could cause injury','Life-Saving Rule / reckless'];
+const WL_WHY=['Honest mistake','Shortcut / at-risk behaviour','Deliberate / reckless'];
+const WL_LEVELS=['Verbal (recorded)','Written — 1st','Written — 2nd','Final warning'];
+const WL_LV=['Coaching','Verbal','Written – 1st','Written – 2nd','Final warning'];
+const WL_LV_LBL={'Coaching':'Coaching — no letter (honest mistake)','Verbal':'Verbal (recorded)','Written – 1st':'Written — 1st','Written – 2nd':'Written — 2nd','Final warning':'Final warning'};
+const WL_NEXT={'Coaching':'Coaching given — no warning letter. Repeated at-risk behaviour will lead to a warning.','Verbal':'A further breach will lead to a WRITTEN warning.','Written – 1st':'A further breach will lead to a 2nd WRITTEN warning.','Written – 2nd':'A further breach will lead to a FINAL WARNING.','Final warning':'Any further breach will lead to removal from site / termination as per company rules and the Oman Labour Law.'};
+function wlReal(w){ return (w&&w.warnings||[]).filter(x=>x.level!=='Coaching'); }
+function wlPrev(w, date, exceptId){ const d=date||localToday(), from=dateAdd(d,-365); return wlReal(w).filter(x=>x.id!==exceptId && String(x.date||'')>=from && String(x.date||'')<=d).sort((a,b)=>String(a.date).localeCompare(String(b.date))); }
+function wlSuggest(w, sev, why, date, exceptId){ if(why===WL_WHY[0]) return 'Coaching'; if(sev===WL_SEV[2] || why===WL_WHY[2]) return 'Final warning'; const n=wlPrev(w, date, exceptId).length; return ['Verbal','Written – 1st','Written – 2nd'][n]||'Final warning'; }
+function wlNextNo(date){ const y=String(date||localToday()).slice(0,4); let mx=0; for(const w of workers) for(const x of (w.warnings||[])){ const m=new RegExp('^WL-'+y+'-(\\d+)$').exec(x.wlNo||''); if(m) mx=Math.max(mx, Number(m[1])); } return `WL-${y}-${String(mx+1).padStart(3,'0')}`; }
+function wlLate(x){ if(!x.incDate || !x.date) return 0; const d=(new Date(x.date+'T00:00:00')-new Date(x.incDate+'T00:00:00'))/864e5; return d>30?Math.round(d):0; }
+let wlUi={wid:'', mode:'', id:'', open:'', pad:'', pre:null};
+function wlBadge(x){ const L=x.level||'Verbal'; return `<span class="badge ${L==='Final warning'?'danger':L==='Coaching'?'muted':L==='Verbal'?'muted':'warn'}">${esc(WL_LV_LBL[L]||L)}</span>`; }
+function wlFormHtml(w, x){
+  const isNew=!x.id, hs=hseSigOf((auth.currentUser||{}).email)||{}, me=hs.name||'', t=x.types||[];
+  const lv=x.level||wlSuggest(w, x.sev, x.why, x.date||localToday(), x.id), prev=wlPrev(w, x.date||localToday(), x.id);
+  const radio=(name, opts, val)=>`<div class="wl-radios">${opts.map(o=>`<label class="chk"><input type="radio" name="${name}" value="${esc(o)}" ${val===o?'checked':''}> ${esc(o)}</label>`).join('')}</div>`;
+  return `<form id="wlForm" class="panel wl-form" data-wl-id="${esc(x.id||'')}"><div class="section-head"><h3>${isNew?'New warning letter':'Edit '+esc(x.wlNo||'warning letter')}</h3><button type="button" class="btn btn-sm" data-wl-cancel="1">Cancel</button></div>
+    <div class="form-grid"><label>Letter date *<input type="date" name="date" value="${esc(x.date||localToday())}" required></label><label>Incident date *<input type="date" name="incDate" value="${esc(x.incDate||'')}" required></label><label>Time<input type="time" name="time" value="${esc(x.time||'')}"></label>
+      <label>Project / site<select name="projectId">${projectOptionsHtml(x.projectId||w.projectId||'')}</select></label><label class="span-all">Exact location<input name="loc" maxlength="120" value="${esc(x.loc||'')}"></label></div>
+    <div class="subhead">Type</div><div class="ptw-ticks">${WL_TYPES.map(o=>`<label class="chk"><input type="checkbox" name="types" value="${esc(o)}" ${t.includes(o)?'checked':''}> ${esc(o)}</label>`).join('')}</div>
+    <div class="form-grid" style="margin-top:6px;"><label>Subject<select name="subj"><option value="">Select…</option>${OBS_CATS.map(o=>`<option ${x.subj===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label><label>Reported by<input name="reportedBy" maxlength="80" value="${esc(x.reportedBy||'')}"></label><label>Linked record<input name="link" maxlength="60" value="${esc(x.link||'')}" placeholder="e.g. OBS-2026-041, INC-2026-003"></label></div>
+    <div class="subhead">Seriousness</div>${radio('sev', WL_SEV, x.sev||'')}
+    <div class="subhead">Why it happened</div>${radio('why', WL_WHY, x.why||'')}
+    <div class="form-grid" style="margin-top:6px;"><label class="span-all">Description — what happened *<textarea name="desc" rows="3" maxlength="1500" required>${esc(x.desc||x.reason||'')}</textarea></label>
+      <label class="span-all">Rule / requirement broken<textarea name="rule" rows="2" maxlength="600">${esc(x.rule||'')}</textarea></label><label class="span-all">What could have happened<textarea name="could" rows="2" maxlength="600">${esc(x.could||'')}</textarea></label></div>
+    <div class="subhead">Warning</div>
+    <div class="form-grid"><label>Level *<select name="level" data-wl-level>${WL_LV.map(o=>`<option value="${esc(o)}" ${lv===o?'selected':''}>${esc(WL_LV_LBL[o])}</option>`).join('')}</select></label><div class="wsub span-all" id="wlSuggest">Suggested: <b>${esc(WL_LV_LBL[wlSuggest(w, x.sev, x.why, x.date||localToday(), x.id)])}</b> — from the seriousness, why, and ${prev.length} letter${prev.length===1?'':'s'} in the last 12 months${prev.length?': '+prev.map(p=>`${isoToDmy(p.date)} ${WL_LV_LBL[p.level]||p.level}`).join(', '):''}.</div>
+      <label class="span-all">What he must do from now on<textarea name="must" rows="2" maxlength="600">${esc(x.must||'')}</textarea></label><label class="span-all">If this happens again<textarea name="next" rows="2" maxlength="300" data-wl-next>${esc(x.next||WL_NEXT[lv])}</textarea></label></div>
+    <div class="subhead">Worker's explanation (his side — before the decision)</div>
+    <div class="form-grid"><label class="span-all">Explanation<textarea name="expl" rows="2" maxlength="1000">${esc(x.expl||'')}</textarea></label><label>Investigated by<input name="inv" maxlength="80" value="${esc(x.inv||me)}"></label><label>Investigation date<input type="date" name="invDate" value="${esc(x.invDate||'')}"></label><label>Issued by<input name="issuedBy" maxlength="80" value="${esc(x.issuedBy||me)}"></label></div>
+    <div class="notice warn" id="wl30" ${wlLate(x)?'':'hidden'}>The letter is more than 30 days after the incident — under the labour law action must be taken within 30 days of finding out. Check with HR.</div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">${isNew?'Save warning letter':'Save changes'}</button></div></form>`; }
+function wlTabHtml(w){
+  if(wlUi.wid!==w.id) wlUi={wid:w.id, mode:wlUi.pre&&wlUi.pre.wid===w.id?'new':'', id:'', open:'', pad:'', pre:wlUi.pre&&wlUi.pre.wid===w.id?wlUi.pre:null};
+  const ed=canEdit(), L=(w.warnings||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))), real=wlPrev(w, localToday()), hs=hseSigOf((auth.currentUser||{}).email)||{};
+  const form=!ed?'':wlUi.mode==='new'?wlFormHtml(w, {...(wlUi.pre||{})}):wlUi.mode==='edit'?wlFormHtml(w, (w.warnings||[]).find(x=>x.id===wlUi.id)||{}):'';
+  const SG=[['w','Worker — received'],['s','Supervisor'],['h','Issued by (HSE)'],['m','Approved — Site / Operations Manager']];
+  const card=x=>{ const open=wlUi.open===x.id, sg=x.sigs||{}, full=!!x.wlNo;
+    return `<div class="record-card wl-card"><div class="record-card-top"><div class="record-card-title">${full?`<span class="mono">${esc(x.wlNo)}</span> `:''}${wlBadge(x)} <span class="wsub">${esc(isoToDmy(x.date)||'')}</span></div>
+      <div class="record-card-actions">${full?`<button type="button" class="btn btn-sm" data-wl-pdf="${esc(x.id)}">${ic('download')} Letter PDF</button>`:''}${ed&&full?`<button type="button" class="btn btn-sm" data-wl-open="${esc(x.id)}">${open?'Close':'Signatures'}</button><button type="button" class="icon-btn" data-wl-edit="${esc(x.id)}" aria-label="Edit">${ic('pencil')}</button>`:''}${ed?`<button type="button" class="icon-btn danger" data-wl-del="${esc(x.id)}" data-armed="0" aria-label="Delete">${ic('trash')}</button>`:''}</div></div>
+      <div class="wsub" style="margin-top:4px;">${esc([(x.types||[]).join(' · '), x.subj, x.sev].filter(Boolean).join(' — '))}</div><div style="margin-top:2px;">${esc(String(x.desc||x.reason||'').slice(0,220))}</div>
+      ${full?`<div class="wsub" style="margin-top:4px;">Signed: ${SG.filter(([k])=>sg[k]).length}/4${x.refused?' · worker refused to sign (witness '+esc(x.witness||'—')+')':''}${wlLate(x)?` · <span class="t-danger">issued ${wlLate(x)} days after the incident</span>`:''}</div>`:''}
+      ${open?`<div class="wl-sigs">${SG.map(([k,l])=>{ const s=sg[k]; return `<div class="trs-row"><div class="trs-who"><strong>${esc(l)}</strong>${s?` <span class="wsub">${esc(s.n||'')} · ${esc(isoToDmy(s.d)||'')}</span>`:''}</div><div class="trs-sig">${s&&s.s?`<img src="${esc(s.s)}" alt="" class="trs-sigimg"> <button type="button" class="att-link" data-wl-unsign="${k}" data-armed="0">remove</button>`
+          :wlUi.pad===k?`<div style="flex:1 1 280px;"><input id="wlSignN" placeholder="Name" maxlength="60" value="${esc(k==='w'?w.fullName||'':k==='h'?(x.issuedBy||hs.name||''):'')}" style="margin-bottom:4px; width:100%;"><div class="hse-sig-pad"><canvas id="wlPad" width="600" height="200"></canvas></div><div style="display:flex; gap:6px; margin-top:4px;"><button type="button" class="btn btn-sm" data-wl-padcancel="1">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-wl-padsave="${k}">Save signature</button></div></div>`
+          :`${k==='h'&&hs.img?'<button type="button" class="btn btn-sm btn-primary" data-wl-mysig="h">Use my saved signature</button> ':''}<button type="button" class="btn btn-sm" data-wl-sign="${k}">✍ Sign</button>`}</div></div>`; }).join('')}
+        <div class="wl-refuse"><label class="chk"><input type="checkbox" data-wl-refused="1" ${x.refused?'checked':''}> Worker refused to sign</label> <input data-wl-witness="1" placeholder="Witness name" maxlength="60" value="${esc(x.witness||'')}"></div></div>`:''}</div>`; };
+  return `<div class="section-head"><h3>Warning letters (${wlReal(w).length})${(w.warnings||[]).some(x=>x.level==='Coaching')?` <span class="wsub">+ ${(w.warnings||[]).filter(x=>x.level==='Coaching').length} coaching</span>`:''}</h3><span style="display:flex; gap:6px; flex-wrap:wrap;"><button type="button" class="btn btn-sm" data-wl-blank="1">${ic('printer')} Blank letter</button>${ed&&!wlUi.mode?'<button type="button" class="btn btn-sm btn-primary" data-wl-new="1">+ New warning letter</button>':''}</span></div>
+    ${real.length?`<p class="wsub" style="margin:-4px 0 8px;">Last 12 months: ${real.length} letter${real.length===1?'':'s'} — next letter suggested: <b>${esc(WL_LV_LBL[wlSuggest(w,'','',localToday())])}</b></p>`:''}
+    ${form}${L.length?L.map(card).join(''):'<p class="wsub">No warning letters.</p>'}`; }
+function wlFromForm(f, w, old){ const F=new FormData(f), g=k=>String(F.get(k)||'').trim();
+  const x={...(old||{}), date:g('date'), incDate:g('incDate'), time:g('time'), projectId:g('projectId'), loc:g('loc'), types:F.getAll('types').map(String), subj:g('subj'), reportedBy:g('reportedBy'), link:g('link'), sev:g('sev'), why:g('why'), desc:g('desc'), rule:g('rule'), could:g('could'), level:g('level')||'Verbal', must:g('must'), next:g('next'), expl:g('expl'), inv:g('inv'), invDate:g('invDate'), issuedBy:g('issuedBy')};
+  x.reason=x.desc.slice(0,300); if(!x.id) x.id='wl'+Date.now().toString(36); if(!x.wlNo) x.wlNo=wlNextNo(x.date); if(wlUi.pre && wlUi.pre.obsId && !x.obsId) x.obsId=wlUi.pre.obsId; return x; }
+async function wlSave(w, list, msg){ try{ await db.collection('workers').doc(w.id).update(stamp({warnings:list})); w.warnings=list; if(msg) toast(msg); return true; }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save — '+((e&&e.code)||'error')); return false; } }
+let wlPadImg='';
+function wlWirePad(){ const cv=document.getElementById('wlPad'); wlPadImg=''; if(cv) compPadWire(cv, img=>{ wlPadImg=img; }); }
+function wlRedraw(){ const y=document.getElementById('drawerBody')?document.getElementById('drawerBody').scrollTop:0; renderDrawerBody(); const b=document.getElementById('drawerBody'); if(b) b.scrollTop=y; if(wlUi.pad) wlWirePad(); }
+/* PDF */
+function wlPdfDoc(w, x, blank){
+  const P=blank?{}:{no:x.wlNo, level:WL_LV_LBL[x.level]||x.level, name:w.fullName, cid:w.civilId, des:w.designation, div:divLabel(workerDivKey(w)||'')||w.trade, proj:x.projectId?projectName(x.projectId):(w.projectId?projectName(w.projectId):'Office / yard'), comp:w.contractor||'Burhan Oil & Trade Services', date:isoToDmy(x.date), link:x.link,
+    when:[isoToDmy(x.incDate), x.time].filter(Boolean).join('  '), loc:x.loc, types:x.types||[], subj:x.subj, by:x.reportedBy, sev:x.sev, why:x.why, desc:x.desc||x.reason, rule:x.rule, could:x.could,
+    prev:wlPrev(w, x.date, x.id).map(p=>({d:isoToDmy(p.date), l:WL_LV_LBL[p.level]||p.level, r:String(p.desc||p.reason||'').slice(0,90)})), must:x.must, next:x.next, expl:x.expl, inv:x.inv, invDate:isoToDmy(x.invDate),
+    sw:{...(x.sigs||{}).w, d:isoToDmy(((x.sigs||{}).w||{}).d)}, ss:{...(x.sigs||{}).s, d:isoToDmy(((x.sigs||{}).s||{}).d)}, sh:{...(x.sigs||{}).h, d:isoToDmy(((x.sigs||{}).h||{}).d)}, sm:{...(x.sigs||{}).m, d:isoToDmy(((x.sigs||{}).m||{}).d)}, refused:!!x.refused, witness:x.witness};
+  const lvSel=blank?'':x.level;
+  return wlDocBuild(P, blank, lvSel); }
+
+function wlDocBuild(P, blank, lvSel){
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'warnLetter', docSub:blank?'Blank form':`${P.no} · ${P.name}`});
+  const g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL, K=100, hw=(CW-2*K)/2, v=t=>blank?{t:'', blank:true}:{t:t||'—'};
+  const L=(a,b,c,d)=>g.row([{t:a, w:K, bold:true, fill:LBL, size:7.6},{...b, w:hw},{t:c, w:K, bold:true, fill:LBL, size:7.6},{...d, w:hw}], blank?20:15);
+  const ticks=(label, opts, sel, per)=>{ const cw=(CW-K)/per; for(let i=0;i<opts.length;i+=per){ const cells=[{t:i?'':label, w:K, bold:true, fill:LBL, size:7.6, blank:!!i}]; for(let j=0;j<per;j++){ const o=opts[i+j]; if(o===undefined){ cells.push({t:'', blank:true, w:cw}); continue; } cells.push({check:!blank&&(Array.isArray(sel)?sel.includes(o):sel===o), w:16},{t:o, w:cw-16, size:7.4, bold:!blank&&(Array.isArray(sel)?sel.includes(o):sel===o)}); } g.row(cells, 16); } };
+  const box=(label, t, h)=>g.row([{t:label, w:K, bold:true, fill:LBL, size:7.6},{t:blank?'':t, blank:true, w:CW-K, size:8}], blank?(h||36):Math.max(18,0));
+  g.title(lvSel==='Coaching'?'HSE COACHING RECORD':'HSE WARNING LETTER', blank?'Ref. ____________':`${P.no} · ${String(P.level).toUpperCase()}`, g.RED);
+  g.head('1. WORKER');
+  L('NAME', v(P.name), 'CIVIL ID', v(P.cid)); L('DESIGNATION', v(P.des), 'DIVISION', v(P.div)); L('PROJECT / SITE', v(P.proj), 'COMPANY', v(P.comp)); L('LETTER DATE', v(P.date), 'LINKED RECORD', v(P.link));
+  g.head('2. WHAT HAPPENED');
+  L('DATE / TIME', v(P.when), 'EXACT LOCATION', v(P.loc));
+  ticks('TYPE', WL_TYPES, P.types||[], 3);
+  L('SUBJECT', v(P.subj), 'REPORTED BY', v(P.by));
+  ticks('SERIOUSNESS', WL_SEV, P.sev, 3);
+  ticks('WHY IT HAPPENED', WL_WHY, P.why, 3);
+  box('DESCRIPTION', P.desc, 48); box('RULE / REQUIREMENT BROKEN', P.rule, 30); box('WHAT COULD HAVE HAPPENED', P.could, 30);
+  g.ensure(150); g.head('3. WARNING');
+  ticks('LEVEL', WL_LEVELS, blank?'':({'Coaching':'','Verbal':WL_LEVELS[0],'Written – 1st':WL_LEVELS[1],'Written – 2nd':WL_LEVELS[2],'Final warning':WL_LEVELS[3]})[lvSel], 4); if(lvSel==='Coaching') g.row([{t:'Coaching only — honest mistake. Recorded for learning; not counted as a warning.', w:CW, size:7.8, bold:true}], 16);
+  g.row([{t:'PREVIOUS WARNINGS (LAST 12 MONTHS)', w:K, bold:true, fill:LBL, size:7.2},{t:blank?'':((P.prev||[]).length?P.prev.map(x=>`${x.d} · ${x.l} — ${x.r}`).join('\n'):'None'), blank:true, w:CW-K, size:7.8}], blank?30:18);
+  box('WHAT YOU MUST DO FROM NOW ON', P.must, 36);
+  g.row([{t:'IF THIS HAPPENS AGAIN', w:K, bold:true, fill:LBL, size:7.6},{t:blank?'':P.next, blank:true, w:CW-K, size:8, bold:true, color:g.RED}], blank?24:18);
+  g.ensure(120); g.head("4. WORKER'S EXPLANATION — his side, written before the decision");
+  box('EXPLANATION', P.expl, 48); L('INVESTIGATED BY', v(P.inv), 'DATE', v(P.invDate));
+  g.ensure(190); g.head('5. ACKNOWLEDGEMENT & SIGNATURES');
+  g.row([{t:'I have received this letter and it was explained to me in a language I understand. My signature confirms that I received it; it does not mean I agree. I may give my comments in section 4.', w:CW, size:7.8}], 26);
+  g.row([{t:'', blank:true, w:K+20, fill:LBL},{t:'Name', w:150, bold:true, fill:LBL, size:7.6},{t:'Signature', w:150, bold:true, fill:LBL, size:7.6},{t:'Date', w:CW-K-20-300, bold:true, fill:LBL, size:7.6}], 14);
+  const sg=(l,sub,x)=>g.row([{t:l, sub, w:K+20, bold:true, fill:LBL, size:7.4},{t:blank?'':(x.n||''), blank:true, w:150, bold:true},!blank&&x.s?{img:x.s, w:150}:{t:'', blank:true, w:150},{t:blank?'':(x.d||''), blank:true, w:CW-K-20-300, size:7.8}], 30);
+  sg('WORKER', 'received', P.sw||{});
+  g.row([{check:!blank&&P.refused, w:20},{t:'Worker refused to sign — witness:', w:170, size:7.6},{t:blank?'':(P.witness||''), blank:true, w:CW-190, size:7.8}], 16);
+  sg('SUPERVISOR', '', P.ss||{}); sg('ISSUED BY (HSE)', '', P.sh||{}); sg('APPROVED BY', 'Site / Operations Manager', P.sm||{});
+  g.row([{t:'Copies: worker · worker file (HR) · HSE file. Recorded in the HSE tracker → worker → Warning letters.', w:CW, size:7.2, color:g.SUB}], 14);
+  return doc; }
+/* handlers */
+document.addEventListener('click', async e=>{
+  const b=e.target.closest && e.target.closest('[data-wl-new],[data-wl-cancel],[data-wl-edit],[data-wl-del],[data-wl-open],[data-wl-pdf],[data-wl-blank],[data-wl-sign],[data-wl-padcancel],[data-wl-padsave],[data-wl-mysig],[data-wl-unsign],[data-wl-issue]');
+  if(!b || b.disabled) return; const D=b.dataset;
+  if(D.wlBlank){ if(!compPdfReady()) return; wlPdfDoc({}, {}, true).save('Warning_letter_blank.pdf'); return; }
+  if(D.wlIssue){ const sel=document.getElementById('obsWlW'), wid=sel&&sel.value, r=regCurrent(); if(!wid){ toast('Choose the worker first'); return; } if(!r) return;
+    wlUi={wid:'', mode:'', id:'', open:'', pad:'', pre:{wid, obsId:r.id, link:r.obsNo||'', date:localToday(), incDate:r.date||'', time:r.time||'', projectId:r.projectId||'', loc:r.location||'', types:[r.obsType==='Unsafe condition'?WL_TYPES[1]:WL_TYPES[0]], subj:OBS_CATS.includes(r.category)?r.category:'', reportedBy:r.observedBy||'', desc:r.description||'', sev:/high|major|critical|catastrophic|4|5/i.test(String(r.risk||''))?WL_SEV[1]:''}};
+    closeRegDrawer(); openDrawer(wid); activeTab='warnings'; renderDrawer(); return; }
+  const w=currentWorker(); if(!w) return;
+  if(D.wlPdf){ const x=(w.warnings||[]).find(y=>y.id===D.wlPdf); if(x && compPdfReady()) wlPdfDoc(w, x, false).save(`${compSafeName(x.wlNo||'Warning')}_${compSafeName(w.fullName)}.pdf`); return; }
+  if(!canEdit()) return;
+  if(D.wlNew){ wlUi.mode='new'; wlUi.id=''; wlUi.pre=null; wlRedraw(); return; }
+  if(D.wlCancel){ clearDirtyForms(); wlUi.mode=''; wlUi.id=''; wlUi.pre=null; wlRedraw(); return; }
+  if(D.wlEdit){ wlUi.mode='edit'; wlUi.id=D.wlEdit; wlRedraw(); return; }
+  if(D.wlOpen){ wlUi.open=wlUi.open===D.wlOpen?'':D.wlOpen; wlUi.pad=''; wlRedraw(); return; }
+  if(D.wlDel){ if(!compArm(b,'tap again to delete')) return; await wlSave(w, (w.warnings||[]).filter(x=>x.id!==D.wlDel), 'Warning letter deleted'); wlRedraw(); return; }
+  const x=(w.warnings||[]).find(y=>y.id===wlUi.open); if(!x) return;
+  const setSig=async(k, v)=>{ const list=(w.warnings||[]).map(y=>{ if(y.id!==x.id) return y; const sg={...(y.sigs||{})}; if(v) sg[k]=v; else delete sg[k]; return {...y, sigs:sg}; }); if(await wlSave(w, list, v?'Signed':'Removed')){ wlUi.pad=''; wlRedraw(); } };
+  if(D.wlSign){ wlUi.pad=D.wlSign; wlRedraw(); return; }
+  if(D.wlPadcancel){ wlUi.pad=''; wlRedraw(); return; }
+  if(D.wlPadsave){ if(!wlPadImg){ toast('Sign in the box first'); return; } const n=((document.getElementById('wlSignN')||{}).value||'').trim(); if(!n){ toast('Write the name first'); return; } await setSig(D.wlPadsave, {n, s:wlPadImg, d:localToday()}); return; }
+  if(D.wlMysig){ const hs=hseSigOf((auth.currentUser||{}).email); if(hs&&hs.img) await setSig('h', {n:hs.name||'', s:hs.img, d:localToday()}); return; }
+  if(D.wlUnsign){ if(!compArm(b,'tap again')) return; await setSig(D.wlUnsign, null); return; }
+});
+document.addEventListener('change', async e=>{ const t=e.target; if(!t || !t.closest) return;
+  const f=t.closest('#wlForm');
+  if(f){ const w=currentWorker(); if(!w) return;
+    if(t.dataset.wlLevel!==undefined){ t.dataset.touched='1'; const nx=f.querySelector('[data-wl-next]'); if(nx && !nx.dataset.touched) nx.value=WL_NEXT[t.value]||''; return; }
+    if(t.dataset.wlNext!==undefined){ t.dataset.touched='1'; return; }
+    if(['sev','why','date'].includes(t.name)){ const F=new FormData(f), s=wlSuggest(w, String(F.get('sev')||''), String(F.get('why')||''), String(F.get('date')||localToday()), f.dataset.wlId); const sel=f.querySelector('[data-wl-level]'); if(sel && !sel.dataset.touched){ sel.value=s; const nx=f.querySelector('[data-wl-next]'); if(nx && !nx.dataset.touched) nx.value=WL_NEXT[s]||''; } const sg=document.getElementById('wlSuggest'); if(sg) sg.querySelector('b').textContent=WL_LV_LBL[s]; }
+    if(['date','incDate'].includes(t.name)){ const F=new FormData(f), n=document.getElementById('wl30'); if(n) n.hidden=!wlLate({date:String(F.get('date')||''), incDate:String(F.get('incDate')||'')}); }
+    return; }
+  if(t.dataset.wlRefused || t.dataset.wlWitness){ const w=currentWorker(); if(!w || !canEdit()) return; const list=(w.warnings||[]).map(y=>y.id!==wlUi.open?y:{...y, ...(t.dataset.wlRefused?{refused:t.checked}:{witness:t.value.trim()})}); await wlSave(w, list); }
+});
+document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement) || f.id!=='wlForm') return; e.preventDefault(); const w=currentWorker(); if(!w || !canEdit()) return;
+  const old=f.dataset.wlId?(w.warnings||[]).find(x=>x.id===f.dataset.wlId):null, x=wlFromForm(f, w, old);
+  if(!x.desc){ toast('Describe what happened'); return; } if(!x.incDate){ toast('Enter the incident date'); return; } if(!x.types.length){ toast('Tick at least one type'); return; }
+  const list=old?(w.warnings||[]).map(y=>y.id===old.id?x:y):[...(w.warnings||[]), x];
+  if(await wlSave(w, list, `${x.wlNo} saved${wlLate(x)?' — more than 30 days after the incident, check with HR':''}`)){ clearDirtyForms(); wlUi.mode=''; wlUi.id=''; wlUi.pre=null; wlUi.open=x.id; wlRedraw(); } });
+/* observation → warning letter */
+function obsWlHtml(r){ const linked=[]; for(const w of workers) for(const x of (w.warnings||[])) if(x.obsId===r.id) linked.push({w, x});
+  const pool=activeWorkers().filter(w=>(w.status||'active')==='active').sort((a,b)=>((b.projectId===r.projectId)-(a.projectId===r.projectId)) || String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  return `${linked.length?`<div class="panel"><div class="subhead" style="margin-top:0;">Letters issued from this observation (${linked.length})</div>${linked.map(({w,x})=>`<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> ${wlBadge(x)} <span class="wsub">${esc(x.wlNo||'')} · ${esc(isoToDmy(x.date))}</span></span></div>`).join('')}</div>`:''}
+    ${canEdit()?`<div class="panel"><div class="subhead" style="margin-top:0;">Issue a warning letter</div><p class="wsub" style="margin:-2px 0 6px;">Choose the worker who did it — date, place, category and description are copied into the letter. You can still change everything before saving.${r.personInvolved?` Person noted on the observation: <b>${esc(r.personInvolved)}</b>.`:''}</p>
+      <div class="form-grid"><label>Worker<select id="obsWlW"><option value="">Select…</option>${pool.map(w=>`<option value="${esc(w.id)}">${esc(w.fullName||'—')}${w.designation?' — '+esc(w.designation):''}${w.projectId&&w.projectId===r.projectId?' (this project)':''}</option>`).join('')}</select></label></div>
+      <button type="button" class="btn btn-sm btn-primary" data-wl-issue="1">Issue warning letter →</button></div>`:''}`; }
+if(REG.obs){ REG.obs.tabs.push({key:'wl', label:'Warning letter', showIf:r=>['Unsafe act','Unsafe condition'].includes(r.obsType), html:r=>obsWlHtml(r)}); }
 
 
 /* ================= Batch 49: PPE — approved PPE list (standards), issue to crew, PPE dashboard ================= */
@@ -15007,7 +15159,7 @@ function computeFlags(w){
   const licenses=aggFor(w,'licenses');
   const medical=medicalStatus(w);
   const civilId=civilIdStatus(w);
-  const warnings=(w.warnings||[]);
+  const warnings=(w.warnings||[]).filter(x=>x.level!=='Coaching');   // Batch 103: coaching records are not warnings
   const violations=(w.violations||[]);
   const warnColor = warnings.some(x=>x.level==='Final warning') ? 'danger' : warnings.length? 'warn':'';
   const vioColor = violations.some(x=>x.severity==='Critical') ? 'danger' : violations.some(x=>x.severity==='Major') ? 'warn' : violations.length? 'warn':'';
@@ -15264,7 +15416,7 @@ function renderTiles(){
     if((w.status||'active')!=='inactive'){ let nr=false; for(const g of TRAINING_CAT_KEYS){ const st=workerCatStatus(w, g); if(st==='norole'){ nr=true; R['tr_'+g].none++; continue; } if(st==='na') continue; trNeed[g]++; put(R['tr_'+g], st==='ok'?'valid':st==='soon'?'expiring':'expired'); } if(nr) trNoRole.n++; }
     for(const [k,key] of [['comp','competency'],['lic','licenses']]){ const recs=w[key]||[]; put(R[k], recs.length ? worstStatusOf(currentRecs(recs, key)) : 'none'); }
     const ms=medicalStatus(w).status; if(ms==='unfit') unfit++; put(R.med, ms);
-    const wl=w.warnings||[]; totalWarnings+=wl.length;
+    const wl=(w.warnings||[]).filter(x=>x.level!=='Coaching'); totalWarnings+=wl.length;
     if(wl.some(x=>x.level==='Final warning')){ finalWarn++; R.warn.bad++; } else if(wl.length) R.warn.soon++; else R.warn.ok++;
     let v90=0, crit=0; for(const v of (w.violations||[])){ const d=daysUntil(v.date); if(d!==null && -d<=90){ v90++; if(v.severity==='Critical') crit++; } }
     vio90+=v90; vioCrit+=crit; if(crit) R.vio.bad++; else if(v90) R.vio.soon++; else R.vio.ok++;
@@ -17616,6 +17768,7 @@ function renderDrawerBody(){
   if(formDirtyIn('drawerBody')) return;
   const body=document.getElementById('drawerBody');
   if(activeTab==='profile'){ body.innerHTML=profileTabHtml(w); wireSignaturePad(); return; }
+  if(activeTab==='warnings' && typeof wlTabHtml==='function'){ body.innerHTML=wlTabHtml(w); if(wlUi.pad) wlWirePad(); return; }   // Batch 103
   const cfg=RECORD_TYPES[activeTab];
   body.innerHTML=(activeTab==='trainings' ? workerRequiredHtml(w) : activeTab==='inductions' ? workerInductionStatusHtml(w) : '') + recordTabHtml(w, activeTab, cfg) + (activeTab==='trainings' ? workerToolboxHtml(w) : '');
 }
