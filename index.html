@@ -1142,7 +1142,16 @@ details.icam-grp .cause-list{margin:6px 0;}
 .wf-grp-act td{background:var(--ok-bg); color:var(--ok); border-left:6px solid var(--ok); border-top:2px solid var(--ok);} .wf-grp-act td>span b{background:var(--ok);}
 .wf-grp-tmp td{background:var(--warn-bg); color:var(--warn); border-left:6px solid var(--warn); border-top:2px solid var(--warn);} .wf-grp-tmp td>span b{background:var(--warn);}
 .wf-grp-off td{background:var(--danger-bg); color:var(--danger); border-left:6px solid var(--danger); border-top:2px solid var(--danger);} .wf-grp-off td>span b{background:var(--danger);}
-.wf-grp td .wsub{color:inherit; opacity:.85;} .wf-subgrp td{font-size:12px; font-weight:700; color:var(--ink-muted); padding:5px 10px; background:transparent;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
+.wf-grp td .wsub{color:inherit; opacity:.85;}
+/* Batch 107: project list — status groups + division colours */
+.wf-grp-hold td{background:var(--warn-bg); color:var(--warn); border-left:6px solid var(--warn); border-top:2px solid var(--warn);} .wf-grp-hold td>span b{background:var(--warn);}
+.wf-grp-done td{background:var(--muted-bg); color:var(--muted); border-left:6px solid var(--muted); border-top:2px solid var(--muted);} .wf-grp-done td>span b{background:var(--muted);}
+#siteRows tr.pj-act>td:first-child{box-shadow:inset 4px 0 0 var(--ok);} #siteRows tr.pj-hold>td:first-child{box-shadow:inset 4px 0 0 var(--warn);} #siteRows tr.pj-done>td:first-child{box-shadow:inset 4px 0 0 var(--muted);}
+#siteRows tr.pj-done .wname{opacity:.8;}
+:root{--dv-civil:#7fb4ff; --dv-civil-bg:rgba(59,130,246,.16); --dv-scaff:#d4a8ff; --dv-scaff-bg:rgba(168,85,247,.18); --dv-rental:#5eead4; --dv-rental-bg:rgba(20,184,166,.16); --dv-office:#c3cedb; --dv-office-bg:rgba(148,163,184,.18);}
+:root[data-theme="light"]{--dv-civil:#1d4ed8; --dv-civil-bg:#e3ecff; --dv-scaff:#7e22ce; --dv-scaff-bg:#f3e8ff; --dv-rental:#0f766e; --dv-rental-bg:#dcf5f1; --dv-office:#475569; --dv-office-bg:#eceff3;}
+.dv-tag{display:inline-block; padding:3px 10px; border-radius:999px; font-weight:700; font-size:12.5px; white-space:nowrap; border:1px solid currentColor;}
+.dv-Civil{color:var(--dv-civil); background:var(--dv-civil-bg);} .dv-Scaffolding{color:var(--dv-scaff); background:var(--dv-scaff-bg);} .dv-Rental{color:var(--dv-rental); background:var(--dv-rental-bg);} .dv-Office{color:var(--dv-office); background:var(--dv-office-bg);} .wf-subgrp td{font-size:12px; font-weight:700; color:var(--ink-muted); padding:5px 10px; background:transparent;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
 .ptw-cc{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; padding:6px 2px;} .ptw-cc-n{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2);} .ptw-cc-n strong{display:block; font-size:24px; line-height:1.1;} .ptw-cc-n span{font-size:12px; color:var(--ink-muted);}
 .ptw-cc-n.ok strong{color:var(--ok);} .ptw-cc-n.warn strong{color:var(--warn);} .ptw-cc-n.danger strong{color:var(--danger);} .ptw-cc-n.danger{border-color:var(--danger);}
 .ptw-cc-line{font-size:13px; color:var(--ink-muted); margin:6px 2px;} .ptw-cc-list{display:grid; gap:4px; margin-top:6px;} .ptw-cc-row{display:grid; grid-template-columns:1fr auto; gap:2px 8px; align-items:center; text-align:left; background:none; border:0; border-top:1px dashed var(--line); padding:6px 2px; color:inherit; font:inherit; font-size:13px; cursor:pointer;} .ptw-cc-row:hover{background:var(--surface-2);}
@@ -3034,7 +3043,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b106';
+const APP_BUILD='b107';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -16395,16 +16404,27 @@ function renderSiteTable(){
   if(activeSites().length===0){ tbody.innerHTML='<tr><td colspan="8" class="empty-state">No projects yet — click “Add project” to get started.</td></tr>'; return; }
   const list=siteEquipmentList.filter(siteMatches);
   if(list.length===0){ tbody.innerHTML='<tr><td colspan="8" class="empty-state">No projects match your filters.</td></tr>'; return; }
-  tbody.innerHTML=list.map(s=>{
+  // Batch 107: groups Active → On hold → Completed with coloured headlines (Completed can be hidden); coloured division tags
+  const G=[{k:'act', st:'Active', t:'Active projects'},{k:'hold', st:'On hold', t:'On hold'},{k:'done', st:'Completed', t:'Completed projects'}].map(g=>({...g, l:list.filter(s=>projectStatus(s)===g.st)}));
+  const endOf=s=>s.actualEnd||s.endDate||'';
+  G[2].l.sort((a,b)=>String(endOf(b)).localeCompare(String(endOf(a))));
+  tbody.innerHTML=G.filter(g=>g.l.length).map(g=>{ const shut=g.k==='done' && pjDoneShut;
+    return `<tr class="wf-grp wf-grp-${g.k}"><td colspan="8"><span>${esc(g.t)} <b>${g.l.length}</b></span>${g.k==='done'?`<button type="button" class="att-link" data-pj-doneshut="1">${shut?'Show':'Hide'}</button>`:''}</td></tr>`+(shut?'':g.l.map(s=>siteRowHtml(s, g.k)).join('')); }).join('');
+}
+let pjDoneShut=false; try{ pjDoneShut=localStorage.getItem('pjDoneShut')==='1'; }catch(e){}
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-pj-doneshut]'); if(!b) return; e.stopPropagation(); pjDoneShut=!pjDoneShut; try{ localStorage.setItem('pjDoneShut', pjDoneShut?'1':'0'); }catch(x){} renderSiteTable(); }, true);
+function divTagHtml(div){ const k=div||'Civil', c={'Office staff':'Office'}[k]||k; return `<span class="dv-tag dv-${esc(c)}">${esc(divLabel(k))}</span>`; }
+function siteRowHtml(s, gk){
+    {
     const m=siteEquipSummary(s.id), d=siteDocsSummary(s);
     const team=workersAtSite(s.id), teamIssues=team.filter(w=>workerIssues(w).length).length;
     const vans=vehiclesAtSite(s.id), vanIssues=vans.filter(v=>vehicleIssues(v).length).length;
     const certWorst = (m.expired||d.expired) ? 'expired' : (m.expiring||d.expiring) ? 'expiring' : ((m.count||d.count) ? 'valid' : 'none');
     const dur=projectDurationText(s);
     const dates = (s.startDate||s.endDate||s.actualEnd) ? `<div class="wsub mono">${s.startDate?esc(s.startDate):'?'} → ${s.actualEnd?esc(s.actualEnd):s.endDate?esc(s.endDate)+' (planned)':'open'}</div>${dur?`<div class="wsub">${esc(dur)}${(s.extensions||[]).length?` · extended ${(s.extensions||[]).length}×`:''}</div>`:''}` : '';
-    return `<tr data-id="${s.id}">
+    return `<tr data-id="${s.id}" class="pj-${gk}">
       <td><div class="wname">${esc(s.siteName)}</div>${dates}${(()=>{ const n=tricPendingFor(s.id); return n?`<div><span class="badge danger" title="Open the project → Toolbox talks">${n} TBT to review</span></div>`:''; })()}</td>
-      <td>${esc(divLabel(s.division||'Civil'))}</td>
+      <td>${divTagHtml(s.division)}</td>
       <td>${esc(s.clientName||'—')}</td>
       <td>${projectStatusBadge(s)}</td>
       <td><span class="pill-count ${teamIssues?'warn':''}" title="${teamIssues} with expired or missing documents">${team.length}</span></td>
@@ -16412,7 +16432,7 @@ function renderSiteTable(){
       <td><span class="pill-count ${m.outOfService?'warn':''}">${m.count}</span></td>
       <td>${certWorst==='none' ? '<span class="badge muted">Nothing logged</span>' : badgeHtml(certWorst)}</td>
     </tr>`;
-  }).join('');
+  }
 }
 
 /* ---------------- vehicle drawer ---------------- */
