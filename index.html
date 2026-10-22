@@ -1132,7 +1132,8 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ptw-signed{display:flex; gap:10px; align-items:center; margin:4px 0;} .ptw-padbox{margin:6px 0;} .ptw-inline{display:flex; gap:6px; flex-wrap:wrap;} .ptw-inline input{flex:1 1 240px; min-width:0;} .ptw-close{display:grid; gap:6px;} .ptw-cancel summary{cursor:pointer; color:var(--ink-muted); margin:8px 0;}
 .ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
 .ck-sec{margin:12px 0 4px; padding:6px 10px; border-radius:8px; background:var(--surface-2); font-weight:800; font-size:13px; letter-spacing:.02em; text-transform:uppercase;} .ck-headline{margin-bottom:8px;} .ck-num{display:flex; gap:6px; align-items:center;} .ck-num input{max-width:140px;}
-.ck-fit{display:flex; gap:8px; flex-wrap:wrap;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
+.ck-fit{display:flex; gap:8px; flex-wrap:wrap;}
+.wf-grp td{background:var(--surface-2); font-weight:800; font-size:13.5px; letter-spacing:.02em; text-transform:uppercase; padding:9px 10px; border-top:2px solid var(--line);} .wf-grp td>span b{margin-left:4px; color:var(--accent);} .wf-grp td{position:relative;} .wf-grp .att-link{float:right; text-transform:none; letter-spacing:0;} .wf-grp-tmp td{border-top-color:var(--warn);} .wf-grp-off td{border-top-color:var(--ink-muted); color:var(--ink-muted);} .wf-subgrp td{font-size:12px; font-weight:700; color:var(--ink-muted); padding:5px 10px; background:transparent;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
 .ptw-cc{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; padding:6px 2px;} .ptw-cc-n{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2);} .ptw-cc-n strong{display:block; font-size:24px; line-height:1.1;} .ptw-cc-n span{font-size:12px; color:var(--ink-muted);}
 .ptw-cc-n.ok strong{color:var(--ok);} .ptw-cc-n.warn strong{color:var(--warn);} .ptw-cc-n.danger strong{color:var(--danger);} .ptw-cc-n.danger{border-color:var(--danger);}
 .ptw-cc-line{font-size:13px; color:var(--ink-muted); margin:6px 2px;} .ptw-cc-list{display:grid; gap:4px; margin-top:6px;} .ptw-cc-row{display:grid; grid-template-columns:1fr auto; gap:2px 8px; align-items:center; text-align:left; background:none; border:0; border-top:1px dashed var(--line); padding:6px 2px; color:inherit; font:inherit; font-size:13px; cursor:pointer;} .ptw-cc-row:hover{background:var(--surface-2);}
@@ -3008,7 +3009,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b100';
+const APP_BUILD='b101';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -15362,7 +15363,12 @@ function renderTable(){
   if(activeWorkers().length===0){ tbody.innerHTML='<tr><td colspan="11" class="empty-state">No workers yet — click “Add worker” to get started.</td></tr>'; return; }
   const list=workers.filter(matches);
   if(list.length===0){ tbody.innerHTML='<tr><td colspan="11" class="empty-state">No workers match your filters.</td></tr>'; return; }
-  tbody.innerHTML=list.map(w=>{
+  // Batch 101: register in groups — active staff, temporary workers, then inactive / left at the bottom (each division and all divisions)
+  const byName=(a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')), allDiv=filters.trade==='all';
+  const sortL=l=>l.slice().sort((a,b)=>allDiv?(String(a.trade||'~').localeCompare(String(b.trade||'~')) || byName(a,b)):byName(a,b));
+  const off=w=>(w.status||'active')==='inactive';
+  const G=[{k:'act', t:'Active workers', l:sortL(list.filter(w=>!off(w) && !isTemp(w)))},{k:'tmp', t:'Temporary workers', l:sortL(list.filter(w=>!off(w) && isTemp(w)))},{k:'off', t:'Inactive / left workers', l:sortL(list.filter(off))}].filter(g=>g.l.length);
+  const rowHtml=w=>{
     const f=computeFlags(w);
     return `<tr data-id="${w.id}">
       <td><div class="wname">${esc(w.fullName)}${w.isSample?'<span class="sample-tag">SAMPLE</span>':''}</div><div class="wsub">${esc(w.designation||w.contractor||'')}</div>${isTemp(w)?`<div style="margin-top:3px;">${contractBadgeHtml(w)}</div>`:''}</td>
@@ -15377,8 +15383,13 @@ function renderTable(){
       <td><span class="pill-count ${f.warnColor}">${f.warningsCount}</span></td>
       <td><span class="pill-count ${f.vioColor}">${f.violationsCount}</span></td>
     </tr>`;
-  }).join('');
+  };
+  tbody.innerHTML=G.map(g=>{ const shut=g.k==='off' && wfRegShut; let rows='';
+    if(!shut){ let last=null; for(const w of g.l){ const d=w.trade||'No division'; if(allDiv && d!==last && new Set(g.l.map(x=>x.trade||'No division')).size>1){ rows+=`<tr class="wf-subgrp"><td colspan="11">${esc(d)} <span class="wsub">(${g.l.filter(x=>(x.trade||'No division')===d).length})</span></td></tr>`; } last=d; rows+=rowHtml(w); } }
+    return `<tr class="wf-grp wf-grp-${g.k}"><td colspan="11"><span>${esc(g.t)} <b>${g.l.length}</b>${allDiv?'':' <span class="wsub">· '+esc(filters.trade)+'</span>'}</span>${g.k==='off'?`<button type="button" class="att-link" data-wf-regshut="1">${shut?'Show':'Hide'}</button>`:''}</td></tr>${rows}`; }).join('');
 }
+let wfRegShut=false;
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-wf-regshut]'); if(!b) return; e.stopPropagation(); wfRegShut=!wfRegShut; renderTable(); }, true);
 
 /* ---------------- vehicle rendering ---------------- */
 function renderVehicleAll(){
