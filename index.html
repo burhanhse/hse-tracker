@@ -1133,6 +1133,10 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
 .ck-sec{margin:12px 0 4px; padding:6px 10px; border-radius:8px; background:var(--surface-2); font-weight:800; font-size:13px; letter-spacing:.02em; text-transform:uppercase;} .ck-headline{margin-bottom:8px;} .ck-num{display:flex; gap:6px; align-items:center;} .ck-num input{max-width:140px;}
 .ck-fit{display:flex; gap:8px; flex-wrap:wrap;}
+.pl-chips{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px;} .pl-chip{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2); text-align:left; color:inherit; font:inherit; cursor:pointer; display:flex; flex-direction:column;} .pl-chip strong{font-size:22px; line-height:1.1;} .pl-chip span{font-size:12.5px;} .pl-chip i{font-style:normal; font-size:11px; color:var(--ink-muted);} .pl-chip.on{outline:2px solid var(--accent);}
+.pl-workshop strong,.pl-yard strong{color:var(--accent);} .pl-standby strong{color:var(--warn);} .pl-camp strong,.pl-sick strong,.pl-leave strong{color:var(--danger);} .pl-proj strong{color:var(--ok);} div.pl-chip{cursor:default;}
+.pl-today{margin-bottom:14px;} .pl-list,.pl-mm{margin-top:8px;} .pl-rules{margin-top:10px; border-top:1px dashed var(--line); padding-top:8px;} .pl-counts{display:grid; gap:4px;} .pl-crewbox{margin-bottom:10px;} .pl-tick{display:flex; align-items:center; padding:0 8px 0 2px;} .pl-tick input{width:20px; height:20px;} .pl-day summary{cursor:pointer; color:var(--accent); margin:8px 0;}
+.badge.pl-b-workshop,.badge.pl-b-yard{background:var(--surface-2); color:var(--accent);} .badge.pl-b-standby{background:var(--warn-bg); color:var(--warn);} .badge.pl-b-camp,.badge.pl-b-leave,.badge.pl-b-sick{background:var(--danger-bg); color:var(--danger);}
 .wl-radios{display:flex; gap:4px 16px; flex-wrap:wrap;} .wl-card .record-card-top{flex-wrap:wrap; gap:6px;} .wl-card .record-card-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center;} .wl-sigs{margin-top:8px; border-top:1px dashed var(--line); padding-top:6px;} .wl-refuse{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;} .wl-refuse input[data-wl-witness]{flex:1 1 200px; min-width:0;} .wl-form .subhead{margin-top:10px;}
 .wf-grp td{font-weight:800; font-size:14px; letter-spacing:.03em; text-transform:uppercase; padding:11px 12px; position:relative;} .wf-grp td>span b{margin-left:6px; padding:1px 9px; border-radius:10px; color:var(--bg);} .wf-grp .att-link{float:right; text-transform:none; letter-spacing:0;}
 .wf-grp-act td{background:var(--ok-bg); color:var(--ok); border-left:6px solid var(--ok); border-top:2px solid var(--ok);} .wf-grp-act td>span b{background:var(--ok);}
@@ -1558,6 +1562,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
       <div class="tiles tiles-4" id="siteTiles"></div>
       <div id="tbtTodaySite"></div>
       <div id="ptwTodaySite"></div>
+      <div id="placesSite"></div>
 
       <div class="panel" id="addSitePanel" hidden>
         <h3>Add a project</h3>
@@ -2999,6 +3004,7 @@ function startSettingsData(){
       if(typeof cmxRender==='function') cmxRender();   // Batch 88
       if(typeof mtgTypesRefresh==='function') mtgTypesRefresh();   // Batch 97
       if(typeof ptwSettingsRefresh==='function') ptwSettingsRefresh();   // Batch 98
+      if(typeof plRender==='function') plRender();   // Batch 105
       renderPpe(true);   // Batch 49
       if(canEdit()) ppeLinkSyncSoon();   // Batch 73: approved PPE list / photos → worker link
       renderComp(); if(compUi.panel) compRenderTop(); renderCcComp();   // Batch 84
@@ -3014,7 +3020,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b104';
+const APP_BUILD='b105';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3644,19 +3650,19 @@ function mhAutoMonths(s, opt){
   opt=opt||{}; const cfg={...s, ...(opt.cfg||{})};
   const from=mhFromOf(cfg); if(!/^\d{4}-\d{2}-\d{2}$/.test(from)) return {};
   const end=[opt.upto||localToday(), cfg.actualEnd||'9999-12-31'].sort()[0];
-  const spans=mhWorkerSpans(s.id), off=MH_DAYS_OFF[cfg.mhDaysPerWeek||7]||[], hpd=Number(cfg.mhHoursPerDay)||10, out={};
+  const spans=mhWorkerSpans(s.id), off=MH_DAYS_OFF[cfg.mhDaysPerWeek||7]||[], hpd=Number(cfg.mhHoursPerDay)||10, out={}, W=new Map(workers.map(w=>[w.id,w]));   // Batch 105: W for days away
   let guard=0;
   for(let d=from; d<=end && guard<6000; d=dateAddDays(d,1), guard++){
     const ym=d.slice(0,7), o=out[ym]||(out[ym]={hours:0, days:0, workerDays:0});
     if(off.includes(new Date(d+'T00:00:00Z').getUTCDay())) continue;
-    let n=0; for(const sp of spans) if((!sp.from || sp.from<=d) && (!sp.to || d<sp.to)) n++;
-    o.days++; o.workerDays+=n; o.hours+=n*hpd;
+    let n=0, away=0; for(const sp of spans) if((!sp.from || sp.from<=d) && (!sp.to || d<sp.to)){ const w=W.get(sp.wid); if(w && typeof plCountsForProject==='function' && !plCountsForProject(w, d)) away++; else n++; }
+    o.days++; o.workerDays+=n; o.hours+=n*hpd; o.away=(o.away||0)+away;
   }
   return out;
 }
 let mhCache=null;
 function mhAutoData(){
-  const k=[workers, siteEquipmentList, localToday()];
+  const k=[workers, siteEquipmentList, localToday(), settingsDocs.places];
   if(mhCache && mhCache.k.every((x,i)=>x===k[i])) return mhCache;
   const entries=[], replaced=new Map();
   for(const s of siteEquipmentList.filter(mhAuto)){
@@ -3664,6 +3670,12 @@ function mhAutoData(){
     for(const [ym,o] of Object.entries(mhAutoMonths(s))) if(o.hours>0) entries.push({id:`auto_mh_${s.id}_${ym}`, category:'manHours', date:ym, hours:o.hours, division:s.division||'Civil', projectId:s.id,
       source:'autoManHours', autoDays:o.days, autoWorkerDays:o.workerDays, autoHpd:Number(s.mhHoursPerDay)||10});
   }
+  // Batch 105: closed months keep their frozen figures; workshop / yard hours go to the company total
+  if(typeof plCfg==='function'){ const C=plCfg(), L=C.locks;
+    for(const e of entries){ const lk=L[e.date]; if(lk && lk.proj){ e.hours=Number(lk.proj[e.projectId])||0; e.locked=true; } }
+    for(const [ym,lk] of Object.entries(L)) for(const [pid,h] of Object.entries(lk.proj||{})) if(!entries.some(e=>e.projectId===pid && e.date===ym) && h>0 && siteEquipmentList.some(x=>x.id===pid && mhAuto(x))) entries.push({id:`auto_mh_${pid}_${ym}`, category:'manHours', date:ym, hours:Number(h)||0, division:(siteEquipmentList.find(x=>x.id===pid)||{}).division||'Civil', projectId:pid, source:'autoManHours', locked:true});
+    const im=plInternalMonths(), months=new Set([...Object.keys(im), ...Object.keys(L).filter(ym=>L[ym].int && Object.keys(L[ym].int).length)]);
+    for(const ym of months){ const src=L[ym]&&L[ym].int?L[ym].int:(im[ym]||{}); for(const [div,h] of Object.entries(src)) if(h>0) entries.push({id:`auto_int_${div}_${ym}`, category:'manHours', date:ym, hours:Number(h)||0, division:div, projectId:null, source:'autoInternal', notes:'Workshop / yard (counted from crew moves)', locked:!!L[ym]}); } }
   mhCache={k, entries, replaced}; return mhCache;
 }
 function mhReplacedManual(s){ const fm=mhFromOf(s).slice(0,7); return reportEntries.filter(e=>e.category==='manHours' && e.projectId===s.id && fm && entryMonth(e)>=fm); }
@@ -9929,6 +9941,136 @@ function obsWlHtml(r){ const linked=[]; for(const w of workers) for(const x of (
 if(REG.obs){ REG.obs.tabs.push({key:'wl', label:'Warning letter', showIf:r=>['Unsafe act','Unsafe condition'].includes(r.obsType), html:r=>obsWlHtml(r)}); }
 
 
+/* =============================== WHERE IS THE CREW — Batch 105 ===============================
+   worker.places = [{id, place, from, to ('' = open-ended, inclusive last day), reason, note, by, at}] — days away from the assigned project
+   (workshop, yard, camp — no work, standby at the project, leave, sick). The newest entry covering a day wins.
+   Man-hours follow the moves: a project (automatic man-hours) counts only its people who are not at another place that day
+   (standby at the project still counts there). Workshop / yard hours go to the company total (from the date set in the rules).
+   settings/places = {counts:{place:true|false}, hpd, dpw, from, locks:{'YYYY-MM':{at, by, proj:{pid:hours}, int:{division:hours}}}, reopened:[…]} */
+const PL_PLACES={workshop:{l:'Workshop', s:'Workshop', count:true, internal:true}, yard:{l:'Yard', s:'Yard', count:true, internal:true}, camp:{l:'Camp / room — no work', s:'Camp — no work', count:false}, standby:{l:'Standby at the project', s:'Standby', count:true, project:true}, leave:{l:'On leave / vacation', s:'Leave', count:false}, sick:{l:'Sick / medical rest', s:'Sick', count:false}};
+const PL_ORDER=['workshop','yard','standby','camp','leave','sick'];
+const PL_REASONS=['Waiting for permit','Client stop-work','No work available','Equipment breakdown','Bad weather','Workshop job','Rest day','Medical','Annual leave','Other'];
+function plCfg(){ const s=settingsDocs.places||{}; const counts={}; for(const k of PL_ORDER) counts[k]=(s.counts&&typeof s.counts[k]==='boolean')?s.counts[k]:PL_PLACES[k].count;
+  return {counts, hpd:Number(s.hpd)||10, dpw:Number(s.dpw)||6, from:s.from||'', locks:s.locks||{}, reopened:s.reopened||[]}; }
+function plList(w){ return Array.isArray(w&&w.places)?w.places.filter(p=>p && PL_PLACES[p.place] && p.from):[]; }
+function placeOn(w, d){ let best=null; for(const p of plList(w)) if(p.from<=d && (!p.to || d<=p.to) && (!best || String(p.at||'')>String(best.at||''))) best=p; return best; }
+function plLabel(k){ return (PL_PLACES[k]||{}).l||k; }
+function projectOn(w, d){ const hs=projHistory(w); if(!hs.length) return w.projectId||''; const h=hs.filter(h=>(!h.from || h.from<=d) && (!h.to || d<h.to)).sort((a,b)=>String(b.from||'').localeCompare(String(a.from||'')))[0]; return h?h.projectId:''; }
+function plLockedUpto(){ return Object.keys(plCfg().locks).sort().pop()||''; }
+function plMonthLocked(ym){ return !!plCfg().locks[ym]; }
+// count a project-day for this worker? (people away at another place do not count, standby counts if the rule says so)
+function plCountsForProject(w, d){ const p=placeOn(w, d); if(!p) return true; return p.place==='standby' && plCfg().counts.standby; }
+function plInternalMonths(upto){
+  const C=plCfg(); if(!/^\d{4}-\d{2}-\d{2}$/.test(C.from)) return {};
+  const end=upto||localToday(), off=MH_DAYS_OFF[C.dpw]||[], out={}, ws=workers.filter(w=>!w.deleted && plList(w).length); let guard=0;
+  if(!ws.length) return out;
+  for(let d=C.from; d<=end && guard<4000; d=dateAddDays(d,1), guard++){
+    if(off.includes(new Date(d+'T00:00:00Z').getUTCDay())) continue;
+    for(const w of ws){ const p=placeOn(w, d); if(!p || p.place==='standby' || !C.counts[p.place]) continue;
+      const ym=d.slice(0,7), div=workerDivKey(w)||'Office staff', o=(out[ym]=out[ym]||{}); o[div]=(o[div]||0)+C.hpd; } }
+  return out; }
+async function plSaveWorker(w, places){ try{ await db.collection('workers').doc(w.id).update(stamp({places:places.slice(-400)})); w.places=places; return true; }catch(e){ console.error(e); toast('Could not save — '+((e&&e.code)||'error')); return false; } }
+function plWho(){ const u=auth.currentUser||{}; return (hseSigOf(u.email)||{}).name||u.email||''; }
+// add a place for several workers; returns how many saved
+async function plAdd(ids, e){
+  const lk=plLockedUpto(); if(lk && e.from.slice(0,7)<=lk){ toast(`${periodLabel(lk)} is closed — reopen the month (with a reason) before changing days in it`); return 0; }
+  let n=0; for(const id of ids){ const w=workers.find(x=>x.id===id); if(!w) continue;
+    const x={id:'pl'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), place:e.place, from:e.from, to:e.to||'', reason:e.reason||'', note:e.note||'', by:plWho(), at:new Date().toISOString(), projectId:w.projectId||''};
+    if(await plSaveWorker(w, [...plList(w), x])) n++; }
+  return n; }
+// take one day out of a place entry (he was working on the project that day)
+async function plClearDay(w, d){
+  const lk=plLockedUpto(); if(lk && d.slice(0,7)<=lk){ toast(`${periodLabel(lk)} is closed — reopen it first`); return false; }
+  const out=[]; for(const p of plList(w)){ if(!(p.from<=d && (!p.to || d<=p.to))){ out.push(p); continue; }
+    if(p.from<d) out.push({...p, to:dateAddDays(d,-1)});
+    if(!p.to || p.to>d) out.push({...p, id:p.id+'b', from:dateAddDays(d,1)}); }
+  return plSaveWorker(w, out); }
+async function plEndNow(w, id){ const t=localToday(), out=[]; for(const p of plList(w)){ if(p.id!==id){ out.push(p); continue; } if(p.from>=t) continue; out.push({...p, to:dateAddDays(t,-1)}); } return plSaveWorker(w, out); }
+
+/* ---- month close & lock ---- */
+function plMonthFigures(ym){ const proj={}, t=localToday(), end=(ym+'-31')<t?ym+'-31':t; for(const s of siteEquipmentList.filter(mhAuto)){ const o=mhAutoMonths(s, {upto:end})[ym]; if(o && o.hours) proj[s.id]=o.hours; }
+  const int=plInternalMonths(end)[ym]||{}; return {proj, int}; }
+async function plCloseMonth(ym){ const f=plMonthFigures(ym); return saveSettings('places', {locks:{[ym]:{at:new Date().toISOString(), by:plWho(), proj:f.proj, int:f.int}}}, settingsStamp('places')); }
+async function plReopenMonth(ym, reason){ const FV=fsFieldValue(), C=plCfg(); return saveSettings('places', {locks:{[ym]:FV?FV.delete():null}, reopened:[...C.reopened, {ym, at:new Date().toISOString(), by:plWho(), reason}].slice(-60)}, settingsStamp('places')); }
+/* ---- mismatch: marked at a place / another project, but signed a TBT at a project that day ---- */
+function plIgnored(){ try{ return new Set(JSON.parse(localStorage.getItem('plIgnore')||'[]')); }catch(e){ return new Set(); } }
+function plMismatches(){ if(typeof tricAll!=='function') return []; const from=localDatePlus(-7), ig=plIgnored(), out=[], seen=new Set();
+  for(const x of tricAll()){ const d=(x.data||{}).date||'', site=tricSiteId(x); if(!d || d<from || !site || x.status==='rejected') continue;
+    for(const a of tbtAtt(x)){ if(!(x.sigs||{})[a.w]) continue; const w=workers.find(y=>y.id===a.w); if(!w || w.deleted) continue; const k=`${w.id}|${d}|${site}`; if(seen.has(k) || ig.has(k)) continue; seen.add(k);
+      const p=placeOn(w, d), pr=projectOn(w, d);
+      if(p && p.place!=='standby') out.push({k, w, d, site, kind:'place', p, txt:`marked "${plLabel(p.place)}" but signed a TBT at ${projectName(site)}`});
+      else if(pr && pr!==site) out.push({k, w, d, site, kind:'project', txt:`assigned to ${projectName(pr)} but signed a TBT at ${projectName(site)}`}); } }
+  return out.sort((a,b)=>String(b.d).localeCompare(String(a.d))); }
+/* ---- Project Details: where are the crews today ---- */
+let plUi={open:'', rules:false, sel:null, move:false};
+function plTodayHtml(){
+  const t=localToday(), ws=activeWorkers().filter(w=>(w.status||'active')==='active'), by={}; for(const k of PL_ORDER) by[k]=[];
+  let onProj=0, none=0; for(const w of ws){ const p=placeOn(w, t); if(p) by[p.place].push({w,p}); else if(w.projectId) onProj++; else none++; }
+  const mm=plMismatches(), C=plCfg(), ed=canEdit(), away=PL_ORDER.reduce((n,k)=>n+by[k].length,0);
+  if(!away && !mm.length && !ed) return '';
+  const chip=k=>`<button type="button" class="pl-chip pl-${k} ${plUi.open===k?'on':''}" data-pl-show="${k}"><strong>${by[k].length}</strong><span>${esc(PL_PLACES[k].s)}</span><i>${C.counts[k]?'counts':'0 hours'}</i></button>`;
+  return `<div class="panel pl-today"><div class="section-head"><h3>${ic('users')} Where are the crews today <span class="wsub">${esc(isoToDmy(t))}</span></h3>${ed?`<button type="button" class="btn btn-sm" data-pl-rules="1">${ic('gear')} Man-hours rules & month close</button>`:''}</div>
+    <div class="pl-chips"><div class="pl-chip pl-proj"><strong>${onProj}</strong><span>On their projects</span><i>counts</i></div>${PL_ORDER.map(chip).join('')}${none?`<div class="pl-chip"><strong>${none}</strong><span>Not assigned</span><i>—</i></div>`:''}</div>
+    ${plUi.open&&by[plUi.open]?`<div class="pl-list">${by[plUi.open].length?by[plUi.open].map(({w,p})=>`<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')}${w.projectId?' · from '+esc(projectName(w.projectId)):''} · ${esc(p.reason||'')}${p.to?` · until ${esc(isoToDmy(p.to))}`:' · open-ended'}</span></span><span>${ed?`<button type="button" class="btn btn-sm" data-pl-back="${esc(w.id)}|${esc(p.id)}">Back on project from today</button> `:''}<button type="button" class="btn btn-sm" data-pl-open="${esc(w.id)}">Open</button></span></div>`).join(''):'<p class="wsub">Nobody.</p>'}</div>`:''}
+    ${mm.length?`<div class="pl-mm"><div class="subhead">⚠ Check these (last 7 days) — ${mm.length}</div>${mm.slice(0,12).map(m=>`<div class="ind-mrow"><span><strong>${esc(m.w.fullName||'')}</strong> <span class="wsub">· ${esc(isoToDmy(m.d))} — ${esc(m.txt)}</span></span><span>${ed?(m.kind==='place'?`<button type="button" class="btn btn-sm btn-primary" data-pl-fix="${esc(m.k)}">He worked at ${esc(projectName(m.site))} — fix</button> `:m.d===t?`<button type="button" class="btn btn-sm btn-primary" data-pl-move="${esc(m.k)}">Move him to ${esc(projectName(m.site))}</button> `:''):''}<button type="button" class="btn btn-sm" data-pl-ignore="${esc(m.k)}">Correct as it is</button></span></div>`).join('')}</div>`:''}
+    ${plUi.rules&&ed?plRulesHtml():''}</div>`; }
+function plRulesHtml(){ const C=plCfg(), t=localToday().slice(0,7), months=[]; for(let i=0;i<6;i++){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }
+  const tot=o=>Object.values(o||{}).reduce((n,v)=>n+(Number(v)||0),0);
+  return `<form data-pl-form="rules" class="pl-rules"><div class="subhead">Man-hours rules</div>
+    <div class="pl-counts">${PL_ORDER.map(k=>`<label class="chk"><input type="checkbox" name="c_${k}" ${C.counts[k]?'checked':''}> ${esc(PL_PLACES[k].l)} <span class="wsub">${k==='standby'?'(counts to the project)':PL_PLACES[k].internal?'(counts to the company total)':'(counts to the company total if ticked)'}</span></label>`).join('')}</div>
+    <div class="form-grid ptw-g6"><label>Workshop / yard hours per day<input type="number" name="hpd" min="1" max="16" value="${C.hpd}"></label><label>Working days<select name="dpw">${[7,6,5].map(n=>`<option value="${n}" ${C.dpw===n?'selected':''}>${esc(MH_DAY_LABEL[n])}</option>`).join('')}</select></label><label>Count workshop / yard hours from<input type="date" name="from" value="${esc(C.from)}"></label></div>
+    <p class="wsub">Projects on <b>automatic man-hours</b> leave out the days their people are at another place (standby at the project still counts there). Workshop / yard hours are added to the company total from the date above — do not also type them by hand in the Monthly Report. Projects on manual man-hours are not changed.</p>
+    <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">Save rules</button></div></form>
+    <div class="subhead">Month close</div><p class="wsub" style="margin:-4px 0 6px;">Closing a month freezes its man-hours. After that, moves and places in that month can only be changed by reopening it with a reason (kept in the log).</p>
+    <div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>Month</th><th>Projects (automatic)</th><th>Workshop / yard</th><th>Status</th><th></th></tr></thead><tbody>${months.map(ym=>{ const L=C.locks[ym], f=L?L:plMonthFigures(ym);
+      return `<tr><td>${esc(periodLabel(ym))}</td><td>${tot(f.proj).toLocaleString()}</td><td>${tot(f.int).toLocaleString()}</td><td>${L?`<span class="badge ok">Closed</span> <span class="wsub">${esc(L.by||'')} · ${esc(isoToDmy(isoToLocalDate(L.at)))}</span>`:ym===t?'<span class="badge muted">This month</span>':'<span class="badge warn">Open</span>'}</td>
+        <td>${L?`<button type="button" class="att-link" data-pl-reopen="${ym}">Reopen…</button>`:ym<t?`<button type="button" class="btn btn-sm" data-pl-close="${ym}" data-armed="0">Close & lock</button>`:''}</td></tr>`; }).join('')}</tbody></table></div>
+    ${plUi.reopen?`<form data-pl-form="reopen" class="ptw-inline" style="margin-top:6px;"><input name="r" required maxlength="160" placeholder="Why reopen ${esc(periodLabel(plUi.reopen))}? (kept in the log)"><button type="submit" class="btn btn-sm">Reopen</button></form>`:''}
+    ${C.reopened.length?`<p class="wsub" style="margin-top:6px;">Reopened: ${C.reopened.slice(-5).reverse().map(r=>`${esc(periodLabel(r.ym))} by ${esc(r.by)} — ${esc(r.reason)}`).join(' · ')}</p>`:''}`; }
+function plRender(){ const el=document.getElementById('placesSite'); if(!el || !auth.currentUser) return; const sec=el.closest('main'); if(sec && sec.hidden) return; el.innerHTML=plTodayHtml(); }
+/* ---- crew move form (Project → Team tab) and day form (worker) ---- */
+function plMoveFormHtml(mode, s){ const sites=activeSites().filter(x=>projectStatus(x)!=='Completed' && (!s || x.id!==s.id)).sort((a,b)=>(a.siteName||'').localeCompare(b.siteName||''));
+  return `<form data-pl-form="${mode}" class="pl-move"><div class="form-grid">
+    <label>Where${mode==='crew'?' (selected men)':''}<select name="place" required><option value="">Select…</option><optgroup label="Not on the project">${PL_ORDER.map(k=>`<option value="${k}">${esc(PL_PLACES[k].l)}</option>`).join('')}</optgroup>${mode==='crew'?`<optgroup label="Another project">${sites.map(x=>`<option value="p:${esc(x.id)}">${esc(x.siteName||'Project')}</option>`).join('')}</optgroup>`:''}</select></label>
+    <label>For<select name="span"><option value="today">Today only</option><option value="until">Until a date (last day)</option><option value="open">Until further notice</option></select></label>
+    <label>Last day<input type="date" name="to" min="${esc(localToday())}"></label>
+    <label>Reason<select name="reason">${PL_REASONS.map(r=>`<option>${esc(r)}</option>`).join('')}</select></label>
+    <label class="span-all">Note<input name="note" maxlength="140" placeholder="optional — e.g. permit PTW-123 not issued, client stopped hot work"></label></div>
+    <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">${mode==='crew'?'Move selected':'Save'}</button>${mode==='crew'?' <button type="button" class="btn btn-sm" data-pl-crewcancel="1">Cancel</button>':''}</div></form>`; }
+function plTimelineHtml(w){ const L=plList(w).sort((a,b)=>String(b.from).localeCompare(String(a.from))).slice(0,30), t=localToday(), ed=canEdit();
+  return L.length?L.map(p=>`<div class="rf"><span class="rf-k mono">${esc(isoToDmy(p.from))} → ${p.to?esc(isoToDmy(p.to)):'<strong>open</strong>'}</span><span class="rf-v"><span class="badge pl-b-${p.place}">${esc(PL_PLACES[p.place].s)}</span> ${esc(p.reason||'')}${p.note?' — '+esc(p.note):''} <span class="wsub">· ${esc(p.by||'')}, ${esc(isoToDmy(isoToLocalDate(p.at||'')))}</span>${ed&&p.from<=t&&(!p.to||p.to>=t)?` <button type="button" class="att-link" data-pl-end="${esc(p.id)}">back on the project from today</button>`:''}</span></div>`).join(''):'<p class="wsub" style="margin:4px 0 0;">No days away from the project recorded.</p>'; }
+function plSpanOf(F){ const t=localToday(); const span=String(F.get('span')||'today'), to=String(F.get('to')||''); if(span==='today') return {from:t, to:t}; if(span==='open') return {from:t, to:''}; if(!to || to<t) return null; return {from:t, to}; }
+document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement) || !f.dataset.plForm) return; e.preventDefault(); if(!canEdit()) return;
+  const k=f.dataset.plForm, F=new FormData(f);
+  if(k==='rules'){ const counts={}; for(const p of PL_ORDER) counts[p]=!!F.get('c_'+p); if(await saveSettings('places', {counts, hpd:Math.max(1,Number(F.get('hpd'))||10), dpw:Number(F.get('dpw'))||6, from:String(F.get('from')||'')}, settingsStamp('places'))){ mhCache=null; renderReportAll(); } return; }
+  if(k==='reopen'){ const r=String(F.get('r')||'').trim(); if(!r || !plUi.reopen) return; if(await plReopenMonth(plUi.reopen, r)){ toast(`${periodLabel(plUi.reopen)} reopened`); plUi.reopen=''; mhCache=null; renderReportAll(); plRender(); } return; }
+  const place=String(F.get('place')||''); if(!place){ toast('Choose where'); return; } const sp=plSpanOf(F); if(!sp){ toast('Choose the last day'); return; }
+  const reason=String(F.get('reason')||''), note=String(F.get('note')||'').trim();
+  if(k==='crew'){ const ids=[...(plUi.sel||new Set())]; if(!ids.length){ toast('Tick the men to move first'); return; }
+    if(place.startsWith('p:')){ const to=place.slice(2); let n=0; for(const id of ids){ const w=workers.find(x=>x.id===id); if(!w) continue; const opts=sp.to&&w.projectId?{returnDate:dateAddDays(sp.to,1), returnProjectId:w.projectId}:{}; if(await moveWorker(id, to, opts)) n++; } toast(`${n} moved to ${projectName(to)}${sp.to?' until '+isoToDmy(sp.to):''}`); }
+    else { const n=await plAdd(ids, {place, ...sp, reason, note}); if(n) toast(`${n} marked "${plLabel(place)}"${sp.to===sp.from?' today':sp.to?' until '+isoToDmy(sp.to):' until further notice'}`); }
+    plUi.sel=null; plUi.move=false; mhCache=null; if(typeof renderSiteDrawerBody==='function') renderSiteDrawerBody(); plRender(); return; }
+  if(k==='day'){ const w=currentWorker(); if(!w) return; const n=await plAdd([w.id], {place, ...sp, reason, note}); if(n){ toast(`Saved — ${plLabel(place)}`); mhCache=null; renderDrawerBody(); plRender(); } } });
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-pl-open],[data-ropen-pl],[data-pl-show],[data-pl-rules],[data-pl-back],[data-pl-fix],[data-pl-move],[data-pl-ignore],[data-pl-close],[data-pl-reopen],[data-pl-crew],[data-pl-crewcancel],[data-pl-end],[data-pl-tick]'); if(!b) return; const D=b.dataset;
+  if(D.plOpen){ openDrawer(D.plOpen); return; }
+  if(D.ropenPl!==undefined){ const n=document.querySelector('.sidenav-btn[data-section="site"]'); if(n) n.click(); plUi.rules=true; setTimeout(plRender, 50); return; }
+  if(D.plShow){ plUi.open=plUi.open===D.plShow?'':D.plShow; plRender(); return; }
+  if(D.plRules){ plUi.rules=!plUi.rules; plRender(); return; }
+  if(D.plTick!==undefined){ e.stopPropagation(); return; }
+  if(D.plIgnore){ const s=plIgnored(); s.add(D.plIgnore); try{ localStorage.setItem('plIgnore', JSON.stringify([...s].slice(-300))); }catch(x){} plRender(); return; }
+  if(!canEdit()) return;
+  if(D.plCrew){ plUi.move=true; plUi.sel=new Set(); if(typeof renderSiteDrawerBody==='function') renderSiteDrawerBody(); return; }
+  if(D.plCrewcancel){ plUi.move=false; plUi.sel=null; if(typeof renderSiteDrawerBody==='function') renderSiteDrawerBody(); return; }
+  if(D.plBack){ const [wid,id]=D.plBack.split('|'), w=workers.find(x=>x.id===wid); if(w && await plEndNow(w, id)){ toast(`${w.fullName} back on the project from today`); mhCache=null; plRender(); } return; }
+  if(D.plEnd){ const w=currentWorker(); if(w && await plEndNow(w, D.plEnd)){ toast('Back on the project from today'); mhCache=null; renderDrawerBody(); plRender(); } return; }
+  if(D.plFix||D.plMove){ const m=plMismatches().find(x=>x.k===(D.plFix||D.plMove)); if(!m) return;
+    if(D.plFix){ if(await plClearDay(m.w, m.d)){ toast(`${m.w.fullName}: ${isoToDmy(m.d)} counted at the project`); mhCache=null; plRender(); } }
+    else if(await moveWorker(m.w.id, m.site)){ toast(`${m.w.fullName} moved to ${projectName(m.site)}`); plRender(); } return; }
+  if(D.plClose){ if(!compArm(b,'tap again to lock')) return; if(await plCloseMonth(D.plClose)){ toast(`${periodLabel(D.plClose)} closed & locked`); mhCache=null; renderReportAll(); plRender(); } return; }
+  if(D.plReopen){ plUi.reopen=D.plReopen; plRender(); return; } });
+document.addEventListener('change', e=>{ const t=e.target; if(t && t.dataset && t.dataset.plTick!==undefined){ const s=plUi.sel||(plUi.sel=new Set()); if(t.checked) s.add(t.dataset.plTick); else s.delete(t.dataset.plTick); const c=document.getElementById('plSelN'); if(c) c.textContent=s.size; } });
+
+
 /* ================= Batch 49: PPE — approved PPE list (standards), issue to crew, PPE dashboard ================= */
 // Suggested starting list — HSE edits it. International standards are the usual EN / ISO / ANSI references; local / client and colours are company choices.
 const PPE_SUGGESTED=[
@@ -15729,6 +15871,7 @@ function renderVehicleTable(){
 function renderSiteAll(){
   renderSiteTiles();
   tbtTodayRender();   // Batch 92
+  if(typeof plRender==='function') plRender();   // Batch 105
   renderSiteTable();
   renderSiteSummary();
   const trashCount=deletedSites().length;
@@ -15805,6 +15948,8 @@ function workerProjectHtml(w){
     <div class="rf"><span class="rf-k">${cur && !cur.deleted ? '<span class="badge ok">Assigned</span>' : '<span class="badge muted">Not assigned</span>'}</span><span class="rf-v"><strong>${cur ? esc(locLabel(w.projectId)) : 'No project'}</strong>${cur?since:''}</span></div>
     ${back}${mover}
     <div class="subhead">Project history</div>${rows}
+    <div class="subhead">Days away from the project ${(()=>{ const p=placeOn(w, localToday()); return p?`<span class="badge pl-b-${p.place}">today: ${esc(PL_PLACES[p.place].s)}</span>`:''; })()}</div>${plTimelineHtml(w)}
+    ${canEdit()?`<details class="pl-day"><summary>+ Workshop / camp / standby / leave / sick…</summary>${plMoveFormHtml('day')}</details>`:''}
   </div>`;
 }
 // Project → Team tab: people who worked here before, and people away on a temporary move
@@ -16628,13 +16773,16 @@ function sitePickerHtml(kind, s){
 function siteTeamTabHtml(s){
   const team=workersAtSite(s.id).slice().sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||''));
   const withIssues=team.filter(w=>workerIssues(w).length).length;
-  const head = `<div class="section-head"><h3>Team on this project (${team.length})</h3>${sitePickerOpen==='team' ? '' : '<button type="button" class="btn btn-sm" id="sitePickerOpenTeam">+ Assign workers</button>'}</div>`;
+  const head = `<div class="section-head"><h3>Team on this project (${team.length})</h3><span style="display:flex; gap:6px; flex-wrap:wrap;">${canEdit()&&team.length&&!plUi.move?'<button type="button" class="btn btn-sm" data-pl-crew="1">↔ Move crew</button>':''}${sitePickerOpen==='team' ? '' : '<button type="button" class="btn btn-sm" id="sitePickerOpenTeam">+ Assign workers</button>'}</span></div>`
+    + (plUi.move&&canEdit()?`<div class="panel pl-crewbox"><div class="subhead" style="margin-top:0;">Move crew — tick the men below (<span id="plSelN">${(plUi.sel||new Set()).size}</span> selected)</div>${plMoveFormHtml('crew', s)}</div>`:'');   // Batch 105
   const note = team.length ? `<p class="wsub" style="margin:0 0 10px;">${withIssues ? `<span class="badge warn">${withIssues}</span> worker(s) have expired or missing documents — check before they start work.` : ic('checkcircle')+' Everyone assigned here has valid induction, medical and licenses.'}</p>` : '';
   const picker = sitePickerOpen==='team' ? sitePickerHtml('team', s) : '';
   const list = team.length ? team.map(w=>{
     const issues=workerIssues(w);
+    const plp=placeOn(w, localToday());
     return `<div class="equip-line" data-open-worker="${w.id}">
-      <div class="equip-line-main"><div class="equip-line-title">${esc(w.fullName||'—')}</div><div class="wsub">${esc([w.designation, w.trade].filter(Boolean).join(' · ')||'—')}</div></div>
+      ${plUi.move&&canEdit()?`<label class="pl-tick" data-pl-tick-wrap="1"><input type="checkbox" data-pl-tick="${esc(w.id)}" ${(plUi.sel||new Set()).has(w.id)?'checked':''}></label>`:''}
+      <div class="equip-line-main"><div class="equip-line-title">${esc(w.fullName||'—')}${plp?` <span class="badge pl-b-${plp.place}">${esc(PL_PLACES[plp.place].s)} today</span>`:''}</div><div class="wsub">${esc([w.designation, w.trade].filter(Boolean).join(' · ')||'—')}</div></div>
       <div class="equip-line-badges">${isTemp(w)?contractBadgeHtml(w)+(workerClearance(w).ok?'<span class="badge ok">Cleared</span>':'<span class="badge danger" title="'+esc(workerClearance(w).why.join(' · '))+'">Not cleared</span>'):''}${issues.length ? issues.map(i=>`<span class="badge danger">${esc(i)}</span>`).join('') : '<span class="badge ok">All valid</span>'}
         <button type="button" class="icon-btn danger" data-unassign-worker="${w.id}" title="Remove from this project" aria-label="Remove from project">${ic('close')}</button></div>
     </div>`;
@@ -17471,8 +17619,11 @@ function renderReportTable(entries){
     const fromTrs = e.source==='trainingSession' && e.sourceTrsId && regState.trs && regActive('trs').some(x=>x.id===e.sourceTrsId);   // Batch 95
     const fromDrill = e.source==='drill' && e.sourceDrillId && regState.drills && regActive('drills').some(x=>x.id===e.sourceDrillId);   // Batch 93
     const fromInd = e.source==='inductionForm' && e.sourceIndId && (!indLoaded || indList.some(x=>x.id===e.sourceIndId));   // Batch 87
+    const fromAutoInt = e.source==='autoInternal';   // Batch 105
     const fromAutoMh = e.source==='autoManHours', fromVeh = e.source==='vehicleInspection' && e.sourceVehicleId && activeVehicles().some(x=>x.id===e.sourceVehicleId);
-    const actions = fromTrs
+    const actions = fromAutoInt
+      ? `<button type="button" class="btn btn-sm" data-ropen-pl="1" title="Workshop / yard hours counted from crew moves — Project Details → Where are the crews">Open crew places</button>`
+      : fromTrs
       ? `<button type="button" class="btn btn-sm" data-reg-row="trs:${esc(e.sourceTrsId)}" title="Recorded in Training Records — edit it there">Open training</button>`
       : fromDrill
       ? `<button type="button" class="btn btn-sm" data-reg-row="drills:${esc(e.sourceDrillId)}" title="Recorded in Emergency Drills — edit it there">Open drill</button>`
@@ -19152,7 +19303,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       for(const [k,id] of Object.entries(SECTIONS)) document.getElementById(id).hidden = section!==k;
       if(section==='objectives' || section==='assurance') refreshLinkedPanels();
       if(section==='comp'){ renderComp(); compRenderTop(); }   // Batch 84
-      if(section==='site'){ tbtTodayRender(); if(typeof ptwTodayRender==='function') ptwTodayRender(); }   // Batch 92 / 99
+      if(section==='site'){ tbtTodayRender(); if(typeof ptwTodayRender==='function') ptwTodayRender(); if(typeof plRender==='function') plRender(); }   // Batch 92 / 99 / 105
     });
   });
 
@@ -19532,7 +19683,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const unV=e.target.closest('[data-unassign-vehicle]');
     if(unV){ e.stopPropagation(); try{ await db.collection('vehicles').doc(unV.dataset.unassignVehicle).update({projectId:null}); toast('Removed from this project'); }catch(err){ toast('Could not update'); } return; }
     const openW=e.target.closest('[data-open-worker]');
-    if(openW){ openDrawer(openW.dataset.openWorker); return; }
+    if(openW && !e.target.closest('.pl-tick')){ openDrawer(openW.dataset.openWorker); return; }
     const openV=e.target.closest('[data-open-vehicle]');
     if(openV){ openVehicleDrawer(openV.dataset.openVehicle); return; }
     const openEq=e.target.closest('[data-open-equip]');
