@@ -459,7 +459,7 @@ label.chk{flex-direction:row; align-items:center; gap:6px; color:var(--ink); fon
 label.chk input{width:auto; flex:none;}
 @media (max-width:700px){ .req-row{grid-template-columns:1fr auto;} .req-divs{grid-column:1 / -1; grid-row:2;} }
 .report-category-fields .span-all{margin-top:12px;}
-.wmove{display:grid; grid-template-columns:minmax(180px,2fr) auto minmax(140px,1fr) auto; gap:10px; margin-top:10px; align-items:end;}
+.wmove{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px; margin-top:10px; align-items:end;} .wmove label:first-child{grid-column:span 2;} .wmove .chk{min-height:40px; display:flex; align-items:center; gap:6px;} #wmTrvWrap input{min-width:0;}   /* Batch 110b: room for From + travel tick */
 @media (max-width:620px){ .wmove{grid-template-columns:1fr 1fr;} .wmove label:first-child{grid-column:1 / -1;} }
 #moveNote .att-link{margin:0 2px;}
 /* Batch 20: IVMS / DFMS portal list */
@@ -3044,7 +3044,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b110';
+const APP_BUILD='b110b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
