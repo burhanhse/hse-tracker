@@ -3046,7 +3046,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b111';
+const APP_BUILD='b111b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10514,13 +10514,14 @@ document.addEventListener('change', e=>{ const t=e.target; if(!t || t.name!=='pl
    Workload % = deployed ÷ available × 100, per division (worker's trade). Manpower needed per project (siteEquipment.mhNeed)
    → needed vs on site, shortage, and "hire N" when the needs are more than the people available. */
 const WL_DIVS=['Scaffolding','Civil','Rental'];
-const WL_SPARE=['workshop','yard','camp'], WL_OUT=['leave','sick'];
+const WL_SPARE=['camp'], WL_INT=['workshop','yard'], WL_OUT=['leave','sick'];   // Batch 111b: workshop / yard work = engaged, not spare
 function wlInPool(w){ if(!w || w.deleted || plIsOfficeTrade(w)) return false; const t=canonTrade(w.trade||''); if(t==='Sub Contractor') return false; return WL_DIVS.includes(workerDivKey(w)||''); }
 function wlDayOf(w, d){ const life=plWorkerLife(w); if(life.st && d<life.st) return ''; if(life.inact && (!life.stop || d>=life.stop)) return ''; const p=placeOn(w, d);
-  if(p && WL_OUT.includes(p.place)) return 'out'; if(p && p.place==='travel' && p.forPid) return 'dep'; if(p && WL_SPARE.includes(p.place)) return 'spare';
-  const pr=projectOn(w, d); if(pr){ const s=siteEquipmentList.find(x=>x.id===pr); if(s && !s.deleted) return 'dep'; } return 'spare'; }
-function wlToday(){ const t=localToday(), by={}; for(const k of WL_DIVS) by[k]={avail:0, dep:0, out:0, spare:0, need:0, onSite:0, short:0};
-  for(const w of workers){ if(!wlInPool(w) || (w.status||'active')!=='active') continue; const st=wlDayOf(w, t); if(!st) continue; const o=by[workerDivKey(w)]; if(st==='out'){ o.out++; continue; } o.avail++; if(st==='dep') o.dep++; else o.spare++; }
+  if(p && WL_OUT.includes(p.place)) return 'out'; if(p && p.place==='travel' && p.forPid) return 'dep'; if(p && WL_SPARE.includes(p.place)) return 'spare'; if(p && WL_INT.includes(p.place)) return 'int';
+  const pr=projectOn(w, d); if(pr){ const s=siteEquipmentList.find(x=>x.id===pr); if(s && !s.deleted) return 'dep'; }
+  const b=baseOn(w, d), bt=b?plBaseType(b):''; if(['workshop','yard','office'].includes(bt)) return 'int'; return 'spare'; }
+function wlToday(){ const t=localToday(), by={}; for(const k of WL_DIVS) by[k]={avail:0, dep:0, int:0, out:0, spare:0, need:0, onSite:0, short:0};
+  for(const w of workers){ if(!wlInPool(w) || (w.status||'active')!=='active') continue; const st=wlDayOf(w, t); if(!st) continue; const o=by[workerDivKey(w)]; if(st==='out'){ o.out++; continue; } o.avail++; if(st==='dep') o.dep++; else if(st==='int') o.int++; else o.spare++; }
   const projs=activeSites().filter(projectLive).map(s=>{ const need=Number(s.mhNeed)||0, on=wlOnSite(s); return {s, need, on, short:Math.max(0, need-on)}; });
   for(const x of projs){ const o=by[x.s.division||'Civil']; if(!o) continue; o.need+=x.need; o.onSite+=x.on; o.short+=x.short; }
   return {by, projs}; }
@@ -10529,32 +10530,32 @@ function wlOnSite(s){ const t=localToday(); let n=0; for(const w of activeWorker
 function wlPct(a,b){ return b ? Math.round(a/b*100) : null; }
 function wlTone(p){ return p===null?'muted':p>100?'danger':p>=90?'warn':p>=60?'ok':'muted'; }
 function wlVehicles(){ const L=activeVehicles().filter(v=>!vehDoNotUse(v)), on=L.filter(v=>{ const s=v.projectId&&siteEquipmentList.find(x=>x.id===v.projectId); return s && !s.deleted && projectLive(s); }).length; return {fit:L.length, on, pct:wlPct(on, L.length)}; }
-function wlBoxHtml(){ const {by, projs}=wlToday(), V=wlVehicles(), tot={avail:0, dep:0, out:0, spare:0, need:0, short:0};
+function wlBoxHtml(){ const {by, projs}=wlToday(), V=wlVehicles(), tot={avail:0, dep:0, int:0, out:0, spare:0, need:0, short:0};
   for(const k of WL_DIVS) for(const f of Object.keys(tot)) tot[f]+=by[k][f];
   tot.hire=WL_DIVS.reduce((n,k)=>n+Math.max(0, by[k].need-by[k].avail),0);   // a Civil man cannot fill a Scaffolding need — add the divisions' hiring
   if(!tot.avail && !tot.out && !V.fit) return '';
-  const row=(lbl,o,strong)=>{ const p=wlPct(o.dep,o.avail), np=wlPct(o.need,o.avail), hire=o.hire!==undefined?o.hire:Math.max(0, o.need-o.avail);
-    return `<tr${strong?' class="wl-tot"':''}><td>${strong?'<b>'+esc(lbl)+'</b>':esc(lbl)}</td><td>${o.avail}${o.out?` <span class="wsub">(+${o.out} leave/sick)</span>`:''}</td><td>${o.dep}</td><td>${o.spare}</td><td>${p===null?'—':`<span class="badge ${wlTone(p)}">${p} %</span>`}</td>
+  const row=(lbl,o,strong)=>{ const p=wlPct(o.dep+o.int,o.avail), np=wlPct(o.need,o.avail), hire=o.hire!==undefined?o.hire:Math.max(0, o.need-o.avail);
+    return `<tr${strong?' class="wl-tot"':''}><td>${strong?'<b>'+esc(lbl)+'</b>':esc(lbl)}</td><td>${o.avail}${o.out?` <span class="wsub">(+${o.out} leave/sick)</span>`:''}</td><td>${o.dep}</td><td>${o.int}</td><td>${o.spare}</td><td>${p===null?'—':`<span class="badge ${wlTone(p)}">${p} %</span>`}</td>
       <td>${o.need?`${o.need} <span class="wsub">(${np} %)</span>`:'<span class="wsub">not set</span>'}</td><td>${hire?`<span class="badge danger">hire ${hire}</span>`:o.short?`<span class="badge warn">short ${o.short} on site</span>`:o.need?'<span class="badge ok">covered</span>':'—'}</td></tr>`; };
   const shortL=projs.filter(x=>x.need && x.short).sort((a,b)=>b.short-a.short);
   return `<div class="panel wl-box"><div class="section-head"><h3>${ic('chart')} Present workload <span class="wsub">${esc(isoToDmy(localToday()))}</span></h3></div>
-    <div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>Division</th><th>Available</th><th>On projects</th><th>Spare</th><th>Workload</th><th>Needed</th><th>Hiring</th></tr></thead><tbody>
+    <div class="ptw-tbl-wrap"><table class="ptw-tbl"><thead><tr><th>Division</th><th>Available</th><th>On projects</th><th>Workshop / yard</th><th>Spare</th><th>Workload</th><th>Needed</th><th>Hiring</th></tr></thead><tbody>
       ${WL_DIVS.filter(k=>by[k].avail||by[k].out||by[k].need).map(k=>row(divLabel(k), by[k])).join('')}${row('All site divisions', tot, true)}</tbody></table></div>
     <p class="wsub" style="margin:6px 0 0;"><b>Vehicles:</b> ${V.on} of ${V.fit} fit vehicles on projects${V.pct!==null?` — <span class="badge ${wlTone(V.pct)}">${V.pct} %</span>`:''}.
-      Workload = people on projects (incl. standby and travel for work) ÷ people available (leave / sick left out). Own staff + temporary / hired workers; office staff and sub-contractors not counted. New people count from their joining date.</p>
+      Workload = people at work (on projects incl. standby and travel for work + workshop / yard) ÷ people available (leave / sick left out). Spare = camp with no work or not assigned. Own staff + temporary / hired workers; office staff and sub-contractors not counted. New people count from their joining date.</p>
     ${shortL.length?`<div class="subhead">Projects short of people</div>${shortL.map(x=>`<div class="ind-mrow"><span><strong>${esc(x.s.siteName||'Project')}</strong> <span class="wsub">${esc(divLabel(x.s.division||'Civil'))} · needs ${x.need} · on site ${x.on}</span></span><span class="badge warn">short ${x.short}</span></div>`).join('')}`:''}
     <p class="wsub" style="margin:6px 0 0;">Set "Manpower needed" in each project's Team tab to see shortages and hiring needs.</p></div>`; }
 function wlRender(){ const el=document.getElementById('wlSite'); if(!el || !auth.currentUser) return; const sec=el.closest('main'); if(sec && sec.hidden) return; el.innerHTML=wlBoxHtml(); }
 /* ---- monthly average (Monthly Report) ---- */
 function wlMonth(ym){ const L=plCfg().locks[ym]; if(L && L.wl) return L.wl; const t=localToday(), first=ym+'-01', lastDay=compAddMonths(first,1)?dateAddDays(compAddMonths(first,1),-1):ym+'-31', end=lastDay<t?lastDay:t, out={};
   for(const k of WL_DIVS) out[k]={dep:0, avail:0}; if(first>t) return out; const ws=workers.filter(wlInPool);
-  for(let d=first, g=0; d<=end && g<32; d=dateAddDays(d,1), g++) for(const w of ws){ const st=wlDayOf(w, d); if(!st || st==='out') continue; const o=out[workerDivKey(w)]; o.avail++; if(st==='dep') o.dep++; }
+  for(let d=first, g=0; d<=end && g<32; d=dateAddDays(d,1), g++) for(const w of ws){ const st=wlDayOf(w, d); if(!st || st==='out') continue; const o=out[workerDivKey(w)]; o.avail++; if(st==='dep' || st==='int') o.dep++; }
   return out; }
 function renderCcWl(){ const el=document.getElementById('ccWl'); if(!el || !auth.currentUser) return; const key=reportPeriodKey(), months=key.length===4?Array.from({length:12},(_,i)=>`${key}-${String(i+1).padStart(2,'0')}`).filter(ym=>ym<=localToday().slice(0,7)):[key];
   const sum={}; for(const k of WL_DIVS) sum[k]={dep:0, avail:0}; for(const ym of months){ const M=wlMonth(ym); for(const k of WL_DIVS){ sum[k].dep+=(M[k]||{}).dep||0; sum[k].avail+=(M[k]||{}).avail||0; } }
   const divs=WL_DIVS.filter(k=>(reportDivision==='all' || reportDivision===k) && sum[k].avail), all=divs.reduce((o,k)=>({dep:o.dep+sum[k].dep, avail:o.avail+sum[k].avail}),{dep:0, avail:0});
   if(!divs.length){ el.innerHTML=''; return; }
-  el.innerHTML=`<div class="cc-title">Workload — manpower <small>average ${key.length===4?'for the year':'for the month'} · people on projects ÷ available</small></div>
+  el.innerHTML=`<div class="cc-title">Workload — manpower <small>average ${key.length===4?'for the year':'for the month'} · people at work (projects + workshop / yard) ÷ available</small></div>
     <div class="wl-cc">${divs.map(k=>{ const p=wlPct(sum[k].dep,sum[k].avail); return `<div><span>${esc(divLabel(k))}</span><b class="${wlTone(p)}">${p} %</b></div>`; }).join('')}${divs.length>1?`<div><span>All site divisions</span><b class="${wlTone(wlPct(all.dep,all.avail))}">${wlPct(all.dep,all.avail)} %</b></div>`:''}</div>`; }
 /* ---- manpower needed per project (Team tab) ---- */
 function wlNeedHtml(s){ if(!canEdit() && !s.mhNeed) return ''; const on=wlOnSite(s), need=Number(s.mhNeed)||0;
