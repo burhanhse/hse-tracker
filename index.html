@@ -3047,7 +3047,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b114';
+const APP_BUILD='b115';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10704,6 +10704,40 @@ function tricLocsRender(){ const el=document.getElementById('tricLocs'); if(!el 
   el.innerHTML=tricLocsHtml(); renderTricPanel(); }
 document.addEventListener('toggle', e=>{ const d=e.target; if(!(d instanceof HTMLElement) || !d.classList.contains('tric-loc')) return; const pid=d.dataset.locPid; if(d.open) locTbtOpen.add(pid); else locTbtOpen.delete(pid); }, true);
 
+/* =============================== Batch 115: ONE Civil link (all Civil projects + yard / workshop / office) ===============================
+   ppeLinks doc with projectId 'div:Civil', kind 'div'. The worker chooses the place in the form: data.site = project id or 'loc:<id>'
+   (data.projectId stays 'div:Civil' so the existing Firestore rules accept it). Places = live Civil projects (incl. completed ones
+   with an open after-completion visit) + company locations (not camps); each place lists its people (assigned / based there today).
+   New Civil projects appear on the link by themselves (re-synced with the project list). Competency tests and training / meeting
+   signing of all Civil projects are merged in. Creating it switches off the old Civil project links and the location links. */
+const CIV_PID='div:Civil';
+function isDivPid(pid){ return String(pid||'').startsWith('div:'); }
+function civProjects(){ return activeSites().filter(s=>(s.division||'Civil')==='Civil' && projectLive(s)).sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))); }
+function civLocs(){ return typeof plLocs==='function' ? plLocs().filter(l=>l.type!=='camp') : []; }
+async function civLinkPayload(token){
+  const projs=civProjects(), pids=new Set(projs.map(s=>s.id)), locs=civLocs();
+  const places=[...projs.map(s=>({id:s.id, n:s.siteName||'Project', t:'p', c:s.clientName||'', ws:activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===s.id).map(w=>w.id)})),
+    ...locs.map(l=>({id:'loc:'+l.id, n:l.name, t:'l', c:'', ws:locPeopleToday(l.id).map(w=>w.id)}))];
+  const inPlace=new Set(places.flatMap(p=>p.ws));
+  const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && (workerDivKey(w)==='Civil' || pids.has(w.projectId) || inPlace.has(w.id))), list=[];
+  for(const w of ws){ const dg=String(w.civilId||'').replace(/\D/g,''); let h='';
+    if(dg.length>=4){ const k=token+':'+dg.slice(-4); h=ppeHashCache.get(k); if(!h){ h=await ppeSha(k); ppeHashCache.set(k,h); } }
+    list.push({id:w.id, name:w.fullName||'—', h, dv:ppeWorkerDiv(w), ds:String(w.designation||'').slice(0,40)}); }
+  list.sort((a,b)=>a.name.localeCompare(b.name));
+  const dc=docControl('ppeIssue'), dt=docControl('tric'), ids=new Set(list.map(w=>w.id)), all=ppeBoard(), board={}; for(const k of Object.keys(all)) if(ids.has(k)) board[k]=all[k];
+  const placeIds=new Set(places.map(p=>p.id)), prevLocs=tricAll().filter(x=>placeIds.has(tricSiteId(x))).map(x=>(x.data||{}).loc).filter(Boolean);
+  const comp={}, train={}; for(const s of projs){ Object.assign(comp, compLinkPayload(s.id)); if(typeof trsLinkPayload==='function') Object.assign(train, trsLinkPayload(s.id)); }
+  return {projectId:CIV_PID, kind:'div', projectName:'Civil Division', division:'Civil', clientName:'', places, clients:[...new Set(projs.map(s=>s.clientName).filter(Boolean))].slice(0,60), vehs:[], tbtJobs:LOC_TBT_JOBS,
+    incTypes:INC_SITE_TYPES.Civil||[], comp, train, workers:list, items:ppeLinkItems(), board, locs:[...new Set([...projs.map(s=>s.location), ...prevLocs].filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,150),
+    docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}}; }
+async function civLinkCreate(){ if(!canEdit()) return; if(ppeLinkOf(CIV_PID)){ toast('The Civil link already exists'); return; }
+  await ppeLinkCreate(CIV_PID); if(!ppeLinks.some(l=>l.projectId===CIV_PID && l.active) && !ppeLinkOf(CIV_PID)){ await new Promise(r=>setTimeout(r,400)); }
+  // switch off the old Civil project links and the company-location links
+  const civIds=new Set(activeSites().filter(s=>(s.division||'Civil')==='Civil').map(s=>s.id)); let n=0;
+  for(const l of ppeLinks.filter(x=>x.active && x.projectId && x.projectId!==CIV_PID && (civIds.has(x.projectId) || isLocPid(x.projectId)))){ try{ await db.collection('ppeLinks').doc(l.id).update({active:false, switchedOffAt:new Date().toISOString(), replacedBy:CIV_PID}); n++; }catch(e){ console.warn(e); } }
+  toast(`Civil link created${n?` — ${n} old Civil / location link${n===1?'':'s'} switched off`:''}. Share the new QR with all Civil crews.`); renderPpe(); }
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-pr-civ]'); if(!b || !canEdit()) return; e.stopPropagation(); if(!compArm(b,'tap again — create the Civil link')) return; b.disabled=true; try{ await civLinkCreate(); } finally{ b.disabled=false; } }, true);
+
 /* ================= Batch 49: PPE — approved PPE list (standards), issue to crew, PPE dashboard ================= */
 // Suggested starting list — HSE edits it. International standards are the usual EN / ISO / ANSI references; local / client and colours are company choices.
 const PPE_SUGGESTED=[
@@ -11107,6 +11141,7 @@ function ppeBoard(){
 }
 async function ppeLinkPayload(token, pid){
   if(isLocPid(pid)) return locLinkPayload(token, pid);   // Batch 114: company-location link
+  if(pid==='div:Civil') return civLinkPayload(token);   // Batch 115: one Civil link
   const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===pid), list=[];
   for(const w of ws){ const dg=String(w.civilId||'').replace(/\D/g,''); let h='';
     if(dg.length>=4){ const k=token+':'+dg.slice(-4); h=ppeHashCache.get(k); if(!h){ h=await ppeSha(k); ppeHashCache.set(k,h); } }
@@ -11178,7 +11213,7 @@ async function ppeMdDecide(id, ok){
 
 /* ---- delivery: the worker's signed receipt (or a paper signature) → PPE issued records ---- */
 // Batch 81: the project of a request = the project of the link it came from (falls back to the worker's project)
-function ppeReqProject(q, w){ const d=(q&&q.data)||{}; return d.projectId || ((ppeLinks.find(l=>l.id===(q&&q.token))||{}).projectId) || (w&&w.projectId) || ''; }
+function ppeReqProject(q, w){ const d=(q&&q.data)||{}; if(isDivPid(d.projectId)) return (w&&w.projectId)||''; return d.projectId || ((ppeLinks.find(l=>l.id===(q&&q.token))||{}).projectId) || (w&&w.projectId) || ''; }
 function ppeIssuedNote(q, li, signed){ const d=q.data||{}; return `PPE request (${d.reason||'—'})${li?' · requested by '+(d.name||'—'):''} · approved by MD · ${signed?'received and signed by the worker on the PPE link':'delivered — paper signature on file'}`; }
 // lines: [{q, li, items}] for this worker; iss: crew-issue records the worker confirmed
 async function ppeAddIssued(w, lines, iss, date, sigId){
@@ -11372,7 +11407,8 @@ function incRepOpen(id){
   const r=incReps.find(x=>x.id===id); if(!r) return; const d=r.data||{}, rw=workers.find(w=>w.id===r.workerId);
   incRepGoto(); openAddIncForm(); incFromReport=id;
   const set=(k,v)=>{ const el=document.querySelector(`#addIncForm [data-ifield="${k}"]`); if(el && v!==undefined && v!==null) el.value=v; };
-  set('projectId', d.projectId||''); set('date', d.date||localToday()); set('time', d.time||''); set('location', d.loc||''); set('type', INC_SITE_MAP[d.type]||'Near miss');
+  const ip=d.site||d.projectId||'', isP=ip && !isLocPid(ip) && !isDivPid(ip);   // Batch 115: the Civil link sends the place in data.site
+  set('projectId', isP?ip:''); set('date', d.date||localToday()); set('time', d.time||''); set('location', isLocPid(ip)?[projectName(ip), d.loc].filter(Boolean).join(' — '):(d.loc||'')); set('type', INC_SITE_MAP[d.type]||'Near miss');
   if(!d.injN) set('injuryClass', 'Not applicable (no injury)');
   set('reportedBy', rw?rw.fullName:(d.name||''));
   set('description', [`Reported on the project link (${d.shift||''} shift) by ${rw?rw.fullName:(d.name||'—')}, mobile ${d.mobile||'—'}.`, d.injN?`Injured person: ${d.injN}.`:'No one injured.', d.veh?`Vehicle: ${d.veh}.`:'', d.desc||''].filter(Boolean).join(' '));
@@ -11463,15 +11499,18 @@ function ppeReqPanelHtml(){
   const conf=[]; for(const w of activeWorkers()) for(const x of (w.ppeIssued||[])) if(x.needConfirm && !x.receivedAt) conf.push({w, x});
   conf.sort((a,b)=>String(b.x.date||'').localeCompare(String(a.x.date||'')));
   if(!ed && !md && !nNew.length && !nMd.length) return '';
-  const lrow=(p)=>{ const l=ppeLinkOf(p.id), off=ppeLinks.find(x=>!x.active && x.projectId===p.id), crew=p.isLoc?locPeopleToday(p.loc.id).length:activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===p.id).length;
-    return `<div class="site-link-row"><div><strong>${esc(p.siteName||'Project')}</strong> ${l?'<span class="badge ok">Link active</span>':'<span class="badge muted">No link</span>'}<div class="wsub">${crew} worker${crew===1?'':'s'} ${p.isLoc?'here today (everyone can use the link)':'assigned to this project'}${l?` · ${(l.items||[]).length} PPE items`:''}${!crew?' — assign the crew in Workforce first':''}</div></div>
+  const lrow=(p)=>{ const l=ppeLinkOf(p.id), off=ppeLinks.find(x=>!x.active && x.projectId===p.id), crew=p.isCiv?civProjects().reduce((n,s)=>n+workersAtSite(s.id).length,0):p.isLoc?locPeopleToday(p.loc.id).length:activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===p.id).length;
+    return `<div class="site-link-row"><div><strong>${esc(p.siteName||'Project')}</strong> ${l?'<span class="badge ok">Link active</span>':'<span class="badge muted">No link</span>'}<div class="wsub">${crew} worker${crew===1?'':'s'} ${p.isCiv?`on ${civProjects().length} Civil project${civProjects().length===1?'':'s'} + ${civLocs().length} yard / workshop / office`:p.isLoc?'here today (everyone can use the link)':'assigned to this project'}${l?` · ${(l.items||[]).length} PPE items`:''}${!crew?' — assign the crew in Workforce first':''}</div></div>
       ${ed?`<div class="site-link-acts">${l?`<button type="button" class="btn btn-sm" data-pr-copy="${esc(l.id)}">${ic('clipboard')} Copy link</button><button type="button" class="btn btn-sm" data-pr-qr="${esc(l.id)}">QR code</button><button type="button" class="btn btn-sm" data-pr-off="${esc(l.id)}" data-armed="0">Switch off</button>`
         :`<button type="button" class="btn btn-sm btn-primary" data-pr-create="${esc(p.id)}">+ Create project link</button>${off?`<button type="button" class="btn btn-sm" data-pr-on="${esc(off.id)}">Switch the old link back on</button>`:''}`}</div>`:''}
       ${l && ed && ppeReqUi.qr===l.id?`<div class="site-qr"><div class="site-qr-img" id="ppeQrBox" data-tok="${esc(l.id)}"></div><div><div class="wsub">QR for the <strong>${esc(p.siteName||'project')}</strong> crew — scan, pick your name, then <strong>Request PPE</strong>, <strong>I received PPE</strong> or <strong>TBT request</strong>.</div><div class="mono site-url">${esc(ppeReqLinkUrl(l.id))}</div><button type="button" class="btn btn-sm" data-pr-qrdl="${esc(l.id)}">${ic('download')} Download QR (PNG)</button></div></div>`:''}</div>`; };
   const oldGen=ppeLinks.filter(l=>l.active && !l.projectId), lps=ppeLinkProjects();
-  const byDiv=PPE_LINK_DIVS.map(dv=>[dv, lps.filter(p=>(p.division||'Civil')===dv)]).filter(([,l])=>l.length);
+  const civL=ppeLinkOf(CIV_PID);   // Batch 115: one Civil link replaces the Civil project links
+  const byDiv=PPE_LINK_DIVS.map(dv=>[dv, lps.filter(p=>(p.division||'Civil')===dv && !(dv==='Civil' && civL))]).filter(([,l])=>l.length);
+  const civRow=`<div class="wsub" style="margin:6px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">Civil division — ONE link</div>${civL?lrow({id:CIV_PID, siteName:'Civil Division — all Civil projects + yard / workshop / office', division:'Civil', isCiv:true}):`<div class="site-link-row"><div><strong>One link for all Civil crews</strong> <span class="badge muted">not created</span><div class="wsub">The crew choose the project / Samail Yard / workshop / office in the form. New Civil projects appear on it by themselves. Creating it switches off the Civil project links and the location links.</div></div>${ed?`<div class="site-link-acts"><button type="button" class="btn btn-sm btn-primary" data-pr-civ="1" data-armed="0">+ Create the Civil link</button></div>`:''}</div>`}`;
   const linkHtml = (ed||ppeLinks.some(l=>l.active)) ? `<div class="subhead" style="margin-top:4px;">Project links (PPE + TBT) — one link per project</div><div class="site-links">${byDiv.length?byDiv.map(([dv,l])=>`<div class="wsub" style="margin:6px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${esc(divLabel?divLabel(dv):dv)} division</div>`+l.map(lrow).join('')).join(''):'<p class="wsub">No active Scaffolding, Civil or Rental project in Project Details.</p>'}
-      ${typeof plLocs==='function'&&plLocs().length?`<div class="wsub" style="margin:10px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">Company locations — TBT + PPE (workshop / yard / office)</div>`+plLocs().map(l=>lrow(locLinkPseudo(l))).join(''):''}
+      ${civRow}
+      ${typeof plLocs==='function'&&plLocs().length&&ppeLinks.some(l=>l.active&&isLocPid(l.projectId))?`<div class="wsub" style="margin:10px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">Company locations — TBT + PPE (workshop / yard / office)</div>`+plLocs().map(l=>lrow(locLinkPseudo(l))).join(''):''}
       ${oldGen.map(l=>`<div class="site-link-row off"><div><strong>Old link for all workers</strong> <span class="badge warn">Still on</span><div class="wsub">Replaced by the project links — switch it off once the crews have the new QR codes.</div></div>${ed?`<div class="site-link-acts"><button type="button" class="btn btn-sm" data-pr-off="${esc(l.id)}" data-armed="0">Switch off</button></div>`:''}</div>`).join('')}</div>` : '';
   const sec=(title, list, mode, empty)=>`<div class="subhead">${title} (${list.length})</div>${list.length?list.map(r=>ppeReqCardHtml(r, mode)).join(''):`<p class="wsub" style="margin:0 0 6px;">${empty}</p>`}`;
   const shownDone=ppeReqUi.done?done:done.slice(0,6);
@@ -11648,7 +11687,7 @@ function tbtTodayHtml(){
 function tbtTodayRender(){ for(const id of ['tbtTodaySite','tbtTodayRep']){ const el=document.getElementById(id); if(!el || !auth.currentUser) continue; const sec=el.closest('main'); if(sec && sec.hidden) continue; el.innerHTML=tbtTodayHtml(); } }
 function tbtSignedAll(x){ const s=x.sigs||{}, a=tbtAtt(x); return a.length>0 && a.every(p=>s[p.w]); }
 function tbtWho(id, fb){ const w=workers.find(x=>x.id===id); return w?(w.fullName||'—'):(fb||'—'); }
-function tbtSite(x){ const d=x.data||{}, pid=x.projectId||d.projectId; if(isLocPid(pid)){ const l=locOfPid(pid); return l?locLinkPseudo(l):null; } return activeSites().find(s=>s.id===pid); }
+function tbtSite(x){ const d=x.data||{}, pid=tricSiteId(x); if(isLocPid(pid)){ const l=locOfPid(pid); return l?locLinkPseudo(l):null; } return activeSites().find(s=>s.id===pid); }
 function tricAlertRender(){
   const el=document.getElementById('tricAlert'); if(!el) return; const list=canEdit()?tricSubs.filter(x=>x.status==='new' && (x.data||{}).job):[];
   if(!list.length){ el.hidden=true; el.innerHTML=''; return; }
@@ -11710,7 +11749,7 @@ function tricDoneCard(x){
       <div class="record-card-actions">${done?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button>`:`<button type="button" class="btn btn-sm btn-ghost" data-tric-del="${esc(x.id)}" data-armed="0" title="Remove this rejected entry for good">${ic('trash')} Delete</button>`}</div></div>
     <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(d.shift||'')} · ${esc(site?site.siteName:'—')} · ${tbtAtt(x).length} people${x.rejectNote?' · '+esc(x.rejectNote):''}</div>${tricJobsHtml(x)}</div>`;
 }
-function tricSiteId(x){ return x.projectId||(x.data||{}).projectId||''; }
+function tricSiteId(x){ const d=x.data||{}; return x.projectId||d.site||d.projectId||''; }   // Batch 115: the Civil link sends the place in data.site
 function tricPendingFor(pid){ return tricSubs.filter(x=>x.status==='new' && (x.data||{}).job && tricSiteId(x)===pid).length; }
 function renderTricPanel(){   // Batch 114: the project drawer box + one box per company location
   const boxes=[document.getElementById('tricBox'), ...document.querySelectorAll('.tric-locbox')].filter(Boolean); for(const b of boxes) renderTricBox(b); }
@@ -15832,6 +15871,7 @@ function complaintCounts(list){
 }
 function projectName(id){
   if(!id) return '';
+  if(String(id).startsWith('div:')) return String(id).slice(4)+' division link';   // Batch 115
   if(String(id).startsWith('loc:')){ const l=typeof plLocById==='function'?plLocById(String(id).slice(4)):null; return l?l.name:'Company location'; }   // Batch 114
   const s=siteEquipmentList.find(x=>x.id===id);
   return s ? (s.siteName||'Unnamed project') : 'Removed project';

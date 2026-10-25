@@ -165,7 +165,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     pdfPendHint:['After the HSE review the final PDF is here.','एचएसई जाँच के बाद अंतिम पीडीएफ यहीं मिलेगी।','بعد مراجعة السلامة يكون الملف النهائي هنا.'],
     st_tbtpend:['TBT — signed, waiting for HSE review','टीबीटी — हस्ताक्षर हो गए, एचएसई जाँच बाकी','تم التوقيع، بانتظار مراجعة السلامة'],
     tbtReq:['TBT request','टीबीटी अनुरोध','طلب اجتماع السلامة'], tbtReqHint:['Send before the work. HSE writes the topic, then everyone signs here.','काम से पहले भेजें। एचएसई विषय लिखेगा, फिर सभी यहाँ हस्ताक्षर करेंगे।','أرسله قبل العمل. يكتب قسم السلامة الموضوع ثم يوقّع الجميع هنا.'],
-    loc:['Location / Well No.','स्थान / वेल नंबर','الموقع / رقم البئر'], locX:['Location','स्थान','الموقع'], jp:['Journey plan number','जर्नी प्लान नंबर','رقم خطة الرحلة'], optional:['optional','वैकल्पिक','اختياري'],
+    loc:['Location / Well No.','स्थान / वेल नंबर','الموقع / رقم البئر'], locX:['Location','स्थान','الموقع'], whereToday:['Where are you working today?','आज आप कहाँ काम कर रहे हैं?','أين تعمل اليوم؟'], jp:['Journey plan number','जर्नी प्लान नंबर','رقم خطة الرحلة'], optional:['optional','वैकल्पिक','اختياري'],
     crew:['People for this TBT','इस टीबीटी के लोग','الأشخاص في هذا الاجتماع'], tbtSend:['Send TBT request','टीबीटी अनुरोध भेजें','إرسال الطلب'],
     tbtSent:['TBT request sent','टीबीटी अनुरोध भेज दिया','تم إرسال الطلب'], tbtSent2:['HSE will review it. Then you get "Sign now" here.','एचएसई जाँच करेगा। फिर यहाँ "अभी हस्ताक्षर करें" आएगा।','سيراجعه قسم السلامة، ثم يظهر «وقّع الآن» هنا.'],
     tbtToSign:['TBT — waiting for your signature','टीबीटी — आपके हस्ताक्षर बाकी','بانتظار توقيعك'], signNow:['Sign now','अभी हस्ताक्षर करें','وقّع الآن'], open:['Open','खोलें','فتح'],
@@ -246,8 +246,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       <label>${tr('name')}<select id="${p}s"></select></label>`; }
   function fillNames(p, exclude, keep){
     const dEl=$('#'+p+'d'), d=dEl?dEl.value:'', s=$('#'+p+'q').value.trim().toLowerCase(), sel=$('#'+p+'s'), cur=keep!==undefined?keep:sel.value;
-    const ws=(link.workers||[]).filter(w=>!exclude.has(w.id) && (!d || (w.dv||'Other')===d) && (!s || w.name.toLowerCase().includes(s))).sort((a,b)=>(b.at?1:0)-(a.at?1:0) || a.name.localeCompare(b.name));   // Batch 114: people at the location today first
-    sel.innerHTML=`<option value="">${esc(T.pick[0])} (${ws.length})</option>`+ws.map(w=>`<option value="${esc(w.id)}">${w.at?'★ ':''}${esc(w.name)}</option>`).join('');
+    const cp=p==='w'?null:curPlace(), here=cp?new Set(cp.ws||[]):null, star=w=>here?here.has(w.id):!!w.at;   // Batch 115: the people of the chosen project / place first
+    const ws=(link.workers||[]).filter(w=>!exclude.has(w.id) && (!d || (w.dv||'Other')===d) && (!s || w.name.toLowerCase().includes(s))).sort((a,b)=>(star(b)?1:0)-(star(a)?1:0) || a.name.localeCompare(b.name));   // Batch 114: people at the location today first
+    sel.innerHTML=`<option value="">${esc(T.pick[0])} (${ws.length})</option>`+ws.map(w=>`<option value="${esc(w.id)}">${star(w)?'★ ':''}${esc(w.name)}</option>`).join('');
     if(ws.some(w=>w.id===cur)) sel.value=cur; else if(ws.length===1) sel.value=ws[0].id; else sel.value='';
   }
   function wirePicker(p, exclude, keep, onSel){
@@ -384,11 +385,18 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   const dsOf=id=>(wById(id)||{}).ds||'';
   // Batch 81: Scaffolding = job buttons + journey plan; Civil = free text work, no journey plan; Rental = free text work + journey plan
   // Batch 114: a company-location link (Samail Yard, Gabha Workshop, Office) — kind 'loc': own job buttons, no client / journey plan
-  const isLoc=()=>link.kind==='loc';
+  // Batch 115: ONE division link (Civil) — link.kind 'div': the worker chooses where he works (project or company location) in the form
+  const isDiv=()=>link.kind==='div';
+  const curPlace=()=>isDiv() && tbtF ? (link.places||[]).find(p=>p.id===tbtF.site)||null : null;
+  const placeOf=id=>(link.places||[]).find(p=>p.id===id)||null;
+  const myPlace=()=>{ const L=link.places||[]; return (L.find(p=>(p.ws||[]).includes(me&&me.id))||L[0]||{}).id||''; };
+  const isLoc=()=>link.kind==='loc' || (isDiv() && !!curPlace() && curPlace().t==='l');
   const isScaf=()=>!isLoc() && (!link.division || link.division==='Scaffolding'), noJp=()=>link.division==='Civil' || isLoc();
   const jpField=(attr,v)=>noJp()?'':`<label>${tr('jp')}<input ${attr}="jp" value="${esc(v)}" maxlength="40" placeholder="${esc(T.optional[0])}"></label>`;
   const jobField=(attr,btn,v)=>isLoc()?locJobField(attr,btn,v):isScaf()?`<div style="font-weight:700; font-size:15px;">${tr('job')}</div><div class="reasons">${TB_JOBS.map(([j,h,a])=>`<button type="button" class="${v===j?'on':''}" ${btn}="${esc(j)}">${esc(j)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>`
     :`<label>${tr('work')}<textarea ${attr}="job" maxlength="120" placeholder="e.g. Block work — ground floor, Building A">${esc(v)}</textarea></label>`;
+  function placeSelect(attr, v){ const L=link.places||[], P=L.filter(p=>p.t==='p'), Lc=L.filter(p=>p.t==='l');
+    return `<label style="font-weight:700;">📍 ${tr('whereToday')}<select ${attr}="site" class="place-sel"><option value="">— choose —</option>${P.length?`<optgroup label="Projects">${P.map(p=>`<option value="${esc(p.id)}" ${p.id===v?'selected':''}>${esc(p.n)}</option>`).join('')}</optgroup>`:''}${Lc.length?`<optgroup label="Yard / workshop / office">${Lc.map(p=>`<option value="${esc(p.id)}" ${p.id===v?'selected':''}>${esc(p.n)}</option>`).join('')}</optgroup>`:''}</select></label>`; }
   function locJobField(attr,btn,v){ const L=link.tbtJobs||[], pick=L.includes(v)?v:(v?'Other work':'');
     return `<div style="font-weight:700; font-size:15px;">${tr('work')}</div><div class="reasons">${L.map(j=>`<button type="button" class="${pick===j?'on':''}" ${btn}="${esc(j)}">${esc(j)}</button>`).join('')}</div>
       ${pick==='Other work'||!L.length?`<label>${tr('work')}<textarea ${attr}="jobx" maxlength="120" placeholder="e.g. Cleaning the yard store">${esc(L.includes(v)?'':v)}</textarea></label>`:''}`; }
@@ -402,17 +410,19 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   function draftClear(){ try{ localStorage.removeItem(draftKey()); }catch(e){} }
   function sentList(){ try{ return JSON.parse(localStorage.getItem('tbtSent_'+token)||'[]'); }catch(e){ return []; } }
   function sentAdd(x){ try{ const l=sentList().filter(y=>Date.now()-y.at<36*3600e3 && y.id!==x.id); l.push(x); localStorage.setItem('tbtSent_'+token, JSON.stringify(l.slice(-30))); }catch(e){} }
-  function tbtSameSent(d){ const fp=[me.id, d.date, tnorm(d.shift), tnorm(d.job), tnorm(d.loc)].join('|');
+  function tbtSameSent(d){ const fp=[me.id, d.date, tnorm(d.shift), tnorm(d.job), tnorm(d.loc), d.site||''].join('|');
     const a=sentList().find(y=>y.fp===fp && y.id!==(tbtF&&tbtF.sid)); if(a) return a;
     const t=tnorm(`TBT · ${d.job} · ${d.loc}`), b=((link.board||{})[me.id]||[]).find(x=>x.k==='tbt' && x.d===d.date && tnorm(x.t)===t && x.id!==(tbtF&&tbtF.sid)); return b?{id:b.id, time:'', t:b.t}:null; }
   function tbtNew(){ try{ const d=JSON.parse(localStorage.getItem(draftKey())||'null'); if(d && d.sid && d.date===today()){ tbtF={...d, sending:false}; return; } }catch(e){}
-    const cl=link.clients||[]; tbtF={sid:newSid(), veh:'', date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(link.clientName)?link.clientName:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
+    const cl=link.clients||[], st=isDiv()?myPlace():'', pc=st?(placeOf(st)||{}).c||'':link.clientName;
+    tbtF={sid:newSid(), site:st, veh:'', date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(pc)?pc:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
   const tq=k=>app.querySelector(`[data-b="${k}"]`);
-  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother','veh']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(isLoc()){ const jx=tq('jobx'); if(jx) tbtF.job=jx.value.trim()?jx.value:(tbtF.job==='Other work'?'Other work':tbtF.job); return; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
+  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother','veh','site']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(isLoc()){ const jx=tq('jobx'); if(jx) tbtF.job=jx.value.trim()?jx.value:(tbtF.job==='Other work'?'Other work':tbtF.job); return; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
   function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
   function renderTbtReq(){
     const t=tbtF, locs=link.locs||[];
     app.innerHTML=`<div class="card"><h2>${tr('tbtReq')}</h2><p class="note">${tr('tbtReqHint')}</p>
+        ${isDiv()?placeSelect('data-b', t.site):''}
         <div class="row2"><label>${tr('date')}<input type="date" data-b="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-b="time" value="${esc(t.time)}"></label></div>
         <label>${tr(isScaf()?'loc':'locX')}<input data-b="loc" list="tbLocs" value="${esc(t.loc)}" maxlength="80" placeholder="${isScaf()?'e.g. NM-12':'e.g. Building A, ground floor'}" autocomplete="off"><datalist id="tbLocs">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
         <div style="font-weight:700; font-size:15px;">${tr('shift')}</div>
@@ -431,6 +441,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     app.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{ tbtRead(); t.job=b.dataset.job; keepScroll(renderTbtReq); });
     app.querySelectorAll('[data-shift]').forEach(b=>b.onclick=()=>{ tbtRead(); t.shift=b.dataset.shift; keepScroll(renderTbtReq); });
     const cs=tq('client'); if(cs) cs.onchange=()=>$('#cOtherBox').classList.toggle('hidden', cs.value!=='__other');
+    const ss=tq('site'); if(ss) ss.onchange=()=>{ const old=placeOf(t.site); tbtRead(); const np=placeOf(t.site); if(np && np.c && (!t.client || (old && t.client===old.c))) t.client=np.c; if(np && np.t==='l') t.job=''; keepScroll(renderTbtReq); };   // Batch 115
     app.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{ tbtRead(); t.att.splice(+b.dataset.tax,1); keepScroll(renderTbtReq); });
     if(t.addOpen){ wirePicker('b', new Set(t.att.map(a=>a.w)), '');
       $('#bAdd').onclick=()=>{ const w=wById($('#bs').value); if(!w){ const e=$('#berr'); e.textContent='Choose the name.'; e.classList.remove('hidden'); return; } tbtRead(); if(t.att.length<40) t.att.push({w:w.id, n:w.name, ds:w.ds||''}); keepScroll(renderTbtReq); };
@@ -444,11 +455,12 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   async function sendTbt(){
     tbtRead(); const t=tbtF;
     if(!t.date) return err('Choose the date.'); if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job: Rig up, Rig down, Modification or Inspection.':'Write the work you will do.');
-    if(isLoc()){ t.client='Internal — '+(link.projectName||'company location'); if(!String(t.job||'').trim() || t.job==='Other work') return err('Choose the work, or write it.'); }
+    if(isDiv() && !placeOf(t.site)) return err('Choose where you are working today.');
+    if(isLoc()){ t.client='Internal — '+((curPlace()||{}).n||link.projectName||'company location'); if(!String(t.job||'').trim() || t.job==='Other work') return err('Choose the work, or write it.'); }
     if(!t.shift) return err('Choose Day or Night job.'); if(!t.client) return err('Choose the client.'); if(t.client==='__other' && !String(t.cother||'').trim()) return err('Write the client name.');
     if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.');
     if(nonLatin(t.loc, t.job, t.jp, t.cother, t.veh)) return err(T.engOnly[0]+' / '+T.engOnly[1]);
-    const data={name:me.name, projectId:link.projectId||'', date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', job:String(t.job).trim().slice(0,120), att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
+    const data={name:me.name, projectId:link.projectId||'', ...(isDiv()?{site:t.site, projectName:(placeOf(t.site)||{}).n||''}:{}), date:t.date, time:t.time, shift:t.shift, client:(t.client==='__other'?String(t.cother||'').trim():t.client).slice(0,60), loc:t.loc.trim().slice(0,80), jp:noJp()?'':t.jp.trim().slice(0,40), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', job:String(t.job).trim().slice(0,120), att:t.att.map(a=>({w:a.w, n:a.n, ds:a.ds||dsOf(a.w)}))};
     if(!t.forceAgain){ const same=tbtSameSent(data); if(same){ t.dupWarn=same; keepScroll(renderTbtReq); return; } }
     if(t.sending) return; t.sending=true; if(!t.sid) t.sid=newSid(); draftSave();
     const b=$('#bSend'); if(b){ b.disabled=true; b.textContent='Sending…'; }
@@ -693,11 +705,11 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   let incF=null;
   const needVeh=()=>!isLoc() && (link.division==='Scaffolding' || link.division==='Rental' || !link.division);
   const vehField=(attr,v,req)=>needVeh()?`<label>${tr('veh')}${req?'':` <span class="note">(${esc(T.optional[0])})</span>`}<input ${attr}="veh" list="tbVehs" value="${esc(v||'')}" maxlength="20" autocomplete="off" placeholder="e.g. 12345 AB"><datalist id="tbVehs">${(link.vehs||[]).map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>`:'';
-  function incNew(){ const h=new Date().getHours(); incF={date:today(), time:nowHM(), shift:(h>=6&&h<18)?'Day':'Night', loc:'', type:'', inj:'', injO:'', mobile:'', veh:'', desc:''}; }
+  function incNew(){ const h=new Date().getHours(); incF={site:isDiv()?myPlace():'', date:today(), time:nowHM(), shift:(h>=6&&h<18)?'Day':'Night', loc:'', type:'', inj:'', injO:'', mobile:'', veh:'', desc:''}; }
   function renderInc(){
     const t=incF, types=link.incTypes||['Injury','Near miss','Equipment / property damage','Vehicle incident','Spill / environment'], ws=(link.workers||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));
-    const read=()=>{ for(const k of ['date','time','loc','injO','mobile','veh','desc']){ const el=app.querySelector(`[data-i="${k}"]`); if(el) t[k]=el.value; } const s=app.querySelector('[data-i="inj"]'); if(s) t.inj=s.value; };
-    app.innerHTML=`<div class="card inc-card"><h2>🚨 ${tr('incRep')}</h2><p class="note">${tr('incHint')}</p>
+    const read=()=>{ for(const k of ['date','time','loc','injO','mobile','veh','desc','site']){ const el=app.querySelector(`[data-i="${k}"]`); if(el) t[k]=el.value; } const s=app.querySelector('[data-i="inj"]'); if(s) t.inj=s.value; };
+    app.innerHTML=`<div class="card inc-card"><h2>🚨 ${tr('incRep')}</h2><p class="note">${tr('incHint')}</p>${isDiv()?placeSelect('data-i', t.site):''}
         <div class="row2"><label>${tr('date')}<input type="date" data-i="date" value="${esc(t.date)}"></label><label>${tr('time')}<input type="time" data-i="time" value="${esc(t.time)}"></label></div>
         <div class="reasons">${TB_SHIFT.map(([v,h,a])=>`<button type="button" class="${t.shift===v?'on':''}" data-ishift="${esc(v)}">${v==='Day'?'☀ ':'☾ '}${esc(v)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>
         <label>${tr(isScaf()?'loc':'locX')}<input data-i="loc" list="incLocs" value="${esc(t.loc)}" maxlength="80" autocomplete="off"><datalist id="incLocs">${(link.locs||[]).map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
@@ -716,11 +728,12 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const sel=app.querySelector('[data-i="inj"]'); sel.onchange=()=>$('#injOBox').classList.toggle('hidden', sel.value!=='__other');
     $('#back').onclick=()=>{ read(); view='home'; render(); window.scrollTo(0,0); };
     $('#iSend').onclick=async()=>{ read();
+      if(isDiv() && !placeOf(t.site)) return err('Choose where it happened.');
       if(!t.loc.trim()) return err('Write the location.'); if(!t.type) return err('Choose the type of incident.');
       if(t.inj==='__other' && !t.injO.trim()) return err('Write the injured person\'s name.');
       if(String(t.mobile).replace(/\D/g,'').length<7) return err('Write a mobile number we can call.');
       const iw=t.inj && t.inj!=='__other' ? wById(t.inj) : null;
-      const data={name:me.name, projectId:link.projectId||'', projectName:link.projectName||'', date:t.date, time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), type:t.type,
+      const data={name:me.name, projectId:link.projectId||'', projectName:(isDiv()?(placeOf(t.site)||{}).n:link.projectName)||'', ...(isDiv()?{site:t.site}:{}), date:t.date, time:t.time, shift:t.shift, loc:t.loc.trim().slice(0,80), type:t.type,
         injW:iw?iw.id:'', injN:iw?iw.name:(t.inj==='__other'?t.injO.trim().slice(0,60):''), mobile:String(t.mobile).trim().slice(0,20), veh:needVeh()?String(t.veh||'').trim().slice(0,20):'', desc:String(t.desc||'').trim().slice(0,200)};
       const b=$('#iSend'); b.disabled=true;
       try{ await db.collection('incidentReports').add({token, workerId:me.id, status:'new', data, submittedAt:firebase.firestore.FieldValue.serverTimestamp()});
