@@ -1196,6 +1196,16 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .ms-done .ms-main,.ms-late .ms-main{opacity:.78;} .ms-over .ms-d,.ms-missed .ms-d,.ms-drop .ms-d,.ms-carried .ms-d,.ms-never .ms-d{color:var(--danger); font-weight:700;} .ms-today .ms-d,.ms-row.ms-month .ms-d{color:var(--warn); font-weight:700;}
 .ms-carry{border-left:3px solid var(--danger); padding-left:8px;} .ms-doneform{display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin-top:6px;} .ms-doneform label{font-size:12px;} .ms-grow{flex:1; min-width:180px;} .ms-form{margin-top:14px;}
 @media (max-width:640px){ .ms-row{flex-wrap:wrap;} .ms-a{width:100%; justify-content:flex-start;} }
+.ms-g-wrap{box-shadow:none; max-height:70vh;} .ms-grid td,.ms-grid th{vertical-align:middle;} .ms-grid{border-collapse:separate; border-spacing:0; width:max-content; min-width:100%; font-size:12px;}
+.ms-grid th,.ms-grid td{border-bottom:1px solid var(--line); padding:0; text-align:center; height:30px;} .ms-grid thead th{position:sticky; top:0; z-index:2; background:var(--surface-2);}
+.ms-g-lbl{position:sticky; left:0; z-index:1; background:var(--surface); text-align:left !important; padding:4px 8px !important; min-width:170px; max-width:210px; border-right:1px solid var(--line); font-weight:600;} .ms-grid thead .ms-g-lbl{z-index:3; background:var(--surface-2);}
+.ms-g-t{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:194px;} .ms-g-grp th{background:var(--surface-2) !important; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-muted);}
+.ms-g-h{width:23px; min-width:23px; font-weight:600; cursor:pointer;} .ms-g-w{font-size:9.5px; color:var(--ink-muted); font-weight:500;} .ms-g-c{width:23px; min-width:23px; border-left:1px solid var(--line);}
+.ms-g-off{background:var(--muted-bg) !important;} .ms-g-now{background:var(--warn-bg) !important;} thead .ms-g-now{color:var(--warn);} .ms-g-sum{padding:0 8px !important; white-space:nowrap; border-left:1px solid var(--line);}
+.ms-g-m{display:inline-flex; width:18px; height:18px; border-radius:50%; align-items:center; justify-content:center; font-weight:800; font-style:normal; font-size:12px; line-height:1;} .ms-g-m[role=button]{cursor:pointer;}
+.ms-g-ok{background:var(--ok-bg); color:var(--ok);} .ms-g-late{background:var(--warn-bg); color:var(--warn);} .ms-g-bad{background:var(--danger-bg); color:var(--danger);} .ms-g-today{background:var(--warn-bg); color:var(--warn);} .ms-g-plan{color:var(--accent); border:1.5px solid var(--accent);}
+.ms-g-span{text-align:left !important; padding:0 8px !important;} .ms-g-span span{display:inline-block; border-radius:10px; padding:2px 10px; font-weight:600; font-size:11.5px;} .ms-g-span span[role=button]{cursor:pointer;}
+.ms-g-leg{display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:8px; font-size:12px;} .ms-g-leg span{display:inline-flex; gap:5px; align-items:center;} .ms-g-sw{display:inline-block; width:16px; height:14px; border:1px solid var(--line);}
 </style>
 </head>
 <body class="auth-open">
@@ -3063,7 +3073,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b119';
+const APP_BUILD='b119b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -9917,6 +9927,32 @@ function msFormHtml(){ const f=msUi.form||{}, t=f.id?(msData().tasks[f.id]||{}):
 function msGroupHtml(key, title, rows, rowHtml, sub){ if(!rows.length) return ''; const open=msUi.more[key], lim=8, shown=open?rows:rows.slice(0,lim), dn=rows.filter(x=>['done','late','notfit'].includes(x.state)).length;
   return `<div class="panel ms-panel"><div class="section-head"><h3>${title} <span class="wsub">${dn} of ${rows.length} done</span></h3></div>${sub?`<p class="wsub" style="margin:-4px 0 6px;">${sub}</p>`:''}
     ${shown.map(rowHtml).join('')}${rows.length>lim?`<button type="button" class="att-link" data-ms-more="${key}">${open?'Show less':`Show all ${rows.length}`}</button>`:''}</div>`; }
+/* Batch 119b: month grid — one row per task / item, one column per date (Fri grey, today highlighted) */
+const MS_MARK={done:['ms-g-ok','✓'], late:['ms-g-late','✓'], notfit:['ms-g-bad','!'], drop:['ms-g-bad','✗'], missed:['ms-g-bad','✗'], over:['ms-g-bad','✗'], today:['ms-g-today','●'], open:['ms-g-plan','○']};
+function msGridRows(ym){ const own=msOwnRows(ym), rows=[], done=x=>['done','late','notfit'].includes(x.state);
+  const byT=new Map(); for(const x of own){ if(!byT.has(x.t.id)) byT.set(x.t.id, []); byT.get(x.t.id).push(x); }
+  for(const L of byT.values()){ const t=L[0].t; rows.push({g:'own', label:t.title||t.what||'Task', sub:[t.what&&t.title?t.what:'', t.where?msWhereLabel(t.where):'', t.who||''].filter(Boolean).join(' · '), rep:t.rep, cells:Object.fromEntries(L.map(x=>[x.d, {state:x.state, act:`data-ms-gown="${esc(x.key)}"`}])), dn:L.filter(done).length, n:L.length}); }
+  rows.sort((a,b)=>Object.keys(a.cells).sort()[0].localeCompare(Object.keys(b.cells).sort()[0]) || a.label.localeCompare(b.label));
+  for(const x of msCarried(ym)) rows.push({g:'car', label:x.t.title||x.t.what||'Task', sub:[x.t.where?msWhereLabel(x.t.where):'', x.t.who||''].filter(Boolean).join(' · '), span:`Not done on ${isoToDmy(x.d)} — carried over`, spanCls:'ms-g-bad', act:`data-ms-gown="${esc(x.key)}"`, dn:0, n:1});
+  for(const x of msAssuranceRows(ym)) rows.push({g:'as', label:x.it.activity, sub:x.it.owner||'', span:x.state==='done'?'✓ done this month':x.state==='missed'?'✗ not done in the month':'any day this month', spanCls:x.state==='done'?'ms-g-ok':x.state==='missed'?'ms-g-bad':'ms-g-today', dn:done(x)?1:0, n:1});
+  for(const x of msInspRows(ym)){ const it=x.S.it, inM=x.d && x.d.slice(0,7)===ym; rows.push({g:'in', label:`${it.kind==='veh'?'Vehicle':it.group} — ${it.label}`, sub:it.where||'', cells:inM?{[x.d]:{state:x.state, act:['done','notfit'].includes(x.state)?'':`data-insp-new="${esc(x.ref)}"`}}:{}, span:inM?'':x.state==='never'?'not inspected yet':`overdue since ${isoToDmy(x.d)}`, spanCls:'ms-g-bad', dn:done(x)?1:0, n:1}); }
+  for(const x of msExpiryRows(ym)) rows.push({g:'ex', label:`${x.who} — ${x.what}: ${x.name}`, sub:'expiry', cells:{[x.d]:{state:x.state, act:`data-ms-open="${esc(x.kind+'|'+x.id+'|'+x.tab)}"`}}, dn:done(x)?1:0, n:1});
+  return rows; }
+const MS_GRID_G={own:'My tasks', car:'Carried over', as:'HSE Assurance Plan', in:'Inspections due', ex:'Expiries'};
+function msGridHtml(ym){ const rows=msGridRows(ym), days=msDim(ym), t=localToday(), ed=canEdit(); if(!rows.length) return '';
+  const D=[...Array(days)].map((_,i)=>{ const d=`${ym}-${String(i+1).padStart(2,'0')}`, dow=new Date(d+'T00:00:00Z').getUTCDay(); return {d, n:i+1, w:'SMTWTFS'[dow], off:dow===5, today:d===t}; });
+  const cls=x=>`${x.off?' ms-g-off':''}${x.today?' ms-g-now':''}`;
+  let lastG='', body='';
+  for(const [g, lim] of [['own',99],['car',99],['as',99],['in',12],['ex',12]]){ const R=rows.filter(r=>r.g===g); if(!R.length) continue; const open=msUi.more['g'+g], shown=open?R:R.slice(0,lim);
+    body+=`<tr class="ms-g-grp"><th class="ms-g-lbl" colspan="${days+2}">${esc(MS_GRID_G[g])} (${R.length})${R.length>lim?` <button type="button" class="att-link" data-ms-more="g${g}">${open?'show less':'show all'}</button>`:''}</th></tr>`;
+    for(const r of shown){ body+=`<tr><th class="ms-g-lbl" title="${esc(r.label+(r.sub?' — '+r.sub:''))}"><div class="ms-g-t">${esc(r.label)}${r.rep?` <span class="wsub">${r.rep==='w'?'↻ weekly':'↻ monthly'}</span>`:''}</div>${r.sub?`<div class="wsub ms-g-t">${esc(r.sub)}</div>`:''}</th>`;
+      if(r.span!==undefined && r.span!=='') body+=`<td colspan="${days}" class="ms-g-span"><span class="${r.spanCls}" ${ed&&r.act?r.act+' role="button" tabindex="0"':''}>${esc(r.span)}</span></td>`;
+      else body+=D.map(x=>{ const c=(r.cells||{})[x.d]; if(!c) return `<td class="ms-g-c${cls(x)}"></td>`; const m=MS_MARK[c.state]||MS_MARK.open, can=c.act && (ed || /data-ms-open/.test(c.act));
+        return `<td class="ms-g-c${cls(x)}"><span class="ms-g-m ${m[0]}" title="${esc(isoToDmy(x.d)+' — '+((MS_BADGE[c.state]||MS_BADGE.open)[1]))}" ${can?c.act+' role="button" tabindex="0"':''}>${m[1]}</span></td>`; }).join('');
+      body+=`<td class="ms-g-sum mono">${r.dn}/${r.n}</td></tr>`; } }
+  return `<div class="panel ms-panel"><div class="section-head"><h3>Month grid — ${esc(periodLabel(ym))}</h3></div>
+    <div class="table-wrap ms-g-wrap"><table class="ms-grid"><thead><tr><th class="ms-g-lbl">Task / place</th>${D.map(x=>`<th class="ms-g-h${cls(x)}" ${ed?`data-ms-add="${x.d}" title="+ Add a task on ${isoToDmy(x.d)}" role="button"`:''}><div>${x.n}</div><div class="ms-g-w">${x.w}</div></th>`).join('')}<th class="ms-g-sum">Done</th></tr></thead><tbody>${body}</tbody></table></div>
+    <div class="ms-g-leg"><span><i class="ms-g-m ms-g-plan">○</i> planned</span><span><i class="ms-g-m ms-g-today">●</i> today</span><span><i class="ms-g-m ms-g-ok">✓</i> done</span><span><i class="ms-g-m ms-g-late">✓</i> done late</span><span><i class="ms-g-m ms-g-bad">✗</i> missed / overdue</span><span><i class="ms-g-c ms-g-off ms-g-sw"></i> Friday</span>${ed?'<span class="wsub">Tap a mark to tick it · tap a date to add a task on that day</span>':''}</div></div>`; }
 function msRender(){ const el=document.getElementById('msBody'); if(!el || !auth.currentUser) return; const sec=document.getElementById('scheduleSection'); if(sec && sec.hidden) return;
   if(formDirtyIn('msBody')) return;
   const ym=msYm(), cur=localToday().slice(0,7), ed=canEdit(), own=msOwnRows(ym), car=msCarried(ym), as=msAssuranceRows(ym), ins=msInspRows(ym), ex=msExpiryRows(ym), act=msActionRows(ym), S=msStats(ym);
@@ -9935,6 +9971,7 @@ function msRender(){ const el=document.getElementById('msBody'); if(!el || !auth
   el.innerHTML=`<div class="ms-bar"><button type="button" class="icon-btn" data-ms-m="-1" aria-label="Previous month">${ic('prev')}</button><strong class="ms-mlabel">${esc(periodLabel(ym))}</strong><button type="button" class="icon-btn" data-ms-m="1" aria-label="Next month">${ic('next')}</button>${ym!==cur?'<button type="button" class="btn btn-sm" data-ms-m="0">This month</button>':''}</div>
     <div class="tiles tiles-4">${tiles.map(t=>`<div class="tile"><div class="tile-head"><div class="tile-icon">${ic(t.icon)}</div><div class="tile-label">${esc(t.label)}</div></div><div class="tile-num ${t.cls||''}">${esc(String(t.num))}</div><div class="tile-sub">${esc(t.sub)}</div></div>`).join('')}</div>
     ${ed && msUi.form ? msFormHtml() : ''}
+    ${msGridHtml(ym)}
     <div class="panel ms-panel"><div class="section-head"><h3>My tasks — ${esc(periodLabel(ym))} <span class="wsub">${own.filter(x=>['done','late'].includes(x.state)).length} of ${own.length} done</span></h3></div>
       ${car.length?`<div class="ms-week ms-carry"><div class="ms-wk-h">Carried over from earlier months (${car.length})</div>${car.map(x=>msOwnRowHtml(x, ed)).join('')}</div>`:''}
       ${own.length?weeks.map(w=>`<div class="ms-week"><div class="ms-wk-h">Week ${w.i+1} · ${esc(isoToDmy(w.s).slice(0,5))} – ${esc(isoToDmy(w.e).slice(0,5))}${ed?` <button type="button" class="att-link" data-ms-add="${esc(w.s<localToday()&&w.e>=localToday()?localToday():w.s)}">+ add</button>`:''}</div>${w.rows.length?w.rows.map(x=>msOwnRowHtml(x, ed)).join(''):'<p class="wsub" style="margin:2px 0 6px;">—</p>'}</div>`).join('')
@@ -9950,7 +9987,7 @@ let _msT=null; function msRenderSoon(){ clearTimeout(_msT); _msT=setTimeout(()=>
 async function msSave(data){ return saveSettings('schedule', data); }
 function msWho(){ return plWho(); }
 /* ---- actions ---- */
-document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-ms-m],[data-ms-add],[data-ms-cancel],[data-ms-edit],[data-ms-del],[data-ms-end],[data-ms-done],[data-ms-donex],[data-ms-undo],[data-ms-drop],[data-ms-skip],[data-ms-as],[data-ms-more],[data-ms-open],[data-ms-act],#msAddBtn,#msPdfBtn'); if(!b || !b.closest('#scheduleSection')) return; const D=b.dataset, FV=fsFieldValue();
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-ms-m],[data-ms-add],[data-ms-cancel],[data-ms-edit],[data-ms-del],[data-ms-end],[data-ms-done],[data-ms-donex],[data-ms-undo],[data-ms-drop],[data-ms-skip],[data-ms-as],[data-ms-more],[data-ms-open],[data-ms-act],[data-ms-gown],#msAddBtn,#msPdfBtn'); if(!b || !b.closest('#scheduleSection')) return; const D=b.dataset, FV=fsFieldValue();
   if(b.id==='msPdfBtn'){ msPdf(); return; }
   if(D.msM!==undefined){ const n=Number(D.msM); msUi.ym = n===0 ? '' : (compAddMonths(msYm()+'-01', n)||'').slice(0,7); msUi.done=''; clearDirtyForms(); msRender(); return; }
   if(D.msMore){ msUi.more[D.msMore]=!msUi.more[D.msMore]; msRender(); return; }
@@ -9963,6 +10000,8 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
   if(D.msDel){ if(!compArm(b,'Tap again — delete')) return; if(await msSave({tasks:{[D.msDel]:FV?FV.delete():null}})){ msUi.form=null; clearDirtyForms(); toast('Task deleted'); msRender(); } return; }
   if(D.msEnd){ if(!compArm(b,'Tap again — end the repeat')) return; const t=msData().tasks[D.msEnd]; if(!t) return; const until=[dateAddDays(localToday(),-1), t.date].sort().pop();
     if(await msSave({tasks:{[t.id]:{...t, until}}})){ msUi.form=null; clearDirtyForms(); toast('Repeat ended — earlier days are kept'); msRender(); } return; }
+  if(D.msGown){ const st=(msData().st[D.msGown]||{}).s; if(st==='done' || st==='drop'){ const r=document.querySelector(`[data-ms-undo="${CSS.escape(D.msGown)}"]`); if(r) r.closest('.ms-row').scrollIntoView({block:'center'}); return; }
+    msUi.done=D.msGown; msRender(); const f=document.querySelector('form[data-ms-doneform]'); if(f){ f.scrollIntoView({block:'center'}); const i=f.querySelector('input[name="note"]'); if(i) i.focus(); } return; }   // Batch 119b
   if(D.msDone){ msUi.done=msUi.done===D.msDone?'':D.msDone; msRender(); const i=document.querySelector('form[data-ms-doneform] input[name="note"]'); if(i) i.focus(); return; }
   if(D.msDonex){ msUi.done=''; clearDirtyForms(); msRender(); return; }
   if(D.msUndo){ if(!compArm(b,'Tap again — undo')) return; if(await msSave({st:{[D.msUndo]:FV?FV.delete():null}})) msRender(); return; }
@@ -9989,7 +10028,7 @@ document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instance
     if(await msSave({st:{[f.dataset.msDoneform]:{s:'done', d, note, by:msWho(), at:new Date().toISOString()}}})){ msUi.done=''; clearDirtyForms(); toast('Done ✓'); msRender(); } } }, true);
 /* ---- PDF ---- */
 function msPdf(){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
-  try{ const ym=msYm(), S=msStats(ym), doc=pdfDoc({unit:'pt', format:'a4', docKey:'schedule', docSub:periodLabel(ym)}), M=34, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, INK=[20,24,32];
+  try{ const ym=msYm(), S=msStats(ym), doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'schedule', docSub:periodLabel(ym)}), M=34, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, INK=[20,24,32];
     let y=40; const ensure=h=>{ if(y+h>H-30){ doc.addPage(); y=40; } };
     doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...INK); doc.text(`Monthly HSE Schedule — ${periodLabel(ym)}`, M, y); y+=16;
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(`Planned ${S.planned} · Done ${S.done}${S.late?` (${S.late} late)`:''} · Missed / overdue ${S.miss} · Done ${S.pct===null?'—':S.pct+' %'} · printed ${isoToDmy(localToday())}`, M, y); y+=16; doc.setTextColor(...INK);
@@ -9998,6 +10037,22 @@ function msPdf(){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are 
       cols.forEach((c,i)=>{ if(head||fill){ doc.setFillColor(...(head?[230,233,238]:fill)); doc.rect(x,y,c.w,h,'F'); } doc.setDrawColor(170,174,182); doc.setLineWidth(0.4); doc.rect(x,y,c.w,h); L[i].forEach((t,n)=>doc.text(t, x+3, y+10+n*9.5)); x+=c.w; }); y+=h; };
     const title=t=>{ ensure(40); y+=8; doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text(t, M, y+10); y+=16; row({d:'Date', what:'What', task:'Task / item', where:'Where', who:'Who', st:'Status'}, true); };
     const stT=s=>(MS_BADGE[s]||MS_BADGE.open)[1];
+    // Batch 119b: month grid — one row per task / item, one column per date
+    { const GR=msGridRows(ym), days=msDim(ym), LW=190, SW=36, dw=(CW-LW-SW)/days, RH=15, col={done:[22,150,90], late:[200,130,0], notfit:[210,30,45], drop:[210,30,45], missed:[210,30,45], over:[210,30,45], today:[200,130,0], open:[40,110,200]};
+      const head=()=>{ ensure(26); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setFillColor(230,233,238); doc.rect(M,y,CW,22,'F'); doc.setTextColor(...INK); doc.text('Task / place', M+3, y+14);
+        for(let i=0;i<days;i++){ const d=`${ym}-${String(i+1).padStart(2,'0')}`, dow=new Date(d+'T00:00:00Z').getUTCDay(), x=M+LW+i*dw; if(dow===5){ doc.setFillColor(210,214,220); doc.rect(x,y,dw,22,'F'); } doc.text(String(i+1), x+dw/2, y+10, {align:'center'}); doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.text('SMTWTFS'[dow], x+dw/2, y+19, {align:'center'}); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); }
+        doc.text('Done', M+LW+days*dw+SW/2, y+14, {align:'center'}); y+=22; };
+      doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text('Month grid', M, y+10); y+=16; head(); let lastG='';
+      for(const r of GR){ if(y+RH>H-30){ doc.addPage(); y=40; head(); }
+        if(r.g!==lastG){ lastG=r.g; doc.setFillColor(242,244,247); doc.rect(M,y,CW,12,'F'); doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(90); doc.text(MS_GRID_G[r.g].toUpperCase(), M+3, y+9); doc.setTextColor(...INK); y+=12; }
+        doc.setDrawColor(200,204,210); doc.setLineWidth(0.3); doc.line(M, y+RH, M+CW, y+RH);
+        for(let i=0;i<days;i++){ const d=`${ym}-${String(i+1).padStart(2,'0')}`; if(new Date(d+'T00:00:00Z').getUTCDay()===5){ doc.setFillColor(232,235,240); doc.rect(M+LW+i*dw, y, dw, RH, 'F'); } }
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.2); doc.text(doc.splitTextToSize(r.label+(r.sub?' — '+r.sub:''), LW-6)[0], M+3, y+10);
+        if(r.span){ doc.setFontSize(7); doc.setTextColor(...(r.spanCls==='ms-g-ok'?col.done:r.spanCls==='ms-g-bad'?col.missed:col.today)); doc.text(r.span.replace(/[✓✗]\s*/g,''), M+LW+4, y+10); doc.setTextColor(...INK); }
+        else for(const [d,c] of Object.entries(r.cells||{})){ const i=Number(d.slice(8,10))-1, cx=M+LW+i*dw+dw/2, cy=y+RH/2, rr=Math.min(4.2, dw/2-1), k=col[c.state]||col.open; doc.setDrawColor(...k); doc.setFillColor(...k); doc.setLineWidth(1);
+          if(['done','late'].includes(c.state)) doc.circle(cx, cy, rr, 'F'); else if(['drop','missed','over','notfit'].includes(c.state)){ doc.line(cx-rr, cy-rr, cx+rr, cy+rr); doc.line(cx-rr, cy+rr, cx+rr, cy-rr); } else doc.circle(cx, cy, rr, 'S'); }
+        doc.setFontSize(7.2); doc.text(`${r.dn}/${r.n}`, M+LW+days*dw+SW/2, y+10, {align:'center'}); y+=RH; }
+      doc.setFontSize(7); doc.setTextColor(90); ensure(14); doc.text('Filled circle = done (amber = done late) · open circle = planned · X = missed / overdue · grey column = Friday', M, y+10); doc.setTextColor(...INK); y+=14; }
     const own=msOwnRows(ym), car=msCarried(ym);
     title('My tasks'); if(!own.length && !car.length) row({task:'No tasks planned'});
     for(const x of car) row({d:isoToDmy(x.d), what:x.t.what, task:x.t.title||x.t.what, where:msWhereLabel(x.t.where), who:x.t.who, st:stT('carried')}, false, [253,236,236]);
