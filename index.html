@@ -3047,7 +3047,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b115';
+const APP_BUILD='b116';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10711,15 +10711,18 @@ document.addEventListener('toggle', e=>{ const d=e.target; if(!(d instanceof HTM
    New Civil projects appear on the link by themselves (re-synced with the project list). Competency tests and training / meeting
    signing of all Civil projects are merged in. Creating it switches off the old Civil project links and the location links. */
 const CIV_PID='div:Civil';
+// Batch 116: the same one-link-per-division engine for Logistics & Rental (projects only — no yard / workshop / office)
+const DIV_LINKS={Civil:{locs:true, name:'Civil'}, Rental:{locs:false, name:'Logistics & Rental'}};
+function divLinkPid(dv){ return 'div:'+dv; }
 function isDivPid(pid){ return String(pid||'').startsWith('div:'); }
-function civProjects(){ return activeSites().filter(s=>(s.division||'Civil')==='Civil' && projectLive(s)).sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))); }
-function civLocs(){ return typeof plLocs==='function' ? plLocs().filter(l=>l.type!=='camp') : []; }
-async function civLinkPayload(token){
-  const projs=civProjects(), pids=new Set(projs.map(s=>s.id)), locs=civLocs();
+function civProjects(dv){ dv=dv||'Civil'; return activeSites().filter(s=>(s.division||'Civil')===dv && projectLive(s)).sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||''))); }
+function civLocs(dv){ if(dv && !(DIV_LINKS[dv]||{}).locs) return []; return typeof plLocs==='function' ? plLocs().filter(l=>l.type!=='camp') : []; }
+async function civLinkPayload(token, dv){ dv=dv||'Civil';
+  const projs=civProjects(dv), pids=new Set(projs.map(s=>s.id)), locs=civLocs(dv);
   const places=[...projs.map(s=>({id:s.id, n:s.siteName||'Project', t:'p', c:s.clientName||'', ws:activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===s.id).map(w=>w.id)})),
     ...locs.map(l=>({id:'loc:'+l.id, n:l.name, t:'l', c:'', ws:locPeopleToday(l.id).map(w=>w.id)}))];
   const inPlace=new Set(places.flatMap(p=>p.ws));
-  const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && (workerDivKey(w)==='Civil' || pids.has(w.projectId) || inPlace.has(w.id))), list=[];
+  const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && (workerDivKey(w)===dv || pids.has(w.projectId) || inPlace.has(w.id))), list=[];
   for(const w of ws){ const dg=String(w.civilId||'').replace(/\D/g,''); let h='';
     if(dg.length>=4){ const k=token+':'+dg.slice(-4); h=ppeHashCache.get(k); if(!h){ h=await ppeSha(k); ppeHashCache.set(k,h); } }
     list.push({id:w.id, name:w.fullName||'—', h, dv:ppeWorkerDiv(w), ds:String(w.designation||'').slice(0,40)}); }
@@ -10727,16 +10730,17 @@ async function civLinkPayload(token){
   const dc=docControl('ppeIssue'), dt=docControl('tric'), ids=new Set(list.map(w=>w.id)), all=ppeBoard(), board={}; for(const k of Object.keys(all)) if(ids.has(k)) board[k]=all[k];
   const placeIds=new Set(places.map(p=>p.id)), prevLocs=tricAll().filter(x=>placeIds.has(tricSiteId(x))).map(x=>(x.data||{}).loc).filter(Boolean);
   const comp={}, train={}; for(const s of projs){ Object.assign(comp, compLinkPayload(s.id)); if(typeof trsLinkPayload==='function') Object.assign(train, trsLinkPayload(s.id)); }
-  return {projectId:CIV_PID, kind:'div', projectName:'Civil Division', division:'Civil', clientName:'', places, clients:[...new Set(projs.map(s=>s.clientName).filter(Boolean))].slice(0,60), vehs:[], tbtJobs:LOC_TBT_JOBS,
-    incTypes:INC_SITE_TYPES.Civil||[], comp, train, workers:list, items:ppeLinkItems(), board, locs:[...new Set([...projs.map(s=>s.location), ...prevLocs].filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,150),
+  const vs=vehicles.filter(v=>!v.deleted && v.vehicleNumber), vehs=dv==='Civil'?[]:[...new Set([...vs.filter(v=>pids.has(v.projectId)), ...vs.filter(v=>!pids.has(v.projectId))].map(v=>String(v.vehicleNumber).trim()))].slice(0,300);
+  return {projectId:divLinkPid(dv), kind:'div', projectName:divLabel(dv), division:dv, clientName:'', places, clients:[...new Set(projs.map(s=>s.clientName).filter(Boolean))].slice(0,60), vehs, tbtJobs:LOC_TBT_JOBS,
+    incTypes:INC_SITE_TYPES[dv]||INC_SITE_TYPES.Civil||[], comp, train, workers:list, items:ppeLinkItems(), board, locs:[...new Set([...projs.map(s=>s.location), ...prevLocs].filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,150),
     docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}}; }
-async function civLinkCreate(){ if(!canEdit()) return; if(ppeLinkOf(CIV_PID)){ toast('The Civil link already exists'); return; }
-  await ppeLinkCreate(CIV_PID); if(!ppeLinks.some(l=>l.projectId===CIV_PID && l.active) && !ppeLinkOf(CIV_PID)){ await new Promise(r=>setTimeout(r,400)); }
+async function civLinkCreate(dv){ dv=DIV_LINKS[dv]?dv:'Civil'; const PID=divLinkPid(dv), nm=DIV_LINKS[dv].name; if(!canEdit()) return; if(ppeLinkOf(PID)){ toast(`The ${nm} link already exists`); return; }
+  await ppeLinkCreate(PID); if(!ppeLinks.some(l=>l.projectId===PID && l.active) && !ppeLinkOf(PID)){ await new Promise(r=>setTimeout(r,400)); }
   // switch off the old Civil project links and the company-location links
-  const civIds=new Set(activeSites().filter(s=>(s.division||'Civil')==='Civil').map(s=>s.id)); let n=0;
-  for(const l of ppeLinks.filter(x=>x.active && x.projectId && x.projectId!==CIV_PID && (civIds.has(x.projectId) || isLocPid(x.projectId)))){ try{ await db.collection('ppeLinks').doc(l.id).update({active:false, switchedOffAt:new Date().toISOString(), replacedBy:CIV_PID}); n++; }catch(e){ console.warn(e); } }
-  toast(`Civil link created${n?` — ${n} old Civil / location link${n===1?'':'s'} switched off`:''}. Share the new QR with all Civil crews.`); renderPpe(); }
-document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-pr-civ]'); if(!b || !canEdit()) return; e.stopPropagation(); if(!compArm(b,'tap again — create the Civil link')) return; b.disabled=true; try{ await civLinkCreate(); } finally{ b.disabled=false; } }, true);
+  const civIds=new Set(activeSites().filter(s=>(s.division||'Civil')===dv).map(s=>s.id)); let n=0;
+  for(const l of ppeLinks.filter(x=>x.active && x.projectId && x.projectId!==PID && (civIds.has(x.projectId) || (DIV_LINKS[dv].locs && isLocPid(x.projectId))))){ try{ await db.collection('ppeLinks').doc(l.id).update({active:false, switchedOffAt:new Date().toISOString(), replacedBy:PID}); n++; }catch(e){ console.warn(e); } }
+  toast(`${nm} link created${n?` — ${n} old ${nm}${DIV_LINKS[dv].locs?' / location':''} link${n===1?'':'s'} switched off`:''}. Share the new QR with all ${nm} crews.`); renderPpe(); }
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-pr-civ]'); if(!b || !canEdit()) return; e.stopPropagation(); const dv=DIV_LINKS[b.dataset.prCiv]?b.dataset.prCiv:'Civil'; if(!compArm(b,`tap again — create the ${DIV_LINKS[dv].name} link`)) return; b.disabled=true; try{ await civLinkCreate(dv); } finally{ b.disabled=false; } }, true);
 
 /* ================= Batch 49: PPE — approved PPE list (standards), issue to crew, PPE dashboard ================= */
 // Suggested starting list — HSE edits it. International standards are the usual EN / ISO / ANSI references; local / client and colours are company choices.
@@ -11141,7 +11145,7 @@ function ppeBoard(){
 }
 async function ppeLinkPayload(token, pid){
   if(isLocPid(pid)) return locLinkPayload(token, pid);   // Batch 114: company-location link
-  if(pid==='div:Civil') return civLinkPayload(token);   // Batch 115: one Civil link
+  if(isDivPid(pid)) return civLinkPayload(token, pid.slice(4));   // Batch 115 / 116: one link per division (Civil, Logistics & Rental)
   const ws=activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===pid), list=[];
   for(const w of ws){ const dg=String(w.civilId||'').replace(/\D/g,''); let h='';
     if(dg.length>=4){ const k=token+':'+dg.slice(-4); h=ppeHashCache.get(k); if(!h){ h=await ppeSha(k); ppeHashCache.set(k,h); } }
@@ -11499,15 +11503,16 @@ function ppeReqPanelHtml(){
   const conf=[]; for(const w of activeWorkers()) for(const x of (w.ppeIssued||[])) if(x.needConfirm && !x.receivedAt) conf.push({w, x});
   conf.sort((a,b)=>String(b.x.date||'').localeCompare(String(a.x.date||'')));
   if(!ed && !md && !nNew.length && !nMd.length) return '';
-  const lrow=(p)=>{ const l=ppeLinkOf(p.id), off=ppeLinks.find(x=>!x.active && x.projectId===p.id), crew=p.isCiv?civProjects().reduce((n,s)=>n+workersAtSite(s.id).length,0):p.isLoc?locPeopleToday(p.loc.id).length:activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===p.id).length;
-    return `<div class="site-link-row"><div><strong>${esc(p.siteName||'Project')}</strong> ${l?'<span class="badge ok">Link active</span>':'<span class="badge muted">No link</span>'}<div class="wsub">${crew} worker${crew===1?'':'s'} ${p.isCiv?`on ${civProjects().length} Civil project${civProjects().length===1?'':'s'} + ${civLocs().length} yard / workshop / office`:p.isLoc?'here today (everyone can use the link)':'assigned to this project'}${l?` · ${(l.items||[]).length} PPE items`:''}${!crew?' — assign the crew in Workforce first':''}</div></div>
+  const lrow=(p)=>{ const l=ppeLinkOf(p.id), off=ppeLinks.find(x=>!x.active && x.projectId===p.id), crew=p.isCiv?civProjects(p.dv).reduce((n,s)=>n+workersAtSite(s.id).length,0):p.isLoc?locPeopleToday(p.loc.id).length:activeWorkers().filter(w=>(w.status||'active')==='active' && w.projectId===p.id).length;
+    return `<div class="site-link-row"><div><strong>${esc(p.siteName||'Project')}</strong> ${l?'<span class="badge ok">Link active</span>':'<span class="badge muted">No link</span>'}<div class="wsub">${crew} worker${crew===1?'':'s'} ${p.isCiv?`on ${civProjects(p.dv).length} ${esc(DIV_LINKS[p.dv].name)} project${civProjects(p.dv).length===1?'':'s'}${civLocs(p.dv).length?` + ${civLocs(p.dv).length} yard / workshop / office`:''}`:p.isLoc?'here today (everyone can use the link)':'assigned to this project'}${l?` · ${(l.items||[]).length} PPE items`:''}${!crew?' — assign the crew in Workforce first':''}</div></div>
       ${ed?`<div class="site-link-acts">${l?`<button type="button" class="btn btn-sm" data-pr-copy="${esc(l.id)}">${ic('clipboard')} Copy link</button><button type="button" class="btn btn-sm" data-pr-qr="${esc(l.id)}">QR code</button><button type="button" class="btn btn-sm" data-pr-off="${esc(l.id)}" data-armed="0">Switch off</button>`
         :`<button type="button" class="btn btn-sm btn-primary" data-pr-create="${esc(p.id)}">+ Create project link</button>${off?`<button type="button" class="btn btn-sm" data-pr-on="${esc(off.id)}">Switch the old link back on</button>`:''}`}</div>`:''}
       ${l && ed && ppeReqUi.qr===l.id?`<div class="site-qr"><div class="site-qr-img" id="ppeQrBox" data-tok="${esc(l.id)}"></div><div><div class="wsub">QR for the <strong>${esc(p.siteName||'project')}</strong> crew — scan, pick your name, then <strong>Request PPE</strong>, <strong>I received PPE</strong> or <strong>TBT request</strong>.</div><div class="mono site-url">${esc(ppeReqLinkUrl(l.id))}</div><button type="button" class="btn btn-sm" data-pr-qrdl="${esc(l.id)}">${ic('download')} Download QR (PNG)</button></div></div>`:''}</div>`; };
   const oldGen=ppeLinks.filter(l=>l.active && !l.projectId), lps=ppeLinkProjects();
-  const civL=ppeLinkOf(CIV_PID);   // Batch 115: one Civil link replaces the Civil project links
-  const byDiv=PPE_LINK_DIVS.map(dv=>[dv, lps.filter(p=>(p.division||'Civil')===dv && !(dv==='Civil' && civL))]).filter(([,l])=>l.length);
-  const civRow=`<div class="wsub" style="margin:6px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">Civil division — ONE link</div>${civL?lrow({id:CIV_PID, siteName:'Civil Division — all Civil projects + yard / workshop / office', division:'Civil', isCiv:true}):`<div class="site-link-row"><div><strong>One link for all Civil crews</strong> <span class="badge muted">not created</span><div class="wsub">The crew choose the project / Samail Yard / workshop / office in the form. New Civil projects appear on it by themselves. Creating it switches off the Civil project links and the location links.</div></div>${ed?`<div class="site-link-acts"><button type="button" class="btn btn-sm btn-primary" data-pr-civ="1" data-armed="0">+ Create the Civil link</button></div>`:''}</div>`}`;
+  const divL=dv=>ppeLinkOf(divLinkPid(dv));   // Batch 115 / 116: one link per division replaces its project links
+  const byDiv=PPE_LINK_DIVS.map(dv=>[dv, lps.filter(p=>(p.division||'Civil')===dv && !(DIV_LINKS[dv] && divL(dv)))]).filter(([,l])=>l.length);
+  const oneRow=dv=>{ const D=DIV_LINKS[dv], L=divL(dv); return `<div class="wsub" style="margin:6px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${esc(D.name)} division — ONE link</div>${L?lrow({id:divLinkPid(dv), siteName:`${divLabel(dv)} — all ${D.name} projects${D.locs?' + yard / workshop / office':''}`, division:dv, isCiv:true, dv}):`<div class="site-link-row"><div><strong>One link for all ${esc(D.name)} crews</strong> <span class="badge muted">not created</span><div class="wsub">The crew choose the project${D.locs?' / Samail Yard / workshop / office':''} in the form. New ${esc(D.name)} projects appear on it by themselves. Creating it switches off the ${esc(D.name)} project links${D.locs?' and the location links':''}.</div></div>${ed?`<div class="site-link-acts"><button type="button" class="btn btn-sm btn-primary" data-pr-civ="${esc(dv)}" data-armed="0">+ Create the ${esc(D.name)} link</button></div>`:''}</div>`}`; };
+  const civRow=Object.keys(DIV_LINKS).map(oneRow).join('');
   const linkHtml = (ed||ppeLinks.some(l=>l.active)) ? `<div class="subhead" style="margin-top:4px;">Project links (PPE + TBT) — one link per project</div><div class="site-links">${byDiv.length?byDiv.map(([dv,l])=>`<div class="wsub" style="margin:6px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${esc(divLabel?divLabel(dv):dv)} division</div>`+l.map(lrow).join('')).join(''):'<p class="wsub">No active Scaffolding, Civil or Rental project in Project Details.</p>'}
       ${civRow}
       ${typeof plLocs==='function'&&plLocs().length&&ppeLinks.some(l=>l.active&&isLocPid(l.projectId))?`<div class="wsub" style="margin:10px 0 0; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">Company locations — TBT + PPE (workshop / yard / office)</div>`+plLocs().map(l=>lrow(locLinkPseudo(l))).join(''):''}
@@ -15871,7 +15876,7 @@ function complaintCounts(list){
 }
 function projectName(id){
   if(!id) return '';
-  if(String(id).startsWith('div:')) return String(id).slice(4)+' division link';   // Batch 115
+  if(String(id).startsWith('div:')) return (typeof divLabel==='function'?divLabel(String(id).slice(4)):String(id).slice(4))+' link';   // Batch 115 / 116
   if(String(id).startsWith('loc:')){ const l=typeof plLocById==='function'?plLocById(String(id).slice(4)):null; return l?l.name:'Company location'; }   // Batch 114
   const s=siteEquipmentList.find(x=>x.id===id);
   return s ? (s.siteName||'Unnamed project') : 'Removed project';
