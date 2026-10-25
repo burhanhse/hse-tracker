@@ -1206,6 +1206,8 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .ms-g-ok{background:var(--ok-bg); color:var(--ok);} .ms-g-late{background:var(--warn-bg); color:var(--warn);} .ms-g-bad{background:var(--danger-bg); color:var(--danger);} .ms-g-today{background:var(--warn-bg); color:var(--warn);} .ms-g-plan{color:var(--accent); border:1.5px solid var(--accent);}
 .ms-g-span{text-align:left !important; padding:0 8px !important;} .ms-g-span span{display:inline-block; border-radius:10px; padding:2px 10px; font-weight:600; font-size:11.5px;} .ms-g-span span[role=button]{cursor:pointer;}
 .ms-g-leg{display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:8px; font-size:12px;} .ms-g-leg span{display:inline-flex; gap:5px; align-items:center;} .ms-g-sw{display:inline-block; width:16px; height:14px; border:1px solid var(--line);}
+.ms-g-div th{background:var(--surface) !important; font-size:13px !important; font-weight:800; letter-spacing:.02em; border-top:2px solid var(--accent); padding:8px 8px !important;} .ms-g-div-Scaffolding th{border-top-color:var(--dv-scaff);} .ms-g-div-Civil th{border-top-color:var(--dv-civil);} .ms-g-div-Rental th{border-top-color:var(--dv-rental);} .ms-g-div-Office th{border-top-color:var(--dv-office);}
+.ms-g-dsum{font-weight:500; font-size:12px; color:var(--ink-muted); margin-left:8px;} .ms-g-dsum b.ok{color:var(--ok);} .ms-g-dsum b.warn{color:var(--warn);} .ms-g-dsum b.danger{color:var(--danger);}
 </style>
 </head>
 <body class="auth-open">
@@ -3073,7 +3075,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b119b';
+const APP_BUILD='b119c';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -9849,6 +9851,14 @@ async function saveCal(data){ const ok=await saveSettings('safetyCalendar', data
 const MS_WHAT=['Site visit','HSE inspection','Toolbox talk','Audit','Training','Housekeeping check','Meeting','Mock drill','Other'];
 const MS_EXP_KEYS=[['trainings','Training'],['medical','Medical'],['licenses','Licence']];
 let msUi={ym:'', form:null, done:'', more:{}};
+/* Batch 119c: division-wise — every row belongs to a division: own task = its Division box (project tasks: the project's division), Assurance = Company-wide,
+   inspections = the item's vehicle / project division, expiries = the worker's division (vehicle documents: the vehicle's division) */
+const MS_DIVS=['Scaffolding','Civil','Rental','Office staff','co'];
+function msDivLabel(k){ return k==='co'?'Company-wide':divLabel(k); }
+function msDivTag(k){ return k==='co'?'<span class="badge muted">Company-wide</span>':divTagHtml(k); }
+function msSiteDiv(pid){ const s=pid&&siteEquipmentList.find(x=>x.id===pid); return s ? (s.division||'Civil') : ''; }
+function msTaskDiv(t){ if(t && MS_DIVS.includes(t.div)) return t.div; const w=String((t&&t.where)||''); return (w.startsWith('p:') && msSiteDiv(w.slice(2))) || 'co'; }
+function msInspDiv(it){ if(it.kind==='veh'){ const v=it.v||{}; return (DIVISIONS.includes(v.division)&&v.division) || msSiteDiv(v.projectId) || 'co'; } return msSiteDiv(it.projectId) || 'co'; }
 function msData(){ const s=settingsDocs.schedule||{}; return {tasks:(s.tasks && typeof s.tasks==='object' && !Array.isArray(s.tasks))?s.tasks:{}, st:(s.st && typeof s.st==='object' && !Array.isArray(s.st))?s.st:{}}; }
 function msYm(){ return msUi.ym || localToday().slice(0,7); }
 function msMonthEnd(ym){ const nx=compAddMonths(ym+'-01', 1); return nx ? dateAddDays(nx, -1) : ym+'-31'; }
@@ -9886,8 +9896,8 @@ function msInspRows(ym){ if(!regState.insp) return []; const from=ym+'-01', to=m
   return out.sort((a,b)=>(a.state==='never')-(b.state==='never') || String(a.d).localeCompare(String(b.d)) || a.S.it.label.localeCompare(b.S.it.label)); }
 function msExpiryRows(ym){ const from=ym+'-01', to=msMonthEnd(ym), t=localToday(), out=[]; const inM=r=>{ const x=r?String(r.expiry||'').slice(0,10):''; return msOkD(x) && x>=from && x<=to; };
   for(const w of activeWorkers()){ if((w.status||'active')!=='active') continue;
-    for(const [k,l] of MS_EXP_KEYS) for(const r of (w[k]||[])) if(inM(r)){ const ren=isRenewed(w[k], k, r); out.push({src:'exp', key:`ex|w|${w.id}|${k}|${r.id||r.expiry}`, kind:'w', id:w.id, tab:k, who:w.fullName||'—', what:l, name:r.name||r.type||r.skill||l, d:r.expiry, state:ren?'done':r.expiry<t?'over':r.expiry===t?'today':'open'}); } }
-  for(const v of activeVehicles()) for(const r of (v.documents||[])) if(inM(r)){ const ren=isRenewed(v.documents, 'documents', r); out.push({src:'exp', key:`ex|v|${v.id}|${r.id||r.expiry}`, kind:'v', id:v.id, tab:'documents', who:v.vehicleNumber||'Vehicle', what:'Vehicle document', name:r.type||'Document', d:r.expiry, state:ren?'done':r.expiry<t?'over':r.expiry===t?'today':'open'}); }
+    for(const [k,l] of MS_EXP_KEYS) for(const r of (w[k]||[])) if(inM(r)){ const ren=isRenewed(w[k], k, r); out.push({src:'exp', key:`ex|w|${w.id}|${k}|${r.id||r.expiry}`, kind:'w', id:w.id, div:workerDivKey(w)||'co', tab:k, who:w.fullName||'—', what:l, name:r.name||r.type||r.skill||l, d:r.expiry, state:ren?'done':r.expiry<t?'over':r.expiry===t?'today':'open'}); } }
+  for(const v of activeVehicles()) for(const r of (v.documents||[])) if(inM(r)){ const ren=isRenewed(v.documents, 'documents', r); out.push({src:'exp', key:`ex|v|${v.id}|${r.id||r.expiry}`, kind:'v', id:v.id, div:(DIVISIONS.includes(v.division)&&v.division)||msSiteDiv(v.projectId)||'co', tab:'documents', who:v.vehicleNumber||'Vehicle', what:'Vehicle document', name:r.type||'Document', d:r.expiry, state:ren?'done':r.expiry<t?'over':r.expiry===t?'today':'open'}); }
   return out.sort((a,b)=>a.d.localeCompare(b.d) || a.who.localeCompare(b.who)); }
 let msActCache=[];
 function msActionRows(ym){ if(ym!==localToday().slice(0,7)) return []; msActCache=collectAllActions().filter(a=>a.status!=='Closed' && complaintOverdueDays(a)).sort((a,b)=>String(a.targetDate).localeCompare(String(b.targetDate))); return msActCache; }
@@ -9903,7 +9913,7 @@ function msOwnRowHtml(x, ed){ const t=x.t, done=['done','late'].includes(x.state
   const btns=!ed?'':(done||x.state==='drop')?`<button type="button" class="att-link" data-ms-undo="${esc(x.key)}" data-armed="0">Undo</button>`
     :`<button type="button" class="btn btn-sm btn-primary" data-ms-done="${esc(x.key)}">Done</button><button type="button" class="btn btn-sm" data-ms-drop="${esc(x.key)}" data-armed="0">${x.state==='carried'?'Drop':'Missed'}</button>${t.rep&&x.state!=='carried'?`<button type="button" class="att-link" data-ms-skip="${esc(x.key)}" data-armed="0">Skip this one</button>`:''}`;
   const doneForm=ed && msUi.done===x.key ? `<form data-ms-doneform="${esc(x.key)}" class="ms-doneform"><label>Done on<input type="date" name="d" value="${esc(localToday())}" max="${esc(localToday())}" required></label><label class="ms-grow">Note (optional)<input name="note" maxlength="140" placeholder="e.g. housekeeping poor at the store — action raised"></label><button type="submit" class="btn btn-sm btn-primary">Save</button><button type="button" class="btn btn-sm" data-ms-donex="1">Cancel</button></form>` : '';
-  return `<div class="ms-row ms-${x.state}"><div class="ms-d mono">${esc(x.state==='carried'?isoToDmy(x.d):msDay(x.d))}</div><div class="ms-main"><div><strong>${esc(t.title||t.what||'Task')}</strong> ${t.title&&t.what?`<span class="badge muted">${esc(t.what)}</span>`:''} ${rep?`<span class="wsub">${rep}</span>`:''} ${msBadge(x.state)}</div>
+  return `<div class="ms-row ms-${x.state}"><div class="ms-d mono">${esc(x.state==='carried'?isoToDmy(x.d):msDay(x.d))}</div><div class="ms-main"><div><strong>${esc(t.title||t.what||'Task')}</strong> ${t.title&&t.what?`<span class="badge muted">${esc(t.what)}</span>`:''} ${msDivTag(msTaskDiv(t))} ${rep?`<span class="wsub">${rep}</span>`:''} ${msBadge(x.state)}</div>
     <div class="wsub">${t.where?'📍 '+esc(msWhereLabel(t.where))+' ':''}${t.who?'· 👤 '+esc(t.who)+' ':''}${t.note?'· '+esc(t.note):''}${x.rec&&x.rec.s==='done'?` · ✓ ${esc(isoToDmy(x.rec.d||''))}${x.rec.by?' by '+esc(x.rec.by):''}${x.rec.note?' — '+esc(x.rec.note):''}`:''}</div>${doneForm}</div>
     <div class="ms-a">${btns}${ed?`<button type="button" class="icon-btn" data-ms-edit="${esc(t.id)}" aria-label="Edit task">${ic('pencil')}</button>`:''}</div></div>`; }
 function msWeeks(ym){ const from=ym+'-01', to=msMonthEnd(ym), W=[]; let s=from;
@@ -9917,6 +9927,7 @@ function msFormHtml(){ const f=msUi.form||{}, t=f.id?(msData().tasks[f.id]||{}):
       <label class="span-all">Task<input name="title" maxlength="120" value="${esc(t.title||'')}" placeholder="e.g. Site visit + housekeeping check, TBT on heat stress"></label>
       <label>Where<select name="where"><option value="">—</option>${projs.length?`<optgroup label="Projects">${projs.map(s=>`<option value="p:${esc(s.id)}" ${'p:'+s.id===wv?'selected':''}>${esc(s.siteName||'Project')}</option>`).join('')}</optgroup>`:''}${locs.length?`<optgroup label="Company locations">${locs.map(l=>`<option value="l:${esc(l.id)}" ${'l:'+l.id===wv?'selected':''}>${esc(l.name)}</option>`).join('')}</optgroup>`:''}<option value="__other" ${known?'':'selected'}>Other place…</option></select></label>
       <label data-ms-other ${known?'hidden':''}>Other place<input name="whereText" maxlength="60" value="${esc(known?'':wv)}" placeholder="e.g. Client office Muscat"></label>
+      <label>Division<select name="div"><option value="">Automatic — the project's division (else Company-wide)</option>${MS_DIVS.map(k=>`<option value="${k}" ${t.div===k?'selected':''}>${esc(msDivLabel(k))}</option>`).join('')}</select></label>
       <label>Who<input name="who" maxlength="60" list="msWho" value="${esc(t.who||'')}"><datalist id="msWho">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>
       <label>Repeat<select name="rep"><option value="" ${!t.rep?'selected':''}>Does not repeat</option><option value="w" ${t.rep==='w'?'selected':''}>Every week (same day)</option><option value="m" ${t.rep==='m'?'selected':''}>Every month (same date)</option></select></label>
       <label data-ms-until ${t.rep?'':'hidden'}>Repeat until (optional)<input type="date" name="until" value="${esc(t.until||'')}"></label>
@@ -9931,26 +9942,28 @@ function msGroupHtml(key, title, rows, rowHtml, sub){ if(!rows.length) return ''
 const MS_MARK={done:['ms-g-ok','✓'], late:['ms-g-late','✓'], notfit:['ms-g-bad','!'], drop:['ms-g-bad','✗'], missed:['ms-g-bad','✗'], over:['ms-g-bad','✗'], today:['ms-g-today','●'], open:['ms-g-plan','○']};
 function msGridRows(ym){ const own=msOwnRows(ym), rows=[], done=x=>['done','late','notfit'].includes(x.state);
   const byT=new Map(); for(const x of own){ if(!byT.has(x.t.id)) byT.set(x.t.id, []); byT.get(x.t.id).push(x); }
-  for(const L of byT.values()){ const t=L[0].t; rows.push({g:'own', label:t.title||t.what||'Task', sub:[t.what&&t.title?t.what:'', t.where?msWhereLabel(t.where):'', t.who||''].filter(Boolean).join(' · '), rep:t.rep, cells:Object.fromEntries(L.map(x=>[x.d, {state:x.state, act:`data-ms-gown="${esc(x.key)}"`}])), dn:L.filter(done).length, n:L.length}); }
+  for(const L of byT.values()){ const t=L[0].t; rows.push({g:'own', div:msTaskDiv(t), label:t.title||t.what||'Task', sub:[t.what&&t.title?t.what:'', t.where?msWhereLabel(t.where):'', t.who||''].filter(Boolean).join(' · '), rep:t.rep, cells:Object.fromEntries(L.map(x=>[x.d, {state:x.state, act:`data-ms-gown="${esc(x.key)}"`}])), dn:L.filter(done).length, n:L.length}); }
   rows.sort((a,b)=>Object.keys(a.cells).sort()[0].localeCompare(Object.keys(b.cells).sort()[0]) || a.label.localeCompare(b.label));
-  for(const x of msCarried(ym)) rows.push({g:'car', label:x.t.title||x.t.what||'Task', sub:[x.t.where?msWhereLabel(x.t.where):'', x.t.who||''].filter(Boolean).join(' · '), span:`Not done on ${isoToDmy(x.d)} — carried over`, spanCls:'ms-g-bad', act:`data-ms-gown="${esc(x.key)}"`, dn:0, n:1});
-  for(const x of msAssuranceRows(ym)) rows.push({g:'as', label:x.it.activity, sub:x.it.owner||'', span:x.state==='done'?'✓ done this month':x.state==='missed'?'✗ not done in the month':'any day this month', spanCls:x.state==='done'?'ms-g-ok':x.state==='missed'?'ms-g-bad':'ms-g-today', dn:done(x)?1:0, n:1});
-  for(const x of msInspRows(ym)){ const it=x.S.it, inM=x.d && x.d.slice(0,7)===ym; rows.push({g:'in', label:`${it.kind==='veh'?'Vehicle':it.group} — ${it.label}`, sub:it.where||'', cells:inM?{[x.d]:{state:x.state, act:['done','notfit'].includes(x.state)?'':`data-insp-new="${esc(x.ref)}"`}}:{}, span:inM?'':x.state==='never'?'not inspected yet':`overdue since ${isoToDmy(x.d)}`, spanCls:'ms-g-bad', dn:done(x)?1:0, n:1}); }
-  for(const x of msExpiryRows(ym)) rows.push({g:'ex', label:`${x.who} — ${x.what}: ${x.name}`, sub:'expiry', cells:{[x.d]:{state:x.state, act:`data-ms-open="${esc(x.kind+'|'+x.id+'|'+x.tab)}"`}}, dn:done(x)?1:0, n:1});
+  for(const x of msCarried(ym)) rows.push({g:'car', div:msTaskDiv(x.t), label:x.t.title||x.t.what||'Task', sub:[x.t.where?msWhereLabel(x.t.where):'', x.t.who||''].filter(Boolean).join(' · '), span:`Not done on ${isoToDmy(x.d)} — carried over`, spanCls:'ms-g-bad', act:`data-ms-gown="${esc(x.key)}"`, dn:0, n:1});
+  for(const x of msAssuranceRows(ym)) rows.push({g:'as', div:'co', label:x.it.activity, sub:x.it.owner||'', span:x.state==='done'?'✓ done this month':x.state==='missed'?'✗ not done in the month':'any day this month', spanCls:x.state==='done'?'ms-g-ok':x.state==='missed'?'ms-g-bad':'ms-g-today', dn:done(x)?1:0, n:1});
+  for(const x of msInspRows(ym)){ const it=x.S.it, inM=x.d && x.d.slice(0,7)===ym; rows.push({g:'in', div:msInspDiv(it), label:`${it.kind==='veh'?'Vehicle':it.group} — ${it.label}`, sub:it.where||'', cells:inM?{[x.d]:{state:x.state, act:['done','notfit'].includes(x.state)?'':`data-insp-new="${esc(x.ref)}"`}}:{}, span:inM?'':x.state==='never'?'not inspected yet':`overdue since ${isoToDmy(x.d)}`, spanCls:'ms-g-bad', dn:done(x)?1:0, n:1}); }
+  for(const x of msExpiryRows(ym)) rows.push({g:'ex', div:x.div||'co', label:`${x.who} — ${x.what}: ${x.name}`, sub:'expiry', cells:{[x.d]:{state:x.state, act:`data-ms-open="${esc(x.kind+'|'+x.id+'|'+x.tab)}"`}}, dn:done(x)?1:0, n:1});
   return rows; }
 const MS_GRID_G={own:'My tasks', car:'Carried over', as:'HSE Assurance Plan', in:'Inspections due', ex:'Expiries'};
 function msGridHtml(ym){ const rows=msGridRows(ym), days=msDim(ym), t=localToday(), ed=canEdit(); if(!rows.length) return '';
   const D=[...Array(days)].map((_,i)=>{ const d=`${ym}-${String(i+1).padStart(2,'0')}`, dow=new Date(d+'T00:00:00Z').getUTCDay(); return {d, n:i+1, w:'SMTWTFS'[dow], off:dow===5, today:d===t}; });
   const cls=x=>`${x.off?' ms-g-off':''}${x.today?' ms-g-now':''}`;
-  let lastG='', body='';
-  for(const [g, lim] of [['own',99],['car',99],['as',99],['in',12],['ex',12]]){ const R=rows.filter(r=>r.g===g); if(!R.length) continue; const open=msUi.more['g'+g], shown=open?R:R.slice(0,lim);
-    body+=`<tr class="ms-g-grp"><th class="ms-g-lbl" colspan="${days+2}">${esc(MS_GRID_G[g])} (${R.length})${R.length>lim?` <button type="button" class="att-link" data-ms-more="g${g}">${open?'show less':'show all'}</button>`:''}</th></tr>`;
+  let body='';
+  for(const dv of MS_DIVS){ const DR=rows.filter(r=>r.div===dv); if(!DR.length) continue; const dn=DR.reduce((n,r)=>n+r.dn,0), nn=DR.reduce((n,r)=>n+r.n,0), pc=nn?Math.round(dn*100/nn):null;   // Batch 119c: one block per division
+    body+=`<tr class="ms-g-div ms-g-div-${esc(dv==='Office staff'?'Office':dv)}"><th class="ms-g-lbl" colspan="${days+2}">${esc(msDivLabel(dv))} <span class="ms-g-dsum">${dn} of ${nn} done${pc!==null?` · <b class="${pc>=90?'ok':pc>=75?'warn':'danger'}">${pc} %</b>`:''}</span></th></tr>`;
+  for(const [g, lim] of [['own',99],['car',99],['as',99],['in',12],['ex',12]]){ const R=DR.filter(r=>r.g===g); if(!R.length) continue; const mk='g'+g+'_'+dv, open=msUi.more[mk], shown=open?R:R.slice(0,lim);
+    body+=`<tr class="ms-g-grp"><th class="ms-g-lbl" colspan="${days+2}">${esc(MS_GRID_G[g])} (${R.length})${R.length>lim?` <button type="button" class="att-link" data-ms-more="${esc(mk)}">${open?'show less':'show all'}</button>`:''}</th></tr>`;
     for(const r of shown){ body+=`<tr><th class="ms-g-lbl" title="${esc(r.label+(r.sub?' — '+r.sub:''))}"><div class="ms-g-t">${esc(r.label)}${r.rep?` <span class="wsub">${r.rep==='w'?'↻ weekly':'↻ monthly'}</span>`:''}</div>${r.sub?`<div class="wsub ms-g-t">${esc(r.sub)}</div>`:''}</th>`;
       if(r.span!==undefined && r.span!=='') body+=`<td colspan="${days}" class="ms-g-span"><span class="${r.spanCls}" ${ed&&r.act?r.act+' role="button" tabindex="0"':''}>${esc(r.span)}</span></td>`;
       else body+=D.map(x=>{ const c=(r.cells||{})[x.d]; if(!c) return `<td class="ms-g-c${cls(x)}"></td>`; const m=MS_MARK[c.state]||MS_MARK.open, can=c.act && (ed || /data-ms-open/.test(c.act));
         return `<td class="ms-g-c${cls(x)}"><span class="ms-g-m ${m[0]}" title="${esc(isoToDmy(x.d)+' — '+((MS_BADGE[c.state]||MS_BADGE.open)[1]))}" ${can?c.act+' role="button" tabindex="0"':''}>${m[1]}</span></td>`; }).join('');
-      body+=`<td class="ms-g-sum mono">${r.dn}/${r.n}</td></tr>`; } }
-  return `<div class="panel ms-panel"><div class="section-head"><h3>Month grid — ${esc(periodLabel(ym))}</h3></div>
+      body+=`<td class="ms-g-sum mono">${r.dn}/${r.n}</td></tr>`; } } }
+  return `<div class="panel ms-panel"><div class="section-head"><h3>Month grid — ${esc(periodLabel(ym))} <span class="wsub">division-wise</span></h3></div>
     <div class="table-wrap ms-g-wrap"><table class="ms-grid"><thead><tr><th class="ms-g-lbl">Task / place</th>${D.map(x=>`<th class="ms-g-h${cls(x)}" ${ed?`data-ms-add="${x.d}" title="+ Add a task on ${isoToDmy(x.d)}" role="button"`:''}><div>${x.n}</div><div class="ms-g-w">${x.w}</div></th>`).join('')}<th class="ms-g-sum">Done</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="ms-g-leg"><span><i class="ms-g-m ms-g-plan">○</i> planned</span><span><i class="ms-g-m ms-g-today">●</i> today</span><span><i class="ms-g-m ms-g-ok">✓</i> done</span><span><i class="ms-g-m ms-g-late">✓</i> done late</span><span><i class="ms-g-m ms-g-bad">✗</i> missed / overdue</span><span><i class="ms-g-c ms-g-off ms-g-sw"></i> Friday</span>${ed?'<span class="wsub">Tap a mark to tick it · tap a date to add a task on that day</span>':''}</div></div>`; }
 function msRender(){ const el=document.getElementById('msBody'); if(!el || !auth.currentUser) return; const sec=document.getElementById('scheduleSection'); if(sec && sec.hidden) return;
@@ -10013,14 +10026,15 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
     if(await saveSettings('assurance', {[y]:{items}})){ appAssurance={...appAssurance, [y]:{items}}; msRender(); } return; }
 }, true);
 document.addEventListener('change', e=>{ const f=e.target.closest && e.target.closest('#msForm'); if(!f) return;
-  if(e.target.name==='where'){ const o=f.querySelector('[data-ms-other]'); if(o) o.hidden=e.target.value!=='__other'; }
+  if(e.target.name==='where'){ const o=f.querySelector('[data-ms-other]'); if(o) o.hidden=e.target.value!=='__other'; const dv=f.querySelector('[name="div"]'), pd=e.target.value.startsWith('p:')?msSiteDiv(e.target.value.slice(2)):''; if(dv && pd) dv.value=pd; }   // Batch 119c
   if(e.target.name==='rep'){ const u=f.querySelector('[data-ms-until]'); if(u) u.hidden=!e.target.value; } });
 document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement)) return;
   if(f.id==='msForm'){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; const F=isoFormData(f), g=k=>String(F.get(k)||'').trim();
     const date=g('date'), rep=['w','m'].includes(g('rep'))?g('rep'):'', until=rep?g('until'):'', wsel=g('where'), where=wsel==='__other'?g('whereText').slice(0,60):wsel;
     if(!msOkD(date)){ toast('Choose the date'); return; } if(until && until<date){ toast('"Repeat until" is before the first date'); return; }
     const old=msUi.form&&msUi.form.id?msData().tasks[msUi.form.id]:null, id=old?old.id:'ms'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-    const t={id, date, what:MS_WHAT.includes(g('what'))?g('what'):'Other', title:g('title').slice(0,120), where, who:g('who').slice(0,60), rep, until, note:g('note').slice(0,140), by:old?old.by||msWho():msWho(), at:old?old.at||new Date().toISOString():new Date().toISOString()};
+    const dsel=g('div'), div=MS_DIVS.includes(dsel)?dsel:((where.startsWith('p:') && msSiteDiv(where.slice(2))) || 'co');
+    const t={id, date, what:MS_WHAT.includes(g('what'))?g('what'):'Other', title:g('title').slice(0,120), where, div, who:g('who').slice(0,60), rep, until, note:g('note').slice(0,140), by:old?old.by||msWho():msWho(), at:old?old.at||new Date().toISOString():new Date().toISOString()};
     if(await msSave({tasks:{[id]:t}})){ msUi.form=null; clearDirtyForms(); if(date.slice(0,7)!==msYm() && !rep) msUi.ym=date.slice(0,7); toast(old?'Task saved':`Task added${rep?' — repeats '+(rep==='w'?'every week':'every month'):''}`); msRender(); }
     return; }
   if(f.dataset.msDoneform){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; const F=isoFormData(f), d=String(F.get('d')||''), note=String(F.get('note')||'').trim().slice(0,140);
@@ -10042,8 +10056,10 @@ function msPdf(){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are 
       const head=()=>{ ensure(26); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setFillColor(230,233,238); doc.rect(M,y,CW,22,'F'); doc.setTextColor(...INK); doc.text('Task / place', M+3, y+14);
         for(let i=0;i<days;i++){ const d=`${ym}-${String(i+1).padStart(2,'0')}`, dow=new Date(d+'T00:00:00Z').getUTCDay(), x=M+LW+i*dw; if(dow===5){ doc.setFillColor(210,214,220); doc.rect(x,y,dw,22,'F'); } doc.text(String(i+1), x+dw/2, y+10, {align:'center'}); doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.text('SMTWTFS'[dow], x+dw/2, y+19, {align:'center'}); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); }
         doc.text('Done', M+LW+days*dw+SW/2, y+14, {align:'center'}); y+=22; };
-      doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text('Month grid', M, y+10); y+=16; head(); let lastG='';
-      for(const r of GR){ if(y+RH>H-30){ doc.addPage(); y=40; head(); }
+      doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text('Month grid — division-wise', M, y+10); y+=16; head(); let lastG='', lastD='';
+      const GRS=MS_DIVS.flatMap(dv=>GR.filter(r=>r.div===dv));
+      for(const r of GRS){ if(y+RH+28>H-30){ doc.addPage(); y=40; head(); }
+        if(r.div!==lastD){ lastD=r.div; lastG=''; const DR=GR.filter(x=>x.div===r.div), dn=DR.reduce((n,x)=>n+x.dn,0), nn=DR.reduce((n,x)=>n+x.n,0); doc.setFillColor(20,30,48); doc.rect(M,y,CW,14,'F'); doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.text(`${msDivLabel(r.div).toUpperCase()}   ${dn} of ${nn} done${nn?' · '+Math.round(dn*100/nn)+' %':''}`, M+4, y+10); doc.setTextColor(...INK); y+=14; }
         if(r.g!==lastG){ lastG=r.g; doc.setFillColor(242,244,247); doc.rect(M,y,CW,12,'F'); doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(90); doc.text(MS_GRID_G[r.g].toUpperCase(), M+3, y+9); doc.setTextColor(...INK); y+=12; }
         doc.setDrawColor(200,204,210); doc.setLineWidth(0.3); doc.line(M, y+RH, M+CW, y+RH);
         for(let i=0;i<days;i++){ const d=`${ym}-${String(i+1).padStart(2,'0')}`; if(new Date(d+'T00:00:00Z').getUTCDay()===5){ doc.setFillColor(232,235,240); doc.rect(M+LW+i*dw, y, dw, RH, 'F'); } }
