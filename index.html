@@ -3048,7 +3048,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b117b';
+const APP_BUILD='b118';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3643,12 +3643,17 @@ const MH_DAYS_OFF={7:[], 6:[5], 5:[5,6]};
 const MH_DAY_LABEL={7:'7 days a week', 6:'6 days (Fri off)', 5:'5 days (Fri + Sat off)'};
 function mhAuto(s){ return !!(s && s.mhMode==='auto' && !s.deleted); }
 function mhFromOf(s){ return (s && (s.mhFrom || s.startDate)) || ''; }
+/* Batch 118: the day a worker who left stops counting (exclusive). contractEnded = his last day at work.
+   Before b118 the fall-back was the record's last-changed date, which moved every time an inactive worker's record was saved
+   (e.g. "delete stored signatures") — older months' man-hours then grew. */
+function workerStopDay(w){ if((w.status||'active')!=='inactive') return ''; const ce=String(w.contractEnded||'').slice(0,10);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(ce)) return dateAddDays(ce, 1); return String(w.updatedAt||'').slice(0,10); }
 function mhWorkerSpans(pid){
   const out=[];
   for(const w of activeWorkers()){
     let hs=projHistory(w).filter(h=>h.projectId===pid);
     if(!hs.length && w.projectId===pid) hs=[{from:String(w.projectAssignedAt||'').slice(0,10), to:''}];
-    const stop=(w.status||'active')==='inactive' ? String(w.contractEnded||String(w.updatedAt||'').slice(0,10)||'').slice(0,10) : '';
+    const stop=workerStopDay(w);
     for(const h of hs){ let to=h.to||''; if(!to && stop) to=stop; out.push({wid:w.id, from:String(h.from||'').slice(0,10), to:String(to).slice(0,10)}); }
   }
   return out;
@@ -6911,7 +6916,7 @@ regDefine({
   addLabel:'+ New meeting', noField:'mtgNo', noPrefix:'MTG', noYear:true, dateField:'date', yearFilter:true, statuses:['Scheduled','Held — minutes draft','Minutes issued'],
   headerButtons:'<button class="btn btn-sm" type="button" id="momBlankBtn">'+ic('printer')+' Blank MOM sheet</button><button class="btn btn-sm" type="button" data-pack-toggle="meetings">'+ic('download')+' MOM pack</button><button class="btn btn-sm" type="button" id="mtgTypesBtn">'+ic('gear')+' Meeting types</button>',
   topPanel:()=>{ const el=document.getElementById('meetingsTop'); if(el && typeof packTopHtml==='function') el.innerHTML=packTopHtml('meetings'); },
-  onData:()=>{ if(typeof momDeepLink!=='function') return; if(canEdit()){ ppeLinkSyncSoon(); trsProcessSigs(); } momDeepLink(); },
+  onData:()=>{ renderAssuranceAll(); if(typeof momDeepLink!=='function') return; if(canEdit()){ ppeLinkSyncSoon(); trsProcessSigs(); } momDeepLink(); },   // Batch 118: one onData — a second onData key further down replaced this one
   pdf:r=>momPdf(r), pdfLabel:'MOM PDF',
   searchPlaceholder:'Search meeting, chair, agenda…', emptyEditor:'No meetings yet — record HSE committee meetings and management reviews here with their minutes and actions.',
   titleOf:r=>r.type||'Meeting', subOf:r=>[r.date, r.chair?'chair '+r.chair:'', r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), badgesOf:r=>mtgStatusBadge(r),
@@ -6959,7 +6964,6 @@ regDefine({
       {label:'Last management review', num:lastMr?lastMr.date:'—', sub:lastMr?`${Math.max(0,-daysUntil(lastMr.date))} days ago`:'none recorded', cls:lastMr&&-daysUntil(lastMr.date)<=365?'ok':'danger', icon:'clipcheck'},
       {label:'Open meeting actions', num:acts.filter(a=>(a.status||'Open')!=='Closed').length, cls:acts.some(a=>complaintOverdueDays(a))?'danger':'', sub:`${acts.filter(a=>complaintOverdueDays(a)).length} overdue`, icon:'alert'},
       {label:'Next meeting', num:next?`${daysUntil(next.date)}d`:'—', sub:next?`${next.date} · ${next.type}`:'nothing scheduled', icon:'clock'}]; },
-  onData:()=>renderAssuranceAll(),
 });
 
 /* =============================== SUBCONTRACTORS =============================== */
@@ -9999,7 +10003,7 @@ function plCountsForProject(w, d){ const p=placeOn(w, d); if(!p) return true; re
    → else office staff by trade. Workshop / yard use the crew rules (hours/day, working days, from); office uses the office rules
    (hours/day, office week, public holidays, Ramadan hours). Inactive workers stop on their end date; office staff start on their joining date. */
 function plWorkerLife(w){ const st=String(w.dateOfJoining||'').slice(0,10), inact=(w.status||'active')==='inactive';
-  const stop=inact ? String(w.contractEnded||String(w.updatedAt||'').slice(0,10)||'').slice(0,10) : ''; return {st:/^\d{4}-\d{2}-\d{2}$/.test(st)?st:'', inact, stop}; }
+  const stop=inact ? workerStopDay(w) : ''; return {st:/^\d{4}-\d{2}-\d{2}$/.test(st)?st:'', inact, stop}; }
 function plDayKind(w, d){
   const p=placeOn(w, d); if(p) return {k:'place', place:p.place, loc:p.loc||'', p};
   const pr=projectOn(w, d); if(pr) return {k:'project', pid:pr};
@@ -10523,7 +10527,9 @@ document.addEventListener('change', e=>{ const t=e.target; if(!t || t.name!=='pl
 const WL_DIVS=['Scaffolding','Civil','Rental'];
 const WL_SPARE=['camp'], WL_INT=['workshop','yard'], WL_OUT=['leave','sick'];   // Batch 111b: workshop / yard work = engaged, not spare
 function wlInPool(w){ if(!w || w.deleted || plIsOfficeTrade(w)) return false; const t=canonTrade(w.trade||''); if(t==='Sub Contractor') return false; return WL_DIVS.includes(workerDivKey(w)||''); }
-function wlDayOf(w, d){ const life=plWorkerLife(w); if(life.st && d<life.st) return ''; if(life.inact && (!life.stop || d>=life.stop)) return ''; const p=placeOn(w, d);
+// Batch 118: no joining date → he is not counted before his first line in the tracker (was "spare", which pulled the month's % down)
+function wlFirstDay(w){ return [...projHistory(w), ...baseHist(w), ...plList(w), {from:w.createdAt}, ...(isTemp(w)?(w.contracts||[]).map(c=>({from:c&&c.date})):[])].map(h=>String(h.from||'').slice(0,10)).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).sort()[0]||''; }
+function wlDayOf(w, d){ const life=plWorkerLife(w); if(life.st && d<life.st) return ''; if(!life.st){ const f=wlFirstDay(w); if(f && d<f) return ''; } if(life.inact && (!life.stop || d>=life.stop)) return ''; const p=placeOn(w, d);
   if(p && WL_OUT.includes(p.place)) return 'out'; if(p && p.place==='travel' && p.forPid) return 'dep'; if(p && WL_SPARE.includes(p.place)) return 'spare'; if(p && WL_INT.includes(p.place)) return 'int';
   const pr=projectOn(w, d); if(pr){ const s=siteEquipmentList.find(x=>x.id===pr); if(s && !s.deleted) return 'dep'; }
   const b=baseOn(w, d), bt=b?plBaseType(b):''; if(['workshop','yard','office'].includes(bt)) return 'int'; return 'spare'; }
@@ -10785,9 +10791,18 @@ function mvSync(f){ const dest=String((f.querySelector('[name="dest"]')||{}).val
   const lbl=f.querySelector('[data-mv-lbl]'); if(lbl) lbl.textContent=isDays?'First day':'From (first day there)';
   const h=f.querySelector('[data-mv-hint]'); if(h) h.textContent=!dest?'':isDays?(dest.startsWith('p:')?'Temporary move to that project — back to his own project the day after the last day.':'Days away — he stays on his project / base; those days are counted by the man-hours rules (standby / travel count, camp / leave / sick = 0).'):'His project / home base changes from that date; the history keeps where he was before.'; }
 document.addEventListener('change', e=>{ const f=e.target.closest && e.target.closest('form[data-mv-form]'); if(f) mvSync(f); });
+// Batch 118: "Move back" from a temporary move is dated on the planned return day (not the day someone pressed the button) — not into a closed month
+function mvBackDay(w){ const t=localToday(); let d=(w.returnDate && w.returnDate<=t) ? w.returnDate : t; const lk=plLockedUpto(), st=mvLineStart(w);
+  if(lk && d.slice(0,7)<=lk) d=dateAddDays(lk+'-01', 40).slice(0,7)+'-01'; if(st && d<st) d=st; return d>t?t:d; }
+function mvLineStart(w){ return [...projHistory(w), ...baseHist(w)].filter(h=>!h.to && h.from).map(h=>String(h.from).slice(0,10)).sort().pop()||''; }   // Batch 118
+function mvNowLabel(w){ return w.projectId ? projectName(w.projectId) : w.base ? baseLabel(w.base) : 'his present place'; }
 function mvIdsOf(f){ const ctx=f.dataset.mvForm; if(ctx==='worker') return mvUi.wid?[mvUi.wid]:[]; if(ctx==='team') return [...(plUi.sel||new Set())]; return [...f.querySelectorAll('input[name="mvw"]:checked')].map(x=>x.value); }
 async function mvApply(ids, F){ const t=localToday(), dest=String(F.get('dest')||''), span=String(F.get('span')||'perm'), day=String(F.get('day')||''), last=String(F.get('last')||''), open=!!F.get('open'), reason=String(F.get('reason')||''), note=String(F.get('note')||'').trim();
   if(!ids.length) return {err:'Choose who moves'}; if(!dest) return {err:'Choose where to'}; if(!/^\d{4}-\d{2}-\d{2}$/.test(day) || day>t) return {err:'The date must be today or earlier'};
+  // Batch 118: no moves into a closed month; a project / base move cannot start before his present line started (two places at once = hours counted twice)
+  const lk=plLockedUpto(); if(lk && day.slice(0,7)<=lk) return {err:`${periodLabel(lk)} is closed — reopen the month (with a reason) or choose a later date`};
+  if(span==='perm' || dest.startsWith('p:')){ const early=ids.map(id=>workers.find(x=>x.id===id)).filter(w=>w && mvLineStart(w)>day);
+    if(early.length){ const w=early[0]; return {err:`${w.fullName||'He'}${early.length>1?` (and ${early.length-1} more)`:''} is at ${mvNowLabel(w)} since ${isoToDmy(mvLineStart(w))} — the move date must be on or after that. To change when he really started, use "Correct start date" in his Project box.`}; } }
   if(span==='perm'){ const trv=F.get('trv')&&dest.startsWith('p:')?{tfrom:String(F.get('ttf')||'').trim(), tto:String(F.get('ttt')||'').trim()}:null;
     const todo=ids.filter(id=>{ const w=workers.find(x=>x.id===id); if(!w) return false; if(dest.startsWith('p:')) return w.projectId!==dest.slice(2); if(dest.startsWith('b:')) return !(!w.projectId && w.base && (w.base===dest.slice(2) || plLocKey(w.base)===dest.slice(2))); return !!(w.projectId||w.base); });
     if(!todo.length) return {err:'Already there'}; const n=await plRelocate(todo, dest, day, trv); return {msg:`${n} moved to ${plDestLabel(dest)} from ${isoToDmy(day)}${trv?' — first day travelling':''}`}; }
@@ -16915,8 +16930,12 @@ async function autoEndContracts(){
     if(!isTemp(w) || (w.status||'active')!=='active' || _autoEnded.has(w.id)) continue;
     const c=currentContract(w), end=contractEnd(c); if(!c || !end || end>=t) continue;
     _autoEnded.add(w.id);
-    try{ await db.collection('workers').doc(w.id).update(stamp({status:'inactive', contractEnded:end, ...moveWorkerUpdate(w, null)})); }catch(e){ console.warn('auto end contract', e); }
+    try{ await db.collection('workers').doc(w.id).update(stamp({status:'inactive', contractEnded:end, ...moveWorkerUpdate(w, null, {date:dateAddDays(end, 1)})})); }catch(e){ console.warn('auto end contract', e); }   // Batch 118: closes the day after the end
   }
+  // Batch 118: inactive workers with no last day — freeze it once (the date the figures used so far), so it no longer moves
+  for(const w of activeWorkers()){ if((w.status||'active')!=='inactive' || /^\d{4}-\d{2}-\d{2}$/.test(String(w.contractEnded||'').slice(0,10)) || _autoEnded.has('f:'+w.id)) continue;
+    const u=String(w.updatedAt||'').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(u)) continue; _autoEnded.add('f:'+w.id);
+    try{ await db.collection('workers').doc(w.id).update(stamp({contractEnded:dateAddDays(u, -1)})); }catch(e){ console.warn('freeze last day', e); } }
 }
 function renderMoveNote(){
   const el=document.getElementById('moveNote'); if(!el) return;
@@ -19003,6 +19022,7 @@ function profileTabHtml(w){
       <label>Date of joining<input type="date" data-field="dateOfJoining" value="${esc(w.dateOfJoining||'')}"></label>
       <label>Employment type<select data-field="empType"><option value="" ${isTemp(w)?'':'selected'}>Permanent / company staff</option><option value="Temporary" ${isTemp(w)?'selected':''}>Temporary contract (individual)</option></select></label>
       <label>Employment status<select data-field="status"><option value="active" ${(w.status||'active')==='active'?'selected':''}>Active</option><option value="inactive" ${w.status==='inactive'?'selected':''}>Inactive</option></select></label>
+      <label data-last-day ${w.status==='inactive'?'':'hidden'}>Last day at work<input type="date" data-field="contractEnded" value="${esc(String(w.contractEnded||'').slice(0,10))}" max="${localToday()}"></label>
     </div>
 
     <div class="form-grid" style="margin-top:10px;">${workerRolesFormHtml(w)}</div>
@@ -19970,6 +19990,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
         data.extraRoles=[...e.target.querySelectorAll('[data-extra-role]:checked')].map(x=>x.value).filter(x=>roleKey(x)!==roleKey(data.designation));
         if(w.mainRole) data.mainRole='';   // the Designation is the main role now
       }
+      // Batch 118: man-hours stop after the last day at work (today when left empty); back to Active clears it
+      if(data.status==='inactive'){ if(!/^\d{4}-\d{2}-\d{2}$/.test(data.contractEnded||'')) data.contractEnded=String(w.contractEnded||'').slice(0,10)||localToday(); }
+      else if(w.contractEnded) data.contractEnded=''; else delete data.contractEnded;
       await updateWorker(w.id,data);
     }
     if(e.target.id==='recordForm'){
@@ -20018,6 +20041,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(e.target.matches && e.target.matches('#recordForm [data-field="expiry"]')) e.target.dataset.auto='0';
   });
   document.getElementById('drawerBody').addEventListener('change', e=>{
+    if(e.target.matches('#profileForm [data-field="status"]')){ const l=document.querySelector('#profileForm [data-last-day]'); if(l){ l.hidden=e.target.value!=='inactive'; const i=l.querySelector('input'); if(!l.hidden && i && !i.value) i.value=localToday(); } }   // Batch 118
     if(e.target.matches('#profileForm [data-field="trade"]')){ const d=document.querySelector('#profileForm select[data-field="designation"]'); if(d) d.innerHTML=designationOptionsHtml(e.target.value, d.value); }
     if(e.target.id==='wmTemp'){ const b=document.getElementById('wmBackWrap'); if(b) b.hidden=!e.target.checked; }
     if(e.target.id==='wmTrv'){ const b=document.getElementById('wmTrvWrap'); if(b) b.hidden=!e.target.checked; }   // Batch 110
@@ -20044,7 +20068,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
     if(e.target.closest('[data-new-contract]')){ activeTab='contracts'; editingRecordId=null; addFormOpen=true; recordPrefill={__tab:'contracts', project:w.projectId?projectName(w.projectId):''}; renderDrawer(); return; }
     const mb=e.target.closest('[data-move-back]');
-    if(mb){ if(await moveWorker(w.id, w.returnProjectId)) toast('Moved back to '+projectName(w.returnProjectId)); return; }
+    if(mb){ const day=mvBackDay(w); if(await moveWorker(w.id, w.returnProjectId, {date:day})) toast(`Moved back to ${projectName(w.returnProjectId)} from ${isoToDmy(day)}`); return; }   // Batch 118: dated on the return day
   });
   document.getElementById('contractNote').addEventListener('click', e=>{ const b=e.target.closest('[data-open-contract]'); if(b) openDrawer(b.dataset.openContract); });
   document.addEventListener('click', e=>{
@@ -20546,7 +20570,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const unW=e.target.closest('[data-unassign-worker]');
     if(unW){ e.stopPropagation(); if(await moveWorker(unW.dataset.unassignWorker, null)) toast('Removed from this project'); return; }
     const bb=e.target.closest('[data-bring-back]');
-    if(bb && s0){ e.stopPropagation(); if(await moveWorker(bb.dataset.bringBack, s0.id)) toast('Moved back to '+(s0.siteName||'this project')); return; }
+    if(bb && s0){ e.stopPropagation(); const bw=workers.find(x=>x.id===bb.dataset.bringBack), day=bw && bw.returnProjectId===s0.id ? mvBackDay(bw) : localToday(); if(await moveWorker(bb.dataset.bringBack, s0.id, {date:day})) toast(`Moved back to ${s0.siteName||'this project'} from ${isoToDmy(day)}`); return; }   // Batch 118
     const unV=e.target.closest('[data-unassign-vehicle]');
     if(unV){ e.stopPropagation(); try{ await db.collection('vehicles').doc(unV.dataset.unassignVehicle).update({projectId:null}); toast('Removed from this project'); }catch(err){ toast('Could not update'); } return; }
     const openW=e.target.closest('[data-open-worker]');
