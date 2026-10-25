@@ -1190,6 +1190,12 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .aud-cell.danger{background:var(--danger-bg); color:var(--danger); border-color:var(--danger);} .aud-cell.info{background:color-mix(in srgb, #8b5cf6 16%, transparent); color:#a78bfa; border-color:#8b5cf6;} .aud-cell.muted{color:var(--muted);}
 .aud-cell.extra{border-style:dashed; color:var(--ok);} .aud-legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; font-size:12px; align-items:center;} .aud-legend .aud-cell{cursor:default; min-width:24px;}
 .aud-agenda table{min-width:640px;} .aud-agenda input{padding:6px 8px;} .aud-agenda tbody tr{cursor:default;}
+.ms-bar{display:flex; align-items:center; gap:8px; margin:0 0 12px; flex-wrap:wrap;} .ms-mlabel{font-size:16px; min-width:150px; text-align:center;}
+.ms-panel{margin-top:14px;} .ms-week{margin-top:10px;} .ms-wk-h{font-weight:700; font-size:12px; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em; padding:4px 0; border-bottom:1px solid var(--line);}
+.ms-row{display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-bottom:1px dashed var(--line);} .ms-d{min-width:58px; font-size:12.5px; color:var(--ink-muted); padding-top:2px;} .ms-main{flex:1; min-width:0;} .ms-a{display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;}
+.ms-done .ms-main,.ms-late .ms-main{opacity:.78;} .ms-over .ms-d,.ms-missed .ms-d,.ms-drop .ms-d,.ms-carried .ms-d,.ms-never .ms-d{color:var(--danger); font-weight:700;} .ms-today .ms-d,.ms-row.ms-month .ms-d{color:var(--warn); font-weight:700;}
+.ms-carry{border-left:3px solid var(--danger); padding-left:8px;} .ms-doneform{display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin-top:6px;} .ms-doneform label{font-size:12px;} .ms-grow{flex:1; min-width:180px;} .ms-form{margin-top:14px;}
+@media (max-width:640px){ .ms-row{flex-wrap:wrap;} .ms-a{width:100%; justify-content:flex-start;} }
 </style>
 </head>
 <body class="auth-open">
@@ -1215,6 +1221,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
   <aside class="sidenav">
     <img src="logo.png" alt="Burhan Oil & Trade Services" class="sidenav-logo">
     <button type="button" class="sidenav-btn" data-section="report">Monthly Report</button>
+    <button type="button" class="sidenav-btn" data-section="schedule">Monthly Schedule</button>
     <div class="nav-group">Operations</div>
     <button type="button" class="sidenav-btn active" data-section="workforce">Workforce</button>
     <button type="button" class="sidenav-btn" data-section="comp">Competency</button>
@@ -1823,6 +1830,12 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
       </div>
     </main>
 
+    <main class="app-main" id="scheduleSection" hidden>
+      <div class="topbar"><div><h1>Monthly Schedule</h1><p class="page-tagline"><span class="pt-co">Burhan Oil &amp; Trade Services</span><span class="pt-sep" aria-hidden="true"></span><span class="pt-slogan">Plan · Go · Check · Close</span></p></div>
+        <div class="topbar-actions"><button class="btn btn-sm" id="msPdfBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Schedule PDF</button><button class="btn btn-primary" id="msAddBtn" type="button" hidden>+ Add task</button></div></div>
+      <div id="msBody"><p class="wsub">Sign in to load…</p></div>
+    </main>
+
     <main class="app-main" id="assuranceSection" hidden>
       <div class="topbar">
         <div>
@@ -2328,6 +2341,7 @@ const PDF_DOCS={
   ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
   liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'}, warnLetter:{title:'HSE Warning Letter'}, ck_veh:{title:'Vehicle Inspection Checklist'}, ck_cut14:{title:'14-inch Cutting Machine Inspection Checklist'}, ck_blower:{title:'Air Blower Inspection Checklist'}, ck_boom:{title:'Boom Lift Inspection Checklist'}, ck_drill:{title:'Drilling Machine Inspection Checklist'}, ck_vib:{title:'Concrete Vibrator Inspection Checklist'}, ck_fire:{title:'Fire Extinguisher Inspection Checklist'}, ck_whm:{title:'Well Head Maintenance Checklist'}, ck_harness:{title:'Full Body Harness Inspection Checklist'}, ck_grind:{title:'Grinding Machine Inspection Checklist'}, ck_ply:{title:'Plywood Cutting Machine Inspection Checklist'}, ck_scissor:{title:'Scissor Lift Inspection Checklist'},
 };
+PDF_DOCS.schedule={title:'Monthly HSE Schedule'};   // Batch 119
 function docControl(key){ const d=(((settingsDocs||{}).docControl||{}).docs||{})[key]; if(d && String(d.no||'').trim()) return d; const t=typeof ckDocDefault==='function'?ckDocDefault(key):null; return t?{...t, ...(d||{}), no:t.no}:(d||{}); }
 let pdfLogoData=null;
 let docCtlBase='';
@@ -3033,6 +3047,7 @@ function startSettingsData(){
       if(typeof mtgTypesRefresh==='function') mtgTypesRefresh();   // Batch 97
       if(typeof ptwSettingsRefresh==='function') ptwSettingsRefresh();   // Batch 98
       if(typeof plRender==='function') plRender();   // Batch 105
+      if(typeof msRenderSoon==='function') msRenderSoon();   // Batch 119
       renderPpe(true);   // Batch 49
       if(canEdit()) ppeLinkSyncSoon();   // Batch 73: approved PPE list / photos → worker link
       renderComp(); if(compUi.panel) compRenderTop(); renderCcComp();   // Batch 84
@@ -3048,7 +3063,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b118';
+const APP_BUILD='b119';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -7152,6 +7167,7 @@ function actMatches(a){
 }
 let actCache=[];
 function renderActionTracker(){
+  if(typeof msRenderSoon==='function') msRenderSoon();   // Batch 119: the Monthly Schedule reads the same records
   const tb=document.getElementById('actRows'); if(!tb || !auth.currentUser) return;
   const all=collectAllActions(); actCache=all;
   const open=all.filter(a=>a.status!=='Closed'), od=open.filter(a=>complaintOverdueDays(a)), soon=open.filter(a=>{ const d=a.targetDate?daysUntil(a.targetDate):null; return d!==null&&d>=0&&d<=7; });
@@ -9811,6 +9827,187 @@ function calDoneFormHtml(e){
     <div class="form-actions span-all"><button type="button" class="btn btn-sm" id="cdCancel">Cancel</button><button type="submit" class="btn btn-primary btn-sm">Save as done</button></div></form>`;
 }
 async function saveCal(data){ const ok=await saveSettings('safetyCalendar', data); if(ok){ renderCalendar(); renderCcExtras(); } return ok; }
+/* =============================== Batch 119: MONTHLY SCHEDULE ===============================
+   One page per month: where to go and what to do, ticked done.
+   Own tasks: settings/schedule.tasks {id: {id, date, what, title, where ('p:<project>' | 'l:<location>' | text), who, rep ''|'w'|'m', until, note, by, at}}
+   Status of one day of a task: settings/schedule.st {'<taskId>|<date>': {s:'done'|'drop'|'skip', d:<done date>, note, by, at}}
+     done = ticked done · drop = marked missed (not carried on) · skip = this one day removed from a repeating task.
+   A task not done by the end of its month counts as missed in that month and is carried into the current month until it is done or dropped.
+   Filled in by themselves: the month's Assurance Plan activities (done from the plan's evidence / tick), inspections due
+   (equipment, fire extinguishers, vehicles, items in vehicles — done when the inspection is recorded), expiries of the month
+   (training, medical, licences, vehicle documents — done when renewed) and, in the current month, overdue actions (reminder, not scored). */
+const MS_WHAT=['Site visit','HSE inspection','Toolbox talk','Audit','Training','Housekeeping check','Meeting','Mock drill','Other'];
+const MS_EXP_KEYS=[['trainings','Training'],['medical','Medical'],['licenses','Licence']];
+let msUi={ym:'', form:null, done:'', more:{}};
+function msData(){ const s=settingsDocs.schedule||{}; return {tasks:(s.tasks && typeof s.tasks==='object' && !Array.isArray(s.tasks))?s.tasks:{}, st:(s.st && typeof s.st==='object' && !Array.isArray(s.st))?s.st:{}}; }
+function msYm(){ return msUi.ym || localToday().slice(0,7); }
+function msMonthEnd(ym){ const nx=compAddMonths(ym+'-01', 1); return nx ? dateAddDays(nx, -1) : ym+'-31'; }
+function msDim(ym){ return Number(msMonthEnd(ym).slice(8,10)); }
+const msOkD=x=>/^\d{4}-\d{2}-\d{2}$/.test(x||'');
+// the days of one task between from and to (inclusive)
+function msTaskDates(t, from, to){ const out=[]; if(!t || !msOkD(t.date)) return out; const stop=msOkD(t.until)?t.until:'9999-12-31', last=[to, stop].sort()[0];
+  if(t.rep==='w'){ let d=t.date; if(d<from){ const n=Math.ceil(daysBetween(t.date, from)/7); d=dateAddDays(t.date, n*7); } for(let g=0; d<=last && g<400; g++, d=dateAddDays(d,7)) if(d>=from) out.push(d); return out; }
+  if(t.rep==='m'){ const day=Number(t.date.slice(8,10)); let ym=[t.date.slice(0,7), from.slice(0,7)].sort().pop();
+    for(let g=0; ym<=last.slice(0,7) && g<240; g++){ const d=`${ym}-${String(Math.min(day, msDim(ym))).padStart(2,'0')}`; if(d>=t.date && d>=from && d<=last) out.push(d); const nx=compAddMonths(ym+'-01',1); if(!nx) break; ym=nx.slice(0,7); } return out; }
+  if(t.date>=from && t.date<=to && t.date<=stop) out.push(t.date); return out; }
+// state of one own-task day: done / late / drop (missed, not carried) / missed (month over) / over (past, this month) / today / open
+function msOwnState(d, rec){ const t=localToday();
+  if(rec && rec.s==='done') return (rec.d && rec.d>msMonthEnd(d.slice(0,7))) ? 'late' : 'done';
+  if(rec && rec.s==='drop') return 'drop';
+  if(msMonthEnd(d.slice(0,7))<t) return 'missed'; if(d<t) return 'over'; if(d===t) return 'today'; return 'open'; }
+function msOwnRows(ym){ const {tasks, st}=msData(), from=ym+'-01', to=msMonthEnd(ym), rows=[];
+  for(const t of Object.values(tasks)){ if(!t || !t.id) continue; for(const d of msTaskDates(t, from, to)){ const key=t.id+'|'+d, rec=st[key]; if(rec && rec.s==='skip') continue; rows.push({src:'own', key, t, d, rec, state:msOwnState(d, rec)}); } }
+  return rows.sort((a,b)=>a.d.localeCompare(b.d) || String(a.t.title||a.t.what).localeCompare(String(b.t.title||b.t.what))); }
+// earlier months: not done, not dropped → carried into the current month
+function msCarried(ym){ if(ym!==localToday().slice(0,7)) return []; const {tasks, st}=msData(), from=compAddMonths(ym+'-01', -6)||ym+'-01', to=dateAddDays(ym+'-01', -1), rows=[];
+  for(const t of Object.values(tasks)){ if(!t || !t.id) continue; for(const d of msTaskDates(t, from, to)){ const key=t.id+'|'+d, rec=st[key]; if(rec && ['skip','drop','done'].includes(rec.s)) continue; rows.push({src:'own', key, t, d, rec, state:'carried'}); } }
+  return rows.sort((a,b)=>a.d.localeCompare(b.d)); }
+function msWhereLabel(w){ w=String(w||''); if(w.startsWith('p:')) return projectName(w.slice(2)); if(w.startsWith('l:')){ const l=plLocById(w.slice(2)); return l?l.name:'Company location'; } return w; }
+/* ---- filled in by themselves ---- */
+function msAssuranceRows(ym){ const y=ym.slice(0,4), m=Number(ym.slice(5,7)), items=assurancePlanFor(y)||[], cur=localToday().slice(0,7), out=[];
+  items.forEach((it,idx)=>{ const c=assuranceCell(it, y, m); if(!c.planned) return; out.push({src:'as', key:`as|${y}|${idx}|${m}`, y, idx, m, it, c, state:c.done?'done':ym<cur?'missed':ym===cur?'month':'open'}); });
+  return out; }
+function msInspRows(ym){ if(!regState.insp) return []; const from=ym+'-01', to=msMonthEnd(ym), cur=localToday().slice(0,7), t=localToday(), out=[];
+  for(const ref of inspItemsDue()){ const S=inspState(ref); if(!S || S.it.gone) continue;
+    if(S.lastDate && S.lastDate>=from && S.lastDate<=to){ out.push({src:'insp', key:'in|'+ref, ref, S, d:S.lastDate, state:S.notFit?'notfit':'done'}); continue; }
+    if(S.next && S.next>=from && S.next<=to){ out.push({src:'insp', key:'in|'+ref, ref, S, d:S.next, state:S.next<t?'over':S.next===t?'today':'open'}); continue; }
+    if(ym===cur && S.next && S.next<from) out.push({src:'insp', key:'in|'+ref, ref, S, d:S.next, state:'over'});
+    else if(ym===cur && S.st==='never') out.push({src:'insp', key:'in|'+ref, ref, S, d:'', state:'never'}); }
+  return out.sort((a,b)=>(a.state==='never')-(b.state==='never') || String(a.d).localeCompare(String(b.d)) || a.S.it.label.localeCompare(b.S.it.label)); }
+function msExpiryRows(ym){ const from=ym+'-01', to=msMonthEnd(ym), t=localToday(), out=[]; const inM=r=>{ const x=r?String(r.expiry||'').slice(0,10):''; return msOkD(x) && x>=from && x<=to; };
+  for(const w of activeWorkers()){ if((w.status||'active')!=='active') continue;
+    for(const [k,l] of MS_EXP_KEYS) for(const r of (w[k]||[])) if(inM(r)){ const ren=isRenewed(w[k], k, r); out.push({src:'exp', key:`ex|w|${w.id}|${k}|${r.id||r.expiry}`, kind:'w', id:w.id, tab:k, who:w.fullName||'—', what:l, name:r.name||r.type||r.skill||l, d:r.expiry, state:ren?'done':r.expiry<t?'over':r.expiry===t?'today':'open'}); } }
+  for(const v of activeVehicles()) for(const r of (v.documents||[])) if(inM(r)){ const ren=isRenewed(v.documents, 'documents', r); out.push({src:'exp', key:`ex|v|${v.id}|${r.id||r.expiry}`, kind:'v', id:v.id, tab:'documents', who:v.vehicleNumber||'Vehicle', what:'Vehicle document', name:r.type||'Document', d:r.expiry, state:ren?'done':r.expiry<t?'over':r.expiry===t?'today':'open'}); }
+  return out.sort((a,b)=>a.d.localeCompare(b.d) || a.who.localeCompare(b.who)); }
+let msActCache=[];
+function msActionRows(ym){ if(ym!==localToday().slice(0,7)) return []; msActCache=collectAllActions().filter(a=>a.status!=='Closed' && complaintOverdueDays(a)).sort((a,b)=>String(a.targetDate).localeCompare(String(b.targetDate))); return msActCache; }
+// planned vs done for a month (own tasks + assurance + inspections + expiries; overdue actions are a reminder only)
+function msStats(ym){ const L=[...msOwnRows(ym), ...msAssuranceRows(ym), ...msInspRows(ym), ...msExpiryRows(ym)];
+  const done=L.filter(x=>['done','late','notfit'].includes(x.state)).length, late=L.filter(x=>x.state==='late').length, miss=L.filter(x=>['missed','drop','over','never'].includes(x.state)).length;
+  return {planned:L.length, done, late, miss, pct:L.length?Math.round(done*100/L.length):null}; }
+/* ---- page ---- */
+const MS_BADGE={done:['ok','Done'], late:['warn','Done late'], notfit:['danger','Done — NOT fit'], drop:['danger','Missed'], missed:['danger','Missed'], over:['danger','Overdue'], today:['warn','Today'], open:['muted','Planned'], month:['warn','This month'], never:['warn','Not inspected yet'], carried:['danger','Not done — carried over']};
+function msBadge(s){ const b=MS_BADGE[s]||MS_BADGE.open; return `<span class="badge ${b[0]}">${esc(b[1])}</span>`; }
+function msDay(d){ if(!d) return '—'; const x=new Date(d+'T00:00:00'); return `${x.toLocaleDateString('en-GB',{weekday:'short'})} ${d.slice(8,10)}`; }
+function msOwnRowHtml(x, ed){ const t=x.t, done=['done','late'].includes(x.state), rep=t.rep==='w'?'↻ weekly':t.rep==='m'?'↻ monthly':'';
+  const btns=!ed?'':(done||x.state==='drop')?`<button type="button" class="att-link" data-ms-undo="${esc(x.key)}" data-armed="0">Undo</button>`
+    :`<button type="button" class="btn btn-sm btn-primary" data-ms-done="${esc(x.key)}">Done</button><button type="button" class="btn btn-sm" data-ms-drop="${esc(x.key)}" data-armed="0">${x.state==='carried'?'Drop':'Missed'}</button>${t.rep&&x.state!=='carried'?`<button type="button" class="att-link" data-ms-skip="${esc(x.key)}" data-armed="0">Skip this one</button>`:''}`;
+  const doneForm=ed && msUi.done===x.key ? `<form data-ms-doneform="${esc(x.key)}" class="ms-doneform"><label>Done on<input type="date" name="d" value="${esc(localToday())}" max="${esc(localToday())}" required></label><label class="ms-grow">Note (optional)<input name="note" maxlength="140" placeholder="e.g. housekeeping poor at the store — action raised"></label><button type="submit" class="btn btn-sm btn-primary">Save</button><button type="button" class="btn btn-sm" data-ms-donex="1">Cancel</button></form>` : '';
+  return `<div class="ms-row ms-${x.state}"><div class="ms-d mono">${esc(x.state==='carried'?isoToDmy(x.d):msDay(x.d))}</div><div class="ms-main"><div><strong>${esc(t.title||t.what||'Task')}</strong> ${t.title&&t.what?`<span class="badge muted">${esc(t.what)}</span>`:''} ${rep?`<span class="wsub">${rep}</span>`:''} ${msBadge(x.state)}</div>
+    <div class="wsub">${t.where?'📍 '+esc(msWhereLabel(t.where))+' ':''}${t.who?'· 👤 '+esc(t.who)+' ':''}${t.note?'· '+esc(t.note):''}${x.rec&&x.rec.s==='done'?` · ✓ ${esc(isoToDmy(x.rec.d||''))}${x.rec.by?' by '+esc(x.rec.by):''}${x.rec.note?' — '+esc(x.rec.note):''}`:''}</div>${doneForm}</div>
+    <div class="ms-a">${btns}${ed?`<button type="button" class="icon-btn" data-ms-edit="${esc(t.id)}" aria-label="Edit task">${ic('pencil')}</button>`:''}</div></div>`; }
+function msWeeks(ym){ const from=ym+'-01', to=msMonthEnd(ym), W=[]; let s=from;
+  while(s<=to){ const dow=new Date(s+'T00:00:00Z').getUTCDay(), e=[dateAddDays(s, 6-dow), to].sort()[0]; W.push({s, e}); s=dateAddDays(e,1); } return W; }
+function msFormHtml(){ const f=msUi.form||{}, t=f.id?(msData().tasks[f.id]||{}):{date:f.date||'', who:plWho(), what:'Site visit'}; const wv=String(t.where||'');
+  const projs=activeSites().filter(s=>projectLive(s) || 'p:'+s.id===wv).sort((a,b)=>(a.siteName||'').localeCompare(b.siteName||'')), locs=plLocs();
+  const known=!wv || wv.startsWith('p:') || wv.startsWith('l:'); const names=[...new Set([plWho(), ...Object.values((settingsDocs.hseSignatures||{}).sigs||{}).map(x=>x&&x.name)].filter(Boolean))];
+  return `<form id="msForm" class="panel ms-form"><div class="section-head"><h3>${f.id?'Edit task':'+ Add task'}</h3></div>
+    <div class="form-grid"><label>Date *<input type="date" name="date" value="${esc(t.date||'')}" required></label>
+      <label>What *<select name="what" required>${MS_WHAT.map(w=>`<option ${w===(t.what||'')?'selected':''}>${esc(w)}</option>`).join('')}</select></label>
+      <label class="span-all">Task<input name="title" maxlength="120" value="${esc(t.title||'')}" placeholder="e.g. Site visit + housekeeping check, TBT on heat stress"></label>
+      <label>Where<select name="where"><option value="">—</option>${projs.length?`<optgroup label="Projects">${projs.map(s=>`<option value="p:${esc(s.id)}" ${'p:'+s.id===wv?'selected':''}>${esc(s.siteName||'Project')}</option>`).join('')}</optgroup>`:''}${locs.length?`<optgroup label="Company locations">${locs.map(l=>`<option value="l:${esc(l.id)}" ${'l:'+l.id===wv?'selected':''}>${esc(l.name)}</option>`).join('')}</optgroup>`:''}<option value="__other" ${known?'':'selected'}>Other place…</option></select></label>
+      <label data-ms-other ${known?'hidden':''}>Other place<input name="whereText" maxlength="60" value="${esc(known?'':wv)}" placeholder="e.g. Client office Muscat"></label>
+      <label>Who<input name="who" maxlength="60" list="msWho" value="${esc(t.who||'')}"><datalist id="msWho">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>
+      <label>Repeat<select name="rep"><option value="" ${!t.rep?'selected':''}>Does not repeat</option><option value="w" ${t.rep==='w'?'selected':''}>Every week (same day)</option><option value="m" ${t.rep==='m'?'selected':''}>Every month (same date)</option></select></label>
+      <label data-ms-until ${t.rep?'':'hidden'}>Repeat until (optional)<input type="date" name="until" value="${esc(t.until||'')}"></label>
+      <label class="span-all">Note<input name="note" maxlength="140" value="${esc(t.note||'')}" placeholder="optional"></label></div>
+    ${f.id&&t.rep?'<p class="wsub" style="margin:4px 0 0;">Changes apply to every day of this repeating task. Use "Skip this one" on a day to leave out one day only.</p>':''}
+    <div class="form-actions" style="justify-content:space-between;"><span>${f.id?`<button type="button" class="btn btn-sm btn-danger" data-ms-del="${esc(f.id)}" data-armed="0">Delete task</button>${t.rep?` <button type="button" class="btn btn-sm" data-ms-end="${esc(f.id)}" data-armed="0">End the repeat (keep the past)</button>`:''}`:''}</span>
+      <span><button type="button" class="btn" data-ms-cancel="1">Cancel</button> <button type="submit" class="btn btn-primary">Save</button></span></div></form>`; }
+function msGroupHtml(key, title, rows, rowHtml, sub){ if(!rows.length) return ''; const open=msUi.more[key], lim=8, shown=open?rows:rows.slice(0,lim), dn=rows.filter(x=>['done','late','notfit'].includes(x.state)).length;
+  return `<div class="panel ms-panel"><div class="section-head"><h3>${title} <span class="wsub">${dn} of ${rows.length} done</span></h3></div>${sub?`<p class="wsub" style="margin:-4px 0 6px;">${sub}</p>`:''}
+    ${shown.map(rowHtml).join('')}${rows.length>lim?`<button type="button" class="att-link" data-ms-more="${key}">${open?'Show less':`Show all ${rows.length}`}</button>`:''}</div>`; }
+function msRender(){ const el=document.getElementById('msBody'); if(!el || !auth.currentUser) return; const sec=document.getElementById('scheduleSection'); if(sec && sec.hidden) return;
+  if(formDirtyIn('msBody')) return;
+  const ym=msYm(), cur=localToday().slice(0,7), ed=canEdit(), own=msOwnRows(ym), car=msCarried(ym), as=msAssuranceRows(ym), ins=msInspRows(ym), ex=msExpiryRows(ym), act=msActionRows(ym), S=msStats(ym);
+  const ab=document.getElementById('msAddBtn'); if(ab) ab.hidden=!ed;
+  const tiles=[{label:'Planned', num:S.planned, sub:'tasks + plan + inspections + expiries', icon:'clipboard'},
+    {label:'Done', num:S.done, sub:S.late?`${S.late} done late`:'ticked / recorded', icon:'checkcircle', cls:S.done?'ok':''},
+    {label:ym<cur?'Missed':'Missed / overdue', num:S.miss, sub:ym<cur?'not done in the month':'date passed, not done', icon:'alert', cls:S.miss?'danger':'ok'},
+    {label:'Done %', num:S.pct===null?'—':S.pct+' %', sub:'done ÷ planned', icon:'target', cls:S.pct===null?'':S.pct>=90?'ok':S.pct>=75?'warn':'danger'}];
+  const weeks=msWeeks(ym).map((w,i)=>({...w, i, rows:own.filter(x=>x.d>=w.s && x.d<=w.e)}));
+  const asRow=x=>`<div class="ms-row ms-${x.state}"><div class="ms-d mono">${esc(MONTHS_SHORT[x.m-1])}</div><div class="ms-main"><div><strong>${esc(x.it.activity)}</strong> ${msBadge(x.state)}</div><div class="wsub">${x.it.owner?'👤 '+esc(x.it.owner):''}${x.it.clause?' · ISO 45001 '+esc(x.it.clause):''}${x.c.ev?` · ${x.c.ev} record${x.c.ev===1?'':'s'} found`:''}${x.c.manual?' · ticked by hand':''}</div></div>
+    <div class="ms-a">${ed && !x.c.ev ? (x.c.manual?`<button type="button" class="att-link" data-ms-as="${esc(x.y+'|'+x.idx+'|'+x.m)}" data-on="0" data-armed="0">Undo</button>`:`<button type="button" class="btn btn-sm btn-primary" data-ms-as="${esc(x.y+'|'+x.idx+'|'+x.m)}" data-on="1">Done</button>`) : ''}</div></div>`;
+  const inRow=x=>{ const it=x.S.it; return `<div class="ms-row ms-${x.state}"><div class="ms-d mono">${esc(x.d?(x.state==='over'&&x.d<ym+'-01'?isoToDmy(x.d):msDay(x.d)):'—')}</div><div class="ms-main"><div><strong>${esc(it.kind==='veh'?'Vehicle':it.group)}</strong> — ${esc(it.label)} ${msBadge(x.state)}</div><div class="wsub">${it.where?'📍 '+esc(it.where):''}${x.S.lastDate?' · last '+esc(isoToDmy(x.S.lastDate)):''}${x.S.next&&x.state!=='done'&&x.state!=='notfit'?' · due '+esc(isoToDmy(x.S.next)):''}</div></div>
+    <div class="ms-a">${ed && !['done','notfit'].includes(x.state)?`<button type="button" class="btn btn-sm" data-insp-new="${esc(x.ref)}">+ Inspect</button>`:''}</div></div>`; };
+  const exRow=x=>`<div class="ms-row ms-${x.state}" data-ms-open="${esc(x.kind+'|'+x.id+'|'+x.tab)}" style="cursor:pointer;"><div class="ms-d mono">${esc(msDay(x.d))}</div><div class="ms-main"><div><strong>${esc(x.who)}</strong> — ${esc(x.what)}: ${esc(x.name)} ${x.state==='done'?'<span class="badge ok">Renewed</span>':x.state==='over'?'<span class="badge danger">Expired — renew</span>':msBadge(x.state)}</div><div class="wsub">valid until ${esc(isoToDmy(x.d))}</div></div><div class="ms-a"></div></div>`;
+  const acRow=(a,n)=>`<div class="ms-row ms-over" data-ms-act="${n}" style="cursor:pointer;"><div class="ms-d mono">${esc(isoToDmy(a.targetDate))}</div><div class="ms-main"><div><strong>${esc(a.ref)}</strong> — ${esc(String(a.text||'').slice(0,120))} <span class="badge danger">${complaintOverdueDays(a)} days overdue</span></div><div class="wsub">${a.owner?'👤 '+esc(a.owner):''}${a.where?' · '+esc(a.where):''}</div></div><div class="ms-a"></div></div>`;
+  el.innerHTML=`<div class="ms-bar"><button type="button" class="icon-btn" data-ms-m="-1" aria-label="Previous month">${ic('prev')}</button><strong class="ms-mlabel">${esc(periodLabel(ym))}</strong><button type="button" class="icon-btn" data-ms-m="1" aria-label="Next month">${ic('next')}</button>${ym!==cur?'<button type="button" class="btn btn-sm" data-ms-m="0">This month</button>':''}</div>
+    <div class="tiles tiles-4">${tiles.map(t=>`<div class="tile"><div class="tile-head"><div class="tile-icon">${ic(t.icon)}</div><div class="tile-label">${esc(t.label)}</div></div><div class="tile-num ${t.cls||''}">${esc(String(t.num))}</div><div class="tile-sub">${esc(t.sub)}</div></div>`).join('')}</div>
+    ${ed && msUi.form ? msFormHtml() : ''}
+    <div class="panel ms-panel"><div class="section-head"><h3>My tasks — ${esc(periodLabel(ym))} <span class="wsub">${own.filter(x=>['done','late'].includes(x.state)).length} of ${own.length} done</span></h3></div>
+      ${car.length?`<div class="ms-week ms-carry"><div class="ms-wk-h">Carried over from earlier months (${car.length})</div>${car.map(x=>msOwnRowHtml(x, ed)).join('')}</div>`:''}
+      ${own.length?weeks.map(w=>`<div class="ms-week"><div class="ms-wk-h">Week ${w.i+1} · ${esc(isoToDmy(w.s).slice(0,5))} – ${esc(isoToDmy(w.e).slice(0,5))}${ed?` <button type="button" class="att-link" data-ms-add="${esc(w.s<localToday()&&w.e>=localToday()?localToday():w.s)}">+ add</button>`:''}</div>${w.rows.length?w.rows.map(x=>msOwnRowHtml(x, ed)).join(''):'<p class="wsub" style="margin:2px 0 6px;">—</p>'}</div>`).join('')
+        :`<p class="wsub">No tasks for ${esc(periodLabel(ym))} yet.${ed?' Add where you go and what you do — e.g. a weekly site visit to each project, a monthly fire extinguisher check at Samail Yard. Repeating tasks are set up once.':''}</p>`}</div>
+    ${msGroupHtml('as', 'From the HSE Assurance Plan', as, asRow, 'Done automatically when the record is in the tracker (meeting, drill, audit…); otherwise tick it here.')}
+    ${!assurancePlanFor(ym.slice(0,4))?`<p class="wsub">No HSE Assurance Plan for ${esc(ym.slice(0,4))} — set it up in HSE Assurance Plan and its activities come here by themselves.</p>`:''}
+    ${msGroupHtml('in', 'Inspections due', ins, inRow, 'Equipment, fire extinguishers, vehicles and items in vehicles — done when the inspection is recorded.')}
+    ${msGroupHtml('ex', 'Expiries this month', ex, exRow, 'Training, medical, licences (active people) and vehicle documents — done when renewed. Tap one to open it.')}
+    ${act.length?`<div class="panel ms-panel"><div class="section-head"><h3>Overdue actions <span class="wsub">${act.length} — reminder, not counted in the %</span></h3></div>${(msUi.more.ac?act:act.slice(0,8)).map(acRow).join('')}${act.length>8?`<button type="button" class="att-link" data-ms-more="ac">${msUi.more.ac?'Show less':`Show all ${act.length}`}</button>`:''}</div>`:''}
+    <p class="wsub">Done % = done ÷ planned for the month (your tasks + Assurance Plan activities + inspections due + expiries). A task not done by the month end counts as missed and moves to the current month until it is done or dropped.</p>`;
+}
+let _msT=null; function msRenderSoon(){ clearTimeout(_msT); _msT=setTimeout(()=>{ try{ msRender(); }catch(e){ console.warn('schedule', e); } }, 120); }
+async function msSave(data){ return saveSettings('schedule', data); }
+function msWho(){ return plWho(); }
+/* ---- actions ---- */
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-ms-m],[data-ms-add],[data-ms-cancel],[data-ms-edit],[data-ms-del],[data-ms-end],[data-ms-done],[data-ms-donex],[data-ms-undo],[data-ms-drop],[data-ms-skip],[data-ms-as],[data-ms-more],[data-ms-open],[data-ms-act],#msAddBtn,#msPdfBtn'); if(!b || !b.closest('#scheduleSection')) return; const D=b.dataset, FV=fsFieldValue();
+  if(b.id==='msPdfBtn'){ msPdf(); return; }
+  if(D.msM!==undefined){ const n=Number(D.msM); msUi.ym = n===0 ? '' : (compAddMonths(msYm()+'-01', n)||'').slice(0,7); msUi.done=''; clearDirtyForms(); msRender(); return; }
+  if(D.msMore){ msUi.more[D.msMore]=!msUi.more[D.msMore]; msRender(); return; }
+  if(D.msOpen){ const [k,id,tab]=D.msOpen.split('|'); if(k==='w'){ openDrawer(id); activeTab=tab; renderDrawer(); } else { openVehicleDrawer(id); activeVehicleTab=tab; renderVehicleDrawer(); } return; }
+  if(D.msAct!==undefined){ const a=msActCache[Number(D.msAct)]; if(a && a.open) a.open(); return; }
+  if(!canEdit()) return;
+  if(b.id==='msAddBtn' || D.msAdd){ const d=D.msAdd && D.msAdd!=='1' ? D.msAdd : (msYm()===localToday().slice(0,7)?localToday():msYm()+'-01'); msUi.form={date:d}; clearDirtyForms(); msRender(); const f=document.getElementById('msForm'); if(f) f.scrollIntoView({block:'nearest'}); return; }
+  if(D.msCancel){ msUi.form=null; clearDirtyForms(); msRender(); return; }
+  if(D.msEdit){ msUi.form={id:D.msEdit}; clearDirtyForms(); msRender(); const f=document.getElementById('msForm'); if(f) f.scrollIntoView({block:'nearest'}); return; }
+  if(D.msDel){ if(!compArm(b,'Tap again — delete')) return; if(await msSave({tasks:{[D.msDel]:FV?FV.delete():null}})){ msUi.form=null; clearDirtyForms(); toast('Task deleted'); msRender(); } return; }
+  if(D.msEnd){ if(!compArm(b,'Tap again — end the repeat')) return; const t=msData().tasks[D.msEnd]; if(!t) return; const until=[dateAddDays(localToday(),-1), t.date].sort().pop();
+    if(await msSave({tasks:{[t.id]:{...t, until}}})){ msUi.form=null; clearDirtyForms(); toast('Repeat ended — earlier days are kept'); msRender(); } return; }
+  if(D.msDone){ msUi.done=msUi.done===D.msDone?'':D.msDone; msRender(); const i=document.querySelector('form[data-ms-doneform] input[name="note"]'); if(i) i.focus(); return; }
+  if(D.msDonex){ msUi.done=''; clearDirtyForms(); msRender(); return; }
+  if(D.msUndo){ if(!compArm(b,'Tap again — undo')) return; if(await msSave({st:{[D.msUndo]:FV?FV.delete():null}})) msRender(); return; }
+  if(D.msDrop){ if(!compArm(b, b.textContent==='Drop'?'Tap again — drop':'Tap again — missed')) return; if(await msSave({st:{[D.msDrop]:{s:'drop', by:msWho(), at:new Date().toISOString()}}})) msRender(); return; }
+  if(D.msSkip){ if(!compArm(b,'Tap again — skip this day')) return; if(await msSave({st:{[D.msSkip]:{s:'skip', by:msWho(), at:new Date().toISOString()}}})){ toast('This day is left out'); msRender(); } return; }
+  if(D.msAs){ const [y,idx,m]=D.msAs.split('|'), on=D.on==='1'; if(!on && !compArm(b,'Tap again — undo')) return;
+    const items=(assurancePlanFor(y)||[]).map(x=>({...x, months:(x.months||[]).slice(), done:{...(x.done||{})}})), it=items[Number(idx)]; if(!it) return;
+    if(on) it.done[Number(m)]=true; else delete it.done[Number(m)];
+    if(await saveSettings('assurance', {[y]:{items}})){ appAssurance={...appAssurance, [y]:{items}}; msRender(); } return; }
+}, true);
+document.addEventListener('change', e=>{ const f=e.target.closest && e.target.closest('#msForm'); if(!f) return;
+  if(e.target.name==='where'){ const o=f.querySelector('[data-ms-other]'); if(o) o.hidden=e.target.value!=='__other'; }
+  if(e.target.name==='rep'){ const u=f.querySelector('[data-ms-until]'); if(u) u.hidden=!e.target.value; } });
+document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement)) return;
+  if(f.id==='msForm'){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; const F=isoFormData(f), g=k=>String(F.get(k)||'').trim();
+    const date=g('date'), rep=['w','m'].includes(g('rep'))?g('rep'):'', until=rep?g('until'):'', wsel=g('where'), where=wsel==='__other'?g('whereText').slice(0,60):wsel;
+    if(!msOkD(date)){ toast('Choose the date'); return; } if(until && until<date){ toast('"Repeat until" is before the first date'); return; }
+    const old=msUi.form&&msUi.form.id?msData().tasks[msUi.form.id]:null, id=old?old.id:'ms'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    const t={id, date, what:MS_WHAT.includes(g('what'))?g('what'):'Other', title:g('title').slice(0,120), where, who:g('who').slice(0,60), rep, until, note:g('note').slice(0,140), by:old?old.by||msWho():msWho(), at:old?old.at||new Date().toISOString():new Date().toISOString()};
+    if(await msSave({tasks:{[id]:t}})){ msUi.form=null; clearDirtyForms(); if(date.slice(0,7)!==msYm() && !rep) msUi.ym=date.slice(0,7); toast(old?'Task saved':`Task added${rep?' — repeats '+(rep==='w'?'every week':'every month'):''}`); msRender(); }
+    return; }
+  if(f.dataset.msDoneform){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; const F=isoFormData(f), d=String(F.get('d')||''), note=String(F.get('note')||'').trim().slice(0,140);
+    if(!msOkD(d) || d>localToday()){ toast('The date must be today or earlier'); return; }
+    if(await msSave({st:{[f.dataset.msDoneform]:{s:'done', d, note, by:msWho(), at:new Date().toISOString()}}})){ msUi.done=''; clearDirtyForms(); toast('Done ✓'); msRender(); } } }, true);
+/* ---- PDF ---- */
+function msPdf(){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
+  try{ const ym=msYm(), S=msStats(ym), doc=pdfDoc({unit:'pt', format:'a4', docKey:'schedule', docSub:periodLabel(ym)}), M=34, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, INK=[20,24,32];
+    let y=40; const ensure=h=>{ if(y+h>H-30){ doc.addPage(); y=40; } };
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...INK); doc.text(`Monthly HSE Schedule — ${periodLabel(ym)}`, M, y); y+=16;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(`Planned ${S.planned} · Done ${S.done}${S.late?` (${S.late} late)`:''} · Missed / overdue ${S.miss} · Done ${S.pct===null?'—':S.pct+' %'} · printed ${isoToDmy(localToday())}`, M, y); y+=16; doc.setTextColor(...INK);
+    const cols=[{k:'d', t:'Date', w:62},{k:'what', t:'What', w:84},{k:'task', t:'Task', w:CW-62-84-110-70-72},{k:'where', t:'Where', w:110},{k:'who', t:'Who', w:70},{k:'st', t:'Status', w:72}];
+    const row=(cells, head, fill)=>{ doc.setFont('helvetica', head?'bold':'normal'); doc.setFontSize(head?8:8); const L=cols.map(c=>doc.splitTextToSize(String(cells[c.k]||'—'), c.w-6)); const h=Math.max(14, ...L.map(l=>l.length*9.5+5)); ensure(h); let x=M;
+      cols.forEach((c,i)=>{ if(head||fill){ doc.setFillColor(...(head?[230,233,238]:fill)); doc.rect(x,y,c.w,h,'F'); } doc.setDrawColor(170,174,182); doc.setLineWidth(0.4); doc.rect(x,y,c.w,h); L[i].forEach((t,n)=>doc.text(t, x+3, y+10+n*9.5)); x+=c.w; }); y+=h; };
+    const title=t=>{ ensure(40); y+=8; doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text(t, M, y+10); y+=16; row({d:'Date', what:'What', task:'Task / item', where:'Where', who:'Who', st:'Status'}, true); };
+    const stT=s=>(MS_BADGE[s]||MS_BADGE.open)[1];
+    const own=msOwnRows(ym), car=msCarried(ym);
+    title('My tasks'); if(!own.length && !car.length) row({task:'No tasks planned'});
+    for(const x of car) row({d:isoToDmy(x.d), what:x.t.what, task:x.t.title||x.t.what, where:msWhereLabel(x.t.where), who:x.t.who, st:stT('carried')}, false, [253,236,236]);
+    for(const w of msWeeks(ym)){ const R=own.filter(x=>x.d>=w.s && x.d<=w.e); if(!R.length) continue; for(const x of R) row({d:`${msDay(x.d)} ${x.d.slice(5,7)}`, what:x.t.what, task:(x.t.title||x.t.what)+(x.rec&&x.rec.note?' — '+x.rec.note:''), where:msWhereLabel(x.t.where), who:x.t.who, st:stT(x.state)}); }
+    const as=msAssuranceRows(ym); if(as.length){ title('HSE Assurance Plan activities'); for(const x of as) row({d:MONTHS_SHORT[x.m-1], what:'Plan', task:x.it.activity, where:'', who:x.it.owner, st:stT(x.state)}); }
+    const ins=msInspRows(ym); if(ins.length){ title('Inspections due'); for(const x of ins) row({d:x.d?isoToDmy(x.d):'—', what:x.S.it.kind==='veh'?'Vehicle':x.S.it.group, task:x.S.it.label, where:x.S.it.where, who:'', st:stT(x.state)}); }
+    const ex=msExpiryRows(ym); if(ex.length){ title('Expiries'); for(const x of ex) row({d:isoToDmy(x.d), what:x.what, task:x.name, where:'', who:x.who, st:x.state==='done'?'Renewed':x.state==='over'?'Expired':stT(x.state)}); }
+    doc.save(`Burhan_Monthly_HSE_Schedule_${ym}.pdf`); toast('Schedule PDF downloaded');
+  }catch(e){ console.error(e); toast('Could not make the PDF'); } }
+
 // Command Centre: Safety Stars + upcoming safety days
 function renderCcExtras(){
   const el=document.getElementById('ccExtras'); if(!el || !auth.currentUser) return;
@@ -18003,6 +18200,7 @@ function refreshLinkedPanels(){
   const vis=id=>{ const el=document.getElementById(id); return el && !el.hidden; };
   try{ if(vis('objectivesSection')) renderKpiPanel(); }catch(e){ console.warn(e); }
   try{ if(vis('assuranceSection')) renderAssuranceAll(); }catch(e){ console.warn(e); }
+  if(vis('scheduleSection') && typeof msRenderSoon==='function') msRenderSoon();   // Batch 119
 }
 function renderReportAll(){
   setTimeout(refreshLinkedPanels, 0);
@@ -20189,10 +20387,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
     btn.addEventListener('click', ()=>{
       const section=btn.dataset.section;
       document.querySelectorAll('.sidenav-btn[data-section]').forEach(b=>b.classList.toggle('active', b===btn));
-      const SECTIONS={workforce:'workforceSection', vehicles:'vehiclesSection', site:'siteSection', comp:'compSection', report:'reportSection', incidents:'incidentsSection', library:'librarySection', audits:'auditsSection', assurance:'assuranceSection', actions:'actionsSection', calendar:'calendarSection', activity:'activitySection', ...Object.fromEntries(Object.keys(REG).map(k=>[k, k+'Section']))};
+      const SECTIONS={workforce:'workforceSection', vehicles:'vehiclesSection', site:'siteSection', comp:'compSection', report:'reportSection', incidents:'incidentsSection', library:'librarySection', audits:'auditsSection', assurance:'assuranceSection', schedule:'scheduleSection', actions:'actionsSection', calendar:'calendarSection', activity:'activitySection', ...Object.fromEntries(Object.keys(REG).map(k=>[k, k+'Section']))};
       for(const [k,id] of Object.entries(SECTIONS)) document.getElementById(id).hidden = section!==k;
       if(section==='objectives' || section==='assurance') refreshLinkedPanels();
       if(section==='comp'){ renderComp(); compRenderTop(); }   // Batch 84
+      if(section==='schedule') msRender();   // Batch 119
       if(section==='site'){ tbtTodayRender(); if(typeof ptwTodayRender==='function') ptwTodayRender(); if(typeof plRender==='function') plRender(); }   // Batch 92 / 99 / 105
     });
   });
