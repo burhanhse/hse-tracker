@@ -246,8 +246,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       <label>${tr('name')}<select id="${p}s"></select></label>`; }
   function fillNames(p, exclude, keep){
     const dEl=$('#'+p+'d'), d=dEl?dEl.value:'', s=$('#'+p+'q').value.trim().toLowerCase(), sel=$('#'+p+'s'), cur=keep!==undefined?keep:sel.value;
-    const ws=(link.workers||[]).filter(w=>!exclude.has(w.id) && (!d || (w.dv||'Other')===d) && (!s || w.name.toLowerCase().includes(s))).sort((a,b)=>a.name.localeCompare(b.name));
-    sel.innerHTML=`<option value="">${esc(T.pick[0])} (${ws.length})</option>`+ws.map(w=>`<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('');
+    const ws=(link.workers||[]).filter(w=>!exclude.has(w.id) && (!d || (w.dv||'Other')===d) && (!s || w.name.toLowerCase().includes(s))).sort((a,b)=>(b.at?1:0)-(a.at?1:0) || a.name.localeCompare(b.name));   // Batch 114: people at the location today first
+    sel.innerHTML=`<option value="">${esc(T.pick[0])} (${ws.length})</option>`+ws.map(w=>`<option value="${esc(w.id)}">${w.at?'★ ':''}${esc(w.name)}</option>`).join('');
     if(ws.some(w=>w.id===cur)) sel.value=cur; else if(ws.length===1) sel.value=ws[0].id; else sel.value='';
   }
   function wirePicker(p, exclude, keep, onSel){
@@ -284,8 +284,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <div class="hboxes"><button type="button" class="hbox hb-blue" id="toReq">${svg('helmet')}<span class="hbl">${tr('req')}</span></button>
           <button type="button" class="hbox hb-green" id="toRec">${svg('impact')}<span class="hbl">${tr('rec')}</span>${nRec?`<span class="badge" style="color:var(--ok)">${nRec}</span>`:''}</button>
           ${!link.projectId?`<div class="card note" style="margin:0;">${tr('oldLink')}</div>`:`<button type="button" class="hbox hb-navy" id="toTbt">${svg('clip')}<span class="hbl">${tr('tbtReq')}</span></button>
-          <button type="button" class="hbox hb-red" id="toInc">${svg('siren')}<span class="hbl">${tr('incRep')}</span></button>
-          <button type="button" class="hbox hb-purple ${compOf()&&!compWasSent(compOf().aid)?'live':''}" id="toComp">${svg('cap')}<span class="hbl">${tr('comp')}<span class="hsub">${compOf()&&!compWasSent(compOf().aid)?esc(T.compOpen[0]):esc(T.compNone[0])}</span></span></button>`}</div>
+          ${isLoc()?'':`<button type="button" class="hbox hb-red" id="toInc">${svg('siren')}<span class="hbl">${tr('incRep')}</span></button>
+          <button type="button" class="hbox hb-purple ${compOf()&&!compWasSent(compOf().aid)?'live':''}" id="toComp">${svg('cap')}<span class="hbl">${tr('comp')}<span class="hsub">${compOf()&&!compWasSent(compOf().aid)?esc(T.compOpen[0]):esc(T.compNone[0])}</span></span></button>`}`}</div>
         ${toSign.length?`<div class="card signme"><h2>${esc(T.tbtToSign[0])} (${toSign.length})<span class="tr">${esc(T.tbtToSign[1])} · <span class="ar" dir="rtl">${esc(T.tbtToSign[2])}</span></span></h2>${toSign.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><button class="btn green" data-tbt-open="${esc(x.id)}" style="margin-top:6px; padding:11px;">${tr('signNow')}</button></div>`).join('')}</div>`:''}
         ${[['trs','🎓','trsToSign','trainer'],['mom','📝','momToSign','chair']].map(([k,icn,h,lb])=>{ const L=trsMine().filter(x=>(x.k==='mom')===(k==='mom')); return L.length?`<div class="card signme"><h2>${icn} ${esc(T[h][0])} (${L.length})<span class="tr">${esc(T[h][1])} · <span class="ar" dir="rtl">${esc(T[h][2])}</span></span></h2>${L.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.tr?`<div class="note">${esc(T[lb][0])}: ${esc(x.tr)}</div>`:''}<button class="btn green" data-trs-open="${esc(x.id)}" style="margin-top:6px;">${tr('trsSign')}</button></div>`).join('')}</div>`:''; }).join('')}
         <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
@@ -295,8 +295,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       $('#toReq').onclick=()=>{ people=[{id:me.id, name:me.name, cart:[]}]; ai=0; addOpen=false; need=''; reason=''; note=''; view='req'; render(); window.scrollTo(0,0); };
       $('#toRec').onclick=()=>{ recSel=new Set(); view='rec'; render(); window.scrollTo(0,0); };
       if(link.projectId){ $('#toTbt').onclick=()=>{ if(!tbtF) tbtNew(); view='tbtReq'; render(); window.scrollTo(0,0); };
-      $('#toInc').onclick=()=>{ if(!incF) incNew(); view='inc'; render(); window.scrollTo(0,0); };
-      $('#toComp').onclick=()=>openComp(); }
+      if($('#toInc')) $('#toInc').onclick=()=>{ if(!incF) incNew(); view='inc'; render(); window.scrollTo(0,0); };
+      if($('#toComp')) $('#toComp').onclick=()=>openComp(); }
       return;
     }
     if(view==='req'){
@@ -383,10 +383,15 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   let tbtF=null, tbtX=null, tpads={};
   const dsOf=id=>(wById(id)||{}).ds||'';
   // Batch 81: Scaffolding = job buttons + journey plan; Civil = free text work, no journey plan; Rental = free text work + journey plan
-  const isScaf=()=>!link.division || link.division==='Scaffolding', noJp=()=>link.division==='Civil';
+  // Batch 114: a company-location link (Samail Yard, Gabha Workshop, Office) — kind 'loc': own job buttons, no client / journey plan
+  const isLoc=()=>link.kind==='loc';
+  const isScaf=()=>!isLoc() && (!link.division || link.division==='Scaffolding'), noJp=()=>link.division==='Civil' || isLoc();
   const jpField=(attr,v)=>noJp()?'':`<label>${tr('jp')}<input ${attr}="jp" value="${esc(v)}" maxlength="40" placeholder="${esc(T.optional[0])}"></label>`;
-  const jobField=(attr,btn,v)=>isScaf()?`<div style="font-weight:700; font-size:15px;">${tr('job')}</div><div class="reasons">${TB_JOBS.map(([j,h,a])=>`<button type="button" class="${v===j?'on':''}" ${btn}="${esc(j)}">${esc(j)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>`
+  const jobField=(attr,btn,v)=>isLoc()?locJobField(attr,btn,v):isScaf()?`<div style="font-weight:700; font-size:15px;">${tr('job')}</div><div class="reasons">${TB_JOBS.map(([j,h,a])=>`<button type="button" class="${v===j?'on':''}" ${btn}="${esc(j)}">${esc(j)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>`
     :`<label>${tr('work')}<textarea ${attr}="job" maxlength="120" placeholder="e.g. Block work — ground floor, Building A">${esc(v)}</textarea></label>`;
+  function locJobField(attr,btn,v){ const L=link.tbtJobs||[], pick=L.includes(v)?v:(v?'Other work':'');
+    return `<div style="font-weight:700; font-size:15px;">${tr('work')}</div><div class="reasons">${L.map(j=>`<button type="button" class="${pick===j?'on':''}" ${btn}="${esc(j)}">${esc(j)}</button>`).join('')}</div>
+      ${pick==='Other work'||!L.length?`<label>${tr('work')}<textarea ${attr}="jobx" maxlength="120" placeholder="e.g. Cleaning the yard store">${esc(L.includes(v)?'':v)}</textarea></label>`:''}`; }
   const TB_SHIFT=[['Day','दिन','نهاري'],['Night','रात','ليلي']];
   const TB_CHG={pm:['People changed','लोग बदले','تغيّر الأشخاص'], te:['Tools / equipment changed','औज़ार / उपकरण बदले','تغيّرت الأدوات'], nh:['New hazards','नए खतरे','مخاطر جديدة'], we:['Weather','मौसम','الطقس']};
   // Batch 104: one TBT = one document. The draft keeps a fixed id (sid) — sending twice (double tap, slow network, page reload) writes the SAME document, never a copy.
@@ -403,7 +408,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   function tbtNew(){ try{ const d=JSON.parse(localStorage.getItem(draftKey())||'null'); if(d && d.sid && d.date===today()){ tbtF={...d, sending:false}; return; } }catch(e){}
     const cl=link.clients||[]; tbtF={sid:newSid(), veh:'', date:today(), time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', client:cl.includes(link.clientName)?link.clientName:'', cother:'', loc:'', jp:'', job:'', att:[{w:me.id, n:me.name, ds:dsOf(me.id)}], addOpen:false}; }
   const tq=k=>app.querySelector(`[data-b="${k}"]`);
-  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother','veh']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
+  function tbtRead(){ if(!tbtF) return; for(const k of ['date','time','loc','jp','client','cother','veh']){ const el=tq(k); if(el) tbtF[k]=el.value; } if(isLoc()){ const jx=tq('jobx'); if(jx) tbtF.job=jx.value.trim()?jx.value:(tbtF.job==='Other work'?'Other work':tbtF.job); return; } if(!isScaf()){ const j=tq('job'); if(j) tbtF.job=j.value; } }
   function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
   function renderTbtReq(){
     const t=tbtF, locs=link.locs||[];
@@ -412,8 +417,8 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         <label>${tr(isScaf()?'loc':'locX')}<input data-b="loc" list="tbLocs" value="${esc(t.loc)}" maxlength="80" placeholder="${isScaf()?'e.g. NM-12':'e.g. Building A, ground floor'}" autocomplete="off"><datalist id="tbLocs">${locs.map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
         <div style="font-weight:700; font-size:15px;">${tr('shift')}</div>
         <div class="reasons">${TB_SHIFT.map(([v,h,a])=>`<button type="button" class="${t.shift===v?'on':''}" data-shift="${esc(v)}">${v==='Day'?'☀ ':'☾ '}${esc(v)}<span class="tr">${esc(h)} · <span class="ar" dir="rtl">${esc(a)}</span></span></button>`).join('')}</div>
-        <label>${tr('client')}<select data-b="client"><option value="">—</option>${(link.clients||[]).map(c=>`<option ${c===t.client?'selected':''}>${esc(c)}</option>`).join('')}<option value="__other" ${t.client==='__other'?'selected':''}>${esc(T.pOther[0])}</option></select></label>
-        <label id="cOtherBox" class="${t.client==='__other'?'':'hidden'}">${tr('clientName')}<input data-b="cother" value="${esc(t.cother||'')}" maxlength="60"></label>
+        ${isLoc()?'':`<label>${tr('client')}<select data-b="client"><option value="">—</option>${(link.clients||[]).map(c=>`<option ${c===t.client?'selected':''}>${esc(c)}</option>`).join('')}<option value="__other" ${t.client==='__other'?'selected':''}>${esc(T.pOther[0])}</option></select></label>
+        <label id="cOtherBox" class="${t.client==='__other'?'':'hidden'}">${tr('clientName')}<input data-b="cother" value="${esc(t.cother||'')}" maxlength="60"></label>`}
         ${jpField('data-b', t.jp)}
         ${vehField('data-b', t.veh, true)}
         ${jobField('data-b','data-job',t.job)}</div>
@@ -425,7 +430,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
       <button class="btn ghost" id="back">${tr('back')}</button>`;
     app.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{ tbtRead(); t.job=b.dataset.job; keepScroll(renderTbtReq); });
     app.querySelectorAll('[data-shift]').forEach(b=>b.onclick=()=>{ tbtRead(); t.shift=b.dataset.shift; keepScroll(renderTbtReq); });
-    const cs=tq('client'); cs.onchange=()=>$('#cOtherBox').classList.toggle('hidden', cs.value!=='__other');
+    const cs=tq('client'); if(cs) cs.onchange=()=>$('#cOtherBox').classList.toggle('hidden', cs.value!=='__other');
     app.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{ tbtRead(); t.att.splice(+b.dataset.tax,1); keepScroll(renderTbtReq); });
     if(t.addOpen){ wirePicker('b', new Set(t.att.map(a=>a.w)), '');
       $('#bAdd').onclick=()=>{ const w=wById($('#bs').value); if(!w){ const e=$('#berr'); e.textContent='Choose the name.'; e.classList.remove('hidden'); return; } tbtRead(); if(t.att.length<40) t.att.push({w:w.id, n:w.name, ds:w.ds||''}); keepScroll(renderTbtReq); };
@@ -439,6 +444,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   async function sendTbt(){
     tbtRead(); const t=tbtF;
     if(!t.date) return err('Choose the date.'); if(!t.loc.trim()) return err('Write the location / well number.'); if(!String(t.job||'').trim()) return err(isScaf()?'Choose the job: Rig up, Rig down, Modification or Inspection.':'Write the work you will do.');
+    if(isLoc()){ t.client='Internal — '+(link.projectName||'company location'); if(!String(t.job||'').trim() || t.job==='Other work') return err('Choose the work, or write it.'); }
     if(!t.shift) return err('Choose Day or Night job.'); if(!t.client) return err('Choose the client.'); if(t.client==='__other' && !String(t.cother||'').trim()) return err('Write the client name.');
     if(needVeh() && !String(t.veh||'').trim()) return err('Write the vehicle number.');
     if(nonLatin(t.loc, t.job, t.jp, t.cother, t.veh)) return err(T.engOnly[0]+' / '+T.engOnly[1]);
@@ -685,7 +691,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
 
   /* ===== Batch 83: report an incident (few fields — HSE completes the rest) ===== */
   let incF=null;
-  const needVeh=()=>link.division==='Scaffolding' || link.division==='Rental' || !link.division;
+  const needVeh=()=>!isLoc() && (link.division==='Scaffolding' || link.division==='Rental' || !link.division);
   const vehField=(attr,v,req)=>needVeh()?`<label>${tr('veh')}${req?'':` <span class="note">(${esc(T.optional[0])})</span>`}<input ${attr}="veh" list="tbVehs" value="${esc(v||'')}" maxlength="20" autocomplete="off" placeholder="e.g. 12345 AB"><datalist id="tbVehs">${(link.vehs||[]).map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>`:'';
   function incNew(){ const h=new Date().getHours(); incF={date:today(), time:nowHM(), shift:(h>=6&&h<18)?'Day':'Night', loc:'', type:'', inj:'', injO:'', mobile:'', veh:'', desc:''}; }
   function renderInc(){
