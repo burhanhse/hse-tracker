@@ -1225,6 +1225,10 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .eq-grid .eq-div th span{font-weight:500; text-transform:none; letter-spacing:0; color:var(--ink-muted); margin-left:8px;} .eq-grid .eq-div-Scaffolding th{border-top-color:var(--dv-scaff);} .eq-grid .eq-div-Civil th{border-top-color:var(--dv-civil);} .eq-grid .eq-div-Rental th{border-top-color:var(--dv-rental);} .eq-grid .eq-div-Office th{border-top-color:var(--dv-office);}
 #equipRows .eq-loc td{background:var(--surface); font-weight:700; font-size:12.5px; padding:6px 12px; border:1px solid var(--line) !important;} #equipRows .eq-loc td span{display:inline-block; margin-left:6px; padding:0 7px; border-radius:9px; background:var(--muted-bg); font-weight:600;}
 .eq-divsum{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 10px;} table:has(.eq-grid){border-collapse:collapse;} table:has(.eq-grid) thead th{border:1px solid var(--line);}
+.eq-grid .eq-div th{color:var(--ink);} .eq-grid .eq-div-Scaffolding th{background:var(--dv-scaff-bg) !important; color:var(--dv-scaff);} .eq-grid .eq-div-Civil th{background:var(--dv-civil-bg) !important; color:var(--dv-civil);} .eq-grid .eq-div-Rental th{background:var(--dv-rental-bg) !important; color:var(--dv-rental);} .eq-grid .eq-div-Office th{background:var(--dv-office-bg) !important; color:var(--dv-office);}
+.eq-grid .eq-div-Company th{background:var(--ok-bg) !important; color:var(--ok); border-top-color:var(--ok);} .eq-grid .eq-div-Store th{background:var(--warn-bg) !important; color:var(--warn); border-top-color:var(--warn);} .eq-grid .eq-div-Not th,.eq-grid .eq-div-none th{background:var(--muted-bg) !important;}
+.eq-grid .eq-div th span{color:inherit; opacity:.8;} #equipRows .eq-loc td{background:var(--surface-2) !important; color:var(--accent);} #equipRows .eq-loc td span{color:var(--ink);}
+.vk-check{border-left:3px solid var(--ok);} .vk-check.vk-bad{border-left-color:var(--danger);} .vk-tbl td,.vk-tbl th{border:1px solid var(--line); padding:6px 10px;} .vk-tbl{border-collapse:collapse; width:100%;} .vk-row-miss td{background:var(--danger-bg);}
 </style>
 </head>
 <body class="auth-open">
@@ -1493,6 +1497,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
         <select id="vehicleTypeFilter" aria-label="Filter by vehicle type"><option value="all">All vehicle types</option></select>
         <select id="vehicleDivisionFilter" aria-label="Filter by division"><option value="all">All divisions</option></select>
       </div>
+      <div id="vehKitPanel"></div>
 
       <div class="table-wrap">
         <table>
@@ -3107,7 +3112,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b125';
+const APP_BUILD='b126';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -11106,7 +11111,7 @@ function vehInspTabHtml(v){ const ed=canEdit(), S=inspState('veh:'+v.id), dnu=ve
     <p class="wsub" style="margin:-4px 0 8px;">The same record as in Inspection Checklists — one inspection, one PDF. After it, the items inside this vehicle that are due are listed for the same round.</p>${rows}${oldHtml}`; }
 function vehKitTabHtml(v){ const ed=canEdit(), items=equipInVeh(v.id).sort((a,b)=>EQUIP_CATEGORY_ORDER.indexOf(a.category)-EQUIP_CATEGORY_ORDER.indexOf(b.category) || equipTitle(a).localeCompare(equipTitle(b)));
   const pool=ed?activeEquipment().filter(e=>{ const l=equipLoc(e); return e.category!=='chemicals' && !l.startsWith('veh:') && (l==='store' || l.startsWith('loc:') || l===v.projectId); }).sort((a,b)=>equipTitle(a).localeCompare(equipTitle(b))):[];
-  return `<p class="wsub" style="margin:0 0 10px;">Equipment kept inside this vehicle${v.projectId?` — it is counted at <b>${esc(projectName(v.projectId))}</b> with the vehicle, once`:''}. When the vehicle moves to another project the items go with it.</p>
+  return `${vehKitCheckHtml(v)}<p class="wsub" style="margin:0 0 10px;">Equipment kept inside this vehicle${v.projectId?` — it is counted at <b>${esc(projectName(v.projectId))}</b> with the vehicle, once`:''}. When the vehicle moves to another project the items go with it.</p>
     ${items.length?items.map(e=>`<div class="equip-line" data-open-equip="${esc(e.id)}"><div class="equip-line-main"><div class="equip-line-title">${ic((EQUIP_CATEGORIES[e.category]||{}).icon||'wrench')} ${esc(equipTitle(e))}</div><div class="wsub mono">S/N ${esc(e.serial||'—')}</div></div>
       <div class="equip-line-badges">${(e.condition||'In service')!=='In service'?conditionBadge(e.condition):''}${e.expiry?`<span title="Expiry / service">${badgeHtml(statusFor(e.expiry))}</span>`:''}${inspEqBadge(e)}</div></div>`).join(''):'<p class="wsub">Nothing recorded inside this vehicle yet.</p>'}
     ${ed?`<form id="vehKitAdd" class="ptw-inline" style="margin-top:10px;"><select name="eq" aria-label="Item to put in this vehicle"><option value="">Put an item in this vehicle…</option>${pool.map(e=>`<option value="${esc(e.id)}">${esc((EQUIP_CATEGORIES[e.category]||{}).short||'')} · ${esc(equipTitle(e))} · ${esc(e.serial||'—')} · ${esc(locLabel(equipLoc(e)))}</option>`).join('')}</select><button type="submit" class="btn btn-sm">Put in vehicle</button></form><p class="wsub" style="margin:4px 0 0;">Only items in store, at a company location or at this vehicle's project are listed. New items: Plant &amp; Equipment → add → Location "Inside a vehicle".</p>`:''}`; }
@@ -17400,6 +17405,7 @@ function renderVehicleTable(){
   if(activeVehicles().length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">No vehicles yet — click “Add vehicle” to get started.</td></tr>'; return; }
   const list=vehicles.filter(vehicleMatches);
   if(list.length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">No vehicles match your filters.</td></tr>'; return; }
+  { const kp=document.getElementById('vehKitPanel'); if(kp) kp.innerHTML=vehKitPanelHtml(); }   // Batch 126
   const vrow=v=>{
     const doc=vehicleAggFor(v,'documents'), ppe=vehKitAgg(v);
     return `<tr data-id="${v.id}">
@@ -17409,13 +17415,13 @@ function renderVehicleTable(){
       <td>${(v.ownership||'Own')==='Rental'?'<span class="badge warn">Rental</span>':'<span class="badge ok">Own</span>'}</td>
       <td>${badgeHtml(doc.status)}${(m=>m.length?`<div><span class="badge warn" title="Required for ${esc(v.vehicleType||'')}: ${esc(m.join(', '))}">${m.length} missing</span></div>`:'')(vehMissingDocs(v))}</td>
       <td>${vehInspBadge(v)}</td>
-      <td>${badgeHtml(ppe.status)}</td>
+      <td>${badgeHtml(ppe.status)}${(c=>c?`<div style="margin-top:3px;">${c.ok?'<span class="badge ok">Kit complete</span>':`<span class="badge danger" title="${esc(vehKitMissTxt(c))}">Kit: ${c.miss} missing</span>`}</div>`:'')(vehKitCheck(v))}</td>
       <td>${svcStatusBadge(v)}</td>
       <td>${vehicleMonitorCell(v)}</td>
     </tr>`;
   };
   // Batch 125: fleet grouped by division (box grid)
-  const VD=['Scaffolding','Civil','Rental','Office staff',''], vd=v=>{ if(DIVISIONS.includes(v.division)) return v.division; const st=v.projectId&&siteEquipmentList.find(x=>x.id===v.projectId); return st?(st.division||'Civil'):''; };   /* no division set → its project's */
+  const VD=['Scaffolding','Civil','Rental','Office staff',''], vd=vehDivOf;   /* no division set → its project's */
   tbody.classList.add('eq-grid');
   tbody.innerHTML=VD.map(d=>{ const L=list.filter(v=>vd(v)===d); if(!L.length) return ''; return `<tr class="eq-div eq-div-${esc(d==='Office staff'?'Office':d||'none')}"><th colspan="9">${esc(d?divLabel(d):'Division not set')} <span>${L.length} vehicle${L.length===1?'':'s'}</span></th></tr>`+L.map(vrow).join(''); }).join('');
 }
@@ -17691,6 +17697,7 @@ function vehicleIssues(v){
   if(vehDoNotUse(v)) out.push('Do not use — not fit for use');
   if(vehDriverProblem(v)) out.push('Driver not qualified');
   if((v.tyres||[]).length && vehicleAggFor(v,'tyres').status==='expired') out.push('Tyre over 4 years old');
+  { const c=vehKitCheck(v); if(c && !c.ok) out.push('Mandatory kit missing: '+vehKitMissTxt(c)); }   // Batch 126
   { const k=vehKitAgg(v); if(k.status==='expired') out.push('Safety kit / PPE expired'); if(k.bad) out.push(`${k.bad} item${k.bad===1?'':'s'} inside damaged / out of service`); }   // Batch 124
   if(vehicleServiceStats(v).status==='overdue') out.push('Service overdue');
   return out;
@@ -18574,10 +18581,35 @@ function renderEquipTable(){
       <td>${expiryCell(e)}</td>
     </tr>`;
   tbody.innerHTML=EQ_DIV_ORDER.filter(d=>G.has(d)).map(d=>{ const L=G.get(d), n=[...L.values()].reduce((a,x)=>a+x.length,0);
-    return `<tr class="eq-div eq-div-${esc(d==='Office staff'?'Office':d)}"><th colspan="5">${esc(equipDivLabel(d))} <span>${n} item${n===1?'':'s'}${equipQty([...L.values()].flat())!==n?` · ${equipQty([...L.values()].flat())} pcs`:''}</span></th></tr>`
+    return `<tr class="eq-div eq-div-${esc(d==='Office staff'?'Office':d.split(' ')[0])}"><th colspan="5">${esc(equipDivLabel(d))} <span>${n} item${n===1?'':'s'}${equipQty([...L.values()].flat())!==n?` · ${equipQty([...L.values()].flat())} pcs`:''}</span></th></tr>`
       + [...L.entries()].sort((a,b)=>(a[0]==='store')-(b[0]==='store') || locLabel(a[0]).localeCompare(locLabel(b[0]))).map(([k,items])=>`<tr class="eq-loc"><td colspan="5">${ic(k.startsWith('veh:')?'truck':k==='store'?'books':k.startsWith('loc:')?'pin':'hardhat')} ${esc(locLabel(k))} <span>${items.length}</span></td></tr>`
         + items.sort((a,b)=>equipTitle(a).localeCompare(equipTitle(b)) || String(a.serial||'').localeCompare(String(b.serial||''))).map(rowOf).join('')).join(''); }).join('');
 }
+/* Batch 126: every SCAFFOLDING division vehicle must carry this kit (only in-service, not expired items count) */
+const SCAF_VEH_KIT=[
+  {k:'fe', label:'Fire extinguisher', need:2, cat:'extinguishers', match:e=>e.category==='extinguishers'},
+  {k:'hb', label:'Safety harness', need:2, cat:'harness', match:e=>e.category==='harness'},
+  {k:'h2s', label:'H2S detector', need:2, cat:'calibration', match:e=>e.category==='calibration' && /gas detector|h2s/i.test(e.instType||e.name||'')},
+  {k:'wt', label:'Warning triangle', need:2, cat:'vehKit', match:e=>e.category==='vehKit' && e.kitType==='Warning triangle'},
+  {k:'nh', label:'NH-15 mask', need:2, cat:'nh15', match:e=>e.category==='nh15' || (e.category==='vehKit' && /NH-15/i.test(e.kitType||''))},
+  {k:'fa', label:'First aid box', need:1, cat:'firstAid', match:e=>e.category==='firstAid'},
+  {k:'ws', label:'Wheel stopper (chocks)', need:2, cat:'vehKit', match:e=>e.category==='vehKit' && e.kitType==='Wheel chocks'}];
+function vehDivOf(v){ if(!v) return ''; if(DIVISIONS.includes(v.division)) return v.division; const st=v.projectId&&siteEquipmentList.find(x=>x.id===v.projectId); return st?(st.division||'Civil'):''; }
+function vehKitCheck(v){ if(!v || v.deleted || vehDivOf(v)!=='Scaffolding') return null; const inside=equipInVeh(v.id), q=e=>e.category==='vehKit'?Math.max(1, Math.round(Number(e.qty)||1)):1;
+  const rows=SCAF_VEH_KIT.map(r=>{ const L=inside.filter(r.match), good=L.filter(e=>(e.condition||'In service')==='In service' && !(e.expiry && statusFor(e.expiry)==='expired')), have=good.reduce((n,e)=>n+q(e),0), bad=L.reduce((n,e)=>n+q(e),0)-have;
+    return {...r, have, bad, miss:Math.max(0, r.need-have)}; });
+  const miss=rows.reduce((n,r)=>n+r.miss,0); return {rows, miss, ok:!miss}; }
+function vehKitMissTxt(c){ return c.rows.filter(r=>r.miss).map(r=>`${r.miss} ${r.label}${r.miss>1&&!/s\)?$/.test(r.label)?'':''}`).join(', '); }
+function vehKitCheckHtml(v){ const c=vehKitCheck(v); if(!c) return '';
+  return `<div class="panel vk-check ${c.ok?'vk-ok':'vk-bad'}"><div class="subhead" style="margin-top:0;">Scaffolding vehicle — mandatory kit ${c.ok?'<span class="badge ok">Complete</span>':`<span class="badge danger">${c.miss} missing</span>`}</div>
+    <div class="table-wrap" style="box-shadow:none;"><table class="vk-tbl"><thead><tr><th>Item</th><th>Need</th><th>Have</th><th>Status</th></tr></thead><tbody>
+    ${c.rows.map(r=>`<tr class="${r.miss?'vk-row-miss':''}"><td>${esc(r.label)}</td><td class="mono">${r.need}</td><td class="mono">${r.have}</td><td>${r.miss?`<span class="badge danger">${r.miss} missing</span>`:'<span class="badge ok">✓ OK</span>'}${r.bad?`<div class="wsub">+${r.bad} expired / damaged</div>`:''}</td></tr>`).join('')}</tbody></table></div>
+    <p class="wsub" style="margin:6px 0 0;">Only items in service and not expired count. Put items in this vehicle with "Put an item in this vehicle" below, or from Plant &amp; Equipment (Location = this vehicle).</p></div>`; }
+function vehKitPanelHtml(){ const L=activeVehicles().map(v=>({v, c:vehKitCheck(v)})).filter(x=>x.c); if(!L.length) return ''; const bad=L.filter(x=>!x.c.ok);
+  return `<div class="panel vk-check ${bad.length?'vk-bad':'vk-ok'}"><div class="section-head"><h3>${ic('truck')} Scaffolding vehicles — mandatory kit</h3><span class="badge ${bad.length?'danger':'ok'}">${L.length-bad.length} of ${L.length} complete</span></div>
+    <p class="wsub" style="margin:-4px 0 6px;">Each Scaffolding vehicle: ${SCAF_VEH_KIT.map(r=>`${r.need} ${r.label}`).join(' · ')}.</p>
+    ${bad.length?bad.map(x=>`<div class="equip-line" data-vkopen="${esc(x.v.id)}" style="cursor:pointer;"><div class="equip-line-main"><div class="equip-line-title">${ic('truck')} ${esc(x.v.vehicleNumber||'Vehicle')}</div><div class="wsub">${esc(x.v.projectId?projectName(x.v.projectId):'')}</div></div><div class="equip-line-badges"><span class="badge danger">missing: ${esc(vehKitMissTxt(x.c))}</span></div></div>`).join(''):'<p class="wsub" style="margin:0;">All Scaffolding vehicles carry the full kit.</p>'}</div>`; }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-vkopen]'); if(!b) return; openVehicleDrawer(b.dataset.vkopen); activeVehicleTab='kit'; renderVehicleDrawer(); });
 /* Batch 125: division of an item = the division of where it is (vehicle → its division or its project's; project → its division; company location; store) */
 const EQ_DIV_ORDER=['Scaffolding','Civil','Rental','Office staff','Company locations','Store','Not set'];
 function equipDivOf(e){ const l=equipLoc(e); if(l==='store') return 'Store'; if(l.startsWith('loc:')) return 'Company locations';
@@ -20148,6 +20180,7 @@ async function buildVehiclePdf(v){
     kv('Required documents', !v.vehicleType ? 'Vehicle type not set' : (miss.length ? 'Missing: '+miss.join(', ') : 'All on record'));
     const li=vehInspAll(v)[0]; kv('Last inspection', li ? `${li.date} — ${VI_RESULT[li.result].t}${vehDoNotUse(v)?' (DO NOT USE)':''}` : 'None recorded'); }
 
+  { const c=vehKitCheck(v); if(c){ h2('Scaffolding vehicle — mandatory kit'); for(const r of c.rows) kv(r.label, `required ${r.need} · in vehicle ${r.have}${r.bad?' (+'+r.bad+' expired / damaged)':''}${r.miss?' · MISSING '+r.miss:' · OK'}`); } }   // Batch 126
   h2('Equipment & PPE inside the vehicle');   // Batch 124: from Plant & Equipment
   { const L=equipInVeh(v.id); if(!L.length) kv('Items', 'None recorded'); for(const e of L) kv(`${(EQUIP_CATEGORIES[e.category]||{}).short||'Item'} — ${equipTitle(e)}`, [e.serial?'S/N '+e.serial:'', e.expiry?'expiry '+isoToDmy(e.expiry):'', (e.condition||'In service')].filter(Boolean).join(' · ')); }
 
