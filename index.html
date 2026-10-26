@@ -1216,6 +1216,9 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .sv-rb-y input:checked+span{background:var(--ok-bg); color:var(--ok); border-color:var(--ok); font-weight:700;} .sv-rb-n input:checked+span{background:var(--danger-bg); color:var(--danger); border-color:var(--danger); font-weight:700;} .sv-rb-na input:checked+span{background:var(--muted-bg); font-weight:700;}
 .sv-crm{display:flex; gap:6px; align-items:center;} .sv-crm input{flex:1; min-width:0;} .sv-ph{display:inline-flex; gap:4px; align-items:center; flex-wrap:wrap;} .sv-ph img{width:34px; height:34px; object-fit:cover; border-radius:6px; border:1px solid var(--line);} .sv-phadd{cursor:pointer; font-size:16px; padding:2px 6px; border:1px dashed var(--line); border-radius:6px;}
 .sv-cstat{margin:0 0 8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;} @media (max-width:720px){ .sv-crow{grid-template-columns:1fr;} }
+.sv-erows{display:flex; flex-direction:column; gap:4px; margin-bottom:8px;} .sv-erow{display:flex; gap:6px; align-items:center;} .sv-erow input{flex:1; min-width:0;} .sv-en{min-width:26px; text-align:right;} .sv-egrp input{font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:var(--accent);}
+.sv-eadd,.sv-one{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:6px 0;} .sv-eadd input,.sv-one input{flex:1; min-width:220px;} .sv-many{margin:6px 0;} .sv-many textarea{width:100%; margin:6px 0;} .sv-ed{border-left:3px solid var(--accent);} .sv-empty{border:1px dashed var(--accent);}
+.sv-sigs{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px;} .sv-sigbox{margin:0;}
 </style>
 </head>
 <body class="auth-open">
@@ -3087,7 +3090,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b121b';
+const APP_BUILD='b121e';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -6628,6 +6631,7 @@ function openRegDrawer(key, id, tab){
 function closeRegDrawer(){ if(typeof siteSubApproving!=='undefined' && siteSubApproving && siteSubApproving.kind==='rigdown') siteCancelReview(); activeRegId=null; document.getElementById('regDrawerOverlay').hidden=true; document.getElementById('regDrawer').hidden=true; }
 function regTabsFor(cfg, r){ return cfg.tabs.filter(t=>!t.showIf || t.showIf(r)).concat(cfg.files||cfg.multiFiles?[{key:'files', label:'Files'}]:[]).concat([{key:'history', label:'History'}]); }
 function renderRegDrawer(){
+  if(activeReg==='sv' && typeof svUi!=='undefined' && svUi.pad && svUi.padObj && svUi.padObj.ink && document.getElementById('svPad')) return;   // Batch 121e: signature being drawn
   const r=regCurrent(), cfg=REG[activeReg]; if(!r || r.deleted){ closeRegDrawer(); return; } if(regBusy || formDirtyIn('regDrawerBody')) return;
   document.getElementById('regDrawerName').textContent = r[cfg.noField] ? `${r[cfg.noField]} — ${cfg.titleOf(r)}` : cfg.titleOf(r);
   document.getElementById('regDrawerSub').textContent = cfg.subOf(r);
@@ -6647,7 +6651,8 @@ function renderRegDrawer(){
   if(activeReg==='trs' && typeof trsUi!=='undefined' && trsUi.pad) trsWirePad();   // Batch 95
   if(activeReg==='meetings' && typeof momUi!=='undefined' && momUi.pad) momWirePad();   // Batch 96
   if(activeReg==='ptw' && typeof ptwUi!=='undefined' && ptwUi.pad) ptwWirePad();   // Batch 98
-  if(activeReg==='insp' && typeof ckUi!=='undefined' && ckUi.pad) ckWirePad();   // Batch 100
+  if(activeReg==='insp' && typeof ckUi!=='undefined' && ckUi.pad) ckWirePad();
+  if(activeReg==='sv' && typeof svUi!=='undefined' && svUi.pad) svWirePad();   // Batch 121e   // Batch 100
 }
 function regFormTabHtml(cfg, r, t){
   const head = t.key==='main' ? `${cfg.badgesOf?`<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">${cfg.badgesOf(r)}</div>`:''}${updatedNoteHtml(r)}` : '';
@@ -9122,13 +9127,11 @@ function renderObsTrends(){
    One report per HSE site visit (Scaffolding first; other divisions get their own criteria later).
    siteVisits/{id}: svNo, date, timeFrom, timeTo, division (label), projectId (project id | 'loc:<id>' | ''), location, client, visitors, purpose,
    crewIds[], crewOther, workDone, crit {<id>:{t, g, r:'y'|'n'|'na', rm}}, critOrder[], obs[] (unsafe act / condition), good[], actions[],
-   photos[] {url, name, contentType, path, ref:'c:<criterion>' | 'o:<obs>' | 'g:<good>' | '', cap}, summary, status Draft / Submitted to MD / Reviewed,
-   submittedDate, mdComments, reviewedDate.
+   photos[] {url, name, contentType, path, ref:'c:<criterion>' | 'o:<obs>' | 'g:<good>' | '', cap}, summary.   (b121d: MD review removed at the user's request)
    Criteria per division: settings/siteVisitCriteria.lists {<division key>: [lines]} — a line starting with "#" is a group heading.
    Each report keeps its own copy of the criteria text, so editing the list later does not change old reports.
-   Counted as a Site visit in the Monthly Report (hseLogs sv_<id>) → also ticks the Monthly Schedule task by itself. MD review = PDF sent by HSE. */
+   Counted as a Site visit in the Monthly Report (hseLogs sv_<id>) → also ticks the Monthly Schedule task by itself. */
 const SV_DIVS=[['Scaffolding','Scaffolding'],['Civil','Civil'],['Rental','Logistics & Rental'],['Office staff','Office']];
-const SV_STATUSES=['Draft','Submitted to MD','Reviewed'];
 const SV_PURPOSES=['Routine HSE site visit','Scaffold inspection','Client request / complaint','Incident follow-up','Start of a new job','Other'];
 const SV_STARTER={Scaffolding:['# Permit & documents','Valid work permit at site (PTW / client permit)','JSA / TRIC reviewed and signed by the crew','TBT done today — signed sheet at site','Scaffold design / drawing available for non-standard scaffolds',
   '# Scaffold condition','Scaffold tag in place (green = safe to use / red = do not use)','Scaffold inspected within the last 7 days and after any change or bad weather','Base plates and sole boards on firm, level ground','Standards plumb, ledgers and transoms secure, couplers tight','Bracing and ties fitted as required',
@@ -9139,13 +9142,12 @@ let svUi={draft:{}, critEdit:false, critDiv:'Scaffolding', crewQ:''};
 function svDivKey(lbl){ const f=SV_DIVS.find(x=>x[1]===lbl || x[0]===lbl); return f?f[0]:''; }
 function svDivLbl(k){ const f=SV_DIVS.find(x=>x[0]===k); return f?f[1]:k; }
 function svHash(t){ let h=5381; const s=String(t||'').trim().toLowerCase().replace(/\s+/g,' '); for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return 'c'+h.toString(36); }
-function svLines(k){ const L=(((settingsDocs.siteVisitCriteria||{}).lists)||{})[k]; return Array.isArray(L) ? L : (SV_STARTER[k]||[]); }
+function svLines(k){ const L=(((settingsDocs.siteVisitCriteria||{}).lists)||{})[k]; return Array.isArray(L) ? L : []; }   // Batch 121c: no starting list — HSE writes its own
 function svCriteriaFor(k){ const out=[]; let g=''; for(const ln of svLines(k)){ const t=String(ln||'').trim(); if(!t) continue; if(t.startsWith('#')){ g=t.replace(/^#+\s*/,''); continue; } out.push({id:svHash(t), t, g}); } return out; }
 function svCritList(r){ if(Array.isArray(r.critOrder) && r.crit && r.critOrder.length) return r.critOrder.map(id=>({id, t:(r.crit[id]||{}).t||'', g:(r.crit[id]||{}).g||''})).filter(x=>x.t); return svCriteriaFor(svDivKey(r.division)); }
 function svCritStats(r){ const L=svCritList(r), c=r.crit||{}; let y=0, n=0, na=0, open=0; for(const x of L){ const v=(c[x.id]||{}).r; if(v==='y') y++; else if(v==='n') n++; else if(v==='na') na++; else open++; } return {total:L.length, y, n, na, open, pct:(y+n)?Math.round(y*100/(y+n)):null}; }
 function svPlace(r){ return [r.projectId?projectName(r.projectId):'', r.location].filter(Boolean).join(' — ')||'—'; }
 function svSiteDiv(r){ const s=r.projectId && !String(r.projectId).startsWith('loc:') ? siteEquipmentList.find(x=>x.id===r.projectId) : null; return s ? (s.division||'Civil') : ''; }
-function svStatusBadge(r){ const s=r.status||'Draft'; return `<span class="badge ${s==='Reviewed'?'ok':s==='Submitted to MD'?'warn':'muted'}">${esc(s)}</span>`; }
 function svPctBadge(p){ return p===null?'<span class="badge muted">—</span>':`<span class="badge ${p>=90?'ok':p>=75?'warn':'danger'}">${p} %</span>`; }
 function svPhotos(r, ref){ return (r.photos||[]).map((p,n)=>({...p, n})).filter(p=>ref===undefined || (p.ref||'')===ref); }
 function svPhotoStrip(r, ref){ const ed=canEdit(), L=svPhotos(r, ref);
@@ -9170,35 +9172,59 @@ function svCrewHtml(r){ const ed=canEdit(), sel=new Set(r.crewIds||[]), c=svCrew
       <label class="span-all">Work being performed<textarea name="workDone" ${ed?'':'disabled'} placeholder="e.g. Rig-up of access scaffold at well NM-112, 12 m high">${esc(r.workDone||'')}</textarea></label></div>
     ${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save crew &amp; work</button></div>':''}</form>`; }
 function svCritHtml(r){ const ed=canEdit(), L=svCritList(r), c=r.crit||{}, D=svUi.draft[r.id]||{}, st=svCritStats(r); let g='';
-  if(!L.length) return `<p class="wsub">No criteria for ${esc(r.division||'this division')} yet.${ed?' Add them with <b>Criteria lists</b> at the top of Site Visit Reports.':''}</p>`;
+  const wbtn=ed?`<button type="button" class="btn btn-sm" data-sv-critedit="${esc(svDivKey(r.division)||'Scaffolding')}">✍ Write / edit the ${esc(r.division||'')} criteria list</button>`:'';
+  const one=ed?`<div class="sv-one"><input id="svOneT" maxlength="200" placeholder="Add a criterion only for this visit…"><button type="button" class="btn btn-sm" data-sv-oneadd="1">+ Add</button></div>`:'';
+  if(!L.length) return `<div class="panel sv-empty"><p style="margin:0 0 8px;"><b>No criteria for ${esc(r.division||'this division')} yet.</b> Write your own list once — every new ${esc(r.division||'')} visit then uses it.</p>${wbtn}${ed?`<p class="wsub" style="margin:10px 0 4px;">Or add criteria only for this visit:</p>${one}`:''}</div>`;
   const rows=L.map((x,i)=>{ const v=(D[x.id]||{}).r!==undefined?D[x.id].r:(c[x.id]||{}).r||'', rm=(D[x.id]||{}).rm!==undefined?D[x.id].rm:(c[x.id]||{}).rm||'';
     const head=x.g && x.g!==g ? (g=x.g, `<div class="sv-cg">${esc(x.g)}</div>`) : '';
     return `${head}<div class="sv-crow sv-${v||'none'}"><div class="sv-ct"><span class="mono wsub">${i+1}.</span> ${esc(x.t)}</div>
       <div class="sv-cr">${[['y','✓ Complied'],['n','✗ Not complied'],['na','N/A']].map(([k,l])=>`<label class="sv-rb sv-rb-${k}"><input type="radio" name="svc_${esc(x.id)}" value="${k}" ${v===k?'checked':''} ${ed?'':'disabled'}><span>${l}</span></label>`).join('')}</div>
       <div class="sv-crm"><input data-svrm="${esc(x.id)}" value="${esc(rm)}" maxlength="200" placeholder="Remark${v==='n'?' — what was wrong':''}" ${ed?'':'disabled'}>${svPhotoStrip(r, 'c:'+x.id)}</div></div>`; }).join('');
-  return `<form id="svCritForm"><div class="sv-cstat">Compliance: ${svPctBadge(st.pct)} <span class="wsub">${st.y} complied · ${st.n} not complied · ${st.na} N/A${st.open?` · <b>${st.open} not checked</b>`:''} (saved)</span></div>${rows}
-    ${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save checklist</button></div>':''}</form>`; }
+  return `<form id="svCritForm"><div class="sv-cstat">Compliance: ${svPctBadge(st.pct)} <span class="wsub">${st.y} complied · ${st.n} not complied · ${st.na} N/A${st.open?` · <b>${st.open} not checked</b>`:''} (saved)</span><span style="margin-left:auto;">${wbtn}</span></div>${rows}
+    ${one}${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save checklist</button></div>':''}</form>`; }
 function svReadCrit(f, r){ const D={}; for(const x of svCritList(r)){ const ch=f.querySelector(`input[name="svc_${CSS.escape(x.id)}"]:checked`), rm=f.querySelector(`[data-svrm="${CSS.escape(x.id)}"]`); D[x.id]={r:ch?ch.value:'', rm:rm?rm.value:''}; } return D; }
 /* ---- criteria lists (settings) ---- */
-function svTopHtml(){ if(!svUi.critEdit || !canEdit()) return ''; const k=svUi.critDiv, lines=svLines(k);
-  return `<form id="svCritListForm" class="panel"><div class="section-head"><h3>Site visit criteria — ${esc(svDivLbl(k))}</h3><button type="button" class="btn btn-sm" data-sv-critx="1">Close</button></div>
+/* Batch 121c: write your own criteria — one row per criterion, optional group headings, move up / down, remove, paste many */
+function svEdLoad(k){ svUi.critDiv=k; svUi.rows=svLines(k).map(x=>{ const t=String(x||'').trim(); return t.startsWith('#')?{g:true, t:t.replace(/^#+\s*/,'')}:{g:false, t}; }).filter(x=>x.t); }
+function svEdRead(){ const f=document.getElementById('svCritListForm'); if(!f || !svUi.rows) return; f.querySelectorAll('[data-sve]').forEach(el=>{ const i=Number(el.dataset.sve); if(svUi.rows[i]) svUi.rows[i].t=el.value; }); }
+function svTopHtml(){ if(!svUi.critEdit || !canEdit()) return ''; const k=svUi.critDiv; if(!svUi.rows) svEdLoad(k); const R=svUi.rows; let n=0;
+  return `<form id="svCritListForm" class="panel sv-ed"><div class="section-head"><h3>✍ Your site visit criteria — ${esc(svDivLbl(k))}</h3><button type="button" class="btn btn-sm" data-sv-critx="1">Close</button></div>
     <div class="seg-tabs" style="margin-bottom:8px;">${SV_DIVS.map(([dk,l])=>`<button type="button" class="seg-btn ${dk===k?'active':''}" data-sv-critdiv="${esc(dk)}">${esc(l)} <span class="wsub">${svCriteriaFor(dk).length}</span></button>`).join('')}</div>
-    <p class="wsub" style="margin:0 0 6px;">One criterion per line. A line starting with <b>#</b> is a group heading (e.g. <code># Scaffold condition</code>). New reports use this list; saved reports keep the criteria they were checked against.${!Array.isArray((((settingsDocs.siteVisitCriteria||{}).lists)||{})[k]) && SV_STARTER[k]?' <b>Starting list — edit it and save.</b>':''}</p>
-    <textarea name="lines" rows="16" style="width:100%; font-family:inherit;">${esc(lines.join('\n'))}</textarea>
-    <div class="form-actions"><button type="button" class="btn" data-sv-critx="1">Cancel</button><button type="submit" class="btn btn-primary">Save ${esc(svDivLbl(k))} criteria</button></div></form>`; }
-function svTopRender(){ const el=document.getElementById('svTop'); if(!el || formDirtyIn('svTop')) return; el.innerHTML=svTopHtml(); }
+    <p class="wsub" style="margin:0 0 8px;">Write what you expect to find at every ${esc(svDivLbl(k))} site visit. In each report you tick every criterion <b>✓ Complied / ✗ Not complied / N/A</b>. Group headings are optional (e.g. "Permit &amp; documents"). Saved reports keep the criteria they were checked against.</p>
+    <div class="sv-erows">${R.length?R.map((x,i)=>`<div class="sv-erow${x.g?' sv-egrp':''}"><span class="mono wsub sv-en">${x.g?'#':(++n)+'.'}</span><input data-sve="${i}" value="${esc(x.t)}" maxlength="200" placeholder="${x.g?'Group heading':'Criterion'}">
+      <button type="button" class="icon-btn" data-sv-eup="${i}" aria-label="Move up" ${i?'':'disabled'}>↑</button><button type="button" class="icon-btn" data-sv-edn="${i}" aria-label="Move down" ${i<R.length-1?'':'disabled'}>↓</button><button type="button" class="icon-btn danger" data-sv-edel="${i}" aria-label="Remove">✕</button></div>`).join(''):'<p class="wsub">No criteria yet — type the first one below.</p>'}</div>
+    <div class="sv-eadd"><input id="svNewT" maxlength="200" placeholder="Type a criterion — e.g. Scaffold tag in place and valid"><button type="button" class="btn btn-sm btn-primary" data-sv-eadd="c">+ Add criterion</button><button type="button" class="btn btn-sm" data-sv-eadd="g">+ Add group heading</button></div>
+    <details class="sv-many"><summary>Add many at once (paste a list, one per line)</summary><textarea id="svManyT" rows="6" placeholder="One criterion per line&#10;# A line starting with # becomes a group heading"></textarea><button type="button" class="btn btn-sm" data-sv-emany="1">Add these lines</button></details>
+    <div class="form-actions"><button type="button" class="btn" data-sv-critx="1">Cancel</button><button type="submit" class="btn btn-primary">Save ${esc(svDivLbl(k))} criteria (${R.filter(x=>!x.g && String(x.t).trim()).length})</button></div></form>`; }
+/* Batch 121e: team name + Operations Executive signature (signed on the screen) */
+function svTeamNames(){ return [...new Set(regActive('sv').map(r=>String(r.teamName||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,80); }
+function svOpsNames(){ return [...new Set(regActive('sv').map(r=>String(r.opsName||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,40); }
+function svSigHtml(r){ const ed=canEdit(), me=hseSigOf((auth.currentUser||{}).email)||{}, o=r.opsSig||null;
+  const box=(role, inner)=>`<div class="panel sv-sigbox"><div class="subhead" style="margin-top:0;">${role}</div>${inner}</div>`;
+  const hse=me.img?`<img src="${esc(me.img)}" alt="signature" class="trs-sigimg"><div class="wsub">${esc(me.name||plWho())} — your saved HSE signature is printed on the PDF</div>`:`<p class="wsub">${esc(plWho())} — no saved HSE signature yet (add it with "Add my signature" in a project's TBT panel); the PDF shows a blank line.</p>`;
+  const ops = svUi.pad==='ops' ? `<div class="hse-sig-pad"><canvas id="svPad" width="600" height="200" aria-label="Operations Executive signature"></canvas></div><div class="ppe-padbtns"><button type="button" class="btn btn-sm" data-sv-padx="1">Cancel</button><button type="button" class="btn btn-sm" data-sv-padclr="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-sv-padsave="1">Save signature</button></div>`
+    : o && o.img ? `<img src="${esc(o.img)}" alt="signature" class="trs-sigimg"><div class="wsub"><b>${esc(o.n||r.opsName||'')}</b> · signed ${esc(isoToDmy(String(o.at||'').slice(0,10)))}</div>${ed?'<button type="button" class="att-link" data-sv-sign="1">Sign again</button> · <button type="button" class="att-link" data-sv-unsign="1" data-armed="0">Remove</button>':''}`
+    : ed ? `<p class="wsub" style="margin:0 0 6px;">${r.opsName?`<b>${esc(r.opsName)}</b> signs here with a finger or the mouse.`:'Write the Operations Executive name in Visit details, then he signs here.'}</p><button type="button" class="btn btn-sm btn-primary" data-sv-sign="1" ${r.opsName?'':'disabled'}>✍ Operations Executive signs</button>` : '<span class="badge warn">Not signed</span>';
+  return `<div class="sv-sigs">${box('Prepared by (HSE)', hse)}${box('Operations Executive'+(r.opsName?' — '+esc(r.opsName):''), ops)}</div>`; }
+function svWirePad(){ const cv=document.getElementById('svPad'); svUi.padImg=''; svUi.padObj=cv?compPadWire(cv, img=>{ svUi.padImg=img; }):null; if(cv) cv.scrollIntoView({block:'center'}); }
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-sv-sign],[data-sv-unsign],[data-sv-padx],[data-sv-padclr],[data-sv-padsave]'); if(!b || activeReg!=='sv' || !canEdit()) return; const D=b.dataset, r=regCurrent(); if(!r) return;
+  if(D.svSign){ svUi.pad='ops'; svUi.padObj=null; renderRegDrawer(); return; }
+  if(D.svPadx){ svUi.pad=''; svUi.padObj=null; renderRegDrawer(); return; }
+  if(D.svPadclr){ svUi.padObj=null; renderRegDrawer(); return; }
+  if(D.svUnsign){ if(!compArm(b,'Tap again — remove')) return; const FV=fsFieldValue(); await regUpdate('sv', r.id, {opsSig:FV?FV.delete():null}, true); toast('Signature removed'); return; }
+  if(D.svPadsave){ if(!svUi.padImg){ toast('Sign in the box first'); return; } const sig={img:svUi.padImg, n:r.opsName||'', at:new Date().toISOString()}; svUi.pad=''; svUi.padObj=null;
+    if(await regUpdate('sv', r.id, {opsSig:sig}, true)) toast('Operations Executive signed ✓'); renderRegDrawer(); } }, true);
+function svTopRender(force){ const el=document.getElementById('svTop'); if(!el || (!force && formDirtyIn('svTop'))) return; el.innerHTML=svTopHtml(); }
 regDefine({
   key:'sv', collection:'siteVisits', singular:'Site visit report', title:'Site Visit Reports', tagline:'Visit · Check · Report',
-  addLabel:'+ New site visit', noField:'svNo', noPrefix:'SV', noYear:true, dateField:'date', yearFilter:true, statuses:SV_STATUSES, statusOf:r=>r.status||'Draft',
-  headerButtons:'<button class="btn btn-sm" type="button" data-sv-critopen="1">Criteria lists</button>',
-  searchPlaceholder:'Search report no., project, place, visitor…', emptyEditor:'No site visit reports yet — click “+ New site visit”. Tick the criteria, add what you found (with photos) and the actions, then download the PDF for the MD.',
+  addLabel:'+ New site visit', noField:'svNo', noPrefix:'SV', noYear:true, dateField:'date', yearFilter:true,
+  headerButtons:'<button class="btn btn-sm btn-primary" type="button" data-sv-critopen="1">✍ Write criteria</button>',
+  searchPlaceholder:'Search report no., project, place, visitor…', emptyEditor:'No site visit reports yet — click “+ New site visit”. Tick the criteria, add what you found (with photos) and the actions, then download the PDF report.',
   titleOf:r=>`${svPlace(r)}`, subOf:r=>[isoToDmy(r.date||''), r.division, r.visitors?'by '+r.visitors:''].filter(Boolean).join(' · '),
-  badgesOf:r=>`${svStatusBadge(r)} ${svPctBadge(svCritStats(r).pct)}`,
+  badgesOf:r=>`${svPctBadge(svCritStats(r).pct)}`,
   searchText:r=>[r.svNo, svPlace(r), r.visitors, r.client, r.division, r.workDone, r.summary].join(' '),
-  addFields:['date','division','projectId','location','client','visitors','purpose'], addDefaults:{date:()=>localToday(), visitors:()=>plWho(), status:'Draft', purpose:'Routine HSE site visit', division:'Scaffolding'},
+  addFields:['date','division','projectId','location','client','teamName','visitors','opsName','purpose'], addDefaults:{date:()=>localToday(), visitors:()=>plWho(), purpose:'Routine HSE site visit', division:'Scaffolding'},
   validate:d=>!d.date?'Choose the date':!String(d.visitors||'').trim()?'Write who visited':(!d.projectId && !String(d.location||'').trim())?'Choose the project / location or write the place':'',
-  prepare:(d, data)=>{ const T=data||d, M={...d, ...(data||{})};
-    if(T.status==='Submitted to MD' && !M.submittedDate) T.submittedDate=localToday(); if(T.status==='Reviewed' && !M.reviewedDate) T.reviewedDate=localToday(); },
   segs:SV_DIVS.map(([k,l])=>({key:k, label:l, match:r=>svDivKey(r.division)===k})), segAllLabel:'All divisions',
   tabs:[{key:'main', label:'Visit details', groups:[{fields:[
       {key:'svNo', label:'Report no.', required:true},
@@ -9208,17 +9234,17 @@ regDefine({
       {key:'location', label:'Exact place / well no.', placeholder:'e.g. NM-112, rack R-04'},
       {key:'client', label:'Client', placeholder:'e.g. PDO'},
       {key:'visitors', label:'Visited by (names)', required:true, wide:true, placeholder:'e.g. Radhakrishnan N, Sayed'},
+      {key:'teamName', label:'Team name', type:'textlist', options:()=>svTeamNames(), placeholder:'e.g. Team A — Ravi Kumar gang'},   // Batch 121e
+      {key:'opsName', label:'Operations Executive', type:'textlist', options:()=>svOpsNames(), placeholder:'name — signs in the Signatures tab'},
       {key:'purpose', label:'Purpose', type:'select', options:SV_PURPOSES},
       {key:'summary', label:'Overall comment / conclusion of the visit', type:'textarea', wide:true},
-    ]}], intro:'Then: <b>Crew &amp; work</b> → <b>Criteria checklist</b> → <b>HSE observations</b> / <b>Good observations</b> → <b>Actions</b> → <b>PDF report</b> for the MD.'},
+    ]}], intro:'Then: <b>Crew &amp; work</b> → <b>Criteria checklist</b> → <b>HSE observations</b> / <b>Good observations</b> → <b>Actions</b> → <b>PDF report</b>.'},
     {key:'crew', label:'Crew & work', html:r=>svCrewHtml(r)},
     {key:'crit', label:'Criteria checklist', html:r=>svCritHtml(r)},
     {key:'sub:obs', label:'HSE observations', sub:'obs'},
     {key:'sub:good', label:'Good observations', sub:'good'},
     {key:'sub:actions', label:'Actions', sub:'actions'},
-    {key:'md', label:'MD review', intro:'Download the PDF report (button at the top) and send it to the MD. When he replies, set <b>Reviewed</b> and write his comments here.', fields:[
-      {key:'status', label:'Status', type:'select', options:SV_STATUSES}, {key:'submittedDate', label:'Sent to MD on', type:'date'},
-      {key:'reviewedDate', label:'Reviewed by MD on', type:'date'}, {key:'mdComments', label:'MD comments', type:'textarea', wide:true}]}],
+    {key:'sig', label:'Signatures', html:r=>svSigHtml(r)}],
   subs:{
     obs:{label:'HSE observations (unsafe act / condition)', addLabel:'Add observation', fields:[
       {key:'type', label:'Type', type:'select', options:['Unsafe act','Unsafe condition'], required:true}, {key:'category', label:'Category', type:'select', options:OBS_CATS},
@@ -9237,25 +9263,39 @@ regDefine({
     {label:'Visited by', html:r=>esc(r.visitors||'—')},
     {label:'Compliance', html:r=>svPctBadge(svCritStats(r).pct)},
     {label:'Findings', html:r=>`<span class="badge ${(r.obs||[]).length?'danger':'muted'}">${(r.obs||[]).length} unsafe</span> <span class="badge ${(r.good||[]).length?'ok':'muted'}">${(r.good||[]).length} good</span>`},
-    {label:'Status', html:r=>svStatusBadge(r)},
   ],
   tiles:list=>{ const mo=localToday().slice(0,7), m=list.filter(r=>String(r.date||'').startsWith(mo)), ps=m.map(r=>svCritStats(r).pct).filter(p=>p!==null), avg=ps.length?Math.round(ps.reduce((a,b)=>a+b,0)/ps.length):null;
     const openA=list.reduce((n,r)=>n+(r.actions||[]).filter(a=>(a.status||'Open')!=='Closed').length,0);
     return [{label:'Visits this month', num:m.length, sub:`${list.filter(r=>String(r.date||'').startsWith(mo.slice(0,4))).length} this year`, icon:'search'},
       {label:'Average compliance', num:avg===null?'—':avg+' %', cls:avg===null?'':avg>=90?'ok':avg>=75?'warn':'danger', sub:'criteria complied this month', icon:'target'},
       {label:'Open actions', num:openA, cls:openA?'warn':'ok', sub:'from site visits', icon:'clipcheck'},
-      {label:'Waiting for MD', num:list.filter(r=>r.status==='Submitted to MD').length, cls:'', sub:'sent, not yet reviewed', icon:'hourglass'}]; },
+      {label:'Unsafe acts / conditions', num:m.reduce((n,r)=>n+(r.obs||[]).length,0), cls:'', sub:'found this month', icon:'alert'}]; },
   topPanel:()=>svTopRender(),
   afterSave:r=>syncSvToReport(r),
 });
 /* ---- events ---- */
-document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-sv-critopen],[data-sv-critx],[data-sv-critdiv]'); if(!b) return; const D=b.dataset;
-  if(D.svCritopen){ if(!canEdit()) return; svUi.critEdit=!svUi.critEdit; clearDirtyForms(); svTopRender(); return; }
-  if(D.svCritx){ svUi.critEdit=false; clearDirtyForms(); svTopRender(); return; }
-  if(D.svCritdiv){ svUi.critDiv=D.svCritdiv; clearDirtyForms(); svTopRender(); } });
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-sv-critopen],[data-sv-critx],[data-sv-critdiv],[data-sv-critedit],[data-sv-eup],[data-sv-edn],[data-sv-edel],[data-sv-eadd],[data-sv-emany],[data-sv-oneadd]'); if(!b) return; const D=b.dataset;
+  const open=k=>{ svUi.critEdit=true; svEdLoad(k); clearDirtyForms(); svTopRender(true); const f=document.getElementById('svCritListForm'); if(f){ f.scrollIntoView({block:'start'}); const n=document.getElementById('svNewT'); if(n) n.focus(); } };
+  if(D.svCritopen){ if(!canEdit()) return; if(svUi.critEdit){ svUi.critEdit=false; clearDirtyForms(); svTopRender(true); } else open(svUi.critDiv||'Scaffolding'); return; }
+  if(D.svCritedit){ if(!canEdit()) return; closeRegDrawer(); open(D.svCritedit); return; }
+  if(D.svCritx){ svUi.critEdit=false; svUi.rows=null; clearDirtyForms(); svTopRender(true); return; }
+  if(D.svCritdiv){ open(D.svCritdiv); return; }
+  if(D.svOneadd){ const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const inp=document.getElementById('svOneT'), t=String((inp||{}).value||'').trim().slice(0,200); if(!t){ toast('Type the criterion first'); if(inp) inp.focus(); return; }
+    const f=document.getElementById('svCritForm'), Dr=f?svReadCrit(f, r):{}, L=svCritList(r), crit={}; for(const x of L) crit[x.id]={t:x.t, g:x.g||'', r:(Dr[x.id]||{}).r||((r.crit||{})[x.id]||{}).r||'', rm:String((Dr[x.id]||{}).rm||((r.crit||{})[x.id]||{}).rm||'').slice(0,200)};
+    let id=svHash(t); if(crit[id]) id=id+'x'+Date.now().toString(36); crit[id]={t, g:'Added for this visit', r:'', rm:''}; clearDirtyForms();
+    if(await regUpdate('sv', r.id, {crit, critOrder:[...L.map(x=>x.id), id]}, true)){ delete svUi.draft[r.id]; toast('Criterion added to this visit'); } return; }
+  // editor rows
+  if(!svUi.rows) return; svEdRead(); const R=svUi.rows;
+  if(D.svEup!==undefined){ const i=Number(D.svEup); if(i>0) [R[i-1],R[i]]=[R[i],R[i-1]]; }
+  else if(D.svEdn!==undefined){ const i=Number(D.svEdn); if(i<R.length-1) [R[i+1],R[i]]=[R[i],R[i+1]]; }
+  else if(D.svEdel!==undefined){ R.splice(Number(D.svEdel),1); }
+  else if(D.svEadd){ const inp=document.getElementById('svNewT'), t=String((inp||{}).value||'').trim(); if(!t){ toast(D.svEadd==='g'?'Type the group heading first':'Type the criterion first'); if(inp) inp.focus(); return; } R.push({g:D.svEadd==='g', t:t.slice(0,200)}); }
+  else if(D.svEmany){ const ta=document.getElementById('svManyT'); String((ta||{}).value||'').split('\n').map(x=>x.trim()).filter(Boolean).forEach(x=>R.push(x.startsWith('#')?{g:true, t:x.replace(/^#+\s*/,'').slice(0,200)}:{g:false, t:x.slice(0,200)})); }
+  clearDirtyForms(); svTopRender(true); const n=document.getElementById('svNewT'); if(n && (D.svEadd||D.svEmany)) n.focus(); });
+document.addEventListener('keydown', e=>{ if(e.key!=='Enter' || !e.target) return; if(e.target.id==='svNewT'){ e.preventDefault(); const b=document.querySelector('[data-sv-eadd="c"]'); if(b) b.click(); } else if(e.target.id==='svOneT'){ e.preventDefault(); const b=document.querySelector('[data-sv-oneadd]'); if(b) b.click(); } else if(e.target.matches && e.target.matches('#svCritListForm [data-sve]')) e.preventDefault(); });
 document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement)) return;
-  if(f.id==='svCritListForm'){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; const lines=String(new FormData(f).get('lines')||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,150).map(x=>x.slice(0,200));
-    if(await saveSettings('siteVisitCriteria', {lists:{[svUi.critDiv]:lines}})){ clearDirtyForms(); toast(`${svDivLbl(svUi.critDiv)} criteria saved — ${lines.filter(x=>!x.startsWith('#')).length} items`); svTopRender(); } return; }
+  if(f.id==='svCritListForm'){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; svEdRead(); const lines=(svUi.rows||[]).map(x=>({g:x.g, t:String(x.t||'').trim()})).filter(x=>x.t).map(x=>(x.g?'# ':'')+x.t.slice(0,200)).slice(0,150);
+    if(await saveSettings('siteVisitCriteria', {lists:{[svUi.critDiv]:lines}})){ clearDirtyForms(); svUi.rows=null; toast(`${svDivLbl(svUi.critDiv)} criteria saved — ${lines.filter(x=>!x.startsWith('#')).length} items`); svTopRender(); } return; }
   if(f.id==='svCritForm'){ e.preventDefault(); e.stopImmediatePropagation(); const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const D=svReadCrit(f, r), L=svCritList(r), crit={};
     for(const x of L) crit[x.id]={t:x.t, g:x.g||'', r:(D[x.id]||{}).r||'', rm:String((D[x.id]||{}).rm||'').trim().slice(0,200)};
     clearDirtyForms(); if(await regUpdate('sv', r.id, {crit, critOrder:L.map(x=>x.id)})){ delete svUi.draft[r.id]; const st=svCritStats({...r, crit, critOrder:L.map(x=>x.id)}); toast(`Checklist saved — compliance ${st.pct===null?'—':st.pct+' %'}${st.open?` · ${st.open} not checked`:''}`); } return; }
@@ -9285,9 +9325,9 @@ async function svPdf(r){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF too
         cells.forEach(([t,w,b],i)=>{ if(b){ doc.setFillColor(238,241,245); doc.rect(x,y,w,h,'F'); } doc.setDrawColor(170,174,182); doc.setLineWidth(0.5); doc.rect(x,y,w,h); doc.setFont('helvetica', b?'bold':'normal'); L[i].forEach((ln,n)=>doc.text(ln, x+4, y+11+n*10.5)); x+=w; }); y+=h; } };
     const st=svCritStats(r), crew=(r.crewIds||[]).map(id=>workers.find(w=>w.id===id)).filter(Boolean);
     doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text(`Site Visit Report — ${r.svNo||''}`, M, y+12); y+=20;
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(`${r.status||'Draft'}${r.submittedDate?' · sent to MD '+isoToDmy(r.submittedDate):''}${r.reviewedDate?' · reviewed '+isoToDmy(r.reviewedDate):''} · printed ${isoToDmy(localToday())}`, M, y+8); doc.setTextColor(...INK); y+=16;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(`Printed ${isoToDmy(localToday())}`, M, y+8); doc.setTextColor(...INK); y+=16;
     title('1. Visit details');
-    kv([['Date', `${isoToDmy(r.date||'')}${r.timeFrom||r.timeTo?'  '+(r.timeFrom||'')+(r.timeTo?' – '+r.timeTo:''):''}`, 'Division', r.division], ['Project / location', r.projectId?projectName(r.projectId):'—', 'Exact place', r.location], ['Client', r.client, 'Purpose', r.purpose], ['Visited by', r.visitors]]);
+    kv([['Date', `${isoToDmy(r.date||'')}${r.timeFrom||r.timeTo?'  '+(r.timeFrom||'')+(r.timeTo?' – '+r.timeTo:''):''}`, 'Division', r.division], ['Project / location', r.projectId?projectName(r.projectId):'—', 'Exact place', r.location], ['Client', r.client, 'Purpose', r.purpose], ['Team name', r.teamName, 'Operations Executive', r.opsName], ['Visited by', r.visitors]]);
     title('2. Crew at site and work performed');
     kv([['Crew present', crew.length?crew.map(w=>`${w.fullName}${w.designation?' ('+w.designation+')':''}`).join(', '):'—'], ['Other people', r.crewOther], ['Work performed', r.workDone]]);
     title(`3. Criteria checklist — compliance ${st.pct===null?'—':st.pct+' %'} (${st.y} complied · ${st.n} not complied · ${st.na} N/A${st.open?' · '+st.open+' not checked':''})`);
@@ -9310,11 +9350,9 @@ async function svPdf(r){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF too
         doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text(doc.splitTextToSize(`P${i+1} — ${capOf(ph[i])}`, cw)[0], x, y+chh+10);
         col++; if(col===2){ col=0; y+=chh+20; } }
       if(col) y+=chh+20; }
-    title('MD review');
-    kv([['Status', r.status||'Draft', 'Sent to MD on', r.submittedDate?isoToDmy(r.submittedDate):''], ['MD comments', r.mdComments], ['Reviewed on', r.reviewedDate?isoToDmy(r.reviewedDate):'']]);
     // signatures
     ensure(110); y+=12; const bw=(CW-12)/2, bh=86, me=hseSigOf((auth.currentUser||{}).email)||{};
-    [['PREPARED BY (HSE)', me.name||plWho(), me.img||''], ['REVIEWED BY (MANAGING DIRECTOR)', r.status==='Reviewed'?'Reviewed '+(r.reviewedDate?isoToDmy(r.reviewedDate):''):'', '']].forEach(([role, name, img], i)=>{ const x=M+i*(bw+12);
+    [['PREPARED BY (HSE)', me.name||plWho(), me.img||''], ['OPERATIONS EXECUTIVE', (r.opsSig&&r.opsSig.n)||r.opsName||'', (r.opsSig&&r.opsSig.img)||'']].forEach(([role, name, img], i)=>{ const x=M+i*(bw+12);
       doc.setDrawColor(110,116,126); doc.rect(x, y, bw, bh); doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,96,106); doc.text(role, x+6, y+11); doc.setTextColor(...INK);
       if(img){ try{ doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+10, y+16, bw-20, bh-44); }catch(e){} } else { doc.setDrawColor(170,174,182); doc.line(x+12, y+bh-28, x+bw-12, y+bh-28); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text('Signature', x+12, y+bh-31); }
       doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.text(`Name: ${name||'______________________'}`, x+6, y+bh-10); });
