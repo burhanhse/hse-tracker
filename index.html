@@ -1219,6 +1219,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .sv-erows{display:flex; flex-direction:column; gap:4px; margin-bottom:8px;} .sv-erow{display:flex; gap:6px; align-items:center;} .sv-erow input{flex:1; min-width:0;} .sv-en{min-width:26px; text-align:right;} .sv-egrp input{font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:var(--accent);}
 .sv-eadd,.sv-one{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:6px 0;} .sv-eadd input,.sv-one input{flex:1; min-width:220px;} .sv-many{margin:6px 0;} .sv-many textarea{width:100%; margin:6px 0;} .sv-ed{border-left:3px solid var(--accent);} .sv-empty{border:1px dashed var(--accent);}
 .sv-sigs{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px;} .sv-sigbox{margin:0;}
+.eq-wait{border-left:3px solid var(--warn);}
 </style>
 </head>
 <body class="auth-open">
@@ -1528,6 +1529,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
           </form>
         </div>
 
+        <div id="equipStoreWait"></div>
         <div class="toolbar">
           <input type="search" id="equipSearchInput" placeholder="Search name or serial no…">
           <select id="equipLocationFilter"><option value="all">All locations</option></select>
@@ -1536,6 +1538,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
             <option value="In service">In service</option>
             <option value="Out for TPI / repair">Out for TPI / repair</option>
             <option value="Damaged / quarantined">Damaged / quarantined</option>
+            <option value="__disposed">Disposed / scrapped</option>
           </select>
           <select id="equipStatusFilter">
             <option value="all">Any expiry status</option>
@@ -2780,11 +2783,10 @@ const VEHICLE_TABS = [
   {key:'driver', label:'Driver & history'},
   {key:'documents', label:'Documents'},
   {key:'inspections', label:'Inspections'},
-  {key:'kit', label:'Equipment inside'},
+  {key:'kit', label:'Equipment & PPE inside'},
   {key:'tyres', label:'Tyres'},
   {key:'services', label:'Service & maintenance'},
-  {key:'ppe', label:'PPE & safety kit'},
-];
+];   // Batch 124: the vehicle "PPE & safety kit" list moved into Plant & Equipment (items located in the vehicle)
 const SERVICE_TYPES=['General service','Preventive maintenance (PM)','Battery check / service','Battery replacement','Tyre change','Tyre service / repair','Breakdown','Repair','Other'];
 const PM_RESET_TYPES=['General service','Preventive maintenance (PM)'];
 const SVC_BATTERY=['Battery check / service','Battery replacement'], SVC_TYRE=['Tyre change','Tyre service / repair'];
@@ -3099,7 +3101,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b123';
+const APP_BUILD='b124';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -11011,7 +11013,7 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
    Vehicles: the Vehicle Inspection Checklist (BHN-VH-CH-12) is the only monthly vehicle inspection — "NOT fit for use" = Do not use;
    the old vehicle form stays read-only for old records. Equipment can be in store, at a project, inside a vehicle (follows the vehicle's
    project) or at a company location. Old checklists with a typed item are linked when the plate / serial matches one item. */
-const INSP_CK_FOR={extinguishers:'fire', harness:'harness', calibration:'gen', specialPpe:'gen', firstAid:'gen', vehKit:'gen'};
+const INSP_CK_FOR={extinguishers:'fire', harness:'harness', calibration:'gen', specialPpe:'gen', firstAid:'gen', vehKit:'gen', nh15:'gen', escapeCyl:'gen'};
 const INSP_TOOL_TPL=['grind','drill','cut14','ply','blower','vib','boom','scissor','whm','gen'];
 const INSP_FREQ_OPTS=[1,2,3,6,12];
 function inspNorm(x){ return String(x||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
@@ -11102,7 +11104,7 @@ function vehKitTabHtml(v){ const ed=canEdit(), items=equipInVeh(v.id).sort((a,b)
     ${items.length?items.map(e=>`<div class="equip-line" data-open-equip="${esc(e.id)}"><div class="equip-line-main"><div class="equip-line-title">${ic((EQUIP_CATEGORIES[e.category]||{}).icon||'wrench')} ${esc(equipTitle(e))}</div><div class="wsub mono">S/N ${esc(e.serial||'—')}</div></div>
       <div class="equip-line-badges">${(e.condition||'In service')!=='In service'?conditionBadge(e.condition):''}${e.expiry?`<span title="Expiry / service">${badgeHtml(statusFor(e.expiry))}</span>`:''}${inspEqBadge(e)}</div></div>`).join(''):'<p class="wsub">Nothing recorded inside this vehicle yet.</p>'}
     ${ed?`<form id="vehKitAdd" class="ptw-inline" style="margin-top:10px;"><select name="eq" aria-label="Item to put in this vehicle"><option value="">Put an item in this vehicle…</option>${pool.map(e=>`<option value="${esc(e.id)}">${esc((EQUIP_CATEGORIES[e.category]||{}).short||'')} · ${esc(equipTitle(e))} · ${esc(e.serial||'—')} · ${esc(locLabel(equipLoc(e)))}</option>`).join('')}</select><button type="submit" class="btn btn-sm">Put in vehicle</button></form><p class="wsub" style="margin:4px 0 0;">Only items in store, at a company location or at this vehicle's project are listed. New items: Plant &amp; Equipment → add → Location "Inside a vehicle".</p>`:''}`; }
-async function equipMoveTo(e, to, note){ const from=equipLoc(e); if(to===from) return false; const hist=(e.history||[]).concat([{kind:'move', date:localToday(), from, to, fromLabel:locLabel(from), toLabel:locLabel(to), note:note||''}]); return updateEquip(e.id, {location:to, history:hist}); }
+async function equipMoveTo(e, to, note){ const from=equipLoc(e); if(to===from) return false; const hist=(e.history||[]).concat([{kind:'move', date:localToday(), from, to, fromLabel:locLabel(from), toLabel:locLabel(to), note:note||'', by:plWho()}]); return updateEquip(e.id, {location:to, history:hist}); }
 /* ---- equipment drawer: inspections ---- */
 function equipInspHtml(e){ const ref='eq:'+e.id, ed=canEdit(), L=inspLinked(ref), need=e.category==='powerTools' || !!INSP_CK_FOR[e.category]; if(e.category==='chemicals') return '';
   const S=inspState(ref), tpl=inspTplOf(e)||'gen', T=CK_TPL.find(t=>t.key===tpl);
@@ -11145,7 +11147,8 @@ async function inspVehReport(r){ const ref=inspRefOf(r); if(!ref.startsWith('veh
     await db.collection('hseLogs').doc(id).set(stamp({category:'vehicleInspection', date:r.date||'', division:v.division||(site&&site.division)||'Rental', projectId:pid, vehicleNumber:v.vehicleNumber||'', result:r.fit===false?'Fail':inspCounts(r).no?'Needs attention':'Pass', source:'vehicleInspection', sourceVehicleId:v.id, sourceRecId:r.id, sourceInspId:r.id})); }
   catch(x){ console.warn('vehicle inspection report', x); } }
 
-document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-open-equip]'); if(!b || b.closest('#siteDrawerBody')) return; openEquipDrawer(b.dataset.openEquip); });   // Batch 109: vehicle drawer / inspection round
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-open-equip]'); if(!b || b.closest('#siteDrawerBody')) return; openEquipDrawer(b.dataset.openEquip); })
+document.addEventListener('click', e=>{ if(e.target && e.target.id==='eqWaitMore'){ equipUi.waitOpen=!equipUi.waitOpen; renderEquipTable(); } });   // Batch 124;   // Batch 109: vehicle drawer / inspection round
 
 /* ---- Batch 110: travel days for work ----
    A place entry {place:'travel', forPid, tfrom, tto} — e.g. Muscat → Nimr. Each travel day counts as a normal working day
@@ -16417,14 +16420,35 @@ const EQUIP_CATEGORIES = {
       {key:'notes', label:'Notes', type:'textarea'},
     ],
     display:e=>e.kitType||'First aid kit' },
-  vehKit:{ label:'Vehicle safety kit', short:'Vehicle kit', icon:'truck', noun:'kit item', emailLabel:'Vehicle safety kit',   // Batch 109
+  vehKit:{ label:'PPE & Safety kit', short:'PPE & Safety kit', icon:'vest', noun:'safety kit item', emailLabel:'PPE & safety kit',   // Batch 109 · b124: was "Vehicle kit" — for vehicles, projects, yards and the store
     fields:[
-      {key:'kitType', label:'Item', type:'select', required:true, options:['Warning triangle','Spill kit','Fire blanket','Torch / flashlight','Wheel chocks','Jack & wheel spanner','Tow rope','Reflective vest','Escape breathing set (NH-15)','Other']},
-      {key:'serial', label:'Item no. / serial no.', type:'text', required:true},
+      {key:'kitType', label:'Item', type:'select', required:true, options:['Warning triangle','Wheel chocks','Jack & wheel spanner','Brass hammer','Spill kit','Fire blanket','Torch / flashlight','Tow rope','Reflective vest','Safety cones','Barricade tape','Ear defenders','Face shield','First aid pouch','Escape breathing set (NH-15)','Other']},
+      {key:'qty', label:'Quantity', type:'number', placeholder:'1'},
+      {key:'size', label:'Size', type:'text', placeholder:'e.g. L, XL — if it has a size'},
+      {key:'serial', label:'Item no. / serial no.', type:'text'},
       {key:'expiry', label:'Check / expiry date', type:'date'},
       {key:'notes', label:'Notes', type:'textarea'},
     ],
-    display:e=>e.kitType||'Vehicle kit' },
+    display:e=>(e.kitType||'Safety kit')+(Number(e.qty)>1?` × ${Number(e.qty)}`:'') },
+  nh15:{ label:'NH-15 masks', short:'NH-15 masks', icon:'goggles', noun:'NH-15 mask', emailLabel:'NH-15 mask',   // Batch 124
+    fields:[
+      {key:'make', label:'Make / model', type:'text', placeholder:'e.g. MSA, Dräger'},
+      {key:'size', label:'Size', type:'select', options:['S','M','L','One size']},
+      {key:'serial', label:'Serial number', type:'text', required:true},
+      {key:'expiry', label:'Expiry / filter change due', type:'date', required:true},
+      {key:'notes', label:'Notes', type:'textarea'},
+    ],
+    display:e=>'NH-15 mask'+(e.size?` · ${e.size}`:'') },
+  escapeCyl:{ label:'Escape cylinders', short:'Escape cylinders', icon:'heart', noun:'escape cylinder', emailLabel:'Escape cylinder',   // Batch 124
+    fields:[
+      {key:'cylType', label:'Type', type:'select', required:true, options:['Escape breathing set (EEBD / air)','Oxygen cylinder','SCBA cylinder','Other']},
+      {key:'duration', label:'Duration / capacity', type:'text', placeholder:'e.g. 10 min · 2 L'},
+      {key:'serial', label:'Serial number', type:'text', required:true},
+      {key:'hydroDate', label:'Last hydro test', type:'date'},
+      {key:'expiry', label:'Expiry / next hydro test', type:'date', required:true},
+      {key:'notes', label:'Notes', type:'textarea'},
+    ],
+    display:e=>(e.cylType||'Escape cylinder')+(e.duration?` · ${e.duration}`:'') },
   chemicals:{ label:'Chemicals / MSDS', short:'Chemicals', icon:'flask', noun:'chemical', emailLabel:'Chemical (SDS review)', attachLabel:'safety data sheet (SDS)',
     fields:[
       {key:'name', label:'Product name', type:'text', required:true, placeholder:'e.g. Thinner, Diesel, Acetylene'},
@@ -16438,7 +16462,7 @@ const EQUIP_CATEGORIES = {
     ],
     display:e=>e.name||'Chemical' },
 };
-const EQUIP_CATEGORY_ORDER = ['powerTools','liftingGear','harness','ladders','extinguishers','firstAid','vehKit','specialPpe','calibration','chemicals'];
+const EQUIP_CATEGORY_ORDER = ['powerTools','liftingGear','harness','ladders','extinguishers','firstAid','vehKit','nh15','escapeCyl','specialPpe','calibration','chemicals'];
 const EQUIP_CONDITIONS = ['In service','Out for TPI / repair','Damaged / quarantined'];
 // How older project tabs map into the register (used once, automatically)
 const LEGACY_SITE_MAP = {
@@ -16457,7 +16481,7 @@ let activeEquipId=null, equipMoveOpen=false;
 let equipFilters={q:'', location:'all', condition:'all', status:'all'};
 let equipMigrationRunning=false;
 
-function activeEquipment(){ return equipmentList.filter(e=>!e.deleted); }
+function activeEquipment(){ return equipmentList.filter(e=>!e.deleted && !e.disposed); }   // Batch 124: disposed / scrapped items are kept but not counted
 function deletedEquipment(){ return equipmentList.filter(e=>e.deleted); }
 function currentEquip(){ return equipmentList.find(e=>e.id===activeEquipId); }
 function equipTitle(e){ const c=EQUIP_CATEGORIES[e.category]; return c ? c.display(e) : (e.displayName||'Item'); }
@@ -16965,7 +16989,7 @@ function startVehicleData(){
   try{
     unsubscribeVehicles = db.collection('vehicles').orderBy('vehicleNumber','asc').onSnapshot(snap=>{
       vehicles = snap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
-      renderVehicleAll();
+      renderVehicleAll(); vehiclesLoaded=true; if(typeof migrateVehiclePpe==='function') migrateVehiclePpe();   // Batch 124
     }, err=>{ console.error(err); if(!auth.currentUser) return; toast('Sync error — some vehicle data may be stale.'); });
   }catch(e){ console.error(e); }
 }
@@ -16992,7 +17016,7 @@ function startEquipmentData(){
       equipmentLoaded=true;
       equipmentList = snap.docs.map(d=>({id:d.id, ...(d.data()||{})}))
         .sort((a,b)=> equipTitle(a).localeCompare(equipTitle(b)) || String(a.serial||'').localeCompare(String(b.serial||'')));
-      renderEquipAll();
+      renderEquipAll(); migrateVehiclePpe();   // Batch 124
       renderSiteAll();            // project pages show what's on site
       renderReportAll();          // Command Centre compliance
       migrateLegacySiteEquipment();
@@ -17258,7 +17282,7 @@ function renderVehicleTiles(){
     }
     return {expired,expiring};
   }
-  const doc=agg('documents'), ppe=agg('ppe');
+  const doc=agg('documents'), ppe=(()=>{ let expired=0, expiring=0; for(const v of list){ const a=vehKitAgg(v); if(a.status==='expired') expired++; else if(a.status==='expiring') expiring++; } return {expired, expiring}; })();   // Batch 124: items inside the vehicles
   const svc=list.map(vehicleServiceStats), svcOver=svc.filter(x=>x.status==='overdue').length, svcSoon=svc.filter(x=>x.status==='soon').length, bdYear=svc.reduce((n,x)=>n+x.bdYear,0);
   // Batch 70: speedometer-style fleet dashboard — main dial = % of vehicles with no issue, odometer = number of vehicles,
   // a mini dial per division (click to filter), then a slim row of counts.
@@ -17371,7 +17395,7 @@ function renderVehicleTable(){
   const list=vehicles.filter(vehicleMatches);
   if(list.length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">No vehicles match your filters.</td></tr>'; return; }
   tbody.innerHTML=list.map(v=>{
-    const doc=vehicleAggFor(v,'documents'), ppe=vehicleAggFor(v,'ppe');
+    const doc=vehicleAggFor(v,'documents'), ppe=vehKitAgg(v);
     return `<tr data-id="${v.id}">
       <td class="mono">${esc(v.vehicleNumber)}</td>
       <td>${esc(v.model||'—')}${v.vehicleType?`<div class="wsub">${esc(v.vehicleType)}</div>`:''}${(d=>d?`<div class="wsub">${ic('users')} ${esc(d.fullName||'')}${vehDriverProblem(v)?' <span class="badge danger">Driver not qualified</span>':''}</div>`:'')(vehDrivers(v)[0])}${vehicleAgeCheck(v).status==='over'?' <span class="badge warn" title="SP-2000 4.2.7.2">Over PDO age / km limit</span>':''}</td>
@@ -17657,7 +17681,7 @@ function vehicleIssues(v){
   if(vehDoNotUse(v)) out.push('Do not use — not fit for use');
   if(vehDriverProblem(v)) out.push('Driver not qualified');
   if((v.tyres||[]).length && vehicleAggFor(v,'tyres').status==='expired') out.push('Tyre over 4 years old');
-  if(vehicleAggFor(v,'ppe').status==='expired') out.push('Safety kit expired');
+  { const k=vehKitAgg(v); if(k.status==='expired') out.push('Safety kit / PPE expired'); if(k.bad) out.push(`${k.bad} item${k.bad===1?'':'s'} inside damaged / out of service`); }   // Batch 124
   if(vehicleServiceStats(v).status==='overdue') out.push('Service overdue');
   return out;
 }
@@ -17913,7 +17937,7 @@ function vehicleServiceSummaryHtml(v){
 function pmFieldsFor(v){ const s=vehicleServiceStats(v); return {pmNextDue:s.dueDate||'', pmStatus:s.status}; }
 
 function vehicleProfileTabHtml(v){
-  const countsHtml = VEHICLE_COUNT_FIELDS.map(f=>`<label>${esc(f.label)} — count<input type="number" min="0" step="1" data-vfield="${f.key}" value="${esc(v[f.key]!=null?v[f.key]:'0')}"></label>`).join('');
+  const countsHtml = [].map(f=>`<label>${esc(f.label)} — count<input type="number" min="0" step="1" data-vfield="${f.key}" value="${esc(v[f.key]!=null?v[f.key]:'0')}"></label>`).join('');
   return `${updatedNoteHtml(v)}
   ${vehicleMonitorBlock(v)}
   <form id="vehicleProfileForm">
@@ -17935,8 +17959,6 @@ function vehicleProfileTabHtml(v){
     </div>
     <p class="wsub" style="margin:6px 0 0;">Leave the links empty to use the company IVMS / DFMS portal for this vehicle type (set on the Fleet page).</p>
     ${vehInventoryHtml(v)}
-    <div class="subhead">Onboard equipment counts</div>
-    <div class="form-grid">${countsHtml}</div>
     <div class="form-actions" style="margin-top:16px;"><button type="submit" class="btn btn-primary">Save changes</button></div>
   </form>
   <div class="danger-zone">
@@ -18465,6 +18487,7 @@ function renderEquipLocationFilter(){
 
 function equipMatches(e){
   if(e.deleted || e.category!==activePlantTab) return false;
+  if(equipFilters.condition==='__disposed') return !!e.disposed; if(e.disposed) return false;   // Batch 124
   const q=equipFilters.q.trim().toLowerCase();
   if(q && !(equipTitle(e)+' '+(e.serial||'')+' '+(e.make||'')+' '+(e.certNo||'')).toLowerCase().includes(q)) return false;
   if(equipFilters.location!=='all' && equipLoc(e)!==equipFilters.location && equipSite(e)!==equipFilters.location) return false;   // Batch 109: a project also shows the items in its vehicles
@@ -18473,16 +18496,59 @@ function equipMatches(e){
   return true;
 }
 
+/* Batch 124: traceability — store waiting list, return to store, dispose, inspection → quarantine */
+const EQ_MOVE_REASONS=['Moved to another vehicle','Sent to a project / site','Returned to store — damaged','Returned to store — expired','Returned to store — not needed','Sent for repair / TPI','Other'];
+const EQ_DISPOSE_REASONS=['Damaged beyond repair','Expired','Lost','Failed TPI / inspection','Other'];
+function equipNeedsAction(e){ return (e.condition && e.condition!=='In service') || (e.expiry && statusFor(e.expiry)==='expired'); }
+function equipStoreWaitHtml(){ const L=activeEquipment().filter(e=>equipLoc(e)==='store' && equipNeedsAction(e)).sort((a,b)=>equipTitle(a).localeCompare(equipTitle(b)));
+  if(!L.length) return ''; const open=!!equipUi.waitOpen, shown=open?L:L.slice(0,6);
+  return `<div class="panel eq-wait"><div class="section-head"><h3>${ic('alert')} In store — damaged / expired, waiting (${L.length})</h3><span class="wsub">repair, send for TPI, or dispose</span></div>
+    ${shown.map(e=>`<div class="equip-line" data-open-equip="${esc(e.id)}"><div class="equip-line-main"><div class="equip-line-title">${ic((EQUIP_CATEGORIES[e.category]||{}).icon||'wrench')} ${esc(equipTitle(e))}</div><div class="wsub mono">S/N ${esc(e.serial||'—')} · ${esc((EQUIP_CATEGORIES[e.category]||{}).short||'')}</div></div>
+      <div class="equip-line-badges">${(e.condition||'In service')!=='In service'?conditionBadge(e.condition):''}${e.expiry?badgeHtml(statusFor(e.expiry)):''}</div></div>`).join('')}${L.length>6?`<button type="button" class="att-link" id="eqWaitMore">${open?'Show less':'Show all '+L.length}</button>`:''}</div>`; }
+let equipUi={waitOpen:false, dispose:false, moveReason:''};
+let _eqQT=null, eqQBusy=false; function equipAutoQuarSoon(){ clearTimeout(_eqQT); _eqQT=setTimeout(()=>{ equipAutoQuar().catch(e=>console.warn('auto quarantine', e)); }, 400); }
+// the last finished inspection says NOT fit → the item becomes Damaged / quarantined (once per inspection); HSE then repairs, replaces or returns it
+async function equipAutoQuar(){ if(eqQBusy || !canEdit() || !equipmentLoaded || !regState.insp) return; eqQBusy=true;
+  try{ for(const e of activeEquipment()){ const S=inspState('eq:'+e.id); const last=S&&S.last; if(!last || last.fit!==false || e.quarFrom===last.id) continue;
+      const upd={quarFrom:last.id}; if((e.condition||'In service')!=='Damaged / quarantined'){ upd.condition='Damaged / quarantined'; upd.history=(e.history||[]).concat([{kind:'condition', date:last.date||localToday(), note:`Condition changed: ${e.condition||'In service'} → Damaged / quarantined — from inspection ${last.inspNo||''} (NOT fit for use)`, by:'automatic'}]); }
+      try{ await db.collection('equipment').doc(e.id).update(stamp(upd)); }catch(x){ console.warn(x); } } }
+  finally{ eqQBusy=false; } }
+if(REG.insp){ const _o=REG.insp.onData; REG.insp.onData=()=>{ if(_o) _o(); equipAutoQuarSoon(); }; }   // Batch 124: a new inspection result reaches the item
+// old vehicle "PPE & safety kit" tab + onboard counts → items in Plant & Equipment located in that vehicle (fixed ids: never twice)
+const VEH_PPE_MAP={'NH-15 mask':r=>({category:'nh15', serial:r.serial||'', expiry:r.expiry||''}), 'Oxygen Cylinder':r=>({category:'escapeCyl', cylType:'Oxygen cylinder', serial:r.serial||'', expiry:r.expiry||''}),
+  'Safety harness':r=>({category:'harness', serial:r.serial||'', expiry:r.expiry||''}), 'H2S detector':r=>({category:'calibration', instType:'Gas detector — single gas (H2S)', serial:r.serial||'', expiry:r.expiry||''}),
+  'Fire extinguisher':r=>({category:'extinguishers', extType:'Other', serial:r.serial||'', expiry:r.expiry||''})};
+const VEH_COUNT_MAP={jackCount:'Jack & wheel spanner', wheelStopperCount:'Wheel chocks', brassHammerCount:'Brass hammer', warningTriangleCount:'Warning triangle'};
+let vehPpeMigrating=false, vehiclesLoaded=false;
+async function migrateVehiclePpe(){ if(vehPpeMigrating || !canEdit() || !equipmentLoaded || !vehiclesLoaded || equipmentLoadError) return;
+  const todo=vehicles.filter(v=>!v.deleted && !v.ppeMovedAt && ((v.ppe||[]).length || Object.keys(VEH_COUNT_MAP).some(k=>Number(v[k])>0))); if(!todo.length) return;
+  vehPpeMigrating=true; let n=0; const today=localToday(), now=new Date().toISOString(), by=((auth.currentUser||{}).email)||'';
+  try{ for(const v of todo){ const loc='veh:'+v.id, hist=[{kind:'move', date:today, from:null, to:loc, fromLabel:'—', toLabel:'In vehicle '+(v.vehicleNumber||''), note:'Moved automatically from the vehicle\'s old "PPE & safety kit" list', by:'automatic'}];
+      const recs=v.ppe||[]; for(let i=0;i<recs.length;i++){ const r=recs[i], m=VEH_PPE_MAP[r.item]; const base=m?m(r):{category:'vehKit', kitType:'Other', serial:r.serial||'', expiry:r.expiry||''};
+        const item={...base, notes:[r.item&&!m?r.item:'', r.notes||''].filter(Boolean).join(' — '), location:loc, condition:'In service', attachment:r.attachment||null, createdAt:now, createdBy:by, history:hist, migratedFrom:{vehicleId:v.id, key:'ppe', recId:r.id||String(i)}};
+        item.displayName=EQUIP_CATEGORIES[item.category].display(item); await db.collection('equipment').doc(`vmig_${v.id}_ppe_${r.id||i}`).set(item); n++; }
+      for(const [k,kt] of Object.entries(VEH_COUNT_MAP)){ const q=Math.round(Number(v[k])||0); if(q<=0) continue;
+        const item={category:'vehKit', kitType:kt, qty:q, serial:'', expiry:'', notes:'From the old onboard count', location:loc, condition:'In service', attachment:null, createdAt:now, createdBy:by, history:hist, migratedFrom:{vehicleId:v.id, key:k}};
+        item.displayName=EQUIP_CATEGORIES.vehKit.display(item); await db.collection('equipment').doc(`vmig_${v.id}_${k}`).set(item); n++; }
+      await db.collection('vehicles').doc(v.id).update({ppe:[], jackCount:0, wheelStopperCount:0, brassHammerCount:0, warningTriangleCount:0, ppeMovedAt:now}); }
+    if(n) toast(`Moved ${n} vehicle PPE / kit item(s) into Plant & Equipment → PPE & Safety kit`); }
+  catch(e){ console.error('vehicle PPE migration', e); } finally{ vehPpeMigrating=false; } }
+// what is inside a vehicle: worst expiry + damaged items (replaces the old vehicle PPE list)
+function vehKitAgg(v){ const L=equipInVeh(v.id); if(!L.length) return {status:'none', bad:0}; let st='valid';
+  for(const e of L){ if(!e.expiry) continue; const x=statusFor(e.expiry); if(x==='expired'){ st='expired'; break; } if(x==='expiring') st='expiring'; }
+  const bad=L.filter(e=>(e.condition||'In service')!=='In service').length; return {status:bad && st!=='expired'?'expiring':st, bad}; }
 function renderEquipTable(){
   const tbody=document.getElementById('equipRows');
   if(!auth.currentUser) return;
+  { const w=document.getElementById('equipStoreWait'); if(w) w.innerHTML=equipStoreWaitHtml(); }   // Batch 124
+  equipAutoQuarSoon();
   if(equipmentLoadError==='rules'){
     tbody.innerHTML='<tr><td colspan="5" class="empty-state">The equipment register needs a one-time Firebase rules update before it can load. Paste the new rules into Firebase Console → Firestore Database → Rules, then refresh this page.</td></tr>';
     return;
   }
   if(equipmentLoadError){ tbody.innerHTML='<tr><td colspan="5" class="empty-state">Could not load equipment right now — check your connection and refresh.</td></tr>'; return; }
   const cat=EQUIP_CATEGORIES[activePlantTab];
-  const all=activeEquipment().filter(e=>e.category===activePlantTab);
+  const all=equipmentList.filter(e=>!e.deleted && e.category===activePlantTab);   // Batch 124: incl. disposed (filter)
   if(all.length===0){ tbody.innerHTML=`<tr><td colspan="5" class="empty-state">No ${esc(cat.label.toLowerCase())} registered yet — click “+ Add ${esc(cat.noun)}” to get started.</td></tr>`; return; }
   const list=equipmentList.filter(equipMatches);
   if(list.length===0){ tbody.innerHTML='<tr><td colspan="5" class="empty-state">No items match your filters.</td></tr>'; return; }
@@ -18490,7 +18556,7 @@ function renderEquipTable(){
       <td><div class="wname">${esc(equipTitle(e))}</div>${e.make && e.category!=='harness'?`<div class="wsub">${esc(e.make)}</div>`:''}</td>
       <td class="mono">${esc(e.serial||'—')}</td>
       <td>${equipLoc(e)==='store' ? '<span class="badge muted">In store</span>' : esc(locLabel(equipLoc(e)))}</td>
-      <td>${conditionBadge(e.condition)}${typeof inspEqBadge==='function'?`<div style="margin-top:4px;">${inspEqBadge(e)}</div>`:''}</td>
+      <td>${e.disposed?`<span class="badge muted">Disposed ${esc(isoToDmy(e.disposed.date||''))}</span><div class="wsub">${esc(e.disposed.reason||'')}</div>`:conditionBadge(e.condition)}${!e.disposed && typeof inspEqBadge==='function'?`<div style="margin-top:4px;">${inspEqBadge(e)}</div>`:''}</td>
       <td>${expiryCell(e)}</td>
     </tr>`).join('');
 }
@@ -18537,8 +18603,9 @@ function historyItemHtml(h){
   if(h.kind==='condition') main = esc(h.note||'Condition changed');
   else if(!h.from) main = `Registered at <strong>${esc(h.toLabel||'—')}</strong>`;
   else main = `${esc(h.fromLabel||'—')} → <strong>${esc(h.toLabel||'—')}</strong>`;
-  const note = (h.kind!=='condition' && h.note) ? `<div class="history-note">${esc(h.note)}</div>` : '';
-  return `<li><span class="history-date">${esc(h.date||'—')}</span><div>${main}${note}</div></li>`;
+  if(h.kind==='dispose') main = `<strong>Disposed / scrapped</strong> — ${esc(h.note||'')}`;
+  const note = (h.kind!=='condition' && h.kind!=='dispose' && h.note) ? `<div class="history-note">${esc(h.note)}</div>` : '';
+  return `<li><span class="history-date">${esc(isoToDmy(h.date||'')||'—')}</span><div>${main}${note}${h.by?`<div class="history-note">by ${esc(h.by)}</div>`:''}</div></li>`;
 }
 function equipDrawerBodyHtml(e){
   const cat=EQUIP_CATEGORIES[e.category];
@@ -18551,6 +18618,7 @@ function equipDrawerBodyHtml(e){
       <div class="form-grid">
         <label>Move to *<select data-mfield="to" required><option value="">Select…</option>${locationOptionsHtml('', loc)}</select></label>
         <label>Date *<input type="date" data-mfield="date" required value="${localToday()}"></label>
+        <label>Reason<select data-mfield="reason">${EQ_MOVE_REASONS.map(r=>`<option ${r===equipUi.moveReason?'selected':''}>${esc(r)}</option>`).join('')}</select></label>
         <label>Note<input data-mfield="note" placeholder="e.g. sent with crew, DN-1042"></label>
       </div>
       <div class="form-actions"><button type="button" class="btn btn-sm" id="equipMoveCancel">Cancel</button><button type="submit" class="btn btn-primary btn-sm">Save move</button></div>
@@ -18560,8 +18628,11 @@ function equipDrawerBodyHtml(e){
   <div class="loc-card">
     <div class="loc-card-top">
       <div class="loc-now">Currently: <strong>${esc(locLabel(loc))}</strong>${since}</div>
-      ${equipMoveOpen ? '' : `<button type="button" class="btn btn-primary btn-sm" id="equipMoveBtn">${ic('move')} Move</button>`}
+      ${e.disposed||!canEdit() ? '' : equipMoveOpen ? '' : `<span style="display:flex; gap:6px; flex-wrap:wrap;"><button type="button" class="btn btn-primary btn-sm" id="equipMoveBtn">${ic('move')} Move</button>${loc!=='store'?'<button type="button" class="btn btn-sm" id="equipStoreBtn">↩ Return to store</button>':''}<button type="button" class="btn btn-sm btn-ghost" id="equipDisposeBtn">🗑 Dispose / scrap</button></span>`}
     </div>
+    ${e.disposed?`<div class="notice" style="margin-top:8px;">${ic('alert')} <strong>Disposed / scrapped</strong> on ${esc(isoToDmy(e.disposed.date||''))} — ${esc(e.disposed.reason||'')}${e.disposed.note?' · '+esc(e.disposed.note):''}${e.disposed.by?' · by '+esc(e.disposed.by):''}. Not counted any more. ${canEdit()?'<button type="button" class="att-link" id="equipUndispose" data-armed="0">Undo</button>':''}</div>`:''}
+    ${equipUi.dispose && !e.disposed ? `<form id="equipDisposeForm" class="move-form"><div class="form-grid"><label>Reason *<select data-dfield="reason">${EQ_DISPOSE_REASONS.map(r=>`<option>${esc(r)}</option>`).join('')}</select></label><label>Date *<input type="date" data-dfield="date" value="${localToday()}" max="${localToday()}" required></label><label class="span-all">Note<input data-dfield="note" maxlength="140" placeholder="e.g. cut and thrown away, sent back to the supplier"></label></div>
+      <div class="form-actions"><button type="button" class="btn btn-sm" id="equipDisposeCancel">Cancel</button><button type="submit" class="btn btn-danger btn-sm">Dispose — not counted any more</button></div></form>` : ''}
     <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">${conditionBadge(e.condition)} ${e.expiry?badgeHtml(statusFor(e.expiry)):'<span class="badge muted">No expiry set</span>'}</div>
     ${moveForm}
   </div>
@@ -20049,11 +20120,10 @@ async function buildVehiclePdf(v){
     kv('Required documents', !v.vehicleType ? 'Vehicle type not set' : (miss.length ? 'Missing: '+miss.join(', ') : 'All on record'));
     const li=vehInspAll(v)[0]; kv('Last inspection', li ? `${li.date} — ${VI_RESULT[li.result].t}${vehDoNotUse(v)?' (DO NOT USE)':''}` : 'None recorded'); }
 
-  h2('Onboard equipment counts');
-  for(const f of VEHICLE_COUNT_FIELDS){ kv(f.label, v[f.key]!=null? v[f.key] : '0'); }
+  h2('Equipment & PPE inside the vehicle');   // Batch 124: from Plant & Equipment
+  { const L=equipInVeh(v.id); if(!L.length) kv('Items', 'None recorded'); for(const e of L) kv(`${(EQUIP_CATEGORIES[e.category]||{}).short||'Item'} — ${equipTitle(e)}`, [e.serial?'S/N '+e.serial:'', e.expiry?'expiry '+isoToDmy(e.expiry):'', (e.condition||'In service')].filter(Boolean).join(' · ')); }
 
   section('Vehicle documents','documents',VEHICLE_RECORD_TYPES.documents);
-  section('PPE & safety equipment','ppe',VEHICLE_RECORD_TYPES.ppe);
   section('Tyres','tyres',VEHICLE_RECORD_TYPES.tyres);
   { const ds=vehDrivers(v); h2('Assigned driver'); if(!ds.length) kv('Driver', 'None assigned'); for(const w of ds){ const c=driverCheck(w,v); kv(w.fullName||'Driver', (c.ok?'Qualified':'NOT QUALIFIED')+' — '+c.items.map(x=>`${x.k}: ${x.note||x.st}${x.exp?' ('+x.exp+')':''}`).join('; ')); } }
 
@@ -21411,19 +21481,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const data={}; e.target.querySelectorAll('[data-efield]').forEach(el=>{ data[el.dataset.efield]=el.value; });
       const oldCond=item.condition||'In service';
       if(data.condition && data.condition!==oldCond){
-        data.history=(item.history||[]).concat([{kind:'condition', date:localToday(), note:`Condition changed: ${oldCond} → ${data.condition}`}]);
+        data.history=(item.history||[]).concat([{kind:'condition', date:localToday(), note:`Condition changed: ${oldCond} → ${data.condition}`, by:plWho()}]);
       }
       data.displayName=EQUIP_CATEGORIES[item.category].display({...item, ...data});
       await updateEquip(item.id, data);
       return;
     }
+    if(e.target.id==='equipDisposeForm'){ e.preventDefault(); const d={}; e.target.querySelectorAll('[data-dfield]').forEach(el=>{ d[el.dataset.dfield]=el.value; });   // Batch 124
+      const date=d.date||localToday(), info={date, reason:d.reason||'Other', note:String(d.note||'').trim().slice(0,140), by:plWho(), at:new Date().toISOString()};
+      equipUi.dispose=false; clearDirtyForms(); if(await updateEquip(item.id, {disposed:info, history:(item.history||[]).concat([{kind:'dispose', date, note:info.reason+(info.note?' — '+info.note:''), by:info.by}])})) toast('Disposed — kept in the history, not counted any more'); return; }
     if(e.target.id==='equipMoveForm'){
       e.preventDefault();
       const m={}; e.target.querySelectorAll('[data-mfield]').forEach(el=>{ m[el.dataset.mfield]=el.value; });
       const from=equipLoc(item);
       if(!m.to || m.to===from){ toast('Pick a different location'); return; }
-      const hist=(item.history||[]).concat([{kind:'move', date:m.date||localToday(), from, to:m.to, fromLabel:locLabel(from), toLabel:locLabel(m.to), note:m.note||''}]);
-      equipMoveOpen=false;
+      const hist=(item.history||[]).concat([{kind:'move', date:m.date||localToday(), from, to:m.to, fromLabel:locLabel(from), toLabel:locLabel(m.to), note:[m.reason, m.note].filter(Boolean).join(' — '), by:plWho()}]);   // Batch 124: reason + who
+      equipMoveOpen=false; equipUi.moveReason='';
       await updateEquip(item.id, {location:m.to, history:hist});
       toast(`Moved to ${locLabel(m.to)}`);
       return;
@@ -21431,8 +21504,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
   document.getElementById('equipDrawerBody').addEventListener('click', async e=>{
     const item=currentEquip(); if(!item) return;
-    if(e.target.id==='equipMoveBtn'){ equipMoveOpen=true; renderEquipDrawer(); return; }
+    if(e.target.id==='equipMoveBtn'){ equipMoveOpen=true; equipUi.dispose=false; equipUi.moveReason=''; renderEquipDrawer(); return; }
     if(e.target.id==='equipMoveCancel'){ equipMoveOpen=false; renderEquipDrawer(); return; }
+    // Batch 124
+    if(e.target.id==='equipStoreBtn'){ equipMoveOpen=true; equipUi.dispose=false; equipUi.moveReason=(item.condition||'In service')!=='In service'?'Returned to store — damaged':(item.expiry && statusFor(item.expiry)==='expired')?'Returned to store — expired':'Returned to store — not needed'; renderEquipDrawer(); const s=document.querySelector('#equipMoveForm [data-mfield="to"]'); if(s) s.value='store'; return; }
+    if(e.target.id==='equipDisposeBtn'){ equipUi.dispose=true; equipMoveOpen=false; renderEquipDrawer(); return; }
+    if(e.target.id==='equipDisposeCancel'){ equipUi.dispose=false; clearDirtyForms(); renderEquipDrawer(); return; }
+    if(e.target.id==='equipUndispose'){ if(!compArm(e.target,'Tap again — back in the register')) return; const FV=fsFieldValue(); await updateEquip(item.id, {disposed:FV?FV.delete():null, history:(item.history||[]).concat([{kind:'condition', date:localToday(), note:'Dispose undone — back in the register', by:plWho()}])}); return; }
     const removeBtn=e.target.closest('[data-remove-attach]');
     if(removeBtn){
       if(removeBtn.dataset.armed!=='1'){
