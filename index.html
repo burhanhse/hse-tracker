@@ -1210,6 +1210,12 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .ms-g-dsum{font-weight:500; font-size:12px; color:var(--ink-muted); margin-left:8px;} .ms-g-dsum b.ok{color:var(--ok);} .ms-g-dsum b.warn{color:var(--warn);} .ms-g-dsum b.danger{color:var(--danger);}
 .ms-auto{color:var(--ok); font-weight:600;} .ms-qrow{display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:5px 0; border-bottom:1px dashed var(--line);} .ms-qrow label{font-size:12.5px;} .ms-qrow .chk{flex:1; min-width:220px;}
 .ms-today{margin:12px 0;} .ms-proj{margin-top:14px;} .ms-psum{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin:6px 0;} .ms-psum>div{display:flex; flex-direction:column; padding:8px 10px; border:1px solid var(--line); border-radius:10px;} .ms-psum b{font-size:18px;} .ms-psum b.ok{color:var(--ok);} .ms-psum b.warn{color:var(--warn);} .ms-psum b.danger{color:var(--danger);}
+.ppe-signpanel{border-left:3px solid var(--accent);} .ppe-signrow{display:flex; gap:12px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; padding:8px 0; border-bottom:1px dashed var(--line);} .ppe-signwho{flex:1; min-width:220px;} .ppe-signact{min-width:240px; max-width:440px; flex:1;} .ppe-padbtns{display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;}
+.sv-cg{font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); margin:12px 0 4px;} .sv-crow{display:grid; grid-template-columns:minmax(220px,1.4fr) auto minmax(200px,1fr); gap:8px 12px; align-items:center; padding:7px 6px; border-bottom:1px dashed var(--line); border-left:3px solid transparent;}
+.sv-crow.sv-y{border-left-color:var(--ok);} .sv-crow.sv-n{border-left-color:var(--danger); background:var(--danger-bg);} .sv-crow.sv-na{border-left-color:var(--line);} .sv-cr{display:flex; gap:4px; flex-wrap:wrap;} .sv-rb{display:inline-flex;} .sv-rb input{position:absolute; opacity:0; pointer-events:none;} .sv-rb span{padding:4px 9px; border:1px solid var(--line); border-radius:14px; font-size:12px; cursor:pointer; white-space:nowrap;}
+.sv-rb-y input:checked+span{background:var(--ok-bg); color:var(--ok); border-color:var(--ok); font-weight:700;} .sv-rb-n input:checked+span{background:var(--danger-bg); color:var(--danger); border-color:var(--danger); font-weight:700;} .sv-rb-na input:checked+span{background:var(--muted-bg); font-weight:700;}
+.sv-crm{display:flex; gap:6px; align-items:center;} .sv-crm input{flex:1; min-width:0;} .sv-ph{display:inline-flex; gap:4px; align-items:center; flex-wrap:wrap;} .sv-ph img{width:34px; height:34px; object-fit:cover; border-radius:6px; border:1px solid var(--line);} .sv-phadd{cursor:pointer; font-size:16px; padding:2px 6px; border:1px dashed var(--line); border-radius:6px;}
+.sv-cstat{margin:0 0 8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;} @media (max-width:720px){ .sv-crow{grid-template-columns:1fr;} }
 </style>
 </head>
 <body class="auth-open">
@@ -1251,6 +1257,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
     <button type="button" class="sidenav-btn" data-section="incidents">Incident Register</button>
     <button type="button" class="sidenav-btn" data-section="alerts">Safety Alerts</button>
     <button type="button" class="sidenav-btn" data-section="obs">Observations</button>
+    <button type="button" class="sidenav-btn" data-section="sv">Site Visit Reports</button>
     <button type="button" class="sidenav-btn" data-section="insp">Inspections</button>
     <button type="button" class="sidenav-btn" data-section="heat">Heat Stress</button>
     <button type="button" class="sidenav-btn" data-section="drills">Emergency Drills</button>
@@ -2358,6 +2365,7 @@ const PDF_DOCS={
   liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'}, warnLetter:{title:'HSE Warning Letter'}, ck_veh:{title:'Vehicle Inspection Checklist'}, ck_cut14:{title:'14-inch Cutting Machine Inspection Checklist'}, ck_blower:{title:'Air Blower Inspection Checklist'}, ck_boom:{title:'Boom Lift Inspection Checklist'}, ck_drill:{title:'Drilling Machine Inspection Checklist'}, ck_vib:{title:'Concrete Vibrator Inspection Checklist'}, ck_fire:{title:'Fire Extinguisher Inspection Checklist'}, ck_whm:{title:'Well Head Maintenance Checklist'}, ck_harness:{title:'Full Body Harness Inspection Checklist'}, ck_grind:{title:'Grinding Machine Inspection Checklist'}, ck_ply:{title:'Plywood Cutting Machine Inspection Checklist'}, ck_scissor:{title:'Scissor Lift Inspection Checklist'},
 };
 PDF_DOCS.schedule={title:'Monthly HSE Schedule'};   // Batch 119
+PDF_DOCS.siteVisit={title:'Site Visit Report'};   // Batch 121
 function docControl(key){ const d=(((settingsDocs||{}).docControl||{}).docs||{})[key]; if(d && String(d.no||'').trim()) return d; const t=typeof ckDocDefault==='function'?ckDocDefault(key):null; return t?{...t, ...(d||{}), no:t.no}:(d||{}); }
 let pdfLogoData=null;
 let docCtlBase='';
@@ -3079,7 +3087,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b120';
+const APP_BUILD='b121';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -5114,6 +5122,9 @@ function incFieldHtml(f, v, attr){
   if(f.type==='textarea') return `<label${cls}>${esc(f.label)}${req}<textarea ${attr}="${f.key}" ${f.required?'required':''} placeholder="${esc(f.placeholder||'')}">${esc(v||'')}</textarea></label>`;
   return `<label${cls}>${esc(f.label)}${req}<input type="${f.type||'text'}" ${attr}="${f.key}" value="${esc(v||'')}" ${f.required?'required':''} placeholder="${esc(f.placeholder||'')}"></label>`;
 }
+// Batch 121: live projects + company locations (Head Office, Samail Yard, Gabha Workshop… — no camps); a saved completed project / closed location stays selectable
+function siteLocOptionsHtml(sel){ const P=activeSites().filter(s=>projectLive(s) || s.id===sel).sort((a,b)=>(a.siteName||'').localeCompare(b.siteName||'')), L=(typeof plLocs==='function'?plLocs(true):[]).filter(l=>(l.type!=='camp' && !l.retired) || 'loc:'+l.id===sel);
+  return `<option value="">— Other / not listed —</option>${P.length?`<optgroup label="Projects">${P.map(s=>`<option value="${esc(s.id)}" ${s.id===sel?'selected':''}>${esc(s.siteName||'Project')}${projectLive(s)?'':' (completed)'}</option>`).join('')}</optgroup>`:''}${L.length?`<optgroup label="Company locations">${L.map(l=>`<option value="loc:${esc(l.id)}" ${'loc:'+l.id===sel?'selected':''}>${esc(l.name)}${l.retired?' (closed)':''}</option>`).join('')}</optgroup>`:''}`; }
 function projectOptionsHtml(sel){ return `<option value="">— No project (office / other) —</option>`+activeSites().map(s=>`<option value="${s.id}" ${s.id===sel?'selected':''}>${esc(s.siteName||'Project')}</option>`).join(''); }
 
 /* =====================================================================
@@ -6487,6 +6498,7 @@ function regFieldHtml0(f, v, attr){
   if(f.type==='kmline') return `<div class="span-all wsub sj-km" data-km-for="${esc(f.key.replace(/KmNote$/,''))}"></div>`;
   const req=f.required?' *':'', cls=f.wide?' class="span-all"':'';
   if(f.type==='project') return `<label${cls}>${esc(f.label)}${req}<select ${attr}="${f.key}">${projectOptionsHtml(v||'')}</select></label>`;
+  if(f.type==='site') return `<label${cls}>${esc(f.label)}${req}<select ${attr}="${f.key}">${siteLocOptionsHtml(v||'')}</select></label>`;   // Batch 121
   if(f.type==='pick'){ const opts=regOptions(f).slice(); if(v && !opts.some(o=>o.value===v)){ const w=workers.find(x=>x.id===v); opts.unshift({value:v, label:w?`${w.fullName||'—'} (not active)`:String(v)}); } return `<label${cls}>${esc(f.label)}${req}<select ${attr}="${f.key}" ${f.required?'required':''}><option value="">${esc(f.empty||'Select…')}</option>${opts.map(o=>`<option value="${esc(o.value)}" ${o.value===v?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label>`; }
   if(f.type==='checks'){ const sel=new Set((v||[]).map(canonTrade)); return `<div class="span-all"><div class="pick-label">${esc(f.label)}</div><div class="cause-list">${regOptions(f).map(o=>`<label class="chk"><input type="checkbox" ${attr}="${f.key}" value="${esc(o)}" ${sel.has(o)?'checked':''}>${esc(o)}</label>`).join('')}</div></div>`; }
   if(f.type==='crew') return crewPickHtml(f, v, attr);
@@ -7155,7 +7167,7 @@ function extraKpiActuals(year, m, upto){
 
 /* =============================== ACTION TRACKER =============================== */
 let actFilters={src:'all', status:'open', owner:'all', q:''};
-const ACT_SOURCES=[{key:'incident',label:'Incidents'},{key:'audit',label:'Audit findings'},{key:'project',label:'Project actions'},{key:'complaint',label:'Client complaints'},{key:'meeting',label:'Meetings'},{key:'legal',label:'Legal gaps'},{key:'alert',label:'Safety alerts'},{key:'objective',label:'Objectives'},{key:'obs',label:'Observations'},{key:'insp',label:'Inspections'},{key:'hira',label:'Risk register'},{key:'moc',label:'Change (MOC)'},{key:'heat',label:'Heat stress'},{key:'vehicle',label:'Vehicle inspections'}];
+const ACT_SOURCES=[{key:'incident',label:'Incidents'},{key:'audit',label:'Audit findings'},{key:'project',label:'Project actions'},{key:'complaint',label:'Client complaints'},{key:'meeting',label:'Meetings'},{key:'legal',label:'Legal gaps'},{key:'alert',label:'Safety alerts'},{key:'objective',label:'Objectives'},{key:'obs',label:'Observations'},{key:'insp',label:'Inspections'},{key:'hira',label:'Risk register'},{key:'moc',label:'Change (MOC)'},{key:'heat',label:'Heat stress'},{key:'vehicle',label:'Vehicle inspections'},{key:'sitevisit',label:'Site visits'}];
 function collectAllActions(){
   const out=[];
   for(const i of activeIncidents()) for(const a of (i.capa||[])) out.push({src:'incident', projectId:i.projectId||'', ref:i.incNo||'Incident', where:i.projectId?projectName(i.projectId):(i.location||''), text:a.action, owner:a.owner, targetDate:a.targetDate, status:a.status||'Open', closedDate:a.closedDate, open:()=>{ document.querySelector('.sidenav-btn[data-section="incidents"]').click(); openIncDrawer(i.id,'actions'); }});
@@ -7167,7 +7179,7 @@ function collectAllActions(){
   for(const v of activeVehicles()) for(const x of (v.inspections||[])) if(x.result==='A' || x.result==='B'){ const cl=viClose(v,x), d=viDefects(x);
     out.push({src:'vehicle', projectId:x.projectId||v.projectId||'', ref:v.vehicleNumber||'Vehicle', where:`Inspection ${x.date} · Class ${x.result}${x.result==='A'?' — do not use':''}`, text:d.map(z=>z.text+(z.note?' ('+z.note+')':'')).join('; ')||'Rectify defects', owner:x.actionOwner, targetDate:x.targetDate, status:cl.closed?'Closed':'Open', closedDate:cl.closed?cl.date:'', tag:'Class '+x.result,
       open:()=>{ document.querySelector('.sidenav-btn[data-section="vehicles"]').click(); openVehicleDrawer(v.id); activeVehicleTab='inspections'; renderVehicleDrawer(); }}); }
-  const regSrc={meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat', aspects:'aspect', hra:'hra', drills:'drill'};
+  const regSrc={sv:'sitevisit', meetings:'meeting', legal:'legal', alerts:'alert', objectives:'objective', obs:'obs', insp:'insp', hira:'hira', moc:'moc', heat:'heat', aspects:'aspect', hra:'hra', drills:'drill'};
   if(REG.obs) for(const r of regActive('obs')) if(r.obsType!=='Positive' && (r.owner||r.targetDate)) out.push({src:'obs', projectId:r.projectId||'', ref:r.obsNo||'Observation', where:[r.category, r.projectId?projectName(r.projectId):r.location].filter(Boolean).join(' · '), text:r.description, owner:r.owner, targetDate:r.targetDate, status:r.status||'Open', closedDate:r.closedDate, tag:r.obsType, open:()=>openRegDrawer('obs', r.id)});
   for(const [k,src] of Object.entries(regSrc)){ const cfg=REG[k]; if(!cfg) continue;
     for(const r of regActive(k)) for(const [sk,sc] of Object.entries(cfg.subs||{})) if(sc.isAction) for(const x of (r[sk]||[])) out.push({src, projectId:r.projectId||'', ref:r[cfg.noField]||cfg.singular, where:cfg.titleOf(r), text:x.action, owner:x.owner, targetDate:x.targetDate, status:x.status||'Open', closedDate:x.closedDate, open:()=>openRegDrawer(k, r.id, 'sub:'+sk)}); }
@@ -8542,7 +8554,7 @@ regDefine({
   tabs:[{key:'main', label:'Work details', pre:r=>ptwMainPre(r), groups:[{fields:[
       {key:'ptwNo', label:'Permit no.', required:true},
       {key:'ptwType', label:'Permit type', type:'select', options:['Cold work','Hot work'], required:true},
-      {key:'projectId', label:'Project / site', type:'project'},
+      {key:'projectId', label:'Project / site', type:'site'},   // Batch 121: live projects + company locations
       {key:'clientPermit', label:'Client permit no. (if any)', placeholder:'blank = own yard / no client permit'},
       {key:'location', label:'Exact location', required:true, placeholder:'e.g. Workshop bay 2 — rack R-04'},
       {key:'equip', label:'Equipment / tag', placeholder:'e.g. Storage rack R-04, Tank T-12'},
@@ -8615,7 +8627,8 @@ function ptwSignHtml(r){ ptwUiFor(r); const live=ptwLive(r), L=ptwCfg().lim, gl=
   const miss=ptwOpenChecks(r), crew=r.crewIds||[];
   ptwUiFor(r);
   const q=ptwUi.crewQ.trim().toLowerCase(), sel=ptwUi.crewSel||new Set(crew);
-  const pool=activeWorkers().filter(w=>sel.has(w.id) || ((w.status||'active')==='active' && (!r.projectId || w.projectId===r.projectId || q))).filter(w=>!q || String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q)).sort((a,b)=>(sel.has(b.id)-sel.has(a.id)) || String(a.fullName||'').localeCompare(String(b.fullName||''))).slice(0,120);
+  const locSet=String(r.projectId||'').startsWith('loc:') && typeof locPeopleToday==='function' ? new Set(locPeopleToday(String(r.projectId).slice(4)).map(w=>w.id)) : null;   // Batch 121: people at that location today
+  const pool=activeWorkers().filter(w=>sel.has(w.id) || ((w.status||'active')==='active' && (!r.projectId || (locSet?locSet.has(w.id):w.projectId===r.projectId) || q))).filter(w=>!q || String(w.fullName||'').toLowerCase().includes(q) || String(w.designation||'').toLowerCase().includes(q)).sort((a,b)=>(sel.has(b.id)-sel.has(a.id)) || String(a.fullName||'').localeCompare(String(b.fullName||''))).slice(0,120);
   const changed=JSON.stringify([...sel].sort())!==JSON.stringify([...crew].sort()), now=new Date(), pd=n=>String(n).padStart(2,'0');
   return `<div class="ptw-steps">${ptwBadge(r)} <span class="wsub">Request → <b>${r.issue?'✓ ':''}Issue</b> → <b>${r.hse?'✓ ':''}HSE countersign</b> → <b>${r.accept?'✓ ':''}Holder accepts</b> → Live</span></div>
   <div class="panel"><div class="subhead" style="margin-top:0;">Gas tests${hot?' <span class="badge warn">required — '+esc(r.ptwType==='Hot work'?'hot work':'confined space')+'</span>':''}</div>
@@ -9104,6 +9117,210 @@ function renderObsTrends(){
   const bars=(rows)=>{ const max=Math.max(...rows.map(x=>x[1])); return rows.map(([k,n])=>`<div class="tr-row"><div class="tr-l">${esc(k)}</div><div class="tr-bar"><i style="width:${Math.round(n*100/max)}%"></i></div><div class="tr-n">${n}</div></div>`).join(''); };
   el.innerHTML=`<div class="obs-trends"><div class="panel"><h3>TOP CATEGORIES · LAST 90 DAYS</h3>${bars(by(r=>r.category))}</div><div class="panel"><h3>BY PROJECT · LAST 90 DAYS</h3>${bars(by(r=>r.projectId?projectName(r.projectId):'No project'))}</div></div>`;
 }
+
+/* =============================== Batch 121: SITE VISIT REPORTS ===============================
+   One report per HSE site visit (Scaffolding first; other divisions get their own criteria later).
+   siteVisits/{id}: svNo, date, timeFrom, timeTo, division (label), projectId (project id | 'loc:<id>' | ''), location, client, visitors, purpose,
+   crewIds[], crewOther, workDone, crit {<id>:{t, g, r:'y'|'n'|'na', rm}}, critOrder[], obs[] (unsafe act / condition), good[], actions[],
+   photos[] {url, name, contentType, path, ref:'c:<criterion>' | 'o:<obs>' | 'g:<good>' | '', cap}, summary, status Draft / Submitted to MD / Reviewed,
+   submittedDate, mdComments, reviewedDate.
+   Criteria per division: settings/siteVisitCriteria.lists {<division key>: [lines]} — a line starting with "#" is a group heading.
+   Each report keeps its own copy of the criteria text, so editing the list later does not change old reports.
+   Counted as a Site visit in the Monthly Report (hseLogs sv_<id>) → also ticks the Monthly Schedule task by itself. MD review = PDF sent by HSE. */
+const SV_DIVS=[['Scaffolding','Scaffolding'],['Civil','Civil'],['Rental','Logistics & Rental'],['Office staff','Office']];
+const SV_STATUSES=['Draft','Submitted to MD','Reviewed'];
+const SV_PURPOSES=['Routine HSE site visit','Scaffold inspection','Client request / complaint','Incident follow-up','Start of a new job','Other'];
+const SV_STARTER={Scaffolding:['# Permit & documents','Valid work permit at site (PTW / client permit)','JSA / TRIC reviewed and signed by the crew','TBT done today — signed sheet at site','Scaffold design / drawing available for non-standard scaffolds',
+  '# Scaffold condition','Scaffold tag in place (green = safe to use / red = do not use)','Scaffold inspected within the last 7 days and after any change or bad weather','Base plates and sole boards on firm, level ground','Standards plumb, ledgers and transoms secure, couplers tight','Bracing and ties fitted as required',
+  'Full boarding — no gaps, boards secured','Guardrails, mid-rails and toe boards on all open sides','Safe access — ladder secured, 1 m above the landing, opening protected','Load limits respected — no overloading with materials',
+  '# People & competence','Scaffolders competent (CISRS / approved card) and supervisor present','Full body harness with 100 % tie-off when working at height','PPE worn — helmet with chin strap, gloves, safety shoes, glasses, coverall','Fit for work — no fatigue / heat stress signs, water and rest area available',
+  '# Work area','Area below barricaded with signs (drop zone)','Tools tethered / materials lowered safely (no throwing)','Housekeeping — no loose material on platforms or walkways','Lifting of materials controlled (gin wheel / crane with lift plan)','Overhead power lines and other hazards identified and controlled','Weather and wind checked — stop work in high wind']};
+let svUi={draft:{}, critEdit:false, critDiv:'Scaffolding', crewQ:''};
+function svDivKey(lbl){ const f=SV_DIVS.find(x=>x[1]===lbl || x[0]===lbl); return f?f[0]:''; }
+function svDivLbl(k){ const f=SV_DIVS.find(x=>x[0]===k); return f?f[1]:k; }
+function svHash(t){ let h=5381; const s=String(t||'').trim().toLowerCase().replace(/\s+/g,' '); for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return 'c'+h.toString(36); }
+function svLines(k){ const L=(((settingsDocs.siteVisitCriteria||{}).lists)||{})[k]; return Array.isArray(L) ? L : (SV_STARTER[k]||[]); }
+function svCriteriaFor(k){ const out=[]; let g=''; for(const ln of svLines(k)){ const t=String(ln||'').trim(); if(!t) continue; if(t.startsWith('#')){ g=t.replace(/^#+\s*/,''); continue; } out.push({id:svHash(t), t, g}); } return out; }
+function svCritList(r){ if(Array.isArray(r.critOrder) && r.crit && r.critOrder.length) return r.critOrder.map(id=>({id, t:(r.crit[id]||{}).t||'', g:(r.crit[id]||{}).g||''})).filter(x=>x.t); return svCriteriaFor(svDivKey(r.division)); }
+function svCritStats(r){ const L=svCritList(r), c=r.crit||{}; let y=0, n=0, na=0, open=0; for(const x of L){ const v=(c[x.id]||{}).r; if(v==='y') y++; else if(v==='n') n++; else if(v==='na') na++; else open++; } return {total:L.length, y, n, na, open, pct:(y+n)?Math.round(y*100/(y+n)):null}; }
+function svPlace(r){ return [r.projectId?projectName(r.projectId):'', r.location].filter(Boolean).join(' — ')||'—'; }
+function svSiteDiv(r){ const s=r.projectId && !String(r.projectId).startsWith('loc:') ? siteEquipmentList.find(x=>x.id===r.projectId) : null; return s ? (s.division||'Civil') : ''; }
+function svStatusBadge(r){ const s=r.status||'Draft'; return `<span class="badge ${s==='Reviewed'?'ok':s==='Submitted to MD'?'warn':'muted'}">${esc(s)}</span>`; }
+function svPctBadge(p){ return p===null?'<span class="badge muted">—</span>':`<span class="badge ${p>=90?'ok':p>=75?'warn':'danger'}">${p} %</span>`; }
+function svPhotos(r, ref){ return (r.photos||[]).map((p,n)=>({...p, n})).filter(p=>ref===undefined || (p.ref||'')===ref); }
+function svPhotoStrip(r, ref){ const ed=canEdit(), L=svPhotos(r, ref);
+  return `<span class="sv-ph">${L.map(p=>`<a href="${esc(p.url)}" target="_blank" rel="noopener" title="${esc(p.cap||p.name||'photo')}"><img src="${esc(p.url)}" alt="" loading="lazy"></a>`).join('')}${ed?`<label class="sv-phadd" title="Add a photo">📷<input type="file" accept="image/*" hidden data-sv-photo="${esc(ref)}"></label>`:''}</span>`; }
+async function syncSvToReport(r){ const id='sv_'+r.id;
+  if(!r || r.deleted || !r.date){ try{ await db.collection('hseLogs').doc(id).delete(); }catch(e){} return; }
+  const loc=String(r.projectId||'').startsWith('loc:') ? String(r.projectId).slice(4) : '', l=loc&&typeof plLocById==='function'?plLocById(loc):null, st=svCritStats(r);
+  try{ await db.collection('hseLogs').doc(id).set(stamp({category:'siteVisit', date:r.date, division:svDivKey(r.division)||svSiteDiv(r)||'Office staff', projectId:(r.projectId && !loc)?r.projectId:null, ...(loc?{locId:loc, locName:l?l.name:''}:{}),
+    visitedBy:r.visitors||'', purpose:r.purpose||'', description:`${r.svNo||''} ${svPlace(r)}${st.pct!==null?' — compliance '+st.pct+' %':''}`.trim(), source:'siteVisit', sourceSvId:r.id})); }catch(e){ console.error('site visit sync', e); } }
+/* ---- tabs ---- */
+function svCrewCands(r){ const pid=String(r.projectId||''), d=r.date||localToday();
+  if(pid.startsWith('loc:')) return typeof locPeopleToday==='function' ? locPeopleToday(pid.slice(4)) : [];
+  if(!pid) return []; return activeWorkers().filter(w=>(w.status||'active')==='active' && (projectOn(w, d)===pid || w.projectId===pid)); }
+function svCrewHtml(r){ const ed=canEdit(), sel=new Set(r.crewIds||[]), c=svCrewCands(r), q=svUi.crewQ.trim().toLowerCase();
+  const extra=q?activeWorkers().filter(w=>(w.status||'active')==='active' && !c.includes(w) && String(w.fullName||'').toLowerCase().includes(q)).slice(0,30):[];
+  const chosenOut=activeWorkers().filter(w=>sel.has(w.id) && !c.includes(w) && !extra.includes(w));
+  const row=w=>`<label class="pick-row"><input type="checkbox" data-sv-crew="${esc(w.id)}" ${sel.has(w.id)?'checked':''} ${ed?'':'disabled'}><span class="pick-main"><span class="wname">${esc(w.fullName||'—')}</span><span class="wsub">${esc([w.designation, w.projectId?projectName(w.projectId):''].filter(Boolean).join(' · '))}</span></span></label>`;
+  return `<form id="svCrewForm"><p class="wsub" style="margin:0 0 8px;">Tick who was working at the site during the visit${r.projectId?` — people on <b>${esc(projectName(r.projectId))}</b> on ${esc(isoToDmy(r.date||''))} are listed`:' — choose the project / location in Visit details to list its people'}.</p>
+    <div class="ppe-wlist">${[...chosenOut, ...c, ...extra].map(row).join('')||'<p class="wsub">Nobody listed — search below or write the names in "Other people".</p>'}</div>
+    ${ed?`<input type="search" id="svCrewQ" value="${esc(svUi.crewQ)}" placeholder="Search another person by name…" style="margin:6px 0;">`:''}
+    <div class="form-grid"><label class="span-all">Other people / sub-contractor crew<input name="crewOther" maxlength="200" value="${esc(r.crewOther||'')}" placeholder="e.g. 4 x ABC Scaffolding Co. scaffolders" ${ed?'':'disabled'}></label>
+      <label class="span-all">Work being performed<textarea name="workDone" ${ed?'':'disabled'} placeholder="e.g. Rig-up of access scaffold at well NM-112, 12 m high">${esc(r.workDone||'')}</textarea></label></div>
+    ${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save crew &amp; work</button></div>':''}</form>`; }
+function svCritHtml(r){ const ed=canEdit(), L=svCritList(r), c=r.crit||{}, D=svUi.draft[r.id]||{}, st=svCritStats(r); let g='';
+  if(!L.length) return `<p class="wsub">No criteria for ${esc(r.division||'this division')} yet.${ed?' Add them with <b>Criteria lists</b> at the top of Site Visit Reports.':''}</p>`;
+  const rows=L.map((x,i)=>{ const v=(D[x.id]||{}).r!==undefined?D[x.id].r:(c[x.id]||{}).r||'', rm=(D[x.id]||{}).rm!==undefined?D[x.id].rm:(c[x.id]||{}).rm||'';
+    const head=x.g && x.g!==g ? (g=x.g, `<div class="sv-cg">${esc(x.g)}</div>`) : '';
+    return `${head}<div class="sv-crow sv-${v||'none'}"><div class="sv-ct"><span class="mono wsub">${i+1}.</span> ${esc(x.t)}</div>
+      <div class="sv-cr">${[['y','✓ Complied'],['n','✗ Not complied'],['na','N/A']].map(([k,l])=>`<label class="sv-rb sv-rb-${k}"><input type="radio" name="svc_${esc(x.id)}" value="${k}" ${v===k?'checked':''} ${ed?'':'disabled'}><span>${l}</span></label>`).join('')}</div>
+      <div class="sv-crm"><input data-svrm="${esc(x.id)}" value="${esc(rm)}" maxlength="200" placeholder="Remark${v==='n'?' — what was wrong':''}" ${ed?'':'disabled'}>${svPhotoStrip(r, 'c:'+x.id)}</div></div>`; }).join('');
+  return `<form id="svCritForm"><div class="sv-cstat">Compliance: ${svPctBadge(st.pct)} <span class="wsub">${st.y} complied · ${st.n} not complied · ${st.na} N/A${st.open?` · <b>${st.open} not checked</b>`:''} (saved)</span></div>${rows}
+    ${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save checklist</button></div>':''}</form>`; }
+function svReadCrit(f, r){ const D={}; for(const x of svCritList(r)){ const ch=f.querySelector(`input[name="svc_${CSS.escape(x.id)}"]:checked`), rm=f.querySelector(`[data-svrm="${CSS.escape(x.id)}"]`); D[x.id]={r:ch?ch.value:'', rm:rm?rm.value:''}; } return D; }
+/* ---- criteria lists (settings) ---- */
+function svTopHtml(){ if(!svUi.critEdit || !canEdit()) return ''; const k=svUi.critDiv, lines=svLines(k);
+  return `<form id="svCritListForm" class="panel"><div class="section-head"><h3>Site visit criteria — ${esc(svDivLbl(k))}</h3><button type="button" class="btn btn-sm" data-sv-critx="1">Close</button></div>
+    <div class="seg-tabs" style="margin-bottom:8px;">${SV_DIVS.map(([dk,l])=>`<button type="button" class="seg-btn ${dk===k?'active':''}" data-sv-critdiv="${esc(dk)}">${esc(l)} <span class="wsub">${svCriteriaFor(dk).length}</span></button>`).join('')}</div>
+    <p class="wsub" style="margin:0 0 6px;">One criterion per line. A line starting with <b>#</b> is a group heading (e.g. <code># Scaffold condition</code>). New reports use this list; saved reports keep the criteria they were checked against.${!Array.isArray((((settingsDocs.siteVisitCriteria||{}).lists)||{})[k]) && SV_STARTER[k]?' <b>Starting list — edit it and save.</b>':''}</p>
+    <textarea name="lines" rows="16" style="width:100%; font-family:inherit;">${esc(lines.join('\n'))}</textarea>
+    <div class="form-actions"><button type="button" class="btn" data-sv-critx="1">Cancel</button><button type="submit" class="btn btn-primary">Save ${esc(svDivLbl(k))} criteria</button></div></form>`; }
+function svTopRender(){ const el=document.getElementById('svTop'); if(!el || formDirtyIn('svTop')) return; el.innerHTML=svTopHtml(); }
+regDefine({
+  key:'sv', collection:'siteVisits', singular:'Site visit report', title:'Site Visit Reports', tagline:'Visit · Check · Report',
+  addLabel:'+ New site visit', noField:'svNo', noPrefix:'SV', noYear:true, dateField:'date', yearFilter:true, statuses:SV_STATUSES, statusOf:r=>r.status||'Draft',
+  headerButtons:'<button class="btn btn-sm" type="button" data-sv-critopen="1">Criteria lists</button>',
+  searchPlaceholder:'Search report no., project, place, visitor…', emptyEditor:'No site visit reports yet — click “+ New site visit”. Tick the criteria, add what you found (with photos) and the actions, then download the PDF for the MD.',
+  titleOf:r=>`${svPlace(r)}`, subOf:r=>[isoToDmy(r.date||''), r.division, r.visitors?'by '+r.visitors:''].filter(Boolean).join(' · '),
+  badgesOf:r=>`${svStatusBadge(r)} ${svPctBadge(svCritStats(r).pct)}`,
+  searchText:r=>[r.svNo, svPlace(r), r.visitors, r.client, r.division, r.workDone, r.summary].join(' '),
+  addFields:['date','division','projectId','location','client','visitors','purpose'], addDefaults:{date:()=>localToday(), visitors:()=>plWho(), status:'Draft', purpose:'Routine HSE site visit', division:'Scaffolding'},
+  validate:d=>!d.date?'Choose the date':!String(d.visitors||'').trim()?'Write who visited':(!d.projectId && !String(d.location||'').trim())?'Choose the project / location or write the place':'',
+  prepare:(d, data)=>{ const T=data||d, M={...d, ...(data||{})};
+    if(T.status==='Submitted to MD' && !M.submittedDate) T.submittedDate=localToday(); if(T.status==='Reviewed' && !M.reviewedDate) T.reviewedDate=localToday(); },
+  segs:SV_DIVS.map(([k,l])=>({key:k, label:l, match:r=>svDivKey(r.division)===k})), segAllLabel:'All divisions',
+  tabs:[{key:'main', label:'Visit details', groups:[{fields:[
+      {key:'svNo', label:'Report no.', required:true},
+      {key:'date', label:'Date of visit', type:'date', required:true}, {key:'timeFrom', label:'From', type:'time'}, {key:'timeTo', label:'To', type:'time'},
+      {key:'division', label:'Division', type:'select', options:SV_DIVS.map(x=>x[1]), required:true},
+      {key:'projectId', label:'Project / location', type:'site'},
+      {key:'location', label:'Exact place / well no.', placeholder:'e.g. NM-112, rack R-04'},
+      {key:'client', label:'Client', placeholder:'e.g. PDO'},
+      {key:'visitors', label:'Visited by (names)', required:true, wide:true, placeholder:'e.g. Radhakrishnan N, Sayed'},
+      {key:'purpose', label:'Purpose', type:'select', options:SV_PURPOSES},
+      {key:'summary', label:'Overall comment / conclusion of the visit', type:'textarea', wide:true},
+    ]}], intro:'Then: <b>Crew &amp; work</b> → <b>Criteria checklist</b> → <b>HSE observations</b> / <b>Good observations</b> → <b>Actions</b> → <b>PDF report</b> for the MD.'},
+    {key:'crew', label:'Crew & work', html:r=>svCrewHtml(r)},
+    {key:'crit', label:'Criteria checklist', html:r=>svCritHtml(r)},
+    {key:'sub:obs', label:'HSE observations', sub:'obs'},
+    {key:'sub:good', label:'Good observations', sub:'good'},
+    {key:'sub:actions', label:'Actions', sub:'actions'},
+    {key:'md', label:'MD review', intro:'Download the PDF report (button at the top) and send it to the MD. When he replies, set <b>Reviewed</b> and write his comments here.', fields:[
+      {key:'status', label:'Status', type:'select', options:SV_STATUSES}, {key:'submittedDate', label:'Sent to MD on', type:'date'},
+      {key:'reviewedDate', label:'Reviewed by MD on', type:'date'}, {key:'mdComments', label:'MD comments', type:'textarea', wide:true}]}],
+  subs:{
+    obs:{label:'HSE observations (unsafe act / condition)', addLabel:'Add observation', fields:[
+      {key:'type', label:'Type', type:'select', options:['Unsafe act','Unsafe condition'], required:true}, {key:'category', label:'Category', type:'select', options:OBS_CATS},
+      {key:'desc', label:'What was observed', type:'textarea', required:true, wide:true}, {key:'where', label:'Where exactly'},
+      {key:'action', label:'Immediate action taken', type:'textarea', wide:true}, {key:'risk', label:'Risk', type:'select', options:['Low','Medium','High']}],
+      defaults:{type:'Unsafe condition'}, hideInCard:['desc'], title:x=>`<span class="badge ${x.type==='Unsafe act'?'danger':'warn'}">${esc(x.type||'')}</span> ${esc(String(x.desc||'').slice(0,140))}`, body:(x,r)=>`<div style="margin:4px 0;">${svPhotoStrip(r, 'o:'+x.id)}</div>`, empty:'No unsafe acts / conditions recorded.'},
+    good:{label:'Good observations', addLabel:'Add good observation', fields:[
+      {key:'desc', label:'What was good', type:'textarea', required:true, wide:true}, {key:'who', label:'Person / crew recognised'}, {key:'category', label:'Category', type:'select', options:OBS_CATS}],
+      hideInCard:['desc'], title:x=>`<span class="badge ok">Good</span> ${esc(String(x.desc||'').slice(0,140))}`, body:(x,r)=>`<div style="margin:4px 0;">${svPhotoStrip(r, 'g:'+x.id)}</div>`, empty:'No good observations recorded.'},
+    actions:actionSub('Actions after the visit')},
+  multiFiles:{key:'photos', label:'All photos of this visit', accept:'image/*', hint:'Photos added on a criterion or observation also appear here. Add general photos here.'},
+  pdf:r=>svPdf(r), pdfLabel:'PDF report',
+  columns:[
+    {label:'No.', cls:'mono', html:r=>`<strong>${esc(r.svNo||'—')}</strong><div class="wsub">${esc(isoToDmy(r.date||''))}</div>`},
+    {label:'Project / place', html:r=>`<div class="wname">${esc(svPlace(r))}</div><div class="wsub">${esc(r.division||'')}${r.client?' · '+esc(r.client):''}</div>`},
+    {label:'Visited by', html:r=>esc(r.visitors||'—')},
+    {label:'Compliance', html:r=>svPctBadge(svCritStats(r).pct)},
+    {label:'Findings', html:r=>`<span class="badge ${(r.obs||[]).length?'danger':'muted'}">${(r.obs||[]).length} unsafe</span> <span class="badge ${(r.good||[]).length?'ok':'muted'}">${(r.good||[]).length} good</span>`},
+    {label:'Status', html:r=>svStatusBadge(r)},
+  ],
+  tiles:list=>{ const mo=localToday().slice(0,7), m=list.filter(r=>String(r.date||'').startsWith(mo)), ps=m.map(r=>svCritStats(r).pct).filter(p=>p!==null), avg=ps.length?Math.round(ps.reduce((a,b)=>a+b,0)/ps.length):null;
+    const openA=list.reduce((n,r)=>n+(r.actions||[]).filter(a=>(a.status||'Open')!=='Closed').length,0);
+    return [{label:'Visits this month', num:m.length, sub:`${list.filter(r=>String(r.date||'').startsWith(mo.slice(0,4))).length} this year`, icon:'search'},
+      {label:'Average compliance', num:avg===null?'—':avg+' %', cls:avg===null?'':avg>=90?'ok':avg>=75?'warn':'danger', sub:'criteria complied this month', icon:'target'},
+      {label:'Open actions', num:openA, cls:openA?'warn':'ok', sub:'from site visits', icon:'clipcheck'},
+      {label:'Waiting for MD', num:list.filter(r=>r.status==='Submitted to MD').length, cls:'', sub:'sent, not yet reviewed', icon:'hourglass'}]; },
+  topPanel:()=>svTopRender(),
+  afterSave:r=>syncSvToReport(r),
+});
+/* ---- events ---- */
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-sv-critopen],[data-sv-critx],[data-sv-critdiv]'); if(!b) return; const D=b.dataset;
+  if(D.svCritopen){ if(!canEdit()) return; svUi.critEdit=!svUi.critEdit; clearDirtyForms(); svTopRender(); return; }
+  if(D.svCritx){ svUi.critEdit=false; clearDirtyForms(); svTopRender(); return; }
+  if(D.svCritdiv){ svUi.critDiv=D.svCritdiv; clearDirtyForms(); svTopRender(); } });
+document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement)) return;
+  if(f.id==='svCritListForm'){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; const lines=String(new FormData(f).get('lines')||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,150).map(x=>x.slice(0,200));
+    if(await saveSettings('siteVisitCriteria', {lists:{[svUi.critDiv]:lines}})){ clearDirtyForms(); toast(`${svDivLbl(svUi.critDiv)} criteria saved — ${lines.filter(x=>!x.startsWith('#')).length} items`); svTopRender(); } return; }
+  if(f.id==='svCritForm'){ e.preventDefault(); e.stopImmediatePropagation(); const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const D=svReadCrit(f, r), L=svCritList(r), crit={};
+    for(const x of L) crit[x.id]={t:x.t, g:x.g||'', r:(D[x.id]||{}).r||'', rm:String((D[x.id]||{}).rm||'').trim().slice(0,200)};
+    clearDirtyForms(); if(await regUpdate('sv', r.id, {crit, critOrder:L.map(x=>x.id)})){ delete svUi.draft[r.id]; const st=svCritStats({...r, crit, critOrder:L.map(x=>x.id)}); toast(`Checklist saved — compliance ${st.pct===null?'—':st.pct+' %'}${st.open?` · ${st.open} not checked`:''}`); } return; }
+  if(f.id==='svCrewForm'){ e.preventDefault(); e.stopImmediatePropagation(); const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const F=new FormData(f);
+    const ids=[...f.querySelectorAll('[data-sv-crew]:checked')].map(x=>x.dataset.svCrew); clearDirtyForms();
+    await regUpdate('sv', r.id, {crewIds:ids, crewOther:String(F.get('crewOther')||'').trim().slice(0,200), workDone:String(F.get('workDone')||'').trim().slice(0,1500)}); return; } }, true);
+// choosing a project fills the division (add form and Visit details)
+document.addEventListener('change', e=>{ const t=e.target; if(!t || !t.matches || !t.matches('[data-reg-addform="sv"] [data-rf="projectId"], #regDrawerBody [data-reg-form="main"] [data-rf="projectId"]') || (activeReg!=='sv' && !t.closest('[data-reg-addform="sv"]'))) return;
+  const dv=svSiteDiv({projectId:t.value}), f=t.closest('form'), sel=f&&f.querySelector('[data-rf="division"]'); if(dv && sel) sel.value=svDivLbl(dv); });
+document.addEventListener('input', e=>{ const t=e.target; if(t && t.id==='svCrewQ'){ svUi.crewQ=t.value; const r=regCurrent(); if(r && activeReg==='sv'){ const f=document.getElementById('svCrewForm'); const keep=f?[...f.querySelectorAll('[data-sv-crew]:checked')].map(x=>x.dataset.svCrew):null;
+  const b=document.getElementById('regDrawerBody'); if(b && f){ const pos=t.selectionStart; b.innerHTML=svCrewHtml({...r, crewIds:keep||r.crewIds}); const q=document.getElementById('svCrewQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(x){} } } } } });
+document.addEventListener('change', async e=>{ const inp=e.target; if(!inp || !inp.matches || !inp.matches('[data-sv-photo]') || !inp.files || !inp.files[0]) return; const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return;
+  const f=document.getElementById('svCritForm'); if(f) svUi.draft[r.id]=svReadCrit(f, r);   // keep ticks not saved yet
+  const ref=inp.dataset.svPhoto||''; regBusy=true; toast('Uploading…');
+  try{ const up=await uploadToStorage(inp.files[0]); regBusy=false; clearDirtyForms(); const cur=regState.sv.list.find(x=>x.id===r.id)||r;
+    if(await regUpdate('sv', r.id, {photos:[...(cur.photos||[]), {...up, ref, cap:''}]}, true)) toast('Photo added'); }
+  catch(err){ console.error(err); toast((err&&err.userMsg)||'Upload failed'); } finally{ regBusy=false; clearDirtyForms(); renderRegDrawer(); } });
+/* ---- PDF report ---- */
+async function svPdf(r){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
+  toast('Preparing the report…');
+  try{ const doc=pdfDoc({unit:'pt', format:'a4', docKey:'siteVisit', docSub:`${r.svNo||''} · ${isoToDmy(r.date||'')}`}), M=34, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, INK=[20,24,32];
+    let y=40; const ensure=h=>{ if(y+h>H-36){ doc.addPage(); y=40; } };
+    const title=t=>{ ensure(40); y+=10; doc.setFillColor(20,30,48); doc.rect(M, y, CW, 16, 'F'); doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text(t.toUpperCase(), M+5, y+11); doc.setTextColor(...INK); y+=20; };
+    const para=(t, sz)=>{ doc.setFont('helvetica','normal'); doc.setFontSize(sz||9); const L=doc.splitTextToSize(String(t||'—'), CW-4); for(const l of L){ ensure(12); doc.text(l, M+2, y+9); y+=11.5; } };
+    const kv=rows=>{ const K=104, half=(CW-2*K)/2; for(const rw of rows){ const cells=rw.length===2?[[rw[0],K,true],[rw[1],CW-K]]:[[rw[0],K,true],[rw[1],half],[rw[2],K,true],[rw[3],half]];
+        doc.setFontSize(8.5); const L=cells.map(([t,w,b])=>{ doc.setFont('helvetica', b?'bold':'normal'); return doc.splitTextToSize(String(t===undefined||t===null||t===''?'—':t), w-8); }); const h=Math.max(16, ...L.map(l=>l.length*10.5+6)); ensure(h); let x=M;
+        cells.forEach(([t,w,b],i)=>{ if(b){ doc.setFillColor(238,241,245); doc.rect(x,y,w,h,'F'); } doc.setDrawColor(170,174,182); doc.setLineWidth(0.5); doc.rect(x,y,w,h); doc.setFont('helvetica', b?'bold':'normal'); L[i].forEach((ln,n)=>doc.text(ln, x+4, y+11+n*10.5)); x+=w; }); y+=h; } };
+    const st=svCritStats(r), crew=(r.crewIds||[]).map(id=>workers.find(w=>w.id===id)).filter(Boolean);
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text(`Site Visit Report — ${r.svNo||''}`, M, y+12); y+=20;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(`${r.status||'Draft'}${r.submittedDate?' · sent to MD '+isoToDmy(r.submittedDate):''}${r.reviewedDate?' · reviewed '+isoToDmy(r.reviewedDate):''} · printed ${isoToDmy(localToday())}`, M, y+8); doc.setTextColor(...INK); y+=16;
+    title('1. Visit details');
+    kv([['Date', `${isoToDmy(r.date||'')}${r.timeFrom||r.timeTo?'  '+(r.timeFrom||'')+(r.timeTo?' – '+r.timeTo:''):''}`, 'Division', r.division], ['Project / location', r.projectId?projectName(r.projectId):'—', 'Exact place', r.location], ['Client', r.client, 'Purpose', r.purpose], ['Visited by', r.visitors]]);
+    title('2. Crew at site and work performed');
+    kv([['Crew present', crew.length?crew.map(w=>`${w.fullName}${w.designation?' ('+w.designation+')':''}`).join(', '):'—'], ['Other people', r.crewOther], ['Work performed', r.workDone]]);
+    title(`3. Criteria checklist — compliance ${st.pct===null?'—':st.pct+' %'} (${st.y} complied · ${st.n} not complied · ${st.na} N/A${st.open?' · '+st.open+' not checked':''})`);
+    { const L=svCritList(r), c=r.crit||{}, rows=[], lbl={y:'Complied', n:'NOT complied', na:'N/A', '':'Not checked'}; let g='', n=0;
+      for(const x of L){ if(x.g && x.g!==g){ g=x.g; rows.push(['', x.g.toUpperCase(), '', '']); } const v=c[x.id]||{}; n++; rows.push([String(n), x.t, lbl[v.r||''], v.rm||'']); }
+      y=rows.length?ppePdfTable(doc, ['#','Criterion','Result','Remarks'], rows, [22, 290, 70, CW-382], y, M):y; }
+    title(`4. HSE observations — unsafe acts / conditions (${(r.obs||[]).length})`);
+    if((r.obs||[]).length) y=ppePdfTable(doc, ['#','Type','Category','What was observed','Immediate action','Risk'], (r.obs||[]).map((o,i)=>[String(i+1), o.type||'', o.category||'', [o.desc, o.where?'('+o.where+')':''].filter(Boolean).join(' '), o.action||'', o.risk||'']), [20,62,70,190,130,CW-472], y, M); else para('None recorded.');
+    title(`5. Good observations (${(r.good||[]).length})`);
+    if((r.good||[]).length) y=ppePdfTable(doc, ['#','What was good','Person / crew','Category'], (r.good||[]).map((o,i)=>[String(i+1), o.desc||'', o.who||'', o.category||'']), [20,300,110,CW-430], y, M); else para('None recorded.');
+    title(`6. Actions after the visit (${(r.actions||[]).length})`);
+    if((r.actions||[]).length) y=ppePdfTable(doc, ['#','Action','Owner','Target date','Status'], (r.actions||[]).map((a,i)=>[String(i+1), a.action||'', a.owner||'', a.targetDate?isoToDmy(a.targetDate):'', a.status||'Open']), [20,270,100,70,CW-460], y, M); else para('No actions.');
+    title('7. Overall comment'); para(r.summary||'—');
+    // photos
+    const ph=(r.photos||[]).filter(p=>/^image\//.test(p.contentType||'') || /\.(jpe?g|png|webp)$/i.test(p.name||'')).slice(0,16);
+    if(ph.length){ title(`8. Photos (${ph.length})`); const cw=(CW-12)/2, chh=150; let col=0;
+      const capOf=p=>{ const ref=p.ref||''; if(ref.startsWith('c:')){ const L=svCritList(r), i=L.findIndex(x=>x.id===ref.slice(2)); return i>=0?`Criterion ${i+1}: ${L[i].t}`:'Criterion'; } if(ref.startsWith('o:')){ const i=(r.obs||[]).findIndex(o=>o.id===ref.slice(2)); return i>=0?`HSE observation ${i+1}: ${r.obs[i].desc||''}`:'HSE observation'; } if(ref.startsWith('g:')){ const i=(r.good||[]).findIndex(o=>o.id===ref.slice(2)); return i>=0?`Good observation ${i+1}: ${r.good[i].desc||''}`:'Good observation'; } return p.cap||'General photo'; };
+      for(let i=0;i<ph.length;i++){ if(col===0) ensure(chh+26); const x=M+col*(cw+12); let img=null; try{ img=await fetchImageDataUrl(ph[i].url); }catch(e){}
+        doc.setDrawColor(200,204,210); doc.rect(x, y, cw, chh); if(img){ try{ let iw=cw-8, ih=chh-8; try{ const pr=doc.getImageProperties(img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+(cw-iw)/2, y+(chh-ih)/2, iw, ih); }catch(e){} } else { doc.setFontSize(8); doc.text('(photo could not be loaded)', x+8, y+20); }
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text(doc.splitTextToSize(`P${i+1} — ${capOf(ph[i])}`, cw)[0], x, y+chh+10);
+        col++; if(col===2){ col=0; y+=chh+20; } }
+      if(col) y+=chh+20; }
+    title('MD review');
+    kv([['Status', r.status||'Draft', 'Sent to MD on', r.submittedDate?isoToDmy(r.submittedDate):''], ['MD comments', r.mdComments], ['Reviewed on', r.reviewedDate?isoToDmy(r.reviewedDate):'']]);
+    // signatures
+    ensure(110); y+=12; const bw=(CW-12)/2, bh=86, me=hseSigOf((auth.currentUser||{}).email)||{};
+    [['PREPARED BY (HSE)', me.name||plWho(), me.img||''], ['REVIEWED BY (MANAGING DIRECTOR)', r.status==='Reviewed'?'Reviewed '+(r.reviewedDate?isoToDmy(r.reviewedDate):''):'', '']].forEach(([role, name, img], i)=>{ const x=M+i*(bw+12);
+      doc.setDrawColor(110,116,126); doc.rect(x, y, bw, bh); doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,96,106); doc.text(role, x+6, y+11); doc.setTextColor(...INK);
+      if(img){ try{ doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+10, y+16, bw-20, bh-44); }catch(e){} } else { doc.setDrawColor(170,174,182); doc.line(x+12, y+bh-28, x+bw-12, y+bh-28); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text('Signature', x+12, y+bh-31); }
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.text(`Name: ${name||'______________________'}`, x+6, y+bh-10); });
+    y+=bh;
+    doc.save(`Burhan_Site_Visit_${String(r.svNo||'report').replace(/[^\w-]+/g,'_')}_${r.date||''}.pdf`); toast('Site visit report PDF downloaded');
+  }catch(e){ console.error(e); toast('Could not make the PDF'); } }
 
 /* =============================== HEAT STRESS =============================== */
 const HEAT_CHECKS=['Midday break observed (12:30–15:30, Jun–Aug)','Cool drinking water available','Shaded rest area available','Work / rest cycle applied','Buddy system in place','Workers briefed on heat illness signs','Acclimatisation for new workers','ORS / electrolytes available'];
@@ -11267,6 +11484,7 @@ function renderPpe(live){
   const pane=document.getElementById('ppePane'); if(!pane || pane.hidden || !auth.currentUser) return;
   ppeKitFix();
   if(live && (ppeUi.edit || ppeUi.exemptOpen)) return;   // don't wipe the item form while someone is typing in it
+  if(live && ppeUi.pad) return;   // Batch 121: a worker is signing
   if(live && ppeUi.issueOpen && document.activeElement && pane.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
   if(live && document.activeElement && document.activeElement.closest && document.activeElement.closest('#ppeReqPanel') && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;   // Batch 73: typing in a request card
   const prArmed=[...pane.querySelectorAll('[data-armed="1"]')].map(el=>{ const at=[...el.attributes].find(x=>x.name.startsWith('data-pr-')); return at?[at.name, at.value, el.textContent]:null; }).filter(Boolean);
@@ -11290,7 +11508,8 @@ function renderPpe(live){
       <span style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">${ed?`<button type="button" class="btn btn-primary btn-sm" id="ppeIssueOpen">Issue PPE to crew</button>`:''}<button type="button" class="btn btn-sm" id="ppeListPdf">${ic('download')} Approved PPE list (PDF)</button><button type="button" class="btn btn-sm" id="ppeListXlsx">${ic('download')} Excel</button></span></div>
     ${ppeReqPanelHtml()}
     ${ppeUi.issueOpen?ppeIssueFormHtml():''}
-    ${ppeUi.lastBatch?`<div class="notice">${ic('checkcircle')} <strong>${ppeUi.lastBatch.n} PPE record${ppeUi.lastBatch.n===1?'':'s'} saved</strong> for ${ppeUi.lastBatch.workers.length} worker${ppeUi.lastBatch.workers.length===1?'':'s'} (${esc(ppeUi.lastBatch.date)}). <button type="button" class="btn btn-sm" id="ppeSheetPdf">${ic('printer')} Signature sheet (PDF)</button> <button type="button" class="att-link" id="ppeBatchClose">Close</button></div>`:''}
+    ${ppeUi.lastBatch?`<div class="notice">${ic('checkcircle')} <strong>${ppeUi.lastBatch.n} PPE record${ppeUi.lastBatch.n===1?'':'s'} saved</strong> for ${ppeUi.lastBatch.workers.length} worker${ppeUi.lastBatch.workers.length===1?'':'s'} (${esc(ppeUi.lastBatch.date)}). ${canEdit()&&ppeUi.lastBatch.key?`<button type="button" class="btn btn-sm btn-primary" data-ppe-signsess="${esc(ppeUi.lastBatch.key+'|'+ppeUi.lastBatch.date)}">✍ Workers sign now</button> `:''}<button type="button" class="btn btn-sm" id="ppeSheetPdf">${ic('printer')} Signature sheet (PDF)</button> <button type="button" class="att-link" id="ppeBatchClose">Close</button></div>`:''}
+    ${typeof ppeSignPanelHtml==='function'?ppeSignPanelHtml():''}
     <div class="tiles tiles-4">
       <div class="tile"><div class="tile-head"><div class="tile-icon">${ic('hardhat')}</div><div class="tile-label">PPE items issued</div></div><div class="tile-num">${total}</div><div class="tile-sub">${word} · ${people} worker${people===1?'':'s'}</div></div>
       <div class="tile"><div class="tile-head"><div class="tile-icon">${ic('vest')}</div><div class="tile-label">Basic kit complete</div></div><div class="tile-num ${gaps&&gapW.length?'warn':''}">${gaps?`${kitOk}/${gaps.length}`:'—'}</div><div class="tile-sub">${gaps?`${gapW.length} active worker${gapW.length===1?'':'s'} missing an item (or past replacement)`:'tick "Basic kit" items in the approved list'}${gaps&&ppeKitExemptList().length?` · ${activeWorkers().filter(w=>(w.status||'active')==='active' && ppeKitExempt(w)).length} not required (office roles)`:''}</div></div>
@@ -11386,7 +11605,7 @@ async function ppeSaveIssue(){
     try{ const FV=fsFieldValue(); await db.collection('workers').doc(id).update(stamp({ppeIssued: FV ? FV.arrayUnion(...add) : [...(w.ppeIssued||[]), ...add]})); n+=add.length; rows.push({w, add}); }
     catch(e){ console.error(e); toast('Could not save for '+(w.fullName||'a worker')+' — '+(e.code||'error')); }
   }
-  ppeUi.saving=false; ppeUi.issueOpen=false; ppeUi.lastBatch={n, date, project:ppeUi.project, issuedBy:ppeUi.issuedBy, condition:ppeUi.condition, workers:rows.map(r=>({name:r.w.fullName||'—', civilId:r.w.civilId||'', designation:r.w.designation||'', items:r.add.map(a=>({item:a.item, size:a.size, qty:a.quantity}))}))};
+  ppeUi.saving=false; ppeUi.issueOpen=false; ppeUi.lastBatch={key:batchId, n, date, project:ppeUi.project, issuedBy:ppeUi.issuedBy, condition:ppeUi.condition, workers:rows.map(r=>({name:r.w.fullName||'—', civilId:r.w.civilId||'', designation:r.w.designation||'', items:r.add.map(a=>({item:a.item, size:a.size, qty:a.quantity}))}))};
   toast(`${n} PPE record${n===1?'':'s'} saved`); renderPpe();
 }
 async function ppeSaveItem(form){
@@ -11451,16 +11670,38 @@ function ppeIssueSessions(fromD, toD){
   for(const w of activeWorkers()) for(const r of (w.ppeIssued||[])){ if(!r.date || r.date<fromD || r.date>toD) continue;
     const pid=r.projectId||'', key=ppeSessKey(r);
     let s=g.get(key); if(!s){ s={key, date:r.date, issuedBy:r.issuedBy||'', condition:r.condition||'', project:pid||'all', ws:new Map(), n:0}; g.set(key,s); }
-    let x=s.ws.get(w.id); if(!x){ x={name:w.fullName||'—', civilId:w.civilId||'', designation:w.designation||'', items:[]}; s.ws.set(w.id,x); }
-    if(r.sigId && !x.sigId){ x.sigId=r.sigId; x.signed=r.receivedDate||''; }
+    let x=s.ws.get(w.id); if(!x){ x={wid:w.id, name:w.fullName||'—', civilId:w.civilId||'', designation:w.designation||'', items:[]}; s.ws.set(w.id,x); }
+    if(r.sigId && !x.sigId){ x.sigId=r.sigId; x.signed=r.receivedDate||''; x.via=r.signedIn||'link'; }
     x.items.push({item:r.item, size:r.size||'', qty:Number(r.quantity)||1}); s.n+=1; }
   return [...g.values()].map(s=>({...s, workers:[...s.ws.values()].sort((a,b)=>a.name.localeCompare(b.name))})).sort((a,b)=>String(b.date).localeCompare(String(a.date)) || b.n-a.n);
 }
 function ppeSessionsHtml(fromD, toD, word){
   const ss=ppeIssueSessions(fromD, toD), show=ppeUi.sessAll?ss:ss.slice(0,12);
   return `<div class="panel"><div class="subhead" style="margin-top:0;">PPE issues — print the signature sheet again (${ss.length} ${esc(word)})</div>
-    ${ss.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Project</th><th>Issued by</th><th class="num">Workers</th><th class="num">Items</th><th></th></tr></thead><tbody>${show.map(s=>`<tr><td class="mono">${esc(s.date)}</td><td>${esc(s.condition||'—')}</td><td>${esc(s.project!=='all'?projectName(s.project):'—')}</td><td>${esc(s.issuedBy||'—')}</td><td class="num">${s.workers.length}</td><td class="num">${s.n}</td><td><button type="button" class="btn btn-sm" data-ppe-sheet="${esc(s.key)}">${ic('printer')} Signature sheet</button>${canEdit()?` <button type="button" class="btn btn-sm btn-ghost" data-pr-sessdel="${esc(s.key)}" data-armed="0" title="Delete this issue and its PPE records (e.g. test entries)">Delete</button>`:''}</td></tr>`).join('')}</tbody></table></div>${ss.length>show.length?`<button type="button" class="att-link" id="ppeSessAll">Show all ${ss.length}</button>`:''}`:`<p class="wsub">No PPE issued ${esc(word)}.</p>`}</div>`;
+    ${ss.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Project</th><th>Issued by</th><th class="num">Workers</th><th class="num">Items</th><th></th></tr></thead><tbody>${show.map(s=>`<tr><td class="mono">${esc(s.date)}</td><td>${esc(s.condition||'—')}</td><td>${esc(s.project!=='all'?projectName(s.project):'—')}</td><td>${esc(s.issuedBy||'—')}</td><td class="num">${s.workers.length}</td><td class="num">${s.n}</td><td>${canEdit()&&s.workers.some(x=>!x.sigId)?`<button type="button" class="btn btn-sm btn-primary" data-ppe-signsess="${esc(s.key+'|'+s.date)}" title="The worker is here — he signs on this screen">✍ Sign</button> `:''}<button type="button" class="btn btn-sm" data-ppe-sheet="${esc(s.key)}">${ic('printer')} Signature sheet</button>${canEdit()?` <button type="button" class="btn btn-sm btn-ghost" data-pr-sessdel="${esc(s.key)}" data-armed="0" title="Delete this issue and its PPE records (e.g. test entries)">Delete</button>`:''}</td></tr>`).join('')}</tbody></table></div>${ss.length>show.length?`<button type="button" class="att-link" id="ppeSessAll">Show all ${ss.length}</button>`:''}`:`<p class="wsub">No PPE issued ${esc(word)}.</p>`}</div>`;
 }
+/* Batch 121: PPE given in the office — the worker is here and signs on this screen (finger or mouse).
+   Signature → ppeSignatures/is_<worker>_<time> {kind:'office'}; his records of that issue get sigId + receivedAt + signedIn:'office'
+   (no link confirmation needed any more). The PPE Issue Record PDF prints the signature. */
+function ppeSignSess(){ const k=ppeUi.signKey; if(!k) return null; const d=ppeUi.signDate||localToday(); return ppeIssueSessions(d, d).find(s=>s.key===k)||null; }
+function ppeSignPanelHtml(){ const S=ppeSignSess(); if(!S) return ''; const ed=canEdit(), left=S.workers.filter(x=>!x.sigId).length;
+  const pad=wid=>`<div class="hse-sig-pad"><canvas id="ppeSigPad" width="600" height="200" aria-label="Worker signature pad"></canvas></div><div class="ppe-padbtns"><button type="button" class="btn btn-sm" data-ppe-padx="1">Cancel</button><button type="button" class="btn btn-sm" data-ppe-padclr="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-ppe-signsave="${esc(wid)}">Save signature</button></div>`;
+  return `<div class="panel ppe-signpanel" id="ppeSignPanel"><div class="section-head"><h3>✍ Workers sign — ${esc(S.condition||'PPE issue')} · ${esc(isoToDmy(S.date))}</h3><button type="button" class="btn btn-sm" id="ppeSignClose">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">The worker checks the items, then signs in the box with a finger (or the mouse). "I have received the PPE listed in good condition…" — the signature is printed on the PPE Issue Record. ${left?`<b>${left}</b> still to sign.`:'<b>Everyone has signed.</b>'}</p>
+    ${S.workers.map(x=>`<div class="ppe-signrow"><div class="ppe-signwho"><strong>${esc(x.name)}</strong> <span class="wsub">${esc([x.designation, x.civilId].filter(Boolean).join(' · '))}</span><div class="wsub">${esc(x.items.map(i=>i.item+(i.size?' ('+i.size+')':'')+(i.qty>1?' ×'+i.qty:'')).join(', '))}</div></div>
+      <div class="ppe-signact">${x.sigId?`<span class="badge ok">✓ Signed${x.signed?' '+esc(isoToDmy(x.signed)):''}${x.via==='office'?'':' (on the link)'}</span>`:ppeUi.pad===x.wid?pad(x.wid):ed?`<button type="button" class="btn btn-sm btn-primary" data-ppe-signw="${esc(x.wid)}">✍ Sign now</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`).join('')}
+    <div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm" id="ppeSignPdf">${ic('printer')} PPE Issue Record (PDF)</button></div></div>`; }
+function ppeWireSigPad(){ const cv=document.getElementById('ppeSigPad'); ppeUi.padImg=''; if(cv){ compPadWire(cv, img=>{ ppeUi.padImg=img; }); cv.scrollIntoView({block:'center'}); } }
+async function ppeSignSave(wid){ const S=ppeSignSess(), w=workers.find(x=>x.id===wid); if(!S || !w) return; const img=ppeUi.padImg; if(!img){ toast('Let him sign in the box first'); return; }
+  const now=new Date().toISOString(), date=localToday(), recs=(w.ppeIssued||[]).filter(r=>ppeSessKey(r)===S.key && !r.sigId), x=S.workers.find(y=>y.wid===wid);
+  if(!recs.length){ toast('Already signed'); ppeUi.pad=''; renderPpe(); return; }
+  const sid='is_'+wid+'_'+Date.now().toString(36);
+  try{ await db.collection('ppeSignatures').doc(sid).set({workerId:w.id, name:w.fullName||'', civilId:w.civilId||'', designation:w.designation||'', projectId:w.projectId||'', img, date, kind:'office', items:x?x.items:[],
+      crewIssues:recs.map(r=>({id:r.id, date:r.date||'', issuedBy:r.issuedBy||'', condition:r.condition||''})), createdAt:now, createdBy:((auth.currentUser||{}).email)||''});
+    const ids=new Set(recs.map(r=>r.id)), next=(w.ppeIssued||[]).map(r=>ids.has(r.id)?{...r, needConfirm:false, receivedAt:now, receivedDate:date, sigId:sid, signedIn:'office'}:r);
+    await db.collection('workers').doc(w.id).update(stamp({ppeIssued:next})); w.ppeIssued=next; ppeSigCache.set(sid, {img});
+    ppeUi.pad=''; ppeUi.padImg=''; toast(`${w.fullName||'Worker'} signed ✓`); renderPpe(); if(typeof ppeLinkSyncSoon==='function') ppeLinkSyncSoon();
+  }catch(e){ console.error(e); toast('Could not save the signature — '+((e&&e.code)||'error')); } }
 async function ppeSigImg(id){
   if(!id) return ''; let s=ppeSigCache.get(id);
   if(!s){ try{ const snap=await db.collection('ppeSignatures').doc(id).get(); if(!snap.exists) return ''; s=snap.data(); ppeSigCache.set(id, s); }catch(e){ console.warn(e); return ''; } }
@@ -11473,7 +11714,7 @@ async function ppeSheetPdf(batch){
   doc.setTextColor(20,20,20); doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
   doc.text(`Date: ${b.date}   ·   Project: ${b.project!=='all'?projectName(b.project):'—'}   ·   Issue type: ${b.condition}   ·   Issued by: ${b.issuedBy||'________________'}`, 32, 58);
   doc.text('I have received the PPE listed below in good condition. I will wear it as instructed, look after it and return it for replacement when worn or damaged.', 32, 72);
-  const rows=b.workers.map((w,i)=>[String(i+1), w.name, w.civilId, w.designation, w.items.map(x=>`${x.item}${x.size?' ('+x.size+')':''}${x.qty>1?' ×'+x.qty:''}`).join(', ')+(w.sigId?`\n(signed on the PPE link${w.signed?' '+isoToDmy(w.signed):''})`:''), '']);
+  const rows=b.workers.map((w,i)=>[String(i+1), w.name, w.civilId, w.designation, w.items.map(x=>`${x.item}${x.size?' ('+x.size+')':''}${x.qty>1?' ×'+x.qty:''}`).join(', ')+(w.sigId?`\n(signed ${w.via==='office'?'at the issue':'on the PPE link'}${w.signed?' '+isoToDmy(w.signed):''})`:''), '']);
   const y=ppePdfTable(doc, ['#','Name','Civil ID','Designation','PPE issued (size)','Signature'], rows, [24,140,70,100,300,140], 86, 32, imgs);
   doc.setFontSize(9.5); let yy=y+30; if(yy>doc.internal.pageSize.getHeight()-30){ doc.addPage(); yy=60; } doc.text('Issued by (name & signature): ______________________________          HSE: ______________________________', 32, yy);
   doc.save(`PPE_issue_${b.date}.pdf`);
@@ -12126,6 +12367,9 @@ function stopTricData(){ for(const u of [unsubTric, unsubTricDone]) if(u){ try{ 
 function tricChanged(){ tbtTodayRender(); if(typeof tricLocsRender==='function') tricLocsRender(); renderTricPanel(); tricAlertRender(); siteTabsRefresh(); if(document.getElementById('siteSection') && !document.getElementById('siteSection').hidden) renderSiteTable(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(async()=>{ try{ await tbtAutoDedupe(); }catch(e){} tricAutoComplete(); }, 1000); } }
 function tricAll(){ const seen=new Set(), out=[]; for(const x of [...tricSubs, ...tricDone]) if(!seen.has(x.id) && (x.data||{}).job){ seen.add(x.id); out.push(x); } return out; }
 const tbtAtt=x=>(x.data||{}).att||[];
+// Batch 121: the requester can cancel on the link → one jobs entry {kind:'cancel', reason, by, n, at}; extra jobs = the others
+const tbtJobs=x=>(x.jobs||[]).filter(q=>q && q.kind!=='cancel');
+const tbtCancelReq=x=>(x.jobs||[]).find(q=>q && q.kind==='cancel')||null;
 /* Batch 92: duplicates & deleting — a crew can send the same TBT twice; HSE deletes the extra copy (waiting for review) or a rejected entry */
 const tbtNorm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
 // Batch 104: a real duplicate = same project, date, shift, job AND location, sent by the same person or for mostly the same crew (two crews doing "Rig up" at two wells are NOT duplicates)
@@ -12187,7 +12431,7 @@ function siteTabsRefresh(){ const s=currentSite(), el=document.getElementById('s
 // board entries for the link (who sees what on his phone)
 function tbtBoardEntries(add){
   for(const x of tricAll()){ const d=x.data||{}, s=x.sigs||{}, t=`TBT · ${d.job} · ${d.loc||'—'}`;
-    const st0={new:'tbtnew', sign:'tbtsign', done:'tbtdone', rejected:'tbtrej'}[x.status]; if(!st0) continue;
+    const st0=(tbtCancelReq(x) || x.cancelled) ? 'tbtcan' : {new:'tbtnew', sign:'tbtsign', done:'tbtdone', rejected:'tbtrej'}[x.status]; if(!st0) continue;   // Batch 121: tbtcan
     const ids=new Set(tbtAtt(x).map(p=>p.w)); ids.add(x.workerId);
     for(const w of ids){ let st=st0;
       /* Batch 82: the crew sign before the HSE review */ if(st0==='tbtnew') st=(s[w] || !tbtAtt(x).some(p=>p.w===w)) ? 'tbtpend' : 'tbtsign'; if(st0==='tbtsign' && (s[w] || !tbtAtt(x).some(p=>p.w===w))) st=tbtSignedAll(x)?'tbtdone':'tbtsigned'; if(st0==='tbtsign' && tbtSignedAll(x)) st='tbtdone';
@@ -12223,10 +12467,10 @@ function tricSignCard(x){
     <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(site?site.siteName:'—')} · requested by ${esc(tbtWho(x.workerId, d.name))}</div>
     <div class="wsub">${a.map(p=>`${s[p.w]?'✓':'…'} ${esc(tbtWho(p.w, p.n))}`).join(' · ')}</div>${tricJobsHtml(x)}</div>`;
 }
-function tricJobsHtml(x){ const j=x.jobs||[]; if(!j.length) return ''; return `<div class="tbt-jobs"><strong>${j.length+1} jobs under this TBT</strong>${j.map((q,i)=>`<div>Job ${i+2}: ${esc(q.time||'')} ${esc(q.shift||'')} · <strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')}${q.jp?' · JP '+esc(q.jp):''} · ${q.chg&&q.chg.length?'<span class="badge warn">changes: '+esc(q.chg.join(', '))+'</span>':'no changes'}</div>`).join('')}</div>`; }
+function tricJobsHtml(x){ const j=tbtJobs(x); if(!j.length) return ''; return `<div class="tbt-jobs"><strong>${j.length+1} jobs under this TBT</strong>${j.map((q,i)=>`<div>Job ${i+2}: ${esc(q.time||'')} ${esc(q.shift||'')} · <strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')}${q.jp?' · JP '+esc(q.jp):''} · ${q.chg&&q.chg.length?'<span class="badge warn">changes: '+esc(q.chg.join(', '))+'</span>':'no changes'}</div>`).join('')}</div>`; }
 function tricDoneCard(x){
   const d=x.data||{}, site=tbtSite(x), done=x.status==='done';
-  return `<div class="record-card tbt-card"><div class="record-card-top"><div class="record-card-title">${esc(x.topic||d.job)} <span class="badge ${done?'ok':'danger'}">${done?'Complete':'Rejected'}</span></div>
+  return `<div class="record-card tbt-card"><div class="record-card-top"><div class="record-card-title">${esc(x.topic||d.job)} <span class="badge ${done?'ok':x.cancelled?'muted':'danger'}">${done?'Complete':x.cancelled?'Cancelled by the requester':'Rejected'}</span></div>
       <div class="record-card-actions">${done?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button>`:`<button type="button" class="btn btn-sm btn-ghost" data-tric-del="${esc(x.id)}" data-armed="0" title="Remove this rejected entry for good">${ic('trash')} Delete</button>`}</div></div>
     <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(d.shift||'')} · ${esc(site?site.siteName:'—')} · ${tbtAtt(x).length} people${x.rejectNote?' · '+esc(x.rejectNote):''}</div>${tricJobsHtml(x)}</div>`;
 }
@@ -12245,7 +12489,7 @@ function renderTricBox(box){
   box.innerHTML=`<div class="panel tric-panel"><div class="section-head"><h3>${ic('clipboard')} TBT requests from the ${isLocPid(sid)?'location':'project'} link${nw.length?` <span class="badge danger">${nw.length} to review</span>`:''}</h3>
       <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><button type="button" class="btn btn-sm ${hseSigOf((auth.currentUser||{}).email)?'':'btn-primary'}" data-hsesig-open="1">${hseSigOf((auth.currentUser||{}).email)?'✓ My signature':'Add my signature'}</button><input type="month" id="tricMonthP" value="${esc(ym)}" style="max-width:160px;"><button type="button" class="btn btn-sm" data-tric-dl="pdf" data-tric-site="${esc(sid)}">${ic('download')} Month PDF</button><button type="button" class="btn btn-sm" data-tric-dl="xlsx" data-tric-site="${esc(sid)}">${ic('download')} Month Excel</button></span></div>
     <p class="wsub" style="margin:-4px 0 8px;">${link?'':'<strong>This project has no project link yet</strong> (Workforce → PPE → project links). '}The crew fill the TBT on the project link and <strong>everyone signs straight away</strong> → you write the <strong>topic</strong>, tick <strong>Musta'ed</strong> and <strong>Life Saving Rules</strong>, add dynamic risks → <strong>✓ Reviewed</strong> (your saved signature is added) → the PDF can be downloaded on their link and the TBT is added to the list below. Full records are <strong>deleted ${TRIC_KEEP_DAYS} days</strong> after the request — download each month (all projects together: Monthly Report → TBT records).</p>
-    ${(()=>{ const t=localToday(), ej=all.flatMap(x=>(x.jobs||[]).filter(q=>isoToLocalDate(q.at)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
+    ${(()=>{ const t=localToday(), ej=all.flatMap(x=>tbtJobs(x).filter(q=>isoToLocalDate(q.at)===t).map(q=>({x, q}))); return ej.length?`<div class="subhead">Extra jobs added today (${ej.length})</div><div class="ppe-gaps">${ej.map(({x,q})=>`<div><strong>${esc(q.job)}</strong> · ${esc(q.loc||'—')} · ${esc(q.time||'')} ${esc(q.shift||'')} — added to “${esc(x.topic||(x.data||{}).job)}” by ${esc(tbtWho(q.by, (x.data||{}).name))}${q.chg&&q.chg.length?' · <span class="badge warn">'+esc(q.chg.join(', '))+'</span>':''}</div>`).join('')}</div>`:''; })()}
     ${tricUi.sigOpen?hseSigBoxHtml():''}
     <div class="subhead">Waiting for your review (${nw.length})</div>${nw.length?nw.map(tricReviewCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing to review.</p>'}
     <div class="subhead">Reviewed — waiting for signatures (${sg.length})</div>${sg.length?sg.map(tricSignCard).join(''):'<p class="wsub" style="margin:0 0 6px;">Nothing waiting.</p>'}
@@ -12293,9 +12537,15 @@ async function tbtAutoDedupe(){
   }
   if(n){ toast(`${n} duplicate TBT${n===1?'':'s'} removed automatically — the same TBT was sent twice`); tricChanged(); }
   return n; }
+// Batch 121: cancelled by the requester on the link → closed (not counted), the reason is kept
+async function tricAutoCancel(){ if(!canEdit()) return;
+  for(const x of tricSubs.filter(s=>['new','sign'].includes(s.status) && tbtCancelReq(s))){ if(tricUi.closing.has(x.id)) continue; tricUi.closing.add(x.id); const c=tbtCancelReq(x), now=new Date().toISOString();
+    try{ await db.collection('tbtSubmissions').doc(x.id).update({status:'rejected', open:false, closedAt:now, tbtDate:(x.data||{}).date||localToday(), rejectNote:`Cancelled by the requester${c.n?' ('+c.n+')':''}${c.reason?' — '+c.reason:''}`.slice(0,300), cancelled:{by:c.by||'', n:c.n||'', reason:c.reason||'', at:c.at||now}, reviewedAt:now}); }
+    catch(e){ console.error('TBT cancel', e); tricUi.closing.delete(x.id); } } }
 async function tricAutoComplete(){
   if(!canEdit() || !workersLoaded || !sitesLoaded) return;   // Batch 85: wait for projects + workers
-  for(const x of tricSubs.filter(s=>s.status==='sign' && tbtSignedAll(s))){
+  await tricAutoCancel();   // Batch 121
+  for(const x of tricSubs.filter(s=>s.status==='sign' && tbtSignedAll(s) && !tbtCancelReq(s))){
     if(tricUi.closing.has(x.id)) continue; tricUi.closing.add(x.id);
     const d=x.data||{}, site=tbtSite(x), now=new Date().toISOString();
     if(isLocPid(tricSiteId(x))){ try{ await locTbtComplete(x); }catch(e){ console.error('location TBT complete', e); tricUi.closing.delete(x.id); } continue; }   // Batch 114
@@ -12340,8 +12590,8 @@ async function tricDownload(kind, site){
 async function tricXlsx(list, ym, tag){
   try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
   const rows=list.map(x=>{ const d=x.data||{}, site=tbtSite(x); return [d.date||'', d.time||'', d.shift||'', site?site.siteName:'', d.client||'', d.loc||'', d.jp||'', d.veh||'', d.job||'', x.topic||'', tbtWho(x.workerId, d.name), tbtAtt(x).length, tbtAtt(x).map(p=>tbtWho(p.w, p.n)).join(', '),
-    (x.musted||[]).filter(Boolean).length+'/7', (x.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), (x.dra||[]).length, 1+(x.jobs||[]).length, x.reviewedBy||'']; });
-  const jobs=[]; for(const x of list){ const d=x.data||{}, site=tbtSite(x); [{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, main:true}, ...(x.jobs||[])].forEach((q,i)=>jobs.push([d.date||'', site?site.siteName:'', x.topic||'', i+1, q.time||'', q.shift||'', q.loc||'', q.jp||'', (q.job||'')+((q.veh||(q.main&&d.veh))?' ('+(q.veh||d.veh)+')':''), q.main?'Main TBT':(q.chg&&q.chg.length?q.chg.join(', '):'No changes'), q.main?tbtWho(x.workerId, d.name):tbtWho(q.by, d.name)])); }
+    (x.musted||[]).filter(Boolean).length+'/7', (x.lsr||[]).map(k=>TRIC_LSR[k]||k).join(', '), (x.dra||[]).length, 1+tbtJobs(x).length, x.reviewedBy||'']; });
+  const jobs=[]; for(const x of list){ const d=x.data||{}, site=tbtSite(x); [{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, main:true}, ...tbtJobs(x)].forEach((q,i)=>jobs.push([d.date||'', site?site.siteName:'', x.topic||'', i+1, q.time||'', q.shift||'', q.loc||'', q.jp||'', (q.job||'')+((q.veh||(q.main&&d.veh))?' ('+(q.veh||d.veh)+')':''), q.main?'Main TBT':(q.chg&&q.chg.length?q.chg.join(', '):'No changes'), q.main?tbtWho(x.workerId, d.name):tbtWho(q.by, d.name)])); }
   const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([['Burhan Oil & Trade Services — Toolbox talks (TBT) '+monthLabel(ym)],['Exported '+localToday()],[],
     ['Date','Time','Shift','Project','Client','Location / well no.','Journey plan no.','Vehicle no.','Job','Topic','Requested by','People','Names',"Musta'ed",'Life Saving Rules','Dynamic risks','Jobs','Reviewed by'], ...rows]);
   sh['!cols']=[{wch:11},{wch:7},{wch:7},{wch:24},{wch:16},{wch:20},{wch:14},{wch:12},{wch:13},{wch:40},{wch:22},{wch:7},{wch:60},{wch:9},{wch:40},{wch:8},{wch:6},{wch:26}];
@@ -12397,7 +12647,7 @@ function tbtPdfBody(doc, x, o){
   const att=d.att||[]; head(`ATTENDEES (${att.length}) — signed on the project link`);
   row([{t:'#', w:22, bold:true, fill:LBL},{t:'Name', w:CW/2-22-120+40, bold:true, fill:LBL},{t:'Designation', w:CW/2-40, bold:true, fill:LBL},{t:'Signature', w:120, bold:true, fill:LBL}]);
   att.forEach((p,i)=>row([{t:String(i+1), w:22},{t:who(p.w), w:CW/2-102},{t:ds(p.w)||p.ds||'—', w:CW/2-40},{img:s[p.w], t:s[p.w]?'':'not signed', w:120, color:SUB}], 30));
-  const jobs=[{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, first:true}, ...(x.jobs||[])];
+  const jobs=[{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, first:true}, ...tbtJobs(x)];
   head(`JOBS CARRIED OUT UNDER THIS TBT (${jobs.length})`);
   row([{t:'#', w:22, bold:true, fill:LBL},{t:'Time / shift', w:70, bold:true, fill:LBL},{t:'Location / well', w:100, bold:true, fill:LBL},{t:'Journey plan', w:70, bold:true, fill:LBL},{t:'Job', w:70, bold:true, fill:LBL},{t:'Pause & check — changes', w:CW-22-70-100-70-70-90, bold:true, fill:LBL},{t:'Confirmed by', w:90, bold:true, fill:LBL}]);
   jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job+(j.veh?' ('+j.veh+')':''), w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
@@ -21320,6 +21570,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(b.id==='ppeIssueClose'){ ppeUi.issueOpen=false; renderPpe(); return; }
     if(b.id==='ppeBatchClose'){ ppeUi.lastBatch=null; renderPpe(); return; }
     if(b.id==='ppeSheetPdf'){ ppeSheetPdf(); return; }
+    if(b.dataset.ppeSignsess){ const [k,d]=b.dataset.ppeSignsess.split(/\|(?=\d{4}-\d{2}-\d{2}$)/); ppeUi.signKey=k; ppeUi.signDate=d; ppeUi.pad=''; renderPpe(); const pn=document.getElementById('ppeSignPanel'); if(pn) pn.scrollIntoView({block:'start'}); return; }   // Batch 121
+    if(b.id==='ppeSignClose'){ ppeUi.signKey=''; ppeUi.pad=''; renderPpe(); return; }
+    if(b.dataset.ppeSignw){ if(!canEdit()) return; ppeUi.pad=b.dataset.ppeSignw; renderPpe(); ppeWireSigPad(); return; }
+    if(b.dataset.ppePadx){ ppeUi.pad=''; renderPpe(); return; }
+    if(b.dataset.ppePadclr){ renderPpe(); ppeWireSigPad(); return; }
+    if(b.dataset.ppeSignsave){ await ppeSignSave(b.dataset.ppeSignsave); return; }
+    if(b.id==='ppeSignPdf'){ const S=ppeSignSess(); if(S) ppeSheetPdf(S); return; }
     if(b.dataset.ppeSheet){ const [f,t]=ppePeriodRange(), s=ppeIssueSessions(f,t).find(x=>x.key===b.dataset.ppeSheet); if(s) ppeSheetPdf(s); return; }
     if(b.id==='ppeSessAll'){ ppeUi.sessAll=true; renderPpe(); return; }
     if(b.id==='ppeExemptOpen'){ ppeUi.exemptOpen=!ppeUi.exemptOpen; ppeUi.exemptBase=settingsStamp('ppeStandards'); renderPpe(); return; }

@@ -25,7 +25,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 .bad{border-color:var(--red) !important; background:var(--red-bg);}
 .btn{display:block; width:100%; padding:15px; border:0; border-radius:14px; font:inherit; font-size:18px; font-weight:800; background:var(--red); color:#fff; cursor:pointer; text-align:center;}
 .btn .tr{color:rgba(255,255,255,.85);}
-.btn:disabled{opacity:.6;} .btn.ghost{background:#fff; color:var(--ink); border:2px solid var(--line);} .btn.ghost .tr{color:var(--muted);} .btn.navy{background:var(--navy);} .btn.green{background:var(--ok);}
+.btn:disabled{opacity:.6;} .btn.ghost{background:#fff; color:var(--ink); border:2px solid var(--line);} .btn.ghost .tr{color:var(--muted);} .btn.navy{background:var(--navy);} .btn.green{background:var(--ok);} .btn.red{background:#c8102e;}
 .big2{display:grid; grid-template-columns:1fr 1fr; gap:12px;} .big2 .btn{min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;}
 .big2 svg{width:44px; height:44px;}
 .hello{display:flex; align-items:center; gap:10px; justify-content:space-between;} .hello b{font-size:19px;}
@@ -63,6 +63,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid c
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
 .sgn{border-top:1px solid var(--line); padding:10px 0;} .sgn:first-of-type{border-top:0;} .sgn-h{font-weight:800;} .sgn.lead{border-top:2px solid var(--navy); margin-top:6px;} .sigbox.small canvas{height:110px;}
 @media (max-width:380px){ .tk-grid{grid-template-columns:1fr;} }
+.b-tbtcan{background:#eceff3; color:#5b6472;} .can-box{border:1px solid #f0c4c4; background:#fff6f6; border-radius:12px; padding:10px; margin-top:10px;} .can-box label{display:flex; gap:8px; align-items:center; padding:6px 0; font-size:14px;}
 .b-tbtnew,.b-tbtpend{background:var(--warn-bg); color:var(--warn);} .b-tbtsign,.b-tbtsigned{background:var(--blue-bg); color:#1d4f91;} .b-tbtdone{background:var(--ok-bg); color:var(--ok);} .b-tbtrej{background:var(--red-bg); color:var(--red);}
 .signme{border:2px solid var(--ok); background:#f6fffa;}
 .inc-btn{background:#fff; color:var(--red); border:2px solid var(--red);} .inc-card{border:2px solid var(--red);}
@@ -172,6 +173,9 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     signHint:['Each person signs in his own box, then press Save.','हर व्यक्ति अपने बॉक्स में हस्ताक्षर करे, फिर सेव दबाएँ।','يوقّع كل شخص في مربعه ثم اضغط حفظ.'], signMine:['Sign in your box, then press Save.','अपने बॉक्स में हस्ताक्षर करें, फिर सेव दबाएँ।','وقّع في مربعك ثم اضغط حفظ.'],
     saveSig:['Save signatures','हस्ताक्षर सेव करें','حفظ التوقيعات'], waitOthers:['You have signed. Waiting for the others.','आपने हस्ताक्षर कर दिए। बाकी लोगों का इंतज़ार।','وقّعت. بانتظار الآخرين.'],
     pdf:['Download PDF','पीडीएफ डाउनलोड करें','تنزيل PDF'], tbtGone:['This TBT is no longer available.','यह टीबीटी अब उपलब्ध नहीं है।','هذا الاجتماع لم يعد متاحاً.'],
+    st_tbtcan:['TBT — cancelled','टीबीटी — रद्द','تم إلغاء الاجتماع'], cancelTbt:['Cancel this TBT','यह टीबीटी रद्द करें','إلغاء هذا الاجتماع'], cancelWhy:['Why is it cancelled?','क्यों रद्द कर रहे हैं?','لماذا يتم الإلغاء؟'],
+    cancelOk:['Yes — cancel this TBT','हाँ — टीबीटी रद्द करें','نعم — إلغاء الاجتماع'], cancelHint:['Only when this job will NOT be done as sent. For a new plan, send a new TBT request.','सिर्फ तब जब यह काम ऐसे नहीं होगा। नई योजना के लिए नया टीबीटी अनुरोध भेजें।','فقط إذا لن يتم العمل كما أُرسل. لخطة جديدة أرسل طلبًا جديدًا.'],
+    cancelled:['Cancelled by','रद्द किया','ألغاه'], cancelOther:['Write the reason (English)','कारण लिखें (अंग्रेज़ी में)','اكتب السبب (بالإنجليزية)'],
     st_tbtnew:['TBT — waiting for HSE review','टीबीटी — एचएसई जाँच बाकी','بانتظار مراجعة السلامة'], st_tbtsign:['TBT — please sign','टीबीटी — कृपया हस्ताक्षर करें','يرجى التوقيع'],
     st_tbtsigned:['TBT — signed, waiting for others','टीबीटी — हस्ताक्षर हो गए, बाकी का इंतज़ार','تم التوقيع، بانتظار الآخرين'], st_tbtdone:['TBT — complete','टीबीटी — पूरा','مكتمل'], st_tbtrej:['TBT — not accepted','टीबीटी — स्वीकार नहीं','غير مقبول'],
     comp:['Competency test','योग्यता परीक्षा','اختبار الكفاءة'], compNone:['No test open — ask HSE','कोई परीक्षा खुली नहीं — एचएसई से पूछें','لا يوجد اختبار مفتوح — اسأل قسم السلامة'],
@@ -229,7 +233,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
   async function sha(s){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16); }
   // Batch 85: what this phone just did (received PPE, signed a TBT) stays shown until the tracker updates the link
   let boardOv={}; try{ boardOv=JSON.parse(sessionStorage.getItem('ppeOv_'+token)||'{}'); }catch(e){}
-  const OV_RANK={delivered:9, tbtdone:9, tbtsigned:5, tbtpend:5};
+  const OV_RANK={delivered:9, tbtdone:9, tbtcan:9, tbtsigned:5, tbtpend:5};
   const ovKey=(w,x)=>w+'|'+x.id+'|'+(x.li||0);
   function setOv(w, x, st){ boardOv[ovKey(w,x)]={st, at:Date.now()}; try{ sessionStorage.setItem('ppeOv_'+token, JSON.stringify(boardOv)); }catch(e){} }
   const applyOv=(w,x)=>{ const o=boardOv[ovKey(w,x)]; return (o && Date.now()-o.at<12*3600e3 && (OV_RANK[o.st]||0)>(OV_RANK[x.st]||0)) ? {...x, st:o.st} : x; };
@@ -289,7 +293,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
           <button type="button" class="hbox hb-purple ${compOf()&&!compWasSent(compOf().aid)?'live':''}" id="toComp">${svg('cap')}<span class="hbl">${tr('comp')}<span class="hsub">${compOf()&&!compWasSent(compOf().aid)?esc(T.compOpen[0]):esc(T.compNone[0])}</span></span></button>`}`}</div>
         ${toSign.length?`<div class="card signme"><h2>${esc(T.tbtToSign[0])} (${toSign.length})<span class="tr">${esc(T.tbtToSign[1])} · <span class="ar" dir="rtl">${esc(T.tbtToSign[2])}</span></span></h2>${toSign.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div><button class="btn green" data-tbt-open="${esc(x.id)}" style="margin-top:6px; padding:11px;">${tr('signNow')}</button></div>`).join('')}</div>`:''}
         ${[['trs','🎓','trsToSign','trainer'],['mom','📝','momToSign','chair']].map(([k,icn,h,lb])=>{ const L=trsMine().filter(x=>(x.k==='mom')===(k==='mom')); return L.length?`<div class="card signme"><h2>${icn} ${esc(T[h][0])} (${L.length})<span class="tr">${esc(T[h][1])} · <span class="ar" dir="rtl">${esc(T[h][2])}</span></span></h2>${L.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.tr?`<div class="note">${esc(T[lb][0])}: ${esc(x.tr)}</div>`:''}<button class="btn green" data-trs-open="${esc(x.id)}" style="margin-top:6px;">${tr('trsSign')}</button></div>`).join('')}</div>`:''; }).join('')}
-        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtrej'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
+        <div class="card"><h2>${tr('mine')}</h2>${b.length?b.map(x=>`<div class="st"><div class="st-h"><b>${esc(x.t||'')}</b><span class="note">${esc(dmy(x.d))}</span></div>${x.f?`<div class="note">${esc(T.forX[0])}: <b>${esc(x.f)}</b></div>`:''}<span class="badge b-${esc(x.st==='sent'?'new':x.st)}">${tr('st_'+x.st)}</span>${x.k==='tbt'&&x.st!=='tbtrej'&&x.st!=='tbtcan'?` <button class="link" data-tbt-open="${esc(x.id)}">${x.st==='tbtdone'?esc(T.pdf[0]):esc(T.open[0])}</button>`:''}</div>`).join(''):`<p class="note">${tr('none')}</p>`}</div>`;
       $('#out').onclick=()=>{ me=null; tbtF=null; incF=null; compA=null; jobF=null; people=[]; recSel=new Set(); need=''; reason=''; note=''; view='who'; render(); };
       app.querySelectorAll('[data-tbt-open]').forEach(bt=>bt.onclick=()=>openTbt(bt.dataset.tbtOpen));
       app.querySelectorAll('[data-trs-open]').forEach(bt=>bt.onclick=()=>openTrs(bt.dataset.trsOpen));   // Batch 95
@@ -488,22 +492,36 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const head=`<div class="card"><h2>${esc(d.job)} · ${esc(d.loc||'')}</h2><p class="note">${esc(dmy(d.date))} ${esc(d.time||'')}${x.topic?' · '+esc(x.topic):''}</p>`;
     const pend=x.status==='new' ? `<p class="note"><span class="badge b-tbtnew">${tr('st_tbtnew')}</span></p>` : '';
     if(x.status==='rejected'){ app.innerHTML=head+`<p class="note"><span class="badge b-tbtrej">${tr('st_tbtrej')}</span>${x.rejectNote?' '+esc(x.rejectNote):''}</p></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; render(); }; return; }
-    const todo=att.filter(p=>!s[p.w] && (mine || p.w===me.id)), dra=x.dra||[], jobs=x.jobs||[];
+    // Batch 121: the requester can cancel the TBT (the job will not be done as sent) — stored as one extra jobs entry {kind:'cancel'} (allowed by the rules)
+    const canc=(x.jobs||[]).find(q=>q && q.kind==='cancel');
+    if(canc || (x.status==='rejected' && x.cancelled)){ const c=canc||x.cancelled||{}; app.innerHTML=head+`<p class="note"><span class="badge b-tbtcan">${tr('st_tbtcan')}</span><br>${esc(T.cancelled[0])}: <b>${esc(c.n||'')}</b>${c.reason?' — '+esc(c.reason):''}</p></div><button class="btn ghost" id="back">${tr('back')}</button>`; $('#back').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); }; return; }
+    const todo=att.filter(p=>!s[p.w] && (mine || p.w===me.id)), dra=x.dra||[], jobs=(x.jobs||[]).filter(q=>q && q.kind!=='cancel');
     app.innerHTML=head+pend+`${dra.length?`<div class="dra"><div class="sec" style="color:var(--red);">⚠ ${tr('dra')}</div>${dra.map(q=>`<div class="dra-r"><b>${esc(q.hz)}</b><span>${esc(q.m)}${q.rn?' — '+esc(q.rn):''}</span></div>`).join('')}</div>`:''}
         <div class="note" style="margin-bottom:8px;">${att.map(p=>`${s[p.w]?'✅':'⬜'} ${esc(p.n)}${p.ds?` <span class="pds">${esc(p.ds)}</span>`:''}`).join('<br>')}</div>
         ${jobs.length?`<div class="note" style="margin-bottom:8px;"><b>${jobs.length+1} ${esc(T.jobsN[0])}</b><br>1. ${esc(d.job)} · ${esc(d.loc||'')}${jobs.map((q,i)=>`<br>${i+2}. ${esc(q.time||'')} ${esc(q.job)} · ${esc(q.loc||'')}`).join('')}</div>`:''}
         ${all?(x.status==='new'?`<p class="note"><b>${tr('allSigned')}</b><br>${tr('pdfAfter')}</p>`:`<button class="btn green" id="tPdf">${tr('pdf')}</button>`):todo.length?`<p class="note">${tr(mine?'signHint':'signMine')}</p>`+todo.map(p=>`<div class="sgn"><div class="sgn-h">${esc(p.n)}</div><div class="sigbox small"><canvas data-sp="${esc(p.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(p.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(p.w)}">${T.clear[0]}</button></div>`).join('')
           +`<div id="err" class="err hidden"></div><button class="btn green" id="tSave">${tr('saveSig')}</button>`:`<p class="note">${tr('waitOthers')}</p>`}
         ${mine && ['new','sign','done'].includes(x.status) && jobs.length<9?`<button class="btn navy" id="tJob" style="margin-top:10px;">+ ${tr('addJob')}</button>`:''}
+        ${mine && ['new','sign'].includes(x.status) && (x.jobs||[]).length<10 ? (canF && canF.id===x.id ? `<div class="can-box"><b>${tr('cancelWhy')}</b><p class="note" style="margin:4px 0;">${tr('cancelHint')}</p>${CAN_R.map((r,i)=>`<label><input type="radio" name="canr" value="${i}" ${canF.r===i?'checked':''}> <span>${esc(r[0])}<span class="tr">${esc(r[1])}</span></span></label>`).join('')}<input id="canTxt" placeholder="${esc(T.cancelOther[0])}" maxlength="140" value="${esc(canF.t||'')}" style="margin-top:6px;"><div id="cErr" class="err hidden"></div><button class="btn red" id="canGo" style="margin-top:8px;">${tr('cancelOk')}</button><button class="link" id="canX">${T.back[0]}</button></div>` : `<button class="btn ghost" id="tCan" style="margin-top:10px;">✕ ${tr('cancelTbt')}</button>`) : ''}
       </div><button class="btn ghost" id="back">${tr('back')}</button>`;
     $('#back').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
     tpads={}; app.querySelectorAll('[data-sp]').forEach(cv=>{ const k=cv.dataset.sp; tpads[k]=makePad(cv, app.querySelector(`[data-sh="${CSS.escape(k)}"]`)); });
     app.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>tpads[b.dataset.sc].clear());
     const sv=$('#tSave'); if(sv) sv.onclick=saveTbtSigs;
     const pd=$('#tPdf'); if(pd) pd.onclick=()=>tbtPhonePdf(x);
+    const tc=$('#tCan'); if(tc) tc.onclick=()=>{ canF={id:x.id, r:-1, t:''}; renderTbtSign(); };
+    const cx=$('#canX'); if(cx) cx.onclick=()=>{ canF=null; renderTbtSign(); };
+    app.querySelectorAll('input[name="canr"]').forEach(r=>r.onchange=()=>{ canF.r=Number(r.value); canF.t=($('#canTxt')||{}).value||''; });
+    const cg=$('#canGo'); if(cg) cg.onclick=async()=>{ const ce=$('#cErr'), bad=m=>{ ce.textContent=m; ce.classList.remove('hidden'); };
+      canF.t=String(($('#canTxt')||{}).value||'').trim(); if(canF.r<0) return bad(T.cancelWhy[0]); const R=CAN_R[canF.r]; if(R[0]==='Other' && !canF.t) return bad(T.cancelOther[0]); if(nonLatin(canF.t)) return bad(T.engOnly[0]);
+      cg.disabled=true; try{ const fresh=await tbtFetch(x.id); if(!fresh || !['new','sign'].includes(fresh.status)) return bad(T.tbtGone[0]);
+        const reason=(R[0]==='Other'?'':R[0])+(canF.t?(R[0]==='Other'?'':' — ')+canF.t:''); const jobs=[...(fresh.jobs||[]), {kind:'cancel', reason:reason.slice(0,180), by:me.id, n:me.name, at:new Date().toISOString()}];
+        await db.collection('tbtSubmissions').doc(x.id).update({jobs}); tbtX={...fresh, jobs}; setOv(me.id, {id:x.id}, 'tbtcan'); canF=null; renderTbtSign(); window.scrollTo(0,0);
+      }catch(e){ console.warn(e); cg.disabled=false; bad((e&&e.message)||'Error'); } };
     const jb=$('#tJob'); if(jb) jb.onclick=()=>{ const d0=x.data||{}; jobF={veh:(x.data||{}).veh||'', time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', loc:'', jp:'', job:'', chg:[]}; view='tbtJob'; render(); window.scrollTo(0,0); };
   }
-  let jobF=null;
+  let jobF=null, canF=null;
+  const CAN_R=[['Job stopped / postponed','काम रुका / आगे बढ़ाया','توقف العمل / تأجيل'],['Permit not given','परमिट नहीं मिला','لم يصدر التصريح'],['Client stopped the work','क्लाइंट ने काम रोका','أوقف العميل العمل'],['Plan changed — a new TBT will be sent','योजना बदली — नया टीबीटी भेजेंगे','تغيّرت الخطة — سيُرسل طلب جديد'],['Weather','मौसम','الطقس'],['Other','अन्य','أخرى']];
   function renderTbtJob(){
     const t=jobF, x=tbtX, d=x.data||{}, locs=link.locs||[];
     const read=()=>{ for(const k of ['time','loc','jp','veh']){ const el=app.querySelector(`[data-j="${k}"]`); if(el) t[k]=el.value; } if(!isScaf()){ const j=app.querySelector('[data-j="job"]'); if(j) t.job=j.value; } };
@@ -604,7 +622,7 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
     const att=d.att||[]; head(`ATTENDEES (${att.length}) — signed on the project link`);
     row([{t:'#', w:22, bold:true, fill:LBL},{t:'Name', w:CW/2-22-120+40, bold:true, fill:LBL},{t:'Designation', w:CW/2-40, bold:true, fill:LBL},{t:'Signature', w:120, bold:true, fill:LBL}]);
     att.forEach((p,i)=>row([{t:String(i+1), w:22},{t:who(p.w), w:CW/2-102},{t:ds(p.w)||p.ds||'—', w:CW/2-40},{img:s[p.w], t:s[p.w]?'':'not signed', w:120, color:SUB}], 30));
-    const jobs=[{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, first:true}, ...(x.jobs||[])];
+    const jobs=[{time:d.time, shift:d.shift, loc:d.loc, jp:d.jp, job:d.job, first:true}, ...(x.jobs||[]).filter(q=>q && q.kind!=='cancel')];
     head(`JOBS CARRIED OUT UNDER THIS TBT (${jobs.length})`);
     row([{t:'#', w:22, bold:true, fill:LBL},{t:'Time / shift', w:70, bold:true, fill:LBL},{t:'Location / well', w:100, bold:true, fill:LBL},{t:'Journey plan', w:70, bold:true, fill:LBL},{t:'Job', w:70, bold:true, fill:LBL},{t:'Pause & check — changes', w:CW-22-70-100-70-70-90, bold:true, fill:LBL},{t:'Confirmed by', w:90, bold:true, fill:LBL}]);
     jobs.forEach((j,i)=>row([{t:String(i+1), w:22},{t:`${j.time||''} ${j.shift?'('+j.shift+')':''}`, w:70},{t:j.loc, w:100},{t:j.jp||'N/A', w:70},{t:j.job+(j.veh?' ('+j.veh+')':''), w:70},{t:j.first?'Main TBT':(j.chg&&j.chg.length?j.chg.join(', '):'No changes'), w:CW-22-70-100-70-70-90},
