@@ -3087,7 +3087,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b121';
+const APP_BUILD='b121b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -12377,6 +12377,19 @@ function tbtCrewOverlap(a, b){ const A=new Set(tbtAtt(a).map(p=>p.w)), B=tbtAtt(
 function tbtSame(x, y){ const d=x.data||{}, e=y.data||{}; return tricSiteId(y)===tricSiteId(x) && (e.date||'')===(d.date||'') && tbtNorm(e.job)===tbtNorm(d.job) && tbtNorm(e.shift)===tbtNorm(d.shift) && tbtNorm(e.loc)===tbtNorm(d.loc) && (y.workerId===x.workerId || tbtCrewOverlap(x,y)>=0.5); }
 function tbtDupOf(x){ const d=x.data||{}; const o=tricAll().find(y=>y.id!==x.id && y.status!=='rejected' && tbtSame(x, y));
   if(!o) return ''; const t=(o.data||{}).time||''; return `${o.status==='new'?'(also waiting for review)':o.status==='sign'?'(already reviewed, waiting for signatures)':'(already complete)'}${t?' at '+t:''} by ${tbtWho(o.workerId, (o.data||{}).name)}`; }
+/* Batch 121b: HSE deletes a TBT the crew sent wrong — at any stage. A completed one also removes its project toolbox talk and its
+   Monthly Report entry (or the company-location TBT entry), so nothing is counted. (The requester "Cancel" on the link was removed.) */
+async function tbtDeleteAny(id){
+  try{ const ref=db.collection('tbtSubmissions').doc(id), snap=await ref.get(), cur=snap&&snap.exists?{id, ...snap.data()}:null;
+    if(!cur){ toast('Already removed'); return; }
+    const pid=tricSiteId(cur);
+    if(cur.status==='done'){
+      if(isLocPid(pid)){ try{ await db.collection('hseLogs').doc(locTbtLogId(pid, id)).delete(); }catch(e){} }
+      else { const site=siteEquipmentList.find(s=>s.id===pid); if(site){ const L=(site.toolboxTalks||[]).filter(t=>t.tricId===id || t.id===(cur.talkId||'tt_'+id));
+          if(L.length){ await db.collection('siteEquipment').doc(site.id).update(stamp({toolboxTalks:(site.toolboxTalks||[]).filter(t=>!L.includes(t))})); for(const t of L) await removeToolboxFromReport(site.id, t.id); } } } }
+    await ref.delete(); delete tricUi.rv[id]; tricSubs=tricSubs.filter(y=>y.id!==id); tricDone=tricDone.filter(y=>y.id!==id);
+    toast(cur.status==='done'?'TBT deleted — removed from the project toolbox talks and the Monthly Report':'TBT deleted'); }
+  catch(e){ console.error(e); toast('Could not delete — '+((e&&e.code)||'error')); } }
 async function tbtDelete(id, onlyStatus){
   try{ const ref=db.collection('tbtSubmissions').doc(id), snap=await ref.get(), cur=snap&&snap.exists?snap.data():null;
     if(!cur){ toast('Already removed'); return; }
@@ -12444,7 +12457,7 @@ function tricReviewCard(x){
   const locHere=site&&site.isLoc?new Set(locPeopleToday(site.loc.id).map(w=>w.id)):null;
   const crew=activeWorkers().filter(w=>(w.status||'active')==='active' && site && (locHere?locHere.has(w.id):w.projectId===site.id) && !r.att.some(p=>p.w===w.id)).sort((a,b)=>String(a.fullName).localeCompare(String(b.fullName)));
   return `<div class="record-card tbt-card${busy?' busy':''}" data-tbt-card="${esc(x.id)}"><div class="record-card-top"><div class="record-card-title">TBT request — <strong>${esc(d.job)}</strong> · ${esc(d.loc||'—')} <span class="badge muted">${r.att.length} people</span></div>
-      <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-tbt-send="${esc(x.id)}">✓ Reviewed</button><button type="button" class="btn btn-sm" data-tbt-no="${esc(x.id)}" data-armed="0">Reject</button><button type="button" class="btn btn-sm btn-ghost" data-tbt-dup="${esc(x.id)}" data-armed="0" title="The crew sent this TBT twice — delete this copy (nothing is recorded)">Delete duplicate</button></div></div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm btn-primary" data-tbt-send="${esc(x.id)}">✓ Reviewed</button><button type="button" class="btn btn-sm" data-tbt-no="${esc(x.id)}" data-armed="0">Reject</button><button type="button" class="btn btn-sm btn-ghost" data-tbt-del="${esc(x.id)}" data-armed="0" title="Sent wrong — delete this TBT for good">${ic('trash')} Delete</button><button type="button" class="btn btn-sm btn-ghost" data-tbt-dup="${esc(x.id)}" data-armed="0" title="The crew sent this TBT twice — delete this copy (nothing is recorded)">Delete duplicate</button></div></div>
     ${tbtDupOf(x)?`<div class="tbt-dupnote">${ic('alert')} Looks like a duplicate — the same job on the same day was also sent ${esc(tbtDupOf(x))}. Keep one and press <strong>Delete duplicate</strong> on the other.</div>`:''}
     <div class="wsub">Requested by <strong>${esc(tbtWho(x.workerId, d.name))}</strong> · ${esc(isoToDmy(d.date||''))} ${esc(d.time||'')} · <strong>${esc(d.shift||'—')} job</strong> · <strong>${esc(site?site.siteName:'Project not found')}</strong>${d.client?' · client '+esc(d.client):''}${d.jp?' · Journey plan '+esc(d.jp):''}${d.veh?' · vehicle <strong>'+esc(d.veh)+'</strong>':''}</div>
     <div class="wsub" style="margin-top:4px;">Signed on the link: <strong>${r.att.filter(p=>(x.sigs||{})[p.w]).length} of ${r.att.length}</strong>${r.att.every(p=>(x.sigs||{})[p.w])?' — everyone signed':''}</div>
@@ -12463,7 +12476,7 @@ function tricReviewCard(x){
 function tricSignCard(x){
   const d=x.data||{}, s=x.sigs||{}, a=tbtAtt(x), n=a.filter(p=>s[p.w]).length, site=tbtSite(x);
   return `<div class="record-card tbt-card"><div class="record-card-top"><div class="record-card-title">${esc(x.topic||d.job)} <span class="badge ${n===a.length?'ok':'warn'}">${n}/${a.length} signed</span></div>
-      <div class="record-card-actions"><button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button><button type="button" class="btn btn-sm btn-ghost" data-tbt-cancel="${esc(x.id)}" data-armed="0">Cancel</button></div></div>
+      <div class="record-card-actions"><button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button><button type="button" class="btn btn-sm btn-ghost" data-tbt-del="${esc(x.id)}" data-armed="0" title="Sent wrong — delete this TBT for good">${ic('trash')} Delete</button></div></div>
     <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(site?site.siteName:'—')} · requested by ${esc(tbtWho(x.workerId, d.name))}</div>
     <div class="wsub">${a.map(p=>`${s[p.w]?'✓':'…'} ${esc(tbtWho(p.w, p.n))}`).join(' · ')}</div>${tricJobsHtml(x)}</div>`;
 }
@@ -12471,7 +12484,7 @@ function tricJobsHtml(x){ const j=tbtJobs(x); if(!j.length) return ''; return `<
 function tricDoneCard(x){
   const d=x.data||{}, site=tbtSite(x), done=x.status==='done';
   return `<div class="record-card tbt-card"><div class="record-card-top"><div class="record-card-title">${esc(x.topic||d.job)} <span class="badge ${done?'ok':x.cancelled?'muted':'danger'}">${done?'Complete':x.cancelled?'Cancelled by the requester':'Rejected'}</span></div>
-      <div class="record-card-actions">${done?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button>`:`<button type="button" class="btn btn-sm btn-ghost" data-tric-del="${esc(x.id)}" data-armed="0" title="Remove this rejected entry for good">${ic('trash')} Delete</button>`}</div></div>
+      <div class="record-card-actions">${done?`<button type="button" class="btn btn-sm" data-tric-pdf="${esc(x.id)}">${ic('download')} PDF</button><button type="button" class="btn btn-sm btn-ghost" data-tbt-del="${esc(x.id)}" data-armed="0" title="Sent wrong — delete this TBT for good">${ic('trash')} Delete</button>`:`<button type="button" class="btn btn-sm btn-ghost" data-tric-del="${esc(x.id)}" data-armed="0" title="Remove this rejected entry for good">${ic('trash')} Delete</button>`}</div></div>
     <div class="wsub">${esc(d.job)} · ${esc(d.loc||'—')} · ${esc(isoToDmy(d.date||''))} · ${esc(d.shift||'')} · ${esc(site?site.siteName:'—')} · ${tbtAtt(x).length} people${x.rejectNote?' · '+esc(x.rejectNote):''}</div>${tricJobsHtml(x)}</div>`;
 }
 function tricSiteId(x){ const d=x.data||{}; return x.projectId||d.site||d.projectId||''; }   // Batch 115: the Civil link sends the place in data.site
@@ -21623,7 +21636,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // Batch 84: Monthly Report → TBT records (all projects)
   document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-tric-allbtn]'); if(!b) return; const p=document.getElementById('tricAllPanel'); if(!p) return; p.hidden=!p.hidden; if(!p.hidden){ const m=document.getElementById('tricMonthAll'); if(m && !m.value) m.value=tricUi.month||localToday().slice(0,7); tbtTodayRender(); } });
   // Batch 79: TBT requests in Project Details
-  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-dl],[data-tbt-send],[data-tbt-no],[data-tbt-cancel],[data-tbt-rm],[data-tbt-allm],[data-tbt-draadd],[data-tbt-drax],[data-tbt-dup],[data-tric-del]'); if(!b) return; const D=b.dataset;
+  document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-tric-goto],[data-tric-pdf],[data-tric-dl],[data-tbt-send],[data-tbt-no],[data-tbt-cancel],[data-tbt-rm],[data-tbt-allm],[data-tbt-draadd],[data-tbt-drax],[data-tbt-dup],[data-tric-del],[data-tbt-del]'); if(!b) return; const D=b.dataset;
+    if(D.tbtDel){ if(!canEdit()) return; if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent='Tap again — delete for good'; setTimeout(()=>{ if(b.isConnected && b.dataset.armed==='1'){ b.dataset.armed='0'; b.innerHTML=ic('trash')+' Delete'; } },4000); return; }   // Batch 121b
+      b.disabled=true; tricUi.busy=D.tbtDel; try{ await tbtDeleteAny(D.tbtDel); } finally{ tricUi.busy=''; renderTricPanel(); tbtTodayRender(); } return; }
     if(D.tbtDup||D.tricDel){ if(!canEdit()) return; if(b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent=D.tbtDup?'Tap again — delete this copy':'Tap again to delete'; setTimeout(()=>{ if(b.isConnected && b.dataset.armed==='1'){ b.dataset.armed='0'; b.innerHTML=D.tbtDup?'Delete duplicate':ic('trash')+' Delete'; } },4000); return; }
       b.disabled=true; tricUi.busy=D.tbtDup||D.tricDel; try{ await tbtDelete(D.tbtDup||D.tricDel, D.tbtDup?'new':'rejected'); } finally{ tricUi.busy=''; renderTricPanel(); tbtTodayRender(); } return; }
     if(D.tbtDraadd){ const x=tricSubs.find(s=>s.id===D.tbtDraadd); if(x){ tricRv(x).dra.push({hz:'', m:'', r:''}); renderTricPanel(); } return; }

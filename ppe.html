@@ -502,26 +502,15 @@ footer{text-align:center; font-size:12.5px; color:var(--muted); padding:0 16px 2
         ${all?(x.status==='new'?`<p class="note"><b>${tr('allSigned')}</b><br>${tr('pdfAfter')}</p>`:`<button class="btn green" id="tPdf">${tr('pdf')}</button>`):todo.length?`<p class="note">${tr(mine?'signHint':'signMine')}</p>`+todo.map(p=>`<div class="sgn"><div class="sgn-h">${esc(p.n)}</div><div class="sigbox small"><canvas data-sp="${esc(p.w)}" width="600" height="200"></canvas><div class="hint" data-sh="${esc(p.w)}">✍</div></div><button type="button" class="link" data-sc="${esc(p.w)}">${T.clear[0]}</button></div>`).join('')
           +`<div id="err" class="err hidden"></div><button class="btn green" id="tSave">${tr('saveSig')}</button>`:`<p class="note">${tr('waitOthers')}</p>`}
         ${mine && ['new','sign','done'].includes(x.status) && jobs.length<9?`<button class="btn navy" id="tJob" style="margin-top:10px;">+ ${tr('addJob')}</button>`:''}
-        ${mine && ['new','sign'].includes(x.status) && (x.jobs||[]).length<10 ? (canF && canF.id===x.id ? `<div class="can-box"><b>${tr('cancelWhy')}</b><p class="note" style="margin:4px 0;">${tr('cancelHint')}</p>${CAN_R.map((r,i)=>`<label><input type="radio" name="canr" value="${i}" ${canF.r===i?'checked':''}> <span>${esc(r[0])}<span class="tr">${esc(r[1])}</span></span></label>`).join('')}<input id="canTxt" placeholder="${esc(T.cancelOther[0])}" maxlength="140" value="${esc(canF.t||'')}" style="margin-top:6px;"><div id="cErr" class="err hidden"></div><button class="btn red" id="canGo" style="margin-top:8px;">${tr('cancelOk')}</button><button class="link" id="canX">${T.back[0]}</button></div>` : `<button class="btn ghost" id="tCan" style="margin-top:10px;">✕ ${tr('cancelTbt')}</button>`) : ''}
       </div><button class="btn ghost" id="back">${tr('back')}</button>`;
     $('#back').onclick=()=>{ view='home'; load().then(ok=>{ if(ok) render(); }); };
     tpads={}; app.querySelectorAll('[data-sp]').forEach(cv=>{ const k=cv.dataset.sp; tpads[k]=makePad(cv, app.querySelector(`[data-sh="${CSS.escape(k)}"]`)); });
     app.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>tpads[b.dataset.sc].clear());
     const sv=$('#tSave'); if(sv) sv.onclick=saveTbtSigs;
     const pd=$('#tPdf'); if(pd) pd.onclick=()=>tbtPhonePdf(x);
-    const tc=$('#tCan'); if(tc) tc.onclick=()=>{ canF={id:x.id, r:-1, t:''}; renderTbtSign(); };
-    const cx=$('#canX'); if(cx) cx.onclick=()=>{ canF=null; renderTbtSign(); };
-    app.querySelectorAll('input[name="canr"]').forEach(r=>r.onchange=()=>{ canF.r=Number(r.value); canF.t=($('#canTxt')||{}).value||''; });
-    const cg=$('#canGo'); if(cg) cg.onclick=async()=>{ const ce=$('#cErr'), bad=m=>{ ce.textContent=m; ce.classList.remove('hidden'); };
-      canF.t=String(($('#canTxt')||{}).value||'').trim(); if(canF.r<0) return bad(T.cancelWhy[0]); const R=CAN_R[canF.r]; if(R[0]==='Other' && !canF.t) return bad(T.cancelOther[0]); if(nonLatin(canF.t)) return bad(T.engOnly[0]);
-      cg.disabled=true; try{ const fresh=await tbtFetch(x.id); if(!fresh || !['new','sign'].includes(fresh.status)) return bad(T.tbtGone[0]);
-        const reason=(R[0]==='Other'?'':R[0])+(canF.t?(R[0]==='Other'?'':' — ')+canF.t:''); const jobs=[...(fresh.jobs||[]), {kind:'cancel', reason:reason.slice(0,180), by:me.id, n:me.name, at:new Date().toISOString()}];
-        await db.collection('tbtSubmissions').doc(x.id).update({jobs}); tbtX={...fresh, jobs}; setOv(me.id, {id:x.id}, 'tbtcan'); canF=null; renderTbtSign(); window.scrollTo(0,0);
-      }catch(e){ console.warn(e); cg.disabled=false; bad((e&&e.message)||'Error'); } };
     const jb=$('#tJob'); if(jb) jb.onclick=()=>{ const d0=x.data||{}; jobF={veh:(x.data||{}).veh||'', time:nowHM(), shift:(new Date().getHours()>=6 && new Date().getHours()<18)?'Day':'Night', loc:'', jp:'', job:'', chg:[]}; view='tbtJob'; render(); window.scrollTo(0,0); };
   }
-  let jobF=null, canF=null;
-  const CAN_R=[['Job stopped / postponed','काम रुका / आगे बढ़ाया','توقف العمل / تأجيل'],['Permit not given','परमिट नहीं मिला','لم يصدر التصريح'],['Client stopped the work','क्लाइंट ने काम रोका','أوقف العميل العمل'],['Plan changed — a new TBT will be sent','योजना बदली — नया टीबीटी भेजेंगे','تغيّرت الخطة — سيُرسل طلب جديد'],['Weather','मौसम','الطقس'],['Other','अन्य','أخرى']];
+  let jobF=null;
   function renderTbtJob(){
     const t=jobF, x=tbtX, d=x.data||{}, locs=link.locs||[];
     const read=()=>{ for(const k of ['time','loc','jp','veh']){ const el=app.querySelector(`[data-j="${k}"]`); if(el) t[k]=el.value; } if(!isScaf()){ const j=app.querySelector('[data-j="job"]'); if(j) t.job=j.value; } };
