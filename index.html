@@ -3090,7 +3090,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b121e';
+const APP_BUILD='b122';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10640,6 +10640,32 @@ function plInternalCalc(upto){
       if(!ty || !dayI || !C.counts[ty]) continue; const div=workerDivKey(x.w)||'Office staff', o=(out.int[ym]=out.int[ym]||{}); o[div]=(o[div]||0)+C.hpd; addLoc(ym, plLocKey(K.base), C.hpd); } }
   return out; }
 function plInternalMonths(upto){ return plInternalCalc(upto).int; }
+/* Batch 122: a wrong move can be DELETED (user chose delete only — then enter it again with ↔ Move and the right date).
+   Project / home-base line: removed; if it was his present line he goes back to the line before it (re-opened, project / base restored,
+   temporary-move return cleared); a line in the middle → the line before it is extended over the gap. A travel day saved with that move goes too.
+   Days-away entry: removed. Not inside a closed month. ("Correct start date" removed from the worker page — the Team tab bulk one stays.) */
+function mvDelKey(h){ return [h.isBase?'b':'p', h.isBase?h.base:h.projectId, h.from||'', h.to||''].join('|'); }
+function mvDelBtn(w, h){ if(!canEdit()) return ''; return ` <button type="button" class="att-link att-remove" data-hdel="${esc(w.id+'§'+mvDelKey(h))}" data-armed="0" title="Wrong entry — he did not go">🗑 Delete</button>`; }
+async function mvDeleteLine(w, key){
+  const [k,id,from,to]=key.split('|'), P=projHistory(w), B=baseHist(w), L=k==='p'?P:B;
+  const i=L.findIndex(h=>(k==='p'?h.projectId:h.base)===id && (h.from||'')===from && (h.to||'')===to); if(i<0){ toast('This line was already changed — open the worker again'); return false; }
+  const lk=plLockedUpto(); if(lk && from && from.slice(0,7)<=lk){ toast(`${periodLabel(lk)} is closed — reopen the month (with a reason) before deleting`); return false; }
+  const X=L.splice(i,1)[0], all=[...P.map(h=>({h, k:'p'})), ...B.map(h=>({h, k:'b'}))];
+  const prev=X.from ? all.filter(o=>o.h.to===X.from).sort((a,b)=>String(b.h.from||'').localeCompare(String(a.h.from||'')))[0] : null, upd={};
+  if(!X.to){ if(prev){ prev.h.to=''; if(prev.k==='p'){ upd.projectId=prev.h.projectId; upd.base=''; upd.projectAssignedAt=new Date().toISOString(); } else { upd.projectId=null; upd.projectAssignedAt=null; upd.base=prev.h.base; } }
+    else if((k==='p' && w.projectId===X.projectId) || (k==='b' && w.base===X.base)){ upd.projectId=null; upd.projectAssignedAt=null; upd.base=''; }
+    upd.returnDate=''; upd.returnProjectId=''; }
+  else if(prev){ prev.h.to=X.to; }
+  upd.projectHistory=P.slice(-200); if(B.length || w.baseHistory) upd.baseHistory=B.slice(-100);
+  if(k==='p' && X.from){ const pl=Array.isArray(w.places)?w.places:[], keep=pl.filter(q=>!(q && q.place==='travel' && q.from===X.from && q.forPid===X.projectId)); if(keep.length!==pl.length) upd.places=keep; }
+  try{ await db.collection('workers').doc(w.id).update(stamp(upd)); mhCache=null; toast(`Deleted — ${w.fullName||'he'} is ${!X.to?(prev?'back at '+(prev.k==='p'?projectName(prev.h.projectId):baseLabel(prev.h.base)):'not assigned'):'unchanged today'} · enter the right move with ↔ Move`); return true; }
+  catch(e){ console.error(e); toast('Could not delete — '+((e&&e.code)||'error')); return false; } }
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-hdel],[data-pldel]'); if(!b || !canEdit()) return; e.stopPropagation();
+  if(!compArm(b, 'Tap again — delete')) return; b.disabled=true; const [wid, ref]=(b.dataset.hdel||b.dataset.pldel).split('§'), w=workers.find(x=>x.id===wid); if(!w) return;
+  if(b.dataset.hdel){ await mvDeleteLine(w, ref); }
+  else { const p=plList(w).find(x=>x.id===ref); if(!p){ toast('Already removed'); return; } const lk=plLockedUpto(); if(lk && p.from.slice(0,7)<=lk){ toast(`${periodLabel(lk)} is closed — reopen the month (with a reason) before deleting`); b.disabled=false; return; }
+    if(await plSaveWorker(w, (w.places||[]).filter(x=>!(x && x.id===ref)))){ mhCache=null; toast(`Deleted — ${PL_PLACES[p.place]?PL_PLACES[p.place].s:'entry'} ${isoToDmy(p.from)}${p.to&&p.to!==p.from?' → '+isoToDmy(p.to):''} removed`); } }
+  if(typeof renderDrawerBody==='function' && activeWorkerId===w.id) renderDrawerBody(); if(typeof plRender==='function') plRender(); }, true);
 async function plSaveWorker(w, places){ try{ await db.collection('workers').doc(w.id).update(stamp({places:places.slice(-400)})); w.places=places; return true; }catch(e){ console.error(e); toast('Could not save — '+((e&&e.code)||'error')); return false; } }
 function plWho(){ const u=auth.currentUser||{}; return (hseSigOf(u.email)||{}).name||u.email||''; }
 // add a place for several workers; returns how many saved
@@ -10734,7 +10760,7 @@ function plMoveFormHtml(mode, s){ const sites=activeSites().filter(x=>projectSta
     <label class="span-all">Note<input name="note" maxlength="140" placeholder="optional — e.g. permit PTW-123 not issued, client stopped hot work"></label></div></div>
     <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">${mode==='crew'?'Move selected':'Save'}</button>${mode==='crew'?' <button type="button" class="btn btn-sm" data-pl-crewcancel="1">Cancel</button>':''}</div></form>`; }
 function plTimelineHtml(w){ const L=plList(w).sort((a,b)=>String(b.from).localeCompare(String(a.from))).slice(0,30), t=localToday(), ed=canEdit();
-  return L.length?L.map(p=>`<div class="rf"><span class="rf-k mono">${esc(isoToDmy(p.from))} → ${p.to?esc(isoToDmy(p.to)):'<strong>open</strong>'}</span><span class="rf-v"><span class="badge pl-b-${p.place}">${esc(p.loc?baseLabel(p.loc):PL_PLACES[p.place].s)}</span> ${p.place==='travel'?esc(plTravelTxt(p))+' ':''}${esc(p.reason||'')}${p.note?' — '+esc(p.note):''} <span class="wsub">· ${esc(p.by||'')}, ${esc(isoToDmy(isoToLocalDate(p.at||'')))}</span>${ed&&p.from<=t&&(!p.to||p.to>=t)?` <button type="button" class="att-link" data-pl-end="${esc(p.id)}">back on the project from today</button>`:''}</span></div>`).join(''):'<p class="wsub" style="margin:4px 0 0;">No days away from the project recorded.</p>'; }
+  return L.length?L.map(p=>`<div class="rf"><span class="rf-k mono">${esc(isoToDmy(p.from))} → ${p.to?esc(isoToDmy(p.to)):'<strong>open</strong>'}</span><span class="rf-v"><span class="badge pl-b-${p.place}">${esc(p.loc?baseLabel(p.loc):PL_PLACES[p.place].s)}</span> ${p.place==='travel'?esc(plTravelTxt(p))+' ':''}${esc(p.reason||'')}${p.note?' — '+esc(p.note):''} <span class="wsub">· ${esc(p.by||'')}, ${esc(isoToDmy(isoToLocalDate(p.at||'')))}</span>${ed&&p.from<=t&&(!p.to||p.to>=t)?` <button type="button" class="att-link" data-pl-end="${esc(p.id)}">back on the project from today</button>`:''}${ed?` <button type="button" class="att-link att-remove" data-pldel="${esc(w.id+'§'+p.id)}" data-armed="0" title="Wrong entry — he was at work normally">🗑 Delete</button>`:''}</span></div>`).join(''):'<p class="wsub" style="margin:4px 0 0;">No days away from the project recorded.</p>'; }
 function plSpanOf(F){ const t=localToday(); const span=String(F.get('span')||'today'), to=String(F.get('to')||''); if(span==='today') return {from:t, to:t}; if(span==='open') return {from:t, to:''}; if(!to || to<t) return null; return {from:t, to}; }
 document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement) || !f.dataset.plForm) return; e.preventDefault(); if(!canEdit()) return;
   const k=f.dataset.plForm, F=isoFormData(f);
@@ -17447,7 +17473,7 @@ function workerProjectHtml(w){
   // Batch 117: one "↔ Move" form (was: Move to / From / Temporary / travel tick + the days-away form)
   const mover = canEdit() ? (mvUi.ctx==='worker' && mvUi.wid===w.id ? mvFormHtml('worker', {name:w.fullName||'', now:plWhereLabel(w), pid:w.projectId||''}) : `<p style="margin:10px 0 0;"><button type="button" class="btn btn-sm btn-primary" data-mv-open="worker|${esc(w.id)}">↔ Move</button> <span class="wsub">to another project, the yard / workshop / office, camp, leave, travel — permanent or for some days</span></p>`) : '';
   const allH=hist.map(h=>({...h})).concat(baseHist(w).filter(b=>b.from).map(b=>({...b, isBase:true}))).sort((a,b)=>String(b.from||'').localeCompare(String(a.from||'')));   // Batch 106: home base lines too
-  const rows = allH.length ? allH.slice(0,30).map(h=>`<div class="rf"><span class="rf-k mono">${esc(h.from||'—')} → ${h.to?esc(h.to):'<strong>now</strong>'}</span><span class="rf-v"><strong>${h.isBase?esc(baseLabel(h.base))+' <span class="badge pl-b-'+esc(plBaseType(h.base))+'">home base</span>':esc(histName(h))}</strong>${histDays(h)?` · ${histDays(h)}`:''}${typeof fixRowBtn==='function'?fixRowBtn(w, h):''}${typeof fixNote==='function'?fixNote(h):''}</span></div>`).join('')
+  const rows = allH.length ? allH.slice(0,30).map(h=>`<div class="rf"><span class="rf-k mono">${esc(h.from||'—')} → ${h.to?esc(h.to):'<strong>now</strong>'}</span><span class="rf-v"><strong>${h.isBase?esc(baseLabel(h.base))+' <span class="badge pl-b-'+esc(plBaseType(h.base))+'">home base</span>':esc(histName(h))}</strong>${histDays(h)?` · ${histDays(h)}`:''}${typeof mvDelBtn==='function'?mvDelBtn(w, h):''}${typeof fixNote==='function'?fixNote(h):''}</span></div>`).join('')
     : '<p class="wsub" style="margin:4px 0 0;">No moves recorded yet — every move from now on is listed here.</p>';
   return `<div class="panel req-box" style="margin-bottom:16px;">
     <div class="subhead" style="margin-top:0;">Project</div>
