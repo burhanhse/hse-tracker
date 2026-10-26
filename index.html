@@ -1220,6 +1220,11 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .sv-eadd,.sv-one{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:6px 0;} .sv-eadd input,.sv-one input{flex:1; min-width:220px;} .sv-many{margin:6px 0;} .sv-many textarea{width:100%; margin:6px 0;} .sv-ed{border-left:3px solid var(--accent);} .sv-empty{border:1px dashed var(--accent);}
 .sv-sigs{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px;} .sv-sigbox{margin:0;}
 .eq-wait{border-left:3px solid var(--warn);}
+.eq-grid td{border:1px solid var(--line) !important;} #equipRows.eq-grid tr[data-id]{cursor:pointer;} .eq-grid .eq-div th{background:var(--surface-2); text-align:left; font-size:13px; letter-spacing:.04em; text-transform:uppercase; padding:9px 12px; border:1px solid var(--line); border-top:3px solid var(--accent);}
+
+.eq-grid .eq-div th span{font-weight:500; text-transform:none; letter-spacing:0; color:var(--ink-muted); margin-left:8px;} .eq-grid .eq-div-Scaffolding th{border-top-color:var(--dv-scaff);} .eq-grid .eq-div-Civil th{border-top-color:var(--dv-civil);} .eq-grid .eq-div-Rental th{border-top-color:var(--dv-rental);} .eq-grid .eq-div-Office th{border-top-color:var(--dv-office);}
+#equipRows .eq-loc td{background:var(--surface); font-weight:700; font-size:12.5px; padding:6px 12px; border:1px solid var(--line) !important;} #equipRows .eq-loc td span{display:inline-block; margin-left:6px; padding:0 7px; border-radius:9px; background:var(--muted-bg); font-weight:600;}
+.eq-divsum{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 10px;} table:has(.eq-grid){border-collapse:collapse;} table:has(.eq-grid) thead th{border:1px solid var(--line);}
 </style>
 </head>
 <body class="auth-open">
@@ -1530,6 +1535,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
         </div>
 
         <div id="equipStoreWait"></div>
+        <div id="equipDivSum"></div>
         <div class="toolbar">
           <input type="search" id="equipSearchInput" placeholder="Search name or serial no…">
           <select id="equipLocationFilter"><option value="all">All locations</option></select>
@@ -1553,7 +1559,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
             <thead>
               <tr><th>Item</th><th>Serial no.</th><th>Location</th><th>Condition</th><th>Certificate / expiry</th></tr>
             </thead>
-            <tbody id="equipRows">
+            <tbody id="equipRows" class="eq-grid">
               <tr><td colspan="5" class="empty-state">Sign in to load equipment data…</td></tr>
             </tbody>
           </table>
@@ -3101,7 +3107,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b124';
+const APP_BUILD='b125';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -16478,7 +16484,7 @@ let equipmentLoadError=null;
 let equipmentLoaded=false;
 let activePlantTab='fleet';
 let activeEquipId=null, equipMoveOpen=false;
-let equipFilters={q:'', location:'all', condition:'all', status:'all'};
+let equipFilters={q:'', location:'all', condition:'all', status:'all', div:'all'};
 let equipMigrationRunning=false;
 
 function activeEquipment(){ return equipmentList.filter(e=>!e.deleted && !e.disposed); }   // Batch 124: disposed / scrapped items are kept but not counted
@@ -17394,7 +17400,7 @@ function renderVehicleTable(){
   if(activeVehicles().length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">No vehicles yet — click “Add vehicle” to get started.</td></tr>'; return; }
   const list=vehicles.filter(vehicleMatches);
   if(list.length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">No vehicles match your filters.</td></tr>'; return; }
-  tbody.innerHTML=list.map(v=>{
+  const vrow=v=>{
     const doc=vehicleAggFor(v,'documents'), ppe=vehKitAgg(v);
     return `<tr data-id="${v.id}">
       <td class="mono">${esc(v.vehicleNumber)}</td>
@@ -17407,7 +17413,11 @@ function renderVehicleTable(){
       <td>${svcStatusBadge(v)}</td>
       <td>${vehicleMonitorCell(v)}</td>
     </tr>`;
-  }).join('');
+  };
+  // Batch 125: fleet grouped by division (box grid)
+  const VD=['Scaffolding','Civil','Rental','Office staff',''], vd=v=>{ if(DIVISIONS.includes(v.division)) return v.division; const st=v.projectId&&siteEquipmentList.find(x=>x.id===v.projectId); return st?(st.division||'Civil'):''; };   /* no division set → its project's */
+  tbody.classList.add('eq-grid');
+  tbody.innerHTML=VD.map(d=>{ const L=list.filter(v=>vd(v)===d); if(!L.length) return ''; return `<tr class="eq-div eq-div-${esc(d==='Office staff'?'Office':d||'none')}"><th colspan="9">${esc(d?divLabel(d):'Division not set')} <span>${L.length} vehicle${L.length===1?'':'s'}</span></th></tr>`+L.map(vrow).join(''); }).join('');
 }
 
 /* ---------------- site equipment rendering ---------------- */
@@ -18550,16 +18560,34 @@ function renderEquipTable(){
   const cat=EQUIP_CATEGORIES[activePlantTab];
   const all=equipmentList.filter(e=>!e.deleted && e.category===activePlantTab);   // Batch 124: incl. disposed (filter)
   if(all.length===0){ tbody.innerHTML=`<tr><td colspan="5" class="empty-state">No ${esc(cat.label.toLowerCase())} registered yet — click “+ Add ${esc(cat.noun)}” to get started.</td></tr>`; return; }
-  const list=equipmentList.filter(equipMatches);
+  const list0=equipmentList.filter(equipMatches);
+  { const sm=document.getElementById('equipDivSum'); if(sm) sm.innerHTML=equipDivSumHtml(list0); }   // Batch 125
+  const list=list0.filter(e=>equipFilters.div==='all' || equipDivOf(e)===equipFilters.div);
   if(list.length===0){ tbody.innerHTML='<tr><td colspan="5" class="empty-state">No items match your filters.</td></tr>'; return; }
-  tbody.innerHTML=list.map(e=>`<tr data-id="${e.id}">
+  // Batch 125: grouped by division, then by place (same vehicle / project / store next to each other)
+  const G=new Map(); for(const e of list){ const d=equipDivOf(e); if(!G.has(d)) G.set(d, new Map()); const L=G.get(d), k=equipLoc(e); if(!L.has(k)) L.set(k, []); L.get(k).push(e); }
+  const rowOf=e=>`<tr data-id="${e.id}">
       <td><div class="wname">${esc(equipTitle(e))}</div>${e.make && e.category!=='harness'?`<div class="wsub">${esc(e.make)}</div>`:''}</td>
       <td class="mono">${esc(e.serial||'—')}</td>
       <td>${equipLoc(e)==='store' ? '<span class="badge muted">In store</span>' : esc(locLabel(equipLoc(e)))}</td>
       <td>${e.disposed?`<span class="badge muted">Disposed ${esc(isoToDmy(e.disposed.date||''))}</span><div class="wsub">${esc(e.disposed.reason||'')}</div>`:conditionBadge(e.condition)}${!e.disposed && typeof inspEqBadge==='function'?`<div style="margin-top:4px;">${inspEqBadge(e)}</div>`:''}</td>
       <td>${expiryCell(e)}</td>
-    </tr>`).join('');
+    </tr>`;
+  tbody.innerHTML=EQ_DIV_ORDER.filter(d=>G.has(d)).map(d=>{ const L=G.get(d), n=[...L.values()].reduce((a,x)=>a+x.length,0);
+    return `<tr class="eq-div eq-div-${esc(d==='Office staff'?'Office':d)}"><th colspan="5">${esc(equipDivLabel(d))} <span>${n} item${n===1?'':'s'}${equipQty([...L.values()].flat())!==n?` · ${equipQty([...L.values()].flat())} pcs`:''}</span></th></tr>`
+      + [...L.entries()].sort((a,b)=>(a[0]==='store')-(b[0]==='store') || locLabel(a[0]).localeCompare(locLabel(b[0]))).map(([k,items])=>`<tr class="eq-loc"><td colspan="5">${ic(k.startsWith('veh:')?'truck':k==='store'?'books':k.startsWith('loc:')?'pin':'hardhat')} ${esc(locLabel(k))} <span>${items.length}</span></td></tr>`
+        + items.sort((a,b)=>equipTitle(a).localeCompare(equipTitle(b)) || String(a.serial||'').localeCompare(String(b.serial||''))).map(rowOf).join('')).join(''); }).join('');
 }
+/* Batch 125: division of an item = the division of where it is (vehicle → its division or its project's; project → its division; company location; store) */
+const EQ_DIV_ORDER=['Scaffolding','Civil','Rental','Office staff','Company locations','Store','Not set'];
+function equipDivOf(e){ const l=equipLoc(e); if(l==='store') return 'Store'; if(l.startsWith('loc:')) return 'Company locations';
+  if(l.startsWith('veh:')){ const v=vehicles.find(x=>x.id===l.slice(4)); if(!v) return 'Not set'; if(DIVISIONS.includes(v.division)) return v.division; const s=v.projectId&&siteEquipmentList.find(x=>x.id===v.projectId); return s?(s.division||'Civil'):'Not set'; }
+  const s=siteEquipmentList.find(x=>x.id===l); return s?(s.division||'Civil'):'Not set'; }
+function equipDivLabel(d){ return d==='Company locations'?'Company locations (yard / workshop / office)':d==='Store'?'In store':d==='Not set'?'Division not set':divLabel(d); }
+function equipQty(L){ return L.reduce((n,e)=>n+Math.max(1, Math.round(Number(e.qty)||1)),0); }
+function equipDivSumHtml(L){ if(!L.length) return ''; const c={}; for(const e of L){ const d=equipDivOf(e); c[d]=(c[d]||0)+1; } const cur=equipFilters.div||'all';
+  return `<div class="eq-divsum"><span class="wsub">Issued by division:</span><button type="button" class="div-chip ${cur==='all'?'active':''}" data-eqdiv="all"><span class="div-chip-l">All</span><span class="div-chip-n">${L.length}</span></button>${EQ_DIV_ORDER.filter(d=>c[d]).map(d=>`<button type="button" class="div-chip ${cur===d?'active':''}" data-eqdiv="${esc(d)}"><span class="div-chip-l">${esc(d==='Company locations'?'Company locations':d==='Store'?'Store':d==='Not set'?'Not set':divLabel(d).replace(/ Division$/,''))}</span><span class="div-chip-n">${c[d]}</span></button>`).join('')}</div>`; }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-eqdiv]'); if(!b) return; equipFilters.div=b.dataset.eqdiv; renderEquipTable(); });
 
 function openAddEquipForm(){
   const cat=EQUIP_CATEGORIES[activePlantTab];
