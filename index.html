@@ -1357,6 +1357,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
             <label>Civil ID *<input class="mono" data-field="civilId" required placeholder="e.g. 784-1990-1234567-1"></label>
             <label>Nationality<input data-field="nationality" placeholder="e.g. Indian"></label>
             <label>Trade / occupation *<select data-field="trade" required><option value="">Select…</option><option value="Office Staff">Office Staff</option><option value="Scaffolding Division">Scaffolding Division</option><option value="Civil Division">Civil Division</option><option value="Logistics &amp; Rental Division">Logistics &amp; Rental Division</option><option value="Sub Contractor">Sub Contractor</option></select></label>
+            <label data-subdiv hidden>Works for division<select data-field="subDiv"><option value="">— the division of his project —</option><option value="Civil">Civil Division</option><option value="Scaffolding">Scaffolding Division</option><option value="Rental">Logistics &amp; Rental Division</option></select></label>
             <label>Subcontractor / company<input data-field="contractor" placeholder="e.g. Al Futtaim Contracting"></label>
             <label>Date of joining<input type="date" data-field="dateOfJoining"></label>
           </div>
@@ -2622,9 +2623,17 @@ function renameOldLabels(o){
 // Which report division (Civil / Scaffolding / Rental / Office staff) a worker belongs to.
 // Sub-contractor workers count under the division of the project they are assigned to.
 const TRADE_TO_DIV = new Map([['Office Staff','Office staff'],['Scaffolding Division','Scaffolding'],['Civil Division','Civil'],['Logistics & Rental Division','Rental']]);
+/* Batch 123: a sub-contractor keeps trade "Sub Contractor" and gets "Works for division" (subDiv: Civil / Scaffolding / Rental) —
+   then he has that division's designations, competency, workload mix and counts; empty = the division of his project (as before) */
+const SUB_DIVS=[['Civil','Civil Division'],['Scaffolding','Scaffolding Division'],['Rental','Logistics & Rental Division']];
+function subDivOf(w){ return (w && canonTrade(w.trade||'')==='Sub Contractor' && SUB_DIVS.some(x=>x[0]===w.subDiv)) ? w.subDiv : ''; }
+function roleTradeOf(w){ const d=subDivOf(w); return d ? SUB_DIVS.find(x=>x[0]===d)[1] : (w && w.trade); }
+function roleTradeFor(trade, subDiv){ return canonTrade(trade||'')==='Sub Contractor' && SUB_DIVS.some(x=>x[0]===subDiv) ? SUB_DIVS.find(x=>x[0]===subDiv)[1] : trade; }
+function subDivSelectHtml(v){ return `<option value="">— the division of his project —</option>${SUB_DIVS.map(([k,t])=>`<option value="${k}" ${k===v?'selected':''}>${esc(t)}</option>`).join('')}`; }
 function workerDivKey(w){
   const t=canonTrade((w && w.trade)||'');
   if(TRADE_TO_DIV.has(t)) return TRADE_TO_DIV.get(t);
+  { const sd=subDivOf(w); if(sd) return sd; }   // Batch 123
   if(w && w.projectId){ const s=siteEquipmentList.find(x=>x.id===w.projectId); if(s && !s.deleted) return s.division||'Civil'; }
   return null;
 }
@@ -3090,7 +3099,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b122';
+const APP_BUILD='b123';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4431,13 +4440,13 @@ function designationOptionsHtml(trade, current){
 function designationFieldHtml(w){
   const roles=roleNamesList(), d=String(w.designation||'').trim();
   if(!roles.length) return `<label>Designation<input data-field="designation" value="${esc(d)}" placeholder="e.g. Foreman, Supervisor"></label>`;
-  return `<label>Designation (role)<select data-field="designation">${designationOptionsHtml(w.trade, workerMainRole(w) || d)}</select></label>`;
+  return `<label>Designation (role)<select data-field="designation">${designationOptionsHtml(roleTradeOf(w), workerMainRole(w) || d)}</select></label>`;
 }
 function workerRolesFormHtml(w){
   const roles=roleNamesList();
   if(!roles.length) return `<div class="span-all wsub">Roles: none set up yet${canEdit()?' — add them in <strong>Workforce → Training matrix → Roles &amp; required trainings</strong>; the Designation then becomes a pick-list of those roles.':'.'}</div>`;
   const extra=new Set((w.extraRoles||[]).map(roleKey)), main=roleKey(workerMainRole(w));
-  const mine=rolesForTrade(w.trade).map(r=>String(r.name).trim()).filter(r=>roleKey(r)!==main);
+  const mine=rolesForTrade(roleTradeOf(w)).map(r=>String(r.name).trim()).filter(r=>roleKey(r)!==main);
   const other=roles.filter(r=>roleKey(r)!==main && !mine.includes(r));
   for(const x of (w.extraRoles||[])) if(x && roleKey(x)!==main && !mine.some(r=>roleKey(r)===roleKey(x)) && !other.some(r=>roleKey(r)===roleKey(x))) other.push(x);
   const box=r=>`<label class="chk"><input type="checkbox" data-extra-role value="${esc(r)}" ${extra.has(roleKey(r))?'checked':''}>${esc(r)}</label>`;
@@ -11222,7 +11231,7 @@ document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instance
    The workload % above stays own + temporary only. */
 const WL_KINDS=[['own','Own staff'],['temp','Temporary'],['sub','Sub-contractor']];
 function wlKind(w){ return canonTrade(w.trade||'')==='Sub Contractor' ? 'sub' : isTemp(w) ? 'temp' : 'own'; }
-function wlDivOn(w, d){ const t=TRADE_TO_DIV.get(canonTrade(w.trade||'')); if(t) return t; const pr=projectOn(w, d), s=pr&&siteEquipmentList.find(x=>x.id===pr); return s ? (s.division||'Civil') : ''; }
+function wlDivOn(w, d){ const t=TRADE_TO_DIV.get(canonTrade(w.trade||'')); if(t) return t; { const sd=subDivOf(w); if(sd) return sd; }   /* Batch 123 */ const pr=projectOn(w, d), s=pr&&siteEquipmentList.find(x=>x.id===pr); return s ? (s.division||'Civil') : ''; }
 function wlAtWork(w, d){ if(!w || w.deleted || plIsOfficeTrade(w)) return false; const st=wlDayOf(w, d); return st==='dep' || st==='int'; }
 function wlMixToday(){ const t=localToday(), by={}, cos={}; for(const k of [...WL_DIVS, 'all']) by[k]={own:0, temp:0, sub:0};
   for(const w of workers){ if((w.status||'active')!=='active' || !wlAtWork(w, t)) continue; const k=wlKind(w), dv=wlDivOn(w, t); if(by[dv]) by[dv][k]++; by.all[k]++; if(k==='sub'){ const c=String(w.contractor||'').trim()||'Company not entered'; cos[c]=(cos[c]||0)+1; } }
@@ -17155,7 +17164,7 @@ function renderDivisionStrip(list){
   const cur=(typeof filters!=='undefined' && filters.trade) || 'all';
   const short=t=>t.replace(/ Division$/,'');
   const chip=(val,label,n,inact)=>`<button type="button" class="div-chip ${cur===val?'active':''}" data-divchip="${esc(val)}"><span class="div-chip-l">${esc(label)}</span><span class="div-chip-n">${n}</span>${inact?`<span class="div-chip-s">${inact} inactive</span>`:''}</button>`;
-  el.innerHTML = chip('all','All divisions', list.length, 0) + cats.map(t=>{ const ws=list.filter(w=>w.trade===t); const inact=ws.filter(w=>(w.status||'active')==='inactive').length; return chip(t, short(t), ws.length, inact); }).join('') + (noDiv?`<span class="div-chip div-chip-warn" title="Open these workers and choose their division">${noDiv} without a division</span>`:'');
+  el.innerHTML = chip('all','All divisions', list.length, 0) + cats.map(t=>{ const ws=list.filter(w=>w.trade===t); const inact=ws.filter(w=>(w.status||'active')==='inactive').length; const dv=TRADE_TO_DIV.get(t), nsub=dv?list.filter(w=>(w.status||'active')!=='inactive' && subDivOf(w)===dv).length:0; return chip(t, short(t), ws.length, inact).replace('</button>', nsub?`<span class="div-chip-s" title="sub-contractors working for this division (listed under Sub Contractor)">+ ${nsub} sub</span></button>`:'</button>'); }).join('') + (noDiv?`<span class="div-chip div-chip-warn" title="Open these workers and choose their division">${noDiv} without a division</span>`:'');
 }
 function renderTradeFilter(){
   const sel=document.getElementById('tradeFilter');
@@ -17202,7 +17211,7 @@ function renderTable(){
     return `<tr data-id="${w.id}">
       <td><div class="wname">${esc(w.fullName)}${w.isSample?'<span class="sample-tag">SAMPLE</span>':''}</div><div class="wsub">${esc(w.designation||w.contractor||'')}</div>${isTemp(w)?`<div style="margin-top:3px;">${contractBadgeHtml(w)}</div>`:''}</td>
       <td class="mono">${esc(w.civilId||'—')}${f.civilId.status!=='none'?`<div style="margin-top:3px;">${badgeHtml(f.civilId.status,{valid:'Valid',expiring:'Expiring soon',expired:'Expired'})}</div>`:''}</td>
-      <td>${esc(w.trade||'—')}</td>
+      <td>${esc(w.trade||'—')}${subDivOf(w)?`<div class="wsub">for ${esc(divLabel(subDivOf(w)))}</div>`:''}</td>
       <td>${(w.status||'active')==='inactive'?'<span class="badge muted">Inactive</span>':'<span class="badge ok">Active</span>'}</td>
       <td>${badgeHtml(f.induction.status)}</td>
       <td>${badgeHtml(f.training.status)}</td>
@@ -19481,7 +19490,7 @@ function renderTrashBody(){
       </div>
       <div class="record-fields">
         <div class="rf"><span class="rf-k">Civil ID</span><span class="rf-v">${esc(w.civilId||'—')}</span></div>
-        <div class="rf"><span class="rf-k">Trade</span><span class="rf-v">${esc(w.trade||'—')}</span></div>
+        <div class="rf"><span class="rf-k">Trade</span><span class="rf-v">${esc(w.trade||'—')}${subDivOf(w)?' — works for '+esc(divLabel(subDivOf(w))):''}</span></div>
         <div class="rf"><span class="rf-k">Deleted on</span><span class="rf-v">${esc(isoToLocalDate(w.deletedAt||'')||'—')}</span></div>
       </div>
     </div>`).join('') : `<p class="wsub">Nothing in the trash.</p>`;
@@ -19702,6 +19711,7 @@ function profileTabHtml(w){
     <div class="form-grid">
       ${designationFieldHtml(w)}
       <label>Trade / occupation *<select data-field="trade" required>${tradeSelectHtml(w.trade||'')}</select></label>
+      <label data-subdiv ${canonTrade(w.trade||'')==='Sub Contractor'?'':'hidden'}>Works for division<select data-field="subDiv">${subDivSelectHtml(w.subDiv||'')}</select></label>
       <label>Subcontractor / company<input data-field="contractor" value="${esc(w.contractor||'')}"></label>
       <label>Date of joining<input type="date" data-field="dateOfJoining" value="${esc(w.dateOfJoining||'')}"></label>
       <label>Employment type<select data-field="empType"><option value="" ${isTemp(w)?'':'selected'}>Permanent / company staff</option><option value="Temporary" ${isTemp(w)?'selected':''}>Temporary contract (individual)</option></select></label>
@@ -20570,6 +20580,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('addWorkerPanel').hidden=true;
     document.getElementById('addWorkerForm').reset();
   });
+  document.getElementById('addWorkerForm').addEventListener('change', e=>{ if(!e.target.matches('[data-field="trade"]')) return; const lb=document.querySelector('#addWorkerForm [data-subdiv]'); if(lb) lb.hidden=canonTrade(e.target.value)!=='Sub Contractor'; });   // Batch 123
   document.getElementById('addWorkerForm').addEventListener('submit', async e=>{
     e.preventDefault();
     const data={status:'active', inductions:[],trainings:[],competency:[],medical:[],licenses:[],warnings:[],violations:[], createdAt:new Date().toISOString(), createdBy:(auth.currentUser&&auth.currentUser.email)||''};
@@ -20726,7 +20737,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
   document.getElementById('drawerBody').addEventListener('change', e=>{
     if(e.target.matches('#profileForm [data-field="status"]')){ const l=document.querySelector('#profileForm [data-last-day]'); if(l){ l.hidden=e.target.value!=='inactive'; const i=l.querySelector('input'); if(!l.hidden && i && !i.value) i.value=localToday(); } }   // Batch 118
-    if(e.target.matches('#profileForm [data-field="trade"]')){ const d=document.querySelector('#profileForm select[data-field="designation"]'); if(d) d.innerHTML=designationOptionsHtml(e.target.value, d.value); }
+    if(e.target.matches('#profileForm [data-field="trade"], #profileForm [data-field="subDiv"]')){ const f=document.getElementById('profileForm'), tr=f.querySelector('[data-field="trade"]').value, sd=f.querySelector('[data-field="subDiv"]'), lb=f.querySelector('[data-subdiv]');   // Batch 123
+      if(lb) lb.hidden=canonTrade(tr)!=='Sub Contractor'; const d=f.querySelector('select[data-field="designation"]'); if(d) d.innerHTML=designationOptionsHtml(roleTradeFor(tr, sd&&!lb.hidden?sd.value:''), d.value); }
     if(e.target.id==='wmTemp'){ const b=document.getElementById('wmBackWrap'); if(b) b.hidden=!e.target.checked; }
     if(e.target.id==='wmTrv'){ const b=document.getElementById('wmTrvWrap'); if(b) b.hidden=!e.target.checked; }   // Batch 110
   });
