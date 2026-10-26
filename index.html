@@ -1229,6 +1229,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .eq-grid .eq-div-Company th{background:var(--ok-bg) !important; color:var(--ok); border-top-color:var(--ok);} .eq-grid .eq-div-Store th{background:var(--warn-bg) !important; color:var(--warn); border-top-color:var(--warn);} .eq-grid .eq-div-Not th,.eq-grid .eq-div-none th{background:var(--muted-bg) !important;}
 .eq-grid .eq-div th span{color:inherit; opacity:.8;} #equipRows .eq-loc td{background:var(--surface-2) !important; color:var(--accent);} #equipRows .eq-loc td span{color:var(--ink);}
 .vk-check{border-left:3px solid var(--ok);} .vk-check.vk-bad{border-left-color:var(--danger);} .vk-tbl td,.vk-tbl th{border:1px solid var(--line); padding:6px 10px;} .vk-tbl{border-collapse:collapse; width:100%;} .vk-row-miss td{background:var(--danger-bg);}
+.vk-head{display:flex; gap:10px; align-items:center; flex-wrap:wrap;} .vk-fold{padding-top:10px; padding-bottom:10px;} .vk-grid th{font-size:11px; text-align:center; white-space:normal; min-width:70px;} .vk-grid td{text-align:center;} .vk-grid td:first-child,.vk-grid th:first-child{text-align:left;} .vk-grid .vk-m{background:var(--danger-bg); color:var(--danger); font-weight:800;} .vk-grid .vk-y{color:var(--ok);}
 </style>
 </head>
 <body class="auth-open">
@@ -3112,7 +3113,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b126';
+const APP_BUILD='b126b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -18605,10 +18606,17 @@ function vehKitCheckHtml(v){ const c=vehKitCheck(v); if(!c) return '';
     <div class="table-wrap" style="box-shadow:none;"><table class="vk-tbl"><thead><tr><th>Item</th><th>Need</th><th>Have</th><th>Status</th></tr></thead><tbody>
     ${c.rows.map(r=>`<tr class="${r.miss?'vk-row-miss':''}"><td>${esc(r.label)}</td><td class="mono">${r.need}</td><td class="mono">${r.have}</td><td>${r.miss?`<span class="badge danger">${r.miss} missing</span>`:'<span class="badge ok">✓ OK</span>'}${r.bad?`<div class="wsub">+${r.bad} expired / damaged</div>`:''}</td></tr>`).join('')}</tbody></table></div>
     <p class="wsub" style="margin:6px 0 0;">Only items in service and not expired count. Put items in this vehicle with "Put an item in this vehicle" below, or from Plant &amp; Equipment (Location = this vehicle).</p></div>`; }
-function vehKitPanelHtml(){ const L=activeVehicles().map(v=>({v, c:vehKitCheck(v)})).filter(x=>x.c); if(!L.length) return ''; const bad=L.filter(x=>!x.c.ok);
-  return `<div class="panel vk-check ${bad.length?'vk-bad':'vk-ok'}"><div class="section-head"><h3>${ic('truck')} Scaffolding vehicles — mandatory kit</h3><span class="badge ${bad.length?'danger':'ok'}">${L.length-bad.length} of ${L.length} complete</span></div>
-    <p class="wsub" style="margin:-4px 0 6px;">Each Scaffolding vehicle: ${SCAF_VEH_KIT.map(r=>`${r.need} ${r.label}`).join(' · ')}.</p>
-    ${bad.length?bad.map(x=>`<div class="equip-line" data-vkopen="${esc(x.v.id)}" style="cursor:pointer;"><div class="equip-line-main"><div class="equip-line-title">${ic('truck')} ${esc(x.v.vehicleNumber||'Vehicle')}</div><div class="wsub">${esc(x.v.projectId?projectName(x.v.projectId):'')}</div></div><div class="equip-line-badges"><span class="badge danger">missing: ${esc(vehKitMissTxt(x.c))}</span></div></div>`).join(''):'<p class="wsub" style="margin:0;">All Scaffolding vehicles carry the full kit.</p>'}</div>`; }
+// Batch 126b: folded by default — one line; "Show" opens a compact grid (vehicle × kit item, missing numbers)
+let vkOpen=(()=>{ try{ return localStorage.getItem('vkOpen')==='1'; }catch(e){ return false; } })();
+function vehKitPanelHtml(){ const L=activeVehicles().map(v=>({v, c:vehKitCheck(v)})).filter(x=>x.c); if(!L.length) return ''; const bad=L.filter(x=>!x.c.ok), tot=bad.reduce((n,x)=>n+x.c.miss,0);
+  const head=`<div class="vk-head"><span>${ic('truck')} <b>Scaffolding vehicles — mandatory kit</b></span><span class="badge ${bad.length?'danger':'ok'}">${L.length-bad.length} of ${L.length} complete</span>${tot?`<span class="wsub">${tot} item${tot===1?'':'s'} missing</span>`:''}<button type="button" class="btn btn-sm" data-vktoggle="1" style="margin-left:auto;">${vkOpen?'Hide':'Show'}</button></div>`;
+  if(!vkOpen) return `<div class="panel vk-check vk-fold ${bad.length?'vk-bad':'vk-ok'}">${head}</div>`;
+  const cell=r=>r.miss?`<td class="vk-m">${r.miss}</td>`:'<td class="vk-y">✓</td>';
+  return `<div class="panel vk-check ${bad.length?'vk-bad':'vk-ok'}">${head}
+    <div class="table-wrap" style="box-shadow:none; margin-top:8px;"><table class="vk-tbl vk-grid"><thead><tr><th>Vehicle</th>${SCAF_VEH_KIT.map(r=>`<th title="${esc(r.label)} — need ${r.need}">${esc(r.label.replace(/ \(chocks\)/,''))}<div class="wsub">need ${r.need}</div></th>`).join('')}<th>Missing</th></tr></thead>
+    <tbody>${L.sort((a,b)=>b.c.miss-a.c.miss || String(a.v.vehicleNumber).localeCompare(String(b.v.vehicleNumber))).map(x=>`<tr data-vkopen="${esc(x.v.id)}" style="cursor:pointer;"><td><b>${esc(x.v.vehicleNumber||'Vehicle')}</b></td>${x.c.rows.map(cell).join('')}<td>${x.c.miss?`<span class="badge danger">${x.c.miss}</span>`:'<span class="badge ok">Complete</span>'}</td></tr>`).join('')}</tbody></table></div>
+    <p class="wsub" style="margin:6px 0 0;">Numbers = how many are missing (only in-service, not expired items count). Tap a vehicle to open it.</p></div>`; }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-vktoggle]'); if(!b) return; vkOpen=!vkOpen; try{ localStorage.setItem('vkOpen', vkOpen?'1':'0'); }catch(x){} const kp=document.getElementById('vehKitPanel'); if(kp) kp.innerHTML=vehKitPanelHtml(); });
 document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-vkopen]'); if(!b) return; openVehicleDrawer(b.dataset.vkopen); activeVehicleTab='kit'; renderVehicleDrawer(); });
 /* Batch 125: division of an item = the division of where it is (vehicle → its division or its project's; project → its division; company location; store) */
 const EQ_DIV_ORDER=['Scaffolding','Civil','Rental','Office staff','Company locations','Store','Not set'];
