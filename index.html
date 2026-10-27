@@ -1211,13 +1211,17 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .ms-auto{color:var(--ok); font-weight:600;} .ms-qrow{display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:5px 0; border-bottom:1px dashed var(--line);} .ms-qrow label{font-size:12.5px;} .ms-qrow .chk{flex:1; min-width:220px;}
 .ms-today{margin:12px 0;} .ms-proj{margin-top:14px;} .ms-psum{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin:6px 0;} .ms-psum>div{display:flex; flex-direction:column; padding:8px 10px; border:1px solid var(--line); border-radius:10px;} .ms-psum b{font-size:18px;} .ms-psum b.ok{color:var(--ok);} .ms-psum b.warn{color:var(--warn);} .ms-psum b.danger{color:var(--danger);}
 .ppe-signpanel{border-left:3px solid var(--accent);} .ppe-signrow{display:flex; gap:12px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; padding:8px 0; border-bottom:1px dashed var(--line);} .ppe-signwho{flex:1; min-width:220px;} .ppe-signact{min-width:240px; max-width:440px; flex:1;} .ppe-padbtns{display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;}
-.sv-cg{font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); margin:12px 0 4px;} .sv-crow{display:grid; grid-template-columns:minmax(220px,1.4fr) auto minmax(200px,1fr); gap:8px 12px; align-items:center; padding:7px 6px; border-bottom:1px dashed var(--line); border-left:3px solid transparent;}
-.sv-crow.sv-y{border-left-color:var(--ok);} .sv-crow.sv-n{border-left-color:var(--danger); background:var(--danger-bg);} .sv-crow.sv-na{border-left-color:var(--line);} .sv-cr{display:flex; gap:4px; flex-wrap:wrap;} .sv-rb{display:inline-flex;} .sv-rb input{position:absolute; opacity:0; pointer-events:none;} .sv-rb span{padding:4px 9px; border:1px solid var(--line); border-radius:14px; font-size:12px; cursor:pointer; white-space:nowrap;}
-.sv-rb-y input:checked+span{background:var(--ok-bg); color:var(--ok); border-color:var(--ok); font-weight:700;} .sv-rb-n input:checked+span{background:var(--danger-bg); color:var(--danger); border-color:var(--danger); font-weight:700;} .sv-rb-na input:checked+span{background:var(--muted-bg); font-weight:700;}
-.sv-crm{display:flex; gap:6px; align-items:center;} .sv-crm input{flex:1; min-width:0;} .sv-ph{display:inline-flex; gap:4px; align-items:center; flex-wrap:wrap;} .sv-ph img{width:34px; height:34px; object-fit:cover; border-radius:6px; border:1px solid var(--line);} .sv-phadd{cursor:pointer; font-size:16px; padding:2px 6px; border:1px dashed var(--line); border-radius:6px;}
-.sv-cstat{margin:0 0 8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;} @media (max-width:720px){ .sv-crow{grid-template-columns:1fr;} }
-.sv-erows{display:flex; flex-direction:column; gap:4px; margin-bottom:8px;} .sv-erow{display:flex; gap:6px; align-items:center;} .sv-erow input{flex:1; min-width:0;} .sv-en{min-width:26px; text-align:right;} .sv-egrp input{font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:var(--accent);}
-.sv-eadd,.sv-one{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:6px 0;} .sv-eadd input,.sv-one input{flex:1; min-width:220px;} .sv-many{margin:6px 0;} .sv-many textarea{width:100%; margin:6px 0;} .sv-ed{border-left:3px solid var(--accent);} .sv-empty{border:1px dashed var(--accent);}
+.sv-ph{display:inline-flex; gap:4px; align-items:center; flex-wrap:wrap;} .sv-ph img{width:34px; height:34px; object-fit:cover; border-radius:6px; border:1px solid var(--line);} .sv-phadd{cursor:pointer; font-size:16px; padding:2px 6px; border:1px dashed var(--line); border-radius:6px;}
+.sv-one{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:8px 0;} .sv-one input{flex:1; min-width:220px;}
+.sv-topic{padding:10px 12px; margin:0 0 10px; border:1px solid var(--line); border-left:4px solid var(--line); border-radius:10px;} .sv-topic textarea{width:100%; margin:6px 0 4px;}
+.sv-topic.sv-tr-g{border-left-color:#16a34a;} .sv-topic.sv-tr-s{border-left-color:#2563eb;} .sv-topic.sv-tr-n{border-left-color:var(--danger);}
+.sv-th{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .sv-thl{font-size:14px;} .sv-rates{display:flex; gap:4px; flex-wrap:wrap; margin-left:auto;}
+.sv-rb{display:inline-flex;} .sv-rb input{position:absolute; opacity:0; pointer-events:none;} .sv-rb span{padding:4px 10px; border:1px solid var(--line); border-radius:14px; font-size:12px; cursor:pointer; white-space:nowrap;}
+.sv-rb-g input:checked+span{background:rgba(22,163,74,.16); color:#16a34a; border-color:#16a34a; font-weight:700;} .sv-rb-s input:checked+span{background:rgba(37,99,235,.16); color:#3b82f6; border-color:#3b82f6; font-weight:700;} .sv-rb-n input:checked+span{background:var(--danger-bg); color:var(--danger); border-color:var(--danger); font-weight:700;}
+.sv-rb input:focus-visible+span{outline:2px solid var(--accent); outline-offset:1px;}
+.svr{display:inline-block; padding:2px 8px; border-radius:10px; font-size:11.5px; font-weight:700; white-space:nowrap;} .svr-g{background:rgba(22,163,74,.16); color:#16a34a;} .svr-s{background:rgba(37,99,235,.16); color:#3b82f6;} .svr-n{background:var(--danger-bg); color:var(--danger);}
+.sv-concl{display:block; margin-top:6px; font-weight:600;} .sv-concl textarea{width:100%; margin-top:4px; font-weight:400;}
+@media (max-width:720px){ .sv-rates{margin-left:0;} }
 .sv-sigs{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px;} .sv-sigbox{margin:0;}
 .eq-wait{border-left:3px solid var(--warn);}
 .eq-grid td{border:1px solid var(--line) !important;} #equipRows.eq-grid tr[data-id]{cursor:pointer;} .eq-grid .eq-div th{background:var(--surface-2); text-align:left; font-size:13px; letter-spacing:.04em; text-transform:uppercase; padding:9px 12px; border:1px solid var(--line); border-top:3px solid var(--accent);}
@@ -3120,7 +3124,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b127';
+const APP_BUILD='b128';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -9153,40 +9157,51 @@ function renderObsTrends(){
   el.innerHTML=`<div class="obs-trends"><div class="panel"><h3>TOP CATEGORIES · LAST 90 DAYS</h3>${bars(by(r=>r.category))}</div><div class="panel"><h3>BY PROJECT · LAST 90 DAYS</h3>${bars(by(r=>r.projectId?projectName(r.projectId):'No project'))}</div></div>`;
 }
 
-/* =============================== Batch 121: SITE VISIT REPORTS ===============================
-   One report per HSE site visit (Scaffolding first; other divisions get their own criteria later).
-   siteVisits/{id}: svNo, date, timeFrom, timeTo, division (label), projectId (project id | 'loc:<id>' | ''), location, client, visitors, purpose,
-   crewIds[], crewOther, workDone, crit {<id>:{t, g, r:'y'|'n'|'na', rm}}, critOrder[], obs[] (unsafe act / condition), good[], actions[],
-   photos[] {url, name, contentType, path, ref:'c:<criterion>' | 'o:<obs>' | 'g:<good>' | '', cap}, summary.   (b121d: MD review removed at the user's request)
-   Criteria per division: settings/siteVisitCriteria.lists {<division key>: [lines]} — a line starting with "#" is a group heading.
-   Each report keeps its own copy of the criteria text, so editing the list later does not change old reports.
+/* =============================== Batch 121 → 128: SITE VISIT REPORTS ===============================
+   One written report per HSE site visit (Scaffolding first). b128: the criteria checklist is gone — the report is written in your own words.
+   siteVisits/{id}: svNo, date, timeFrom, timeTo, division (label), projectId (project id | 'loc:<id>' | ''), location, vehicleNo, client, visitors, purpose,
+   teamName, opsName, opsSig, crewIds[], crewOther, workDone,
+   seen[] {id, h, r:'g'|'s'|'n'|'', t}  — "What we saw on site": 6 fixed headings + your own headings for one visit,
+   obs[] (unsafe acts / conditions seen), good[] (good points), actions[] (improvements required — followed up), mgmt[] (support needed from management — followed up),
+   photos[] {url, name, contentType, path, ref:'s:<heading>' | 'o:<obs>' | 'g:<good>' | '', cap}, summary (overall conclusion).
+   Old reports may still hold crit / critOrder (b121 checklist) — kept in the database, no longer shown.
    Counted as a Site visit in the Monthly Report (hseLogs sv_<id>) → also ticks the Monthly Schedule task by itself. */
 const SV_DIVS=[['Scaffolding','Scaffolding'],['Civil','Civil'],['Rental','Logistics & Rental'],['Office staff','Office']];
 const SV_PURPOSES=['Routine HSE site visit','Scaffold inspection','Client request / complaint','Incident follow-up','Start of a new job','Other'];
-const SV_STARTER={Scaffolding:['# Permit & documents','Valid work permit at site (PTW / client permit)','JSA / TRIC reviewed and signed by the crew','TBT done today — signed sheet at site','Scaffold design / drawing available for non-standard scaffolds',
-  '# Scaffold condition','Scaffold tag in place (green = safe to use / red = do not use)','Scaffold inspected within the last 7 days and after any change or bad weather','Base plates and sole boards on firm, level ground','Standards plumb, ledgers and transoms secure, couplers tight','Bracing and ties fitted as required',
-  'Full boarding — no gaps, boards secured','Guardrails, mid-rails and toe boards on all open sides','Safe access — ladder secured, 1 m above the landing, opening protected','Load limits respected — no overloading with materials',
-  '# People & competence','Scaffolders competent (CISRS / approved card) and supervisor present','Full body harness with 100 % tie-off when working at height','PPE worn — helmet with chin strap, gloves, safety shoes, glasses, coverall','Fit for work — no fatigue / heat stress signs, water and rest area available',
-  '# Work area','Area below barricaded with signs (drop zone)','Tools tethered / materials lowered safely (no throwing)','Housekeeping — no loose material on platforms or walkways','Lifting of materials controlled (gin wheel / crane with lift plan)','Overhead power lines and other hazards identified and controlled','Weather and wind checked — stop work in high wind']};
-let svUi={draft:{}, critEdit:false, critDiv:'Scaffolding', crewQ:''};
+const SV_TOPICS=[
+  {id:'behav', h:'Crew behaviour & attitude', ph:'How the crew behaved and worked — discipline, attitude, following instructions, fitness for work…'},
+  {id:'scaf', h:'Scaffolding erection / dismantling', ph:'How they were erecting / dismantling — method and sequence, tags, harness tie-off, handling of materials…'},
+  {id:'team', h:'Teamwork & coordination', ph:'How they coordinated with each other, who led the job, how they helped one another…'},
+  {id:'comm', h:'Communication with supervisor & client', ph:'How they spoke to the supervisor and the client — respect, reporting, understanding the instructions…'},
+  {id:'veh', h:'Vehicle & equipment condition', ph:'Vehicle number, cleanliness, kit inside, condition of tools and equipment, parking…'},
+  {id:'ppe', h:'PPE & housekeeping', ph:'PPE worn correctly, work area tidy, materials stacked, waste…'}];
+const SV_RATES=[['g','Good'],['s','Satisfactory'],['n','Needs improvement']];
+const SV_RATE_PDF={g:[22,150,74], s:[37,99,235], n:[214,40,40]};
+const SV_MGMT_CATS=['Tools & equipment','PPE','Manpower','Training','Vehicle','Welfare / facilities','Other'];
+let svUi={draft:{}, crewQ:''};
 function svDivKey(lbl){ const f=SV_DIVS.find(x=>x[1]===lbl || x[0]===lbl); return f?f[0]:''; }
 function svDivLbl(k){ const f=SV_DIVS.find(x=>x[0]===k); return f?f[1]:k; }
-function svHash(t){ let h=5381; const s=String(t||'').trim().toLowerCase().replace(/\s+/g,' '); for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return 'c'+h.toString(36); }
-function svLines(k){ const L=(((settingsDocs.siteVisitCriteria||{}).lists)||{})[k]; return Array.isArray(L) ? L : []; }   // Batch 121c: no starting list — HSE writes its own
-function svCriteriaFor(k){ const out=[]; let g=''; for(const ln of svLines(k)){ const t=String(ln||'').trim(); if(!t) continue; if(t.startsWith('#')){ g=t.replace(/^#+\s*/,''); continue; } out.push({id:svHash(t), t, g}); } return out; }
-function svCritList(r){ if(Array.isArray(r.critOrder) && r.crit && r.critOrder.length) return r.critOrder.map(id=>({id, t:(r.crit[id]||{}).t||'', g:(r.crit[id]||{}).g||''})).filter(x=>x.t); return svCriteriaFor(svDivKey(r.division)); }
-function svCritStats(r){ const L=svCritList(r), c=r.crit||{}; let y=0, n=0, na=0, open=0; for(const x of L){ const v=(c[x.id]||{}).r; if(v==='y') y++; else if(v==='n') n++; else if(v==='na') na++; else open++; } return {total:L.length, y, n, na, open, pct:(y+n)?Math.round(y*100/(y+n)):null}; }
+function svRateLbl(k){ const f=SV_RATES.find(x=>x[0]===k); return f?f[1]:''; }
+function svRateChip(k){ return k?`<span class="svr svr-${esc(k)}">${esc(svRateLbl(k))}</span>`:''; }
+/* fixed headings first (their saved note / rating), then your own headings in the order they were added */
+function svSeenList(r){ const S=Array.isArray(r.seen)?r.seen:[], by={}; S.forEach(x=>{ if(x && x.id) by[x.id]=x; });
+  return [...SV_TOPICS.map(t=>({id:t.id, h:t.h, ph:t.ph, own:false, r:(by[t.id]||{}).r||'', t:(by[t.id]||{}).t||''})),
+    ...S.filter(x=>x && x.id && !SV_TOPICS.some(t=>t.id===x.id)).map(x=>({id:x.id, h:x.h||'Other', ph:'Write what you noticed…', own:true, r:x.r||'', t:x.t||''}))]; }
+function svSeenFilled(r){ return svSeenList(r).filter(x=>x.r || String(x.t||'').trim() || svPhotos(r, 's:'+x.id).length); }
+function svRateCount(r){ const c={g:0, s:0, n:0}; svSeenList(r).forEach(x=>{ if(c[x.r]!==undefined) c[x.r]++; }); return c; }
+function svRateSumHtml(r){ const c=svRateCount(r); const L=SV_RATES.filter(([k])=>c[k]).map(([k,l])=>`<span class="svr svr-${k}">${c[k]} ${esc(l==='Needs improvement'?'need impr.':l.toLowerCase())}</span>`); return L.length?L.join(' '):'<span class="badge muted">not written</span>'; }
+function svOpenCount(r, k){ return (r[k]||[]).filter(a=>(a.status||'Open')!=='Closed').length; }
+function svVehOptions(){ return [...new Set(activeVehicles().filter(v=>v.status!=='disposed').map(v=>String(v.vehicleNumber||v.plate||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 function svPlace(r){ return [r.projectId?projectName(r.projectId):'', r.location].filter(Boolean).join(' — ')||'—'; }
 function svSiteDiv(r){ const s=r.projectId && !String(r.projectId).startsWith('loc:') ? siteEquipmentList.find(x=>x.id===r.projectId) : null; return s ? (s.division||'Civil') : ''; }
-function svPctBadge(p){ return p===null?'<span class="badge muted">—</span>':`<span class="badge ${p>=90?'ok':p>=75?'warn':'danger'}">${p} %</span>`; }
 function svPhotos(r, ref){ return (r.photos||[]).map((p,n)=>({...p, n})).filter(p=>ref===undefined || (p.ref||'')===ref); }
 function svPhotoStrip(r, ref){ const ed=canEdit(), L=svPhotos(r, ref);
   return `<span class="sv-ph">${L.map(p=>`<a href="${esc(p.url)}" target="_blank" rel="noopener" title="${esc(p.cap||p.name||'photo')}"><img src="${esc(p.url)}" alt="" loading="lazy"></a>`).join('')}${ed?`<label class="sv-phadd" title="Add a photo">📷<input type="file" accept="image/*" hidden data-sv-photo="${esc(ref)}"></label>`:''}</span>`; }
 async function syncSvToReport(r){ const id='sv_'+r.id;
   if(!r || r.deleted || !r.date){ try{ await db.collection('hseLogs').doc(id).delete(); }catch(e){} return; }
-  const loc=String(r.projectId||'').startsWith('loc:') ? String(r.projectId).slice(4) : '', l=loc&&typeof plLocById==='function'?plLocById(loc):null, st=svCritStats(r);
+  const loc=String(r.projectId||'').startsWith('loc:') ? String(r.projectId).slice(4) : '', l=loc&&typeof plLocById==='function'?plLocById(loc):null, nu=(r.obs||[]).length;
   try{ await db.collection('hseLogs').doc(id).set(stamp({category:'siteVisit', date:r.date, division:svDivKey(r.division)||svSiteDiv(r)||'Office staff', projectId:(r.projectId && !loc)?r.projectId:null, ...(loc?{locId:loc, locName:l?l.name:''}:{}),
-    visitedBy:r.visitors||'', purpose:r.purpose||'', description:`${r.svNo||''} ${svPlace(r)}${st.pct!==null?' — compliance '+st.pct+' %':''}`.trim(), source:'siteVisit', sourceSvId:r.id})); }catch(e){ console.error('site visit sync', e); } }
+    visitedBy:r.visitors||'', purpose:r.purpose||'', description:`${r.svNo||''} ${svPlace(r)}${nu?' — '+nu+' unsafe act / condition'+(nu>1?'s':''):''}`.trim(), source:'siteVisit', sourceSvId:r.id})); }catch(e){ console.error('site visit sync', e); } }
 /* ---- tabs ---- */
 function svCrewCands(r){ const pid=String(r.projectId||''), d=r.date||localToday();
   if(pid.startsWith('loc:')) return typeof locPeopleToday==='function' ? locPeopleToday(pid.slice(4)) : [];
@@ -9201,31 +9216,24 @@ function svCrewHtml(r){ const ed=canEdit(), sel=new Set(r.crewIds||[]), c=svCrew
     <div class="form-grid"><label class="span-all">Other people / sub-contractor crew<input name="crewOther" maxlength="200" value="${esc(r.crewOther||'')}" placeholder="e.g. 4 x ABC Scaffolding Co. scaffolders" ${ed?'':'disabled'}></label>
       <label class="span-all">Work being performed<textarea name="workDone" ${ed?'':'disabled'} placeholder="e.g. Rig-up of access scaffold at well NM-112, 12 m high">${esc(r.workDone||'')}</textarea></label></div>
     ${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save crew &amp; work</button></div>':''}</form>`; }
-function svCritHtml(r){ const ed=canEdit(), L=svCritList(r), c=r.crit||{}, D=svUi.draft[r.id]||{}, st=svCritStats(r); let g='';
-  const wbtn=ed?`<button type="button" class="btn btn-sm" data-sv-critedit="${esc(svDivKey(r.division)||'Scaffolding')}">✍ Write / edit the ${esc(r.division||'')} criteria list</button>`:'';
-  const one=ed?`<div class="sv-one"><input id="svOneT" maxlength="200" placeholder="Add a criterion only for this visit…"><button type="button" class="btn btn-sm" data-sv-oneadd="1">+ Add</button></div>`:'';
-  if(!L.length) return `<div class="panel sv-empty"><p style="margin:0 0 8px;"><b>No criteria for ${esc(r.division||'this division')} yet.</b> Write your own list once — every new ${esc(r.division||'')} visit then uses it.</p>${wbtn}${ed?`<p class="wsub" style="margin:10px 0 4px;">Or add criteria only for this visit:</p>${one}`:''}</div>`;
-  const rows=L.map((x,i)=>{ const v=(D[x.id]||{}).r!==undefined?D[x.id].r:(c[x.id]||{}).r||'', rm=(D[x.id]||{}).rm!==undefined?D[x.id].rm:(c[x.id]||{}).rm||'';
-    const head=x.g && x.g!==g ? (g=x.g, `<div class="sv-cg">${esc(x.g)}</div>`) : '';
-    return `${head}<div class="sv-crow sv-${v||'none'}"><div class="sv-ct"><span class="mono wsub">${i+1}.</span> ${esc(x.t)}</div>
-      <div class="sv-cr">${[['y','✓ Complied'],['n','✗ Not complied'],['na','N/A']].map(([k,l])=>`<label class="sv-rb sv-rb-${k}"><input type="radio" name="svc_${esc(x.id)}" value="${k}" ${v===k?'checked':''} ${ed?'':'disabled'}><span>${l}</span></label>`).join('')}</div>
-      <div class="sv-crm"><input data-svrm="${esc(x.id)}" value="${esc(rm)}" maxlength="200" placeholder="Remark${v==='n'?' — what was wrong':''}" ${ed?'':'disabled'}>${svPhotoStrip(r, 'c:'+x.id)}</div></div>`; }).join('');
-  return `<form id="svCritForm"><div class="sv-cstat">Compliance: ${svPctBadge(st.pct)} <span class="wsub">${st.y} complied · ${st.n} not complied · ${st.na} N/A${st.open?` · <b>${st.open} not checked</b>`:''} (saved)</span><span style="margin-left:auto;">${wbtn}</span></div>${rows}
-    ${one}${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save checklist</button></div>':''}</form>`; }
-function svReadCrit(f, r){ const D={}; for(const x of svCritList(r)){ const ch=f.querySelector(`input[name="svc_${CSS.escape(x.id)}"]:checked`), rm=f.querySelector(`[data-svrm="${CSS.escape(x.id)}"]`); D[x.id]={r:ch?ch.value:'', rm:rm?rm.value:''}; } return D; }
-/* ---- criteria lists (settings) ---- */
-/* Batch 121c: write your own criteria — one row per criterion, optional group headings, move up / down, remove, paste many */
-function svEdLoad(k){ svUi.critDiv=k; svUi.rows=svLines(k).map(x=>{ const t=String(x||'').trim(); return t.startsWith('#')?{g:true, t:t.replace(/^#+\s*/,'')}:{g:false, t}; }).filter(x=>x.t); }
-function svEdRead(){ const f=document.getElementById('svCritListForm'); if(!f || !svUi.rows) return; f.querySelectorAll('[data-sve]').forEach(el=>{ const i=Number(el.dataset.sve); if(svUi.rows[i]) svUi.rows[i].t=el.value; }); }
-function svTopHtml(){ if(!svUi.critEdit || !canEdit()) return ''; const k=svUi.critDiv; if(!svUi.rows) svEdLoad(k); const R=svUi.rows; let n=0;
-  return `<form id="svCritListForm" class="panel sv-ed"><div class="section-head"><h3>✍ Your site visit criteria — ${esc(svDivLbl(k))}</h3><button type="button" class="btn btn-sm" data-sv-critx="1">Close</button></div>
-    <div class="seg-tabs" style="margin-bottom:8px;">${SV_DIVS.map(([dk,l])=>`<button type="button" class="seg-btn ${dk===k?'active':''}" data-sv-critdiv="${esc(dk)}">${esc(l)} <span class="wsub">${svCriteriaFor(dk).length}</span></button>`).join('')}</div>
-    <p class="wsub" style="margin:0 0 8px;">Write what you expect to find at every ${esc(svDivLbl(k))} site visit. In each report you tick every criterion <b>✓ Complied / ✗ Not complied / N/A</b>. Group headings are optional (e.g. "Permit &amp; documents"). Saved reports keep the criteria they were checked against.</p>
-    <div class="sv-erows">${R.length?R.map((x,i)=>`<div class="sv-erow${x.g?' sv-egrp':''}"><span class="mono wsub sv-en">${x.g?'#':(++n)+'.'}</span><input data-sve="${i}" value="${esc(x.t)}" maxlength="200" placeholder="${x.g?'Group heading':'Criterion'}">
-      <button type="button" class="icon-btn" data-sv-eup="${i}" aria-label="Move up" ${i?'':'disabled'}>↑</button><button type="button" class="icon-btn" data-sv-edn="${i}" aria-label="Move down" ${i<R.length-1?'':'disabled'}>↓</button><button type="button" class="icon-btn danger" data-sv-edel="${i}" aria-label="Remove">✕</button></div>`).join(''):'<p class="wsub">No criteria yet — type the first one below.</p>'}</div>
-    <div class="sv-eadd"><input id="svNewT" maxlength="200" placeholder="Type a criterion — e.g. Scaffold tag in place and valid"><button type="button" class="btn btn-sm btn-primary" data-sv-eadd="c">+ Add criterion</button><button type="button" class="btn btn-sm" data-sv-eadd="g">+ Add group heading</button></div>
-    <details class="sv-many"><summary>Add many at once (paste a list, one per line)</summary><textarea id="svManyT" rows="6" placeholder="One criterion per line&#10;# A line starting with # becomes a group heading"></textarea><button type="button" class="btn btn-sm" data-sv-emany="1">Add these lines</button></details>
-    <div class="form-actions"><button type="button" class="btn" data-sv-critx="1">Cancel</button><button type="submit" class="btn btn-primary">Save ${esc(svDivLbl(k))} criteria (${R.filter(x=>!x.g && String(x.t).trim()).length})</button></div></form>`; }
+/* "What we saw on site" — a written note + simple rating under each heading */
+function svSeenHtml(r){ const ed=canEdit(), D=svUi.draft[r.id]||{}, DS=D.seen||{}, L=svSeenList(r).map(x=>DS[x.id]?{...x, r:DS[x.id].r, t:DS[x.id].t}:x);
+  const sum=D.summary!==undefined?D.summary:(r.summary||'');
+  const blk=x=>`<div class="sv-topic sv-tr-${esc(x.r||'none')}" data-svtopic="${esc(x.id)}"><div class="sv-th"><b class="sv-thl">${esc(x.h)}</b>${x.own?' <span class="badge muted">your heading</span>':''}${x.own&&ed?` <button type="button" class="att-link" data-sv-owndel="${esc(x.id)}" data-armed="0">Remove</button>`:''}
+      <span class="sv-rates">${SV_RATES.map(([k,l])=>`<label class="sv-rb sv-rb-${k}"><input type="radio" name="svr_${esc(x.id)}" value="${k}" ${x.r===k?'checked':''} ${ed?'':'disabled'}><span>${esc(l)}</span></label>`).join('')}</span></div>
+    <textarea data-svt="${esc(x.id)}" rows="3" maxlength="2500" placeholder="${esc(x.ph||'')}" ${ed?'':'disabled'}>${esc(x.t||'')}</textarea>
+    <div class="sv-tph">${svPhotoStrip(r, 's:'+x.id)}</div></div>`;
+  return `<form id="svSeenForm"><p class="wsub" style="margin:0 0 8px;">Write what you noticed during the visit, in your own words, and choose a rating. A heading you leave blank is not printed in the report.</p>
+    ${L.map(blk).join('')}
+    ${ed?`<div class="sv-one"><input id="svOwnH" maxlength="80" placeholder="Add your own heading for this visit — e.g. Lifting of materials"><button type="button" class="btn btn-sm" data-sv-ownadd="1">+ Add heading</button></div>`:''}
+    <label class="sv-concl">Overall conclusion of the visit<textarea name="summary" rows="4" maxlength="3000" placeholder="Your overall view of the crew and the site — what went well and what must change" ${ed?'':'disabled'}>${esc(sum)}</textarea></label>
+    ${ed?'<div class="form-actions"><button type="submit" class="btn btn-primary">Save what we saw</button></div>':''}</form>`; }
+function svReadSeen(f){ const seen={}; f.querySelectorAll('[data-svtopic]').forEach(b=>{ const id=b.dataset.svtopic, ch=b.querySelector(`input[name="svr_${CSS.escape(id)}"]:checked`), ta=b.querySelector('[data-svt]'), h=(b.querySelector('.sv-thl')||{}).textContent||'';
+  seen[id]={h, r:ch?ch.value:'', t:ta?ta.value:''}; }); const s=f.querySelector('[name="summary"]'); return {seen, summary:s?s.value:undefined}; }
+function svSeenSave(r, rd, extra){ const out=[];
+  for(const x of [...svSeenList(r), ...(extra||[])]){ const v=rd.seen[x.id]; if(v && v.del) continue; const rr=v?v.r:x.r, tt=v?v.t:x.t;
+    out.push({id:x.id, h:String(x.h||'').slice(0,80), r:['g','s','n'].includes(rr)?rr:'', t:String(tt||'').trim().slice(0,2500)}); }
+  return out; }
 /* Batch 121e: team name + Operations Executive signature (signed on the screen) */
 function svTeamNames(){ return [...new Set(regActive('sv').map(r=>String(r.teamName||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,80); }
 function svOpsNames(){ return [...new Set(regActive('sv').map(r=>String(r.opsName||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).slice(0,40); }
@@ -9244,16 +9252,22 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
   if(D.svUnsign){ if(!compArm(b,'Tap again — remove')) return; const FV=fsFieldValue(); await regUpdate('sv', r.id, {opsSig:FV?FV.delete():null}, true); toast('Signature removed'); return; }
   if(D.svPadsave){ if(!svUi.padImg){ toast('Sign in the box first'); return; } const sig={img:svUi.padImg, n:r.opsName||'', at:new Date().toISOString()}; svUi.pad=''; svUi.padObj=null;
     if(await regUpdate('sv', r.id, {opsSig:sig}, true)) toast('Operations Executive signed ✓'); renderRegDrawer(); } }, true);
-function svTopRender(force){ const el=document.getElementById('svTop'); if(!el || (!force && formDirtyIn('svTop'))) return; el.innerHTML=svTopHtml(); }
+const SV_FU_FIELDS=(what, ph, cats)=>[
+  {key:'action', label:what, type:'textarea', required:true, wide:true, placeholder:ph},
+  ...(cats?[{key:'category', label:'Type', type:'select', options:cats}]:[]),
+  {key:'owner', label:'Who will do it', type:'text', required:true},
+  {key:'targetDate', label:'By when', type:'date'},
+  {key:'status', label:'Status', type:'select', options:ACTION_STATUSES, required:true},
+  {key:'closedDate', label:'Closed on', type:'date'},
+  {key:'verification', label:'How it was closed', type:'textarea', wide:true}];
 regDefine({
-  key:'sv', collection:'siteVisits', singular:'Site visit report', title:'Site Visit Reports', tagline:'Visit · Check · Report',
+  key:'sv', collection:'siteVisits', singular:'Site visit report', title:'Site Visit Reports', tagline:'Visit · Notice · Report',
   addLabel:'+ New site visit', noField:'svNo', noPrefix:'SV', noYear:true, dateField:'date', yearFilter:true,
-  headerButtons:'<button class="btn btn-sm btn-primary" type="button" data-sv-critopen="1">✍ Write criteria</button>',
-  searchPlaceholder:'Search report no., project, place, visitor…', emptyEditor:'No site visit reports yet — click “+ New site visit”. Tick the criteria, add what you found (with photos) and the actions, then download the PDF report.',
-  titleOf:r=>`${svPlace(r)}`, subOf:r=>[isoToDmy(r.date||''), r.division, r.visitors?'by '+r.visitors:''].filter(Boolean).join(' · '),
-  badgesOf:r=>`${svPctBadge(svCritStats(r).pct)}`,
-  searchText:r=>[r.svNo, svPlace(r), r.visitors, r.client, r.division, r.workDone, r.summary].join(' '),
-  addFields:['date','division','projectId','location','client','teamName','visitors','opsName','purpose'], addDefaults:{date:()=>localToday(), visitors:()=>plWho(), purpose:'Routine HSE site visit', division:'Scaffolding'},
+  searchPlaceholder:'Search report no., project, place, vehicle, visitor…', emptyEditor:'No site visit reports yet — click “+ New site visit”. Write what you saw (crew, scaffolding work, teamwork, vehicle…), the unsafe acts, the improvements and the support needed, then download the PDF report.',
+  titleOf:r=>`${svPlace(r)}`, subOf:r=>[isoToDmy(r.date||''), r.division, r.vehicleNo?'🚚 '+r.vehicleNo:'', r.visitors?'by '+r.visitors:''].filter(Boolean).join(' · '),
+  badgesOf:r=>`${(r.obs||[]).length?`<span class="badge danger">${(r.obs||[]).length} unsafe</span>`:''}`,
+  searchText:r=>[r.svNo, svPlace(r), r.vehicleNo, r.teamName, r.visitors, r.client, r.division, r.workDone, r.summary, ...svSeenList(r).map(x=>x.t)].join(' '),
+  addFields:['date','division','projectId','location','vehicleNo','client','teamName','visitors','opsName','purpose'], addDefaults:{date:()=>localToday(), visitors:()=>plWho(), purpose:'Routine HSE site visit', division:'Scaffolding'},
   validate:d=>!d.date?'Choose the date':!String(d.visitors||'').trim()?'Write who visited':(!d.projectId && !String(d.location||'').trim())?'Choose the project / location or write the place':'',
   segs:SV_DIVS.map(([k,l])=>({key:k, label:l, match:r=>svDivKey(r.division)===k})), segAllLabel:'All divisions',
   tabs:[{key:'main', label:'Visit details', groups:[{fields:[
@@ -9262,73 +9276,65 @@ regDefine({
       {key:'division', label:'Division', type:'select', options:SV_DIVS.map(x=>x[1]), required:true},
       {key:'projectId', label:'Project / location', type:'site'},
       {key:'location', label:'Exact place / well no.', placeholder:'e.g. NM-112, rack R-04'},
+      {key:'vehicleNo', label:'Vehicle number', type:'textlist', options:()=>svVehOptions(), placeholder:'e.g. 1234 AB — the crew vehicle'},   // Batch 128
       {key:'client', label:'Client', placeholder:'e.g. PDO'},
       {key:'visitors', label:'Visited by (names)', required:true, wide:true, placeholder:'e.g. Radhakrishnan N, Sayed'},
       {key:'teamName', label:'Team name', type:'textlist', options:()=>svTeamNames(), placeholder:'e.g. Team A — Ravi Kumar gang'},   // Batch 121e
       {key:'opsName', label:'Operations Executive', type:'textlist', options:()=>svOpsNames(), placeholder:'name — signs in the Signatures tab'},
       {key:'purpose', label:'Purpose', type:'select', options:SV_PURPOSES},
-      {key:'summary', label:'Overall comment / conclusion of the visit', type:'textarea', wide:true},
-    ]}], intro:'Then: <b>Crew &amp; work</b> → <b>Criteria checklist</b> → <b>HSE observations</b> / <b>Good observations</b> → <b>Actions</b> → <b>PDF report</b>.'},
+    ]}], intro:'Then: <b>Crew &amp; work</b> → <b>What we saw</b> → <b>Unsafe acts</b> → <b>Good points</b> → <b>Improvements</b> → <b>Management support</b> → <b>Signatures</b> → <b>PDF report</b>.'},
     {key:'crew', label:'Crew & work', html:r=>svCrewHtml(r)},
-    {key:'crit', label:'Criteria checklist', html:r=>svCritHtml(r)},
-    {key:'sub:obs', label:'HSE observations', sub:'obs'},
-    {key:'sub:good', label:'Good observations', sub:'good'},
-    {key:'sub:actions', label:'Actions', sub:'actions'},
+    {key:'seen', label:'What we saw', html:r=>svSeenHtml(r)},
+    {key:'sub:obs', label:'Unsafe acts', sub:'obs'},
+    {key:'sub:good', label:'Good points', sub:'good'},
+    {key:'sub:actions', label:'Improvements', sub:'actions'},
+    {key:'sub:mgmt', label:'Management support', sub:'mgmt'},
     {key:'sig', label:'Signatures', html:r=>svSigHtml(r)}],
   subs:{
-    obs:{label:'HSE observations (unsafe act / condition)', addLabel:'Add observation', fields:[
-      {key:'type', label:'Type', type:'select', options:['Unsafe act','Unsafe condition'], required:true}, {key:'category', label:'Category', type:'select', options:OBS_CATS},
-      {key:'desc', label:'What was observed', type:'textarea', required:true, wide:true}, {key:'where', label:'Where exactly'},
-      {key:'action', label:'Immediate action taken', type:'textarea', wide:true}, {key:'risk', label:'Risk', type:'select', options:['Low','Medium','High']}],
-      defaults:{type:'Unsafe condition'}, hideInCard:['desc'], title:x=>`<span class="badge ${x.type==='Unsafe act'?'danger':'warn'}">${esc(x.type||'')}</span> ${esc(String(x.desc||'').slice(0,140))}`, body:(x,r)=>`<div style="margin:4px 0;">${svPhotoStrip(r, 'o:'+x.id)}</div>`, empty:'No unsafe acts / conditions recorded.'},
-    good:{label:'Good observations', addLabel:'Add good observation', fields:[
-      {key:'desc', label:'What was good', type:'textarea', required:true, wide:true}, {key:'who', label:'Person / crew recognised'}, {key:'category', label:'Category', type:'select', options:OBS_CATS}],
-      hideInCard:['desc'], title:x=>`<span class="badge ok">Good</span> ${esc(String(x.desc||'').slice(0,140))}`, body:(x,r)=>`<div style="margin:4px 0;">${svPhotoStrip(r, 'g:'+x.id)}</div>`, empty:'No good observations recorded.'},
-    actions:actionSub('Actions after the visit')},
-  multiFiles:{key:'photos', label:'All photos of this visit', accept:'image/*', hint:'Photos added on a criterion or observation also appear here. Add general photos here.'},
+    obs:{label:'Unsafe acts / conditions seen', addLabel:'Add unsafe act / condition', fields:[
+      {key:'type', label:'Type', type:'select', options:['Unsafe act','Unsafe condition'], required:true},
+      {key:'desc', label:'What we saw', type:'textarea', required:true, wide:true, placeholder:'e.g. Scaffolder working at 6 m without tying off the harness'}, {key:'where', label:'Where exactly / who'},
+      {key:'action', label:'What was done on the spot', type:'textarea', wide:true, placeholder:'e.g. Work stopped, the crew was told and the harness was tied off'}],
+      defaults:{type:'Unsafe act'}, hideInCard:['desc'], title:x=>`<span class="badge ${x.type==='Unsafe act'?'danger':'warn'}">${esc(x.type||'')}</span> ${esc(String(x.desc||'').slice(0,140))}`, body:(x,r)=>`<div style="margin:4px 0;">${svPhotoStrip(r, 'o:'+x.id)}</div>`, empty:'No unsafe acts / conditions seen.'},
+    good:{label:'Good points seen', addLabel:'Add good point', fields:[
+      {key:'desc', label:'What was good', type:'textarea', required:true, wide:true}, {key:'who', label:'Person / crew recognised'}],
+      hideInCard:['desc'], title:x=>`<span class="badge ok">Good</span> ${esc(String(x.desc||'').slice(0,140))}`, body:(x,r)=>`<div style="margin:4px 0;">${svPhotoStrip(r, 'g:'+x.id)}</div>`, empty:'No good points written yet.'},
+    actions:actionSub('Improvements required (crew / site)', {addLabel:'Add improvement', fields:SV_FU_FIELDS('Improvement required', 'e.g. Crew to tie off the harness at all times above 1.8 m — refresher TBT'), empty:'No improvements written yet.'}),
+    mgmt:actionSub('Support needed from management', {addLabel:'Add support needed', fields:SV_FU_FIELDS('What management needs to provide', 'e.g. 2 new full body harnesses for Team A', SV_MGMT_CATS),
+      title:x=>`${x.category?`<span class="badge info">${esc(x.category)}</span> `:''}<span>${esc(x.action||'')}</span> ${complaintBadges(x)}`, empty:'No support requested from management.'})},
+  multiFiles:{key:'photos', label:'All photos of this visit', accept:'image/*', hint:'Photos added under a heading, an unsafe act or a good point also appear here. Add general photos here.'},
   pdf:r=>svPdf(r), pdfLabel:'PDF report',
   columns:[
     {label:'No.', cls:'mono', html:r=>`<strong>${esc(r.svNo||'—')}</strong><div class="wsub">${esc(isoToDmy(r.date||''))}</div>`},
-    {label:'Project / place', html:r=>`<div class="wname">${esc(svPlace(r))}</div><div class="wsub">${esc(r.division||'')}${r.client?' · '+esc(r.client):''}</div>`},
+    {label:'Project / place', html:r=>`<div class="wname">${esc(svPlace(r))}</div><div class="wsub">${esc([r.division, r.vehicleNo?'Vehicle '+r.vehicleNo:'', r.teamName].filter(Boolean).join(' · '))}</div>`},
     {label:'Visited by', html:r=>esc(r.visitors||'—')},
-    {label:'Compliance', html:r=>svPctBadge(svCritStats(r).pct)},
-    {label:'Findings', html:r=>`<span class="badge ${(r.obs||[]).length?'danger':'muted'}">${(r.obs||[]).length} unsafe</span> <span class="badge ${(r.good||[]).length?'ok':'muted'}">${(r.good||[]).length} good</span>`},
+    {label:'What we saw', html:r=>svRateSumHtml(r)},
+    {label:'Findings', html:r=>{ const oi=svOpenCount(r,'actions'), om=svOpenCount(r,'mgmt'); return `<span class="badge ${(r.obs||[]).length?'danger':'muted'}">${(r.obs||[]).length} unsafe</span> <span class="badge ${oi?'warn':'muted'}">${oi} improvement${oi===1?'':'s'} open</span>${om?` <span class="badge info">${om} support open</span>`:''}`; }},
   ],
-  tiles:list=>{ const mo=localToday().slice(0,7), m=list.filter(r=>String(r.date||'').startsWith(mo)), ps=m.map(r=>svCritStats(r).pct).filter(p=>p!==null), avg=ps.length?Math.round(ps.reduce((a,b)=>a+b,0)/ps.length):null;
-    const openA=list.reduce((n,r)=>n+(r.actions||[]).filter(a=>(a.status||'Open')!=='Closed').length,0);
+  tiles:list=>{ const mo=localToday().slice(0,7), m=list.filter(r=>String(r.date||'').startsWith(mo));
+    const openI=list.reduce((n,r)=>n+svOpenCount(r,'actions'),0), openM=list.reduce((n,r)=>n+svOpenCount(r,'mgmt'),0);
     return [{label:'Visits this month', num:m.length, sub:`${list.filter(r=>String(r.date||'').startsWith(mo.slice(0,4))).length} this year`, icon:'search'},
-      {label:'Average compliance', num:avg===null?'—':avg+' %', cls:avg===null?'':avg>=90?'ok':avg>=75?'warn':'danger', sub:'criteria complied this month', icon:'target'},
-      {label:'Open actions', num:openA, cls:openA?'warn':'ok', sub:'from site visits', icon:'clipcheck'},
-      {label:'Unsafe acts / conditions', num:m.reduce((n,r)=>n+(r.obs||[]).length,0), cls:'', sub:'found this month', icon:'alert'}]; },
-  topPanel:()=>svTopRender(),
+      {label:'Unsafe acts / conditions', num:m.reduce((n,r)=>n+(r.obs||[]).length,0), cls:'', sub:'seen this month', icon:'alert'},
+      {label:'Improvements open', num:openI, cls:openI?'warn':'ok', sub:'crew / site — not closed yet', icon:'clipcheck'},
+      {label:'Management support open', num:openM, cls:openM?'warn':'ok', sub:'tools, PPE, manpower…', icon:'target'}]; },
   afterSave:r=>syncSvToReport(r),
 });
 /* ---- events ---- */
-document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-sv-critopen],[data-sv-critx],[data-sv-critdiv],[data-sv-critedit],[data-sv-eup],[data-sv-edn],[data-sv-edel],[data-sv-eadd],[data-sv-emany],[data-sv-oneadd]'); if(!b) return; const D=b.dataset;
-  const open=k=>{ svUi.critEdit=true; svEdLoad(k); clearDirtyForms(); svTopRender(true); const f=document.getElementById('svCritListForm'); if(f){ f.scrollIntoView({block:'start'}); const n=document.getElementById('svNewT'); if(n) n.focus(); } };
-  if(D.svCritopen){ if(!canEdit()) return; if(svUi.critEdit){ svUi.critEdit=false; clearDirtyForms(); svTopRender(true); } else open(svUi.critDiv||'Scaffolding'); return; }
-  if(D.svCritedit){ if(!canEdit()) return; closeRegDrawer(); open(D.svCritedit); return; }
-  if(D.svCritx){ svUi.critEdit=false; svUi.rows=null; clearDirtyForms(); svTopRender(true); return; }
-  if(D.svCritdiv){ open(D.svCritdiv); return; }
-  if(D.svOneadd){ const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const inp=document.getElementById('svOneT'), t=String((inp||{}).value||'').trim().slice(0,200); if(!t){ toast('Type the criterion first'); if(inp) inp.focus(); return; }
-    const f=document.getElementById('svCritForm'), Dr=f?svReadCrit(f, r):{}, L=svCritList(r), crit={}; for(const x of L) crit[x.id]={t:x.t, g:x.g||'', r:(Dr[x.id]||{}).r||((r.crit||{})[x.id]||{}).r||'', rm:String((Dr[x.id]||{}).rm||((r.crit||{})[x.id]||{}).rm||'').slice(0,200)};
-    let id=svHash(t); if(crit[id]) id=id+'x'+Date.now().toString(36); crit[id]={t, g:'Added for this visit', r:'', rm:''}; clearDirtyForms();
-    if(await regUpdate('sv', r.id, {crit, critOrder:[...L.map(x=>x.id), id]}, true)){ delete svUi.draft[r.id]; toast('Criterion added to this visit'); } return; }
-  // editor rows
-  if(!svUi.rows) return; svEdRead(); const R=svUi.rows;
-  if(D.svEup!==undefined){ const i=Number(D.svEup); if(i>0) [R[i-1],R[i]]=[R[i],R[i-1]]; }
-  else if(D.svEdn!==undefined){ const i=Number(D.svEdn); if(i<R.length-1) [R[i+1],R[i]]=[R[i],R[i+1]]; }
-  else if(D.svEdel!==undefined){ R.splice(Number(D.svEdel),1); }
-  else if(D.svEadd){ const inp=document.getElementById('svNewT'), t=String((inp||{}).value||'').trim(); if(!t){ toast(D.svEadd==='g'?'Type the group heading first':'Type the criterion first'); if(inp) inp.focus(); return; } R.push({g:D.svEadd==='g', t:t.slice(0,200)}); }
-  else if(D.svEmany){ const ta=document.getElementById('svManyT'); String((ta||{}).value||'').split('\n').map(x=>x.trim()).filter(Boolean).forEach(x=>R.push(x.startsWith('#')?{g:true, t:x.replace(/^#+\s*/,'').slice(0,200)}:{g:false, t:x.slice(0,200)})); }
-  clearDirtyForms(); svTopRender(true); const n=document.getElementById('svNewT'); if(n && (D.svEadd||D.svEmany)) n.focus(); });
-document.addEventListener('keydown', e=>{ if(e.key!=='Enter' || !e.target) return; if(e.target.id==='svNewT'){ e.preventDefault(); const b=document.querySelector('[data-sv-eadd="c"]'); if(b) b.click(); } else if(e.target.id==='svOneT'){ e.preventDefault(); const b=document.querySelector('[data-sv-oneadd]'); if(b) b.click(); } else if(e.target.matches && e.target.matches('#svCritListForm [data-sve]')) e.preventDefault(); });
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('[data-sv-ownadd],[data-sv-owndel]'); if(!b) return; const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const D=b.dataset, f=document.getElementById('svSeenForm');
+  const rd=f?svReadSeen(f):{seen:{}};
+  if(D.svOwnadd){ const inp=document.getElementById('svOwnH'), h=String((inp||{}).value||'').trim().slice(0,80); if(!h){ toast('Type the heading first'); if(inp) inp.focus(); return; }
+    if(svSeenList(r).some(x=>x.h.toLowerCase()===h.toLowerCase())){ toast('That heading is already there'); return; }
+    const id='x'+Date.now().toString(36), seen=svSeenSave(r, rd, [{id, h, r:'', t:''}]); clearDirtyForms();
+    if(await regUpdate('sv', r.id, {seen, ...(rd.summary!==undefined?{summary:String(rd.summary).trim().slice(0,3000)}:{})}, true)){ delete svUi.draft[r.id]; toast(`Heading "${h}" added — write your note under it`); renderRegDrawer(); const ta=document.querySelector(`[data-svt="${CSS.escape(id)}"]`); if(ta) ta.focus(); } return; }
+  if(D.svOwndel){ if(!compArm(b,'Tap again — remove heading')) return; rd.seen[D.svOwndel]={...(rd.seen[D.svOwndel]||{}), del:true};
+    const seen=svSeenSave(r, rd); clearDirtyForms();
+    const ph=(r.photos||[]).filter(p=>(p.ref||'')!=='s:'+D.svOwndel), rm=(r.photos||[]).length-ph.length;
+    if(await regUpdate('sv', r.id, {seen, ...(rm?{photos:ph}:{}), ...(rd.summary!==undefined?{summary:String(rd.summary).trim().slice(0,3000)}:{})}, true)){ delete svUi.draft[r.id]; toast('Heading removed'+(rm?` (with ${rm} photo${rm>1?'s':''})`:'')); renderRegDrawer(); } return; } });
+document.addEventListener('keydown', e=>{ if(e.key!=='Enter' || !e.target) return; if(e.target.id==='svOwnH'){ e.preventDefault(); const b=document.querySelector('[data-sv-ownadd]'); if(b) b.click(); } });
+document.addEventListener('change', e=>{ const t=e.target; if(!t || !t.matches || !t.matches('#svSeenForm input[type="radio"]')) return; const blk=t.closest('.sv-topic'); if(blk) blk.className=blk.className.replace(/sv-tr-\S+/, 'sv-tr-'+t.value); });
 document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement)) return;
-  if(f.id==='svCritListForm'){ e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return; svEdRead(); const lines=(svUi.rows||[]).map(x=>({g:x.g, t:String(x.t||'').trim()})).filter(x=>x.t).map(x=>(x.g?'# ':'')+x.t.slice(0,200)).slice(0,150);
-    if(await saveSettings('siteVisitCriteria', {lists:{[svUi.critDiv]:lines}})){ clearDirtyForms(); svUi.rows=null; toast(`${svDivLbl(svUi.critDiv)} criteria saved — ${lines.filter(x=>!x.startsWith('#')).length} items`); svTopRender(); } return; }
-  if(f.id==='svCritForm'){ e.preventDefault(); e.stopImmediatePropagation(); const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const D=svReadCrit(f, r), L=svCritList(r), crit={};
-    for(const x of L) crit[x.id]={t:x.t, g:x.g||'', r:(D[x.id]||{}).r||'', rm:String((D[x.id]||{}).rm||'').trim().slice(0,200)};
-    clearDirtyForms(); if(await regUpdate('sv', r.id, {crit, critOrder:L.map(x=>x.id)})){ delete svUi.draft[r.id]; const st=svCritStats({...r, crit, critOrder:L.map(x=>x.id)}); toast(`Checklist saved — compliance ${st.pct===null?'—':st.pct+' %'}${st.open?` · ${st.open} not checked`:''}`); } return; }
+  if(f.id==='svSeenForm'){ e.preventDefault(); e.stopImmediatePropagation(); const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const rd=svReadSeen(f), seen=svSeenSave(r, rd);
+    clearDirtyForms(); if(await regUpdate('sv', r.id, {seen, summary:String(rd.summary||'').trim().slice(0,3000)})){ delete svUi.draft[r.id]; const c=svRateCount({seen}); toast(`Saved — ${seen.filter(x=>x.t||x.r).length} headings written${c.n?` · ${c.n} need improvement`:''}`); } return; }
   if(f.id==='svCrewForm'){ e.preventDefault(); e.stopImmediatePropagation(); const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return; const F=new FormData(f);
     const ids=[...f.querySelectorAll('[data-sv-crew]:checked')].map(x=>x.dataset.svCrew); clearDirtyForms();
     await regUpdate('sv', r.id, {crewIds:ids, crewOther:String(F.get('crewOther')||'').trim().slice(0,200), workDone:String(F.get('workDone')||'').trim().slice(0,1500)}); return; } }, true);
@@ -9338,54 +9344,64 @@ document.addEventListener('change', e=>{ const t=e.target; if(!t || !t.matches |
 document.addEventListener('input', e=>{ const t=e.target; if(t && t.id==='svCrewQ'){ svUi.crewQ=t.value; const r=regCurrent(); if(r && activeReg==='sv'){ const f=document.getElementById('svCrewForm'); const keep=f?[...f.querySelectorAll('[data-sv-crew]:checked')].map(x=>x.dataset.svCrew):null;
   const b=document.getElementById('regDrawerBody'); if(b && f){ const pos=t.selectionStart; b.innerHTML=svCrewHtml({...r, crewIds:keep||r.crewIds}); const q=document.getElementById('svCrewQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(x){} } } } } });
 document.addEventListener('change', async e=>{ const inp=e.target; if(!inp || !inp.matches || !inp.matches('[data-sv-photo]') || !inp.files || !inp.files[0]) return; const r=regCurrent(); if(!r || activeReg!=='sv' || !canEdit()) return;
-  const f=document.getElementById('svCritForm'); if(f) svUi.draft[r.id]=svReadCrit(f, r);   // keep ticks not saved yet
+  const f=document.getElementById('svSeenForm'); if(f){ const rd=svReadSeen(f); svUi.draft[r.id]={...(svUi.draft[r.id]||{}), seen:rd.seen, summary:rd.summary}; }   // keep notes not saved yet
   const ref=inp.dataset.svPhoto||''; regBusy=true; toast('Uploading…');
   try{ const up=await uploadToStorage(inp.files[0]); regBusy=false; clearDirtyForms(); const cur=regState.sv.list.find(x=>x.id===r.id)||r;
     if(await regUpdate('sv', r.id, {photos:[...(cur.photos||[]), {...up, ref, cap:''}]}, true)) toast('Photo added'); }
   catch(err){ console.error(err); toast((err&&err.userMsg)||'Upload failed'); } finally{ regBusy=false; clearDirtyForms(); renderRegDrawer(); } });
-/* ---- PDF report ---- */
+/* ---- PDF report (b128: a written report — no checklist; small signature boxes) ---- */
 async function svPdf(r){ if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
   toast('Preparing the report…');
   try{ const doc=pdfDoc({unit:'pt', format:'a4', docKey:'siteVisit', docSub:`${r.svNo||''} · ${isoToDmy(r.date||'')}`}), M=34, W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), CW=W-2*M, INK=[20,24,32];
-    let y=40; const ensure=h=>{ if(y+h>H-36){ doc.addPage(); y=40; } };
-    const title=t=>{ ensure(40); y+=10; doc.setFillColor(20,30,48); doc.rect(M, y, CW, 16, 'F'); doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text(t.toUpperCase(), M+5, y+11); doc.setTextColor(...INK); y+=20; };
-    const para=(t, sz)=>{ doc.setFont('helvetica','normal'); doc.setFontSize(sz||9); const L=doc.splitTextToSize(String(t||'—'), CW-4); for(const l of L){ ensure(12); doc.text(l, M+2, y+9); y+=11.5; } };
+    let y=40, sec=0; const ensure=h=>{ if(y+h>H-36){ doc.addPage(); y=40; } };
+    const title=t=>{ ensure(46); y+=10; sec++; doc.setFillColor(20,30,48); doc.rect(M, y, CW, 16, 'F'); doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text(`${sec}. ${t}`.toUpperCase(), M+5, y+11); doc.setTextColor(...INK); y+=22; };
+    const para=(t, sz, ind)=>{ doc.setFont('helvetica','normal'); doc.setFontSize(sz||9.5); doc.setTextColor(...INK); const x=M+2+(ind||0); String(t||'—').split(/\n+/).forEach(pg=>{ const L=doc.splitTextToSize(pg, CW-4-(ind||0)); for(const l of L){ ensure(13); doc.text(l, x, y+9); y+=12.5; } y+=2; }); };
     const kv=rows=>{ const K=104, half=(CW-2*K)/2; for(const rw of rows){ const cells=rw.length===2?[[rw[0],K,true],[rw[1],CW-K]]:[[rw[0],K,true],[rw[1],half],[rw[2],K,true],[rw[3],half]];
         doc.setFontSize(8.5); const L=cells.map(([t,w,b])=>{ doc.setFont('helvetica', b?'bold':'normal'); return doc.splitTextToSize(String(t===undefined||t===null||t===''?'—':t), w-8); }); const h=Math.max(16, ...L.map(l=>l.length*10.5+6)); ensure(h); let x=M;
         cells.forEach(([t,w,b],i)=>{ if(b){ doc.setFillColor(238,241,245); doc.rect(x,y,w,h,'F'); } doc.setDrawColor(170,174,182); doc.setLineWidth(0.5); doc.rect(x,y,w,h); doc.setFont('helvetica', b?'bold':'normal'); L[i].forEach((ln,n)=>doc.text(ln, x+4, y+11+n*10.5)); x+=w; }); y+=h; } };
-    const st=svCritStats(r), crew=(r.crewIds||[]).map(id=>workers.find(w=>w.id===id)).filter(Boolean);
+    const pill=(k, xr, yy)=>{ const t=svRateLbl(k).toUpperCase(); if(!t) return; doc.setFont('helvetica','bold'); doc.setFontSize(7.5); const tw=doc.getTextWidth(t)+12; doc.setFillColor(...SV_RATE_PDF[k]); doc.roundedRect(xr-tw, yy-9, tw, 13, 6, 6, 'F'); doc.setTextColor(255); doc.text(t, xr-tw+6, yy); doc.setTextColor(...INK); };
+    const bullets=(items)=>{ items.forEach((t,i)=>{ doc.setFont('helvetica','normal'); doc.setFontSize(9.5); const L=doc.splitTextToSize(String(t||''), CW-20); ensure(13); doc.text(`${i+1}.`, M+4, y+9); L.forEach((l,n)=>{ if(n) ensure(13); doc.text(l, M+18, y+9); y+=12.5; }); y+=2; }); };
+    const crew=(r.crewIds||[]).map(id=>workers.find(w=>w.id===id)).filter(Boolean), phAll=(r.photos||[]).filter(p=>/^image\//.test(p.contentType||'') || /\.(jpe?g|png|webp)$/i.test(p.name||'')).slice(0,16);
     doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text(`Site Visit Report — ${r.svNo||''}`, M, y+12); y+=20;
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(`Printed ${isoToDmy(localToday())}`, M, y+8); doc.setTextColor(...INK); y+=16;
-    title('1. Visit details');
-    kv([['Date', `${isoToDmy(r.date||'')}${r.timeFrom||r.timeTo?'  '+(r.timeFrom||'')+(r.timeTo?' – '+r.timeTo:''):''}`, 'Division', r.division], ['Project / location', r.projectId?projectName(r.projectId):'—', 'Exact place', r.location], ['Client', r.client, 'Purpose', r.purpose], ['Team name', r.teamName, 'Operations Executive', r.opsName], ['Visited by', r.visitors]]);
-    title('2. Crew at site and work performed');
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(`${r.division||''}${r.division?' division · ':''}Printed ${isoToDmy(localToday())}`, M, y+8); doc.setTextColor(...INK); y+=14;
+    title('Visit details');
+    kv([['Date', `${isoToDmy(r.date||'')}${r.timeFrom||r.timeTo?'  '+(r.timeFrom||'')+(r.timeTo?' – '+r.timeTo:''):''}`, 'Division', r.division], ['Project / location', r.projectId?projectName(r.projectId):'—', 'Exact place', r.location], ['Vehicle number', r.vehicleNo, 'Client', r.client], ['Team name', r.teamName, 'Operations Executive', r.opsName], ['Visited by', r.visitors, 'Purpose', r.purpose]]);
+    title('Crew at site and work performed');
     kv([['Crew present', crew.length?crew.map(w=>`${w.fullName}${w.designation?' ('+w.designation+')':''}`).join(', '):'—'], ['Other people', r.crewOther], ['Work performed', r.workDone]]);
-    title(`3. Criteria checklist — compliance ${st.pct===null?'—':st.pct+' %'} (${st.y} complied · ${st.n} not complied · ${st.na} N/A${st.open?' · '+st.open+' not checked':''})`);
-    { const L=svCritList(r), c=r.crit||{}, rows=[], lbl={y:'Complied', n:'NOT complied', na:'N/A', '':'Not checked'}; let g='', n=0;
-      for(const x of L){ if(x.g && x.g!==g){ g=x.g; rows.push(['', x.g.toUpperCase(), '', '']); } const v=c[x.id]||{}; n++; rows.push([String(n), x.t, lbl[v.r||''], v.rm||'']); }
-      y=rows.length?ppePdfTable(doc, ['#','Criterion','Result','Remarks'], rows, [22, 290, 70, CW-382], y, M):y; }
-    title(`4. HSE observations — unsafe acts / conditions (${(r.obs||[]).length})`);
-    if((r.obs||[]).length) y=ppePdfTable(doc, ['#','Type','Category','What was observed','Immediate action','Risk'], (r.obs||[]).map((o,i)=>[String(i+1), o.type||'', o.category||'', [o.desc, o.where?'('+o.where+')':''].filter(Boolean).join(' '), o.action||'', o.risk||'']), [20,62,70,190,130,CW-472], y, M); else para('None recorded.');
-    title(`5. Good observations (${(r.good||[]).length})`);
-    if((r.good||[]).length) y=ppePdfTable(doc, ['#','What was good','Person / crew','Category'], (r.good||[]).map((o,i)=>[String(i+1), o.desc||'', o.who||'', o.category||'']), [20,300,110,CW-430], y, M); else para('None recorded.');
-    title(`6. Actions after the visit (${(r.actions||[]).length})`);
-    if((r.actions||[]).length) y=ppePdfTable(doc, ['#','Action','Owner','Target date','Status'], (r.actions||[]).map((a,i)=>[String(i+1), a.action||'', a.owner||'', a.targetDate?isoToDmy(a.targetDate):'', a.status||'Open']), [20,270,100,70,CW-460], y, M); else para('No actions.');
-    title('7. Overall comment'); para(r.summary||'—');
+    // what we saw — written notes under each heading with the rating on the right
+    const seen=svSeenFilled(r); title('What we saw on site');
+    if(seen.length){ const c=svRateCount(r); const sm=SV_RATES.filter(([k])=>c[k]).map(([k,l])=>`${c[k]} ${l.toLowerCase()}`).join(' · ');
+      if(sm){ doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(90); doc.text(`In short: ${sm}`, M+2, y+8); doc.setTextColor(...INK); y+=14; }
+      seen.forEach(x=>{ ensure(36); doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text(x.h, M+2, y+10); pill(x.r, M+CW-2, y+10); y+=15; doc.setDrawColor(215,219,225); doc.setLineWidth(0.5); doc.line(M+2, y-2, M+CW-2, y-2); y+=2;
+        const pn=phAll.map((q,i)=>(q.ref||'')==='s:'+x.id?'P'+(i+1):'').filter(Boolean); const tx=String(x.t||'').trim();
+        para(tx?tx+(pn.length?`  (photo ${pn.join(', ')})`:''):(pn.length?`See photo ${pn.join(', ')}.`:'—'), 9.5); y+=4; }); }
+    else para('Nothing written.');
+    title(`Unsafe acts / conditions seen (${(r.obs||[]).length})`);
+    if((r.obs||[]).length) y=ppePdfTable(doc, ['#','Type','What we saw','Where / who','Done on the spot'], (r.obs||[]).map((o,i)=>[String(i+1), o.type||'', o.desc||'', o.where||'', o.action||'']), [20,70,200,90,CW-380], y, M); else para('None seen.');
+    title(`Good points seen (${(r.good||[]).length})`);
+    if((r.good||[]).length) bullets((r.good||[]).map(o=>`${o.desc||''}${o.who?' — '+o.who:''}`)); else para('—');
+    const fu=k=>(r[k]||[]).map((a,i)=>[String(i+1), `${k==='mgmt'&&a.category?'['+a.category+'] ':''}${a.action||''}`, a.owner||'', a.targetDate?isoToDmy(a.targetDate):'', (a.status||'Open')+(a.status==='Closed'&&a.closedDate?' '+isoToDmy(a.closedDate):'')]);
+    title(`Improvements required — crew / site (${(r.actions||[]).length})`);
+    if((r.actions||[]).length) y=ppePdfTable(doc, ['#','Improvement required','Who','By when','Status'], fu('actions'), [20,270,100,64,CW-454], y, M); else para('None.');
+    title(`Support needed from management (${(r.mgmt||[]).length})`);
+    if((r.mgmt||[]).length) y=ppePdfTable(doc, ['#','What management needs to provide','Who','By when','Status'], fu('mgmt'), [20,270,100,64,CW-454], y, M); else para('None requested.');
+    title('Overall conclusion'); para(r.summary||'—');
     // photos
-    const ph=(r.photos||[]).filter(p=>/^image\//.test(p.contentType||'') || /\.(jpe?g|png|webp)$/i.test(p.name||'')).slice(0,16);
-    if(ph.length){ title(`8. Photos (${ph.length})`); const cw=(CW-12)/2, chh=150; let col=0;
-      const capOf=p=>{ const ref=p.ref||''; if(ref.startsWith('c:')){ const L=svCritList(r), i=L.findIndex(x=>x.id===ref.slice(2)); return i>=0?`Criterion ${i+1}: ${L[i].t}`:'Criterion'; } if(ref.startsWith('o:')){ const i=(r.obs||[]).findIndex(o=>o.id===ref.slice(2)); return i>=0?`HSE observation ${i+1}: ${r.obs[i].desc||''}`:'HSE observation'; } if(ref.startsWith('g:')){ const i=(r.good||[]).findIndex(o=>o.id===ref.slice(2)); return i>=0?`Good observation ${i+1}: ${r.good[i].desc||''}`:'Good observation'; } return p.cap||'General photo'; };
+    const ph=phAll;
+    if(ph.length){ ensure(150+80); title(`Photos (${ph.length})`); const cw=(CW-12)/2, chh=150; let col=0;
+      const capOf=p=>{ const ref=p.ref||''; if(ref.startsWith('s:')){ const x=svSeenList(r).find(t=>t.id===ref.slice(2)); return x?x.h:'What we saw'; } if(ref.startsWith('o:')){ const i=(r.obs||[]).findIndex(o=>o.id===ref.slice(2)); return i>=0?`Unsafe ${i+1}: ${r.obs[i].desc||''}`:'Unsafe act / condition'; } if(ref.startsWith('g:')){ const i=(r.good||[]).findIndex(o=>o.id===ref.slice(2)); return i>=0?`Good point ${i+1}: ${r.good[i].desc||''}`:'Good point'; } return p.cap||'General photo'; };
       for(let i=0;i<ph.length;i++){ if(col===0) ensure(chh+26); const x=M+col*(cw+12); let img=null; try{ img=await fetchImageDataUrl(ph[i].url); }catch(e){}
         doc.setDrawColor(200,204,210); doc.rect(x, y, cw, chh); if(img){ try{ let iw=cw-8, ih=chh-8; try{ const pr=doc.getImageProperties(img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+(cw-iw)/2, y+(chh-ih)/2, iw, ih); }catch(e){} } else { doc.setFontSize(8); doc.text('(photo could not be loaded)', x+8, y+20); }
         doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text(doc.splitTextToSize(`P${i+1} — ${capOf(ph[i])}`, cw)[0], x, y+chh+10);
         col++; if(col===2){ col=0; y+=chh+20; } }
       if(col) y+=chh+20; }
-    // signatures
-    ensure(110); y+=12; const bw=(CW-12)/2, bh=86, me=hseSigOf((auth.currentUser||{}).email)||{};
-    [['PREPARED BY (HSE)', me.name||plWho(), me.img||''], ['OPERATIONS EXECUTIVE', (r.opsSig&&r.opsSig.n)||r.opsName||'', (r.opsSig&&r.opsSig.img)||'']].forEach(([role, name, img], i)=>{ const x=M+i*(bw+12);
-      doc.setDrawColor(110,116,126); doc.rect(x, y, bw, bh); doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,96,106); doc.text(role, x+6, y+11); doc.setTextColor(...INK);
-      if(img){ try{ doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+10, y+16, bw-20, bh-44); }catch(e){} } else { doc.setDrawColor(170,174,182); doc.line(x+12, y+bh-28, x+bw-12, y+bh-28); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text('Signature', x+12, y+bh-31); }
-      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.text(`Name: ${name||'______________________'}`, x+6, y+bh-10); });
+    // signatures — b128: small boxes side by side
+    ensure(72); y+=12; const bw=170, bh=56, me=hseSigOf((auth.currentUser||{}).email)||{};
+    [['PREPARED BY (HSE)', me.name||plWho(), me.img||''], ['OPERATIONS EXECUTIVE', (r.opsSig&&r.opsSig.n)||r.opsName||'', (r.opsSig&&r.opsSig.img)||'']].forEach(([role, name, img], i)=>{ const x=M+i*(bw+14);
+      doc.setDrawColor(150,156,166); doc.setLineWidth(0.5); doc.rect(x, y, bw, bh); doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(90,96,106); doc.text(role, x+5, y+9); doc.setTextColor(...INK);
+      if(img){ try{ let iw=110, ih=26; try{ const pr=doc.getImageProperties(img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+8, y+12+(26-ih)/2, iw, ih); }catch(e){} }
+      else { doc.setDrawColor(170,174,182); doc.line(x+8, y+36, x+bw-8, y+36); }
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text(doc.splitTextToSize(`Name: ${name||'____________________'}`, bw-10)[0], x+5, y+bh-7); });
     y+=bh;
     doc.save(`Burhan_Site_Visit_${String(r.svNo||'report').replace(/[^\w-]+/g,'_')}_${r.date||''}.pdf`); toast('Site visit report PDF downloaded');
   }catch(e){ console.error(e); toast('Could not make the PDF'); } }
