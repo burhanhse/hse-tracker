@@ -2401,7 +2401,7 @@ const PDF_DOCS={
 };
 PDF_DOCS.schedule={title:'Monthly HSE Schedule'};   // Batch 119
 PDF_DOCS.siteVisit={title:'Site Visit Report'};   // Batch 121
-function docControl(key){ const d=(((settingsDocs||{}).docControl||{}).docs||{})[key]; if(d && String(d.no||'').trim()) return d; const t=typeof ckDocDefault==='function'?ckDocDefault(key):null; return t?{...t, ...(d||{}), no:t.no}:(d||{}); }
+function docControl(key){ const d=(((settingsDocs||{}).docControl||{}).docs||{})[key]; if(d && String(d.no||'').trim()) return d; const t=(typeof ckDocDefault==='function'?ckDocDefault(key):null) || (typeof IMS_PDF_NUMBERS!=='undefined' && IMS_PDF_NUMBERS[key] ? {no:IMS_PDF_NUMBERS[key], rev:'00', date:''} : null); return t?{...t, ...(d||{}), no:t.no}:(d||{}); }
 let pdfLogoData=null;
 let docCtlBase='';
 function renderDocCtl(){
@@ -3129,7 +3129,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b129';
+const APP_BUILD='b129b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4683,11 +4683,12 @@ const IMS_BHN_EXTRA=[
   ['GI-CH-13','General Equipment Inspection Checklist','Checklist','','ck_gen','Made by the tracker — Inspection Checklists (items without their own checklist), Rev 01 — suggested number'],
   ['F0913-04','Yearly HSE Report','Form','P0913-02','yearlyReport','Made by the tracker — Monthly Report → yearly PDF'],
   ['F0913-05','Client Monthly HSE Report','Form','P0913-02','clientPack','Made by the tracker — Monthly Report → client report'],
+  ['F0913-06','Site Visit Report','Form','P0913-02','siteVisit','Made by the tracker — Site Visit Reports → PDF report (b129b)'],
   ['F0920-05','HSE Assurance Plan','Form','P0920-01','assurance','Made by the tracker — Assurance Plan PDF'],
   ['F0920-06','Internal Audit Plan','Form','P0920-01','auditPlan','Made by the tracker — Audits → audit → Audit plan PDF'],
 ];
 // PDF made by the tracker → document number (the ISO-map documents first, our own numbers for the rest)
-const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', ptw:'BHN-F0811-14', warnLetter:'BHN-HSE-WL-01', ck_veh:'BHN-VH-CH-12', ck_cut14:'BHN-CM-CH-01', ck_blower:'BHN-AM-CH-02', ck_boom:'BHN-BLT-CH-03', ck_drill:'BHN-DM-CH-04', ck_vib:'BHN-VM-CH-05', ck_fire:'BHN-FE-CH-06', ck_whm:'BHN-WHM-CH-07', ck_harness:'BHN-FBH-CH-08', ck_grind:'BHN-GM-CH-09', ck_ply:'BHN-CM-CH-10', ck_scissor:'BHN-SLT-CH-11', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13'};
+const IMS_PDF_NUMBERS={monthlyReport:'BHN-F0913-02', yearlyReport:'BHN-F0913-04', clientPack:'BHN-F0913-05', incident:'BHN-F1020-10', audit:'BHN-F0920-01', assurance:'BHN-F0920-05', kpi:'BHN-F0620-01', actions:'BHN-F1020-06', alert:'BHN-F0740-03', star:'BHN-F0540-03', ppeList:'BHN-F0811-21', ppeIssue:'BHN-F0811-01', workerProfile:'BHN-F0723-07', vehicle:'BHN-F0713-06', vehInsp:'BHN-F0713-07', tric:'BHN-F0740-02', comp:'BHN-F0723-03', auditProg:'BHN-F0920-02', auditPlan:'BHN-F0920-06', induction:'BHN-F0723-04', compMatrix:'BHN-F0723-02', aspects:'BHN-F0612-02', waste:'BHN-F0812-03', critEquip:'BHN-F0713-08', hra:'BHN-F0811-24', drill:'BHN-F0870-08', drillPlan:'BHN-F0870-09', mrPack:'BHN-F0930-01', trs:'BHN-F0723-05', mom:'BHN-F0740-04', ptw:'BHN-F0811-14', warnLetter:'BHN-HSE-WL-01', ck_veh:'BHN-VH-CH-12', ck_cut14:'BHN-CM-CH-01', ck_blower:'BHN-AM-CH-02', ck_boom:'BHN-BLT-CH-03', ck_drill:'BHN-DM-CH-04', ck_vib:'BHN-VM-CH-05', ck_fire:'BHN-FE-CH-06', ck_whm:'BHN-WHM-CH-07', ck_harness:'BHN-FBH-CH-08', ck_grind:'BHN-GM-CH-09', ck_ply:'BHN-CM-CH-10', ck_scissor:'BHN-SLT-CH-11', site:'BHN-F0811-23', liftPlan:'BHN-F0811-11', scaffJob:'BHN-F0811-13', siteVisit:'BHN-F0913-06'};
 function imsMasterList(){
   const pdfOf=no=>{ const k=Object.keys(IMS_PDF_NUMBERS).find(k=>IMS_PDF_NUMBERS[k]==='BHN-'+no); return k||''; };
   const out=[];
