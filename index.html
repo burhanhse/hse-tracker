@@ -1140,7 +1140,9 @@ details.icam-grp .cause-list{margin:6px 0;}
 .wl-radios{display:flex; gap:4px 16px; flex-wrap:wrap;} .wl-card .record-card-top{flex-wrap:wrap; gap:6px;} .wl-card .record-card-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center;} .wl-sigs{margin-top:8px; border-top:1px dashed var(--line); padding-top:6px;} .wl-refuse{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;} .wl-refuse input[data-wl-witness]{flex:1 1 200px; min-width:0;} .wl-form .subhead{margin-top:10px;}
 .wf-grp td{font-weight:800; font-size:14px; letter-spacing:.03em; text-transform:uppercase; padding:11px 12px; position:relative;} .wf-grp td>span b{margin-left:6px; padding:1px 9px; border-radius:10px; color:var(--bg);} .wf-grp .att-link{float:right; text-transform:none; letter-spacing:0;}
 .wf-grp-act td{background:var(--ok-bg); color:var(--ok); border-left:6px solid var(--ok); border-top:2px solid var(--ok);} .wf-grp-act td>span b{background:var(--ok);}
-.wf-grp-tmp td{background:var(--warn-bg); color:var(--warn); border-left:6px solid var(--warn); border-top:2px solid var(--warn);} .wf-grp-tmp td>span b{background:var(--warn);}
+.wf-grp-tmp td,.wf-grp-tmpS td{background:var(--warn-bg); color:var(--warn); border-left:6px solid var(--warn); border-top:2px solid var(--warn);} .wf-grp-tmp td>span b,.wf-grp-tmpS td>span b{background:var(--warn);}
+.wf-grp-tmpL td{background:rgba(37,99,235,.14); color:#3b82f6; border-left:6px solid #3b82f6; border-top:2px solid #3b82f6;} .wf-grp-tmpL td>span b{background:#3b82f6;}
+.badge.tt-long{background:rgba(37,99,235,.16); color:#3b82f6;} .tt-txt-l{color:#3b82f6; font-weight:700;} .tt-txt-s{color:var(--warn); font-weight:700;} .badge.tt-short{background:var(--warn-bg); color:var(--warn);} :root[data-theme="light"] .badge.tt-long,:root[data-theme="light"] .wf-grp-tmpL td{color:#1d4ed8;}
 .wf-grp-off td{background:var(--danger-bg); color:var(--danger); border-left:6px solid var(--danger); border-top:2px solid var(--danger);} .wf-grp-off td>span b{background:var(--danger);}
 .wf-grp td .wsub{color:inherit; opacity:.85;}
 /* Batch 107: project list — status groups + division colours */
@@ -1364,6 +1366,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
             <label>Start date *<input type="date" data-tfield="start" required></label>
             <label>Contract runs<select data-tfield="endType" id="tempEndType"><option>Fixed end date</option><option>Until work is completed</option><option>Until the project ends</option></select></label>
             <label>End date <span class="wsub" style="display:inline;">(not needed if open-ended)</span><input type="date" data-tfield="end"></label>
+            <label>Long / short term<select data-tfield="tempTerm" id="tempTerm"><option value="">Auto — from the dates (3 months or more = long term)</option><option value="long">Long term</option><option value="short">Short term</option></select><span class="wsub" id="tempTermHint"></span></label>
           </div>
           <p class="wsub" style="margin:8px 0 0;">After saving, upload the signed agreement (Contracts tab) and his training certificates and medical — the profile then shows whether he is <strong>cleared to start</strong>.</p>
           <div class="form-actions"><button type="button" class="btn" id="cancelAddTemp">Cancel</button><button type="submit" class="btn btn-primary">Save temporary worker</button></div>
@@ -1397,6 +1400,8 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
           <option value="active">Active only</option>
           <option value="inactive">Inactive only</option>
           <option value="temporary">Temporary contract workers</option>
+          <option value="templong">Temporary — long term</option>
+          <option value="tempshort">Temporary — short term</option>
         </select>
       </div>
 
@@ -3124,7 +3129,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b128';
+const APP_BUILD='b129';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -17224,7 +17229,7 @@ function renderTiles(){
       <div class="wf-hero-body">
         <div class="wf-donut"><svg viewBox="0 0 132 132" width="132" height="132" aria-hidden="true"><circle r="${R0}" cx="66" cy="66" fill="none" stroke="var(--surface-2)" stroke-width="14"/><g transform="rotate(-90 66 66)">${arcs}</g></svg>
           <div class="wf-donut-c"><div class="wf-big">${total}</div><div class="wf-sub">${active} active${total-active?` · ${total-active} inactive`:''}</div></div></div>
-        <div class="wf-legend"><div class="wf-leg-title">${donutTitle}</div>${legend}${(()=>{ const n=list.filter(w=>isTemp(w) && (w.status||'active')==='active').length; return n?`<div class="wsub" style="margin:6px 6px 0;">incl. <strong>${n}</strong> temporary contract worker${n===1?'':'s'}</div>`:''; })()}</div>
+        <div class="wf-legend"><div class="wf-leg-title">${donutTitle}</div>${legend}${(()=>{ const T=list.filter(w=>isTemp(w) && (w.status||'active')==='active'), n=T.length, nl=T.filter(w=>tempTermOf(w)==='long').length; return n?`<div class="wsub" style="margin:6px 6px 0;">incl. <strong>${n}</strong> temporary contract worker${n===1?'':'s'} — <span class="tt-txt-l">${nl} long term</span> · <span class="tt-txt-s">${n-nl} short term</span></div>`:''; })()}</div>
       </div>
       ${div==='all' && total ? (()=>{ const iss=list.filter(w=>workerIssues(w).length).length, ok=total-iss; return `<div class="wf-ready"><div class="wf-leg-title">Documents</div>
         <div class="wf-bar" role="img" aria-label="${ok} ready to work, ${iss} need attention">${ok?`<span class="wf-seg ok" style="flex:${ok}" title="${ok} ready to work"></span>`:''}${iss?`<span class="wf-seg bad" style="flex:${iss}" title="${iss} need attention"></span>`:''}</div>
@@ -17245,7 +17250,8 @@ function renderDivisionStrip(list){
   const cur=(typeof filters!=='undefined' && filters.trade) || 'all';
   const short=t=>t.replace(/ Division$/,'');
   const chip=(val,label,n,inact)=>`<button type="button" class="div-chip ${cur===val?'active':''}" data-divchip="${esc(val)}"><span class="div-chip-l">${esc(label)}</span><span class="div-chip-n">${n}</span>${inact?`<span class="div-chip-s">${inact} inactive</span>`:''}</button>`;
-  el.innerHTML = chip('all','All divisions', list.length, 0) + cats.map(t=>{ const ws=list.filter(w=>w.trade===t); const inact=ws.filter(w=>(w.status||'active')==='inactive').length; const dv=TRADE_TO_DIV.get(t), nsub=dv?list.filter(w=>(w.status||'active')!=='inactive' && subDivOf(w)===dv).length:0; return chip(t, short(t), ws.length, inact).replace('</button>', nsub?`<span class="div-chip-s" title="sub-contractors working for this division (listed under Sub Contractor)">+ ${nsub} sub</span></button>`:'</button>'); }).join('') + (noDiv?`<span class="div-chip div-chip-warn" title="Open these workers and choose their division">${noDiv} without a division</span>`:'');
+  el.innerHTML = chip('all','All divisions', list.length, 0) + cats.map(t=>{ const ws=list.filter(w=>w.trade===t); const inact=ws.filter(w=>(w.status||'active')==='inactive').length; const dv=TRADE_TO_DIV.get(t), nsub=dv?list.filter(w=>(w.status||'active')!=='inactive' && subDivOf(w)===dv).length:0; const tl=ws.filter(w=>(w.status||'active')!=='inactive' && tempTermOf(w)==='long').length, tsh=ws.filter(w=>(w.status||'active')!=='inactive' && tempTermOf(w)==='short').length;
+    return chip(t, short(t), ws.length, inact).replace('</button>', (tl||tsh?`<span class="div-chip-s" title="temporary contract workers: long term (3 months or more) / short term">${tl+tsh} temp · ${tl} long · ${tsh} short</span>`:'')+(nsub?`<span class="div-chip-s" title="sub-contractors working for this division (listed under Sub Contractor)">+ ${nsub} sub</span>`:'')+'</button>'); }).join('') + (noDiv?`<span class="div-chip div-chip-warn" title="Open these workers and choose their division">${noDiv} without a division</span>`:'');
 }
 function renderTradeFilter(){
   const sel=document.getElementById('tradeFilter');
@@ -17264,6 +17270,7 @@ function matches(w){
   if(filters.trade!=='all' && w.trade!==filters.trade) return false;
   if(filters.lang && !(w.languages||[]).includes(filters.lang)) return false;
   if(filters.status==='temporary'){ if(!isTemp(w)) return false; }
+  else if(filters.status==='templong' || filters.status==='tempshort'){ if((w.status||'active')==='inactive' || tempTermOf(w)!==(filters.status==='templong'?'long':'short')) return false; }   // Batch 129
   else if(filters.status!=='all' && (w.status||'active')!==filters.status) return false;
   return true;
 }
@@ -17286,7 +17293,7 @@ function renderTable(){
   const byName=(a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')), allDiv=filters.trade==='all';
   const sortL=l=>l.slice().sort((a,b)=>allDiv?(String(a.trade||'~').localeCompare(String(b.trade||'~')) || byName(a,b)):byName(a,b));
   const off=w=>(w.status||'active')==='inactive';
-  const G=[{k:'act', t:'Active workers', l:sortL(list.filter(w=>!off(w) && !isTemp(w)))},{k:'tmp', t:'Temporary workers', l:sortL(list.filter(w=>!off(w) && isTemp(w)))},{k:'off', t:'Inactive / left workers', l:sortL(list.filter(off))}].filter(g=>g.l.length);
+  const G=[{k:'act', t:'Active workers', l:sortL(list.filter(w=>!off(w) && !isTemp(w)))},{k:'tmpL', t:'Temporary — long term', l:sortL(list.filter(w=>!off(w) && tempTermOf(w)==='long'))},{k:'tmpS', t:'Temporary — short term', l:sortL(list.filter(w=>!off(w) && tempTermOf(w)==='short'))},{k:'off', t:'Inactive / left workers', l:sortL(list.filter(off))}].filter(g=>g.l.length);
   const rowHtml=w=>{
     const f=computeFlags(w);
     return `<tr data-id="${w.id}">
@@ -17608,6 +17615,23 @@ function renderDupNote(){
    They belong to the division they work for. When the latest contract has ended the tracker marks them
    inactive and releases them from the project (records + history kept); "+ New contract" brings them back. */
 function isTemp(w){ return !!w && w.empType==='Temporary'; }
+/* Batch 129: temporary LONG TERM / SHORT TERM — 3 months (90 days) or more = long term. Back-to-back contracts (no gap) count together;
+   an open-ended contract counts the days so far (moves to long term by itself). worker.tempTerm 'long' | 'short' = set by hand (wins); '' = auto. */
+const TEMP_LONG_DAYS=90;
+function tempRunDays(w){ const L=(w.contracts||[]).filter(c=>c && c.date).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))); if(!L.length) return 0;
+  const stop=(w.status==='inactive' && /^\d{4}-\d{2}-\d{2}/.test(String(w.contractEnded||''))) ? String(w.contractEnded).slice(0,10) : localToday(); let start=null, end=null;
+  for(const c of L){ let ce=contractEnd(c) || (contractOpenEnded(c) ? stop : c.date); if(ce<c.date) ce=c.date;
+    if(start===null || daysBetween(end, c.date)>1){ start=c.date; end=ce; } else if(ce>end) end=ce; }
+  return Math.max(0, daysBetween(start, end)+1); }
+function tempTermAuto(w){ return tempRunDays(w)>=TEMP_LONG_DAYS ? 'long' : 'short'; }
+function tempTermOf(w){ if(!isTemp(w)) return ''; return (w.tempTerm==='long' || w.tempTerm==='short') ? w.tempTerm : tempTermAuto(w); }
+function tempTermHintUpd(){ const f=document.getElementById('addTempForm'), h=document.getElementById('tempTermHint'); if(!f || !h) return; const g=k=>(f.querySelector(`[data-tfield="${k}"]`)||{}).value||'';
+  if(g('tempTerm')){ h.textContent='set by hand'; return; } const st=g('start'), et=g('endType')||'Fixed end date', en=g('end');
+  if(!st){ h.textContent=''; return; } if(et!=='Fixed end date' && !en){ h.textContent='→ Short term now; long term after '+TEMP_LONG_DAYS+' days'; return; }
+  if(!en || en<st){ h.textContent=''; return; } const d=daysBetween(st, en)+1; h.textContent=`→ ${d>=TEMP_LONG_DAYS?'Long term':'Short term'} (${d} days)`; }
+function tempTermLbl(k){ return k==='long' ? 'Long term' : k==='short' ? 'Short term' : ''; }
+function tempTermBadge(w){ const k=tempTermOf(w); if(!k) return ''; const d=tempRunDays(w);
+  return `<span class="badge tt-${k}" title="${w.tempTerm?'set by hand':`contract ${d} day${d===1?'':'s'} — ${TEMP_LONG_DAYS} days or more = long term`}">${tempTermLbl(k)}</span>`; }
 // Batch 34: open-ended contracts — "Until work is completed" (no end date; checked every 14 days) or "Until the project ends" (ends on the project's actual end date)
 const CONTRACT_CHECK_DAYS=14;
 function contractOpenEnded(c){ return !!c && (c.endType==='Until work is completed' || c.endType==='Until the project ends'); }
@@ -17632,7 +17656,7 @@ function contractState(w){
 function contractBadgeHtml(w){
   const st=contractState(w); if(!st) return '';
   const cls={ended:'muted', soon:'warn', running:'ok', none:'danger', open:'ok', check:'warn'}[st.key];
-  return `<span class="badge ${cls}" title="Temporary contract worker">Temp · ${esc(st.text)}</span>`;
+  return `${tempTermBadge(w)} <span class="badge ${cls}" title="Temporary contract worker">Temp · ${esc(st.text)}</span>`;
 }
 // Is this person cleared to start work? (role trainings, medical, Civil ID, induction for the project)
 function workerClearance(w){
@@ -17654,7 +17678,8 @@ function tempWorkerBoxHtml(w){
   const c=currentContract(w), st=contractState(w), cl=workerClearance(w);
   const stBadge={ended:'<span class="badge muted">Ended</span>', soon:'<span class="badge warn">Ending</span>', running:'<span class="badge ok">Running</span>', none:'<span class="badge danger">No contract</span>', open:'<span class="badge ok">Open-ended</span>', check:'<span class="badge warn">Still working?</span>'}[st.key];
   return `<div class="panel req-box" style="margin-bottom:16px;">
-    <div class="subhead" style="margin-top:0;">Temporary contract worker</div>
+    <div class="subhead" style="margin-top:0;">Temporary contract worker — ${esc(tempTermLbl(tempTermOf(w)))}</div>
+    <div class="rf"><span class="rf-k">${tempTermBadge(w)}</span><span class="rf-v">${w.tempTerm?`Set by hand to <strong>${esc(tempTermLbl(w.tempTerm))}</strong> (Profile → Long / short term)`:`Contract ${tempRunDays(w)} day${tempRunDays(w)===1?'':'s'}${(currentContract(w)&&contractOpenEnded(currentContract(w))&&!contractEnd(currentContract(w)))?' so far':''} — ${TEMP_LONG_DAYS} days (3 months) or more is long term`}</span></div>
     <div class="rf"><span class="rf-k">${stBadge}</span><span class="rf-v">${c ? `<strong>${esc(c.agreementNo||'Contract')}</strong> · ${esc(c.date||'?')} → ${esc(contractEnd(c)||(contractOpenEnded(c)?'open':'?'))}${c.project?' · '+esc(c.project):''} · ` : ''}${esc(st.text)}</span></div>
     <div class="rf"><span class="rf-k">${cl.ok?'<span class="badge ok">✓ Cleared</span>':'<span class="badge danger">✗ Not cleared</span>'}</span><span class="rf-v">${cl.ok ? 'Cleared to start work — trainings, medical and project induction in order.' : '<strong>Not cleared to start:</strong> '+esc(cl.why.join(' · '))}</span></div>
     ${canEdit() && c && !contractEnd(c) && contractOpenEnded(c) && (w.status||'active')==='active' ? `<div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">${c.endType==='Until work is completed'?`<button type="button" class="btn btn-sm" data-contract-still="${w.id}">Still working${c.checkedOn?` (last checked ${esc(c.checkedOn)})`:''}</button>`:''}<button type="button" class="btn btn-sm" data-contract-end="${w.id}" data-armed="0">End contract today</button></div>`:''}
@@ -19900,6 +19925,7 @@ function profileTabHtml(w){
       <label>Subcontractor / company<input data-field="contractor" value="${esc(w.contractor||'')}"></label>
       <label>Date of joining<input type="date" data-field="dateOfJoining" value="${esc(w.dateOfJoining||'')}"></label>
       <label>Employment type<select data-field="empType"><option value="" ${isTemp(w)?'':'selected'}>Permanent / company staff</option><option value="Temporary" ${isTemp(w)?'selected':''}>Temporary contract (individual)</option></select></label>
+      <label data-tempterm ${isTemp(w)?'':'hidden'}>Long / short term<select data-field="tempTerm"><option value="" ${w.tempTerm?'':'selected'}>Auto — from the contract dates (now: ${esc(tempTermLbl(tempTermAuto(w)))}, ${tempRunDays(w)} days)</option><option value="long" ${w.tempTerm==='long'?'selected':''}>Long term (set by hand)</option><option value="short" ${w.tempTerm==='short'?'selected':''}>Short term (set by hand)</option></select></label>
       <label>Employment status<select data-field="status"><option value="active" ${(w.status||'active')==='active'?'selected':''}>Active</option><option value="inactive" ${w.status==='inactive'?'selected':''}>Inactive</option></select></label>
       <label data-last-day ${w.status==='inactive'?'':'hidden'}>Last day at work<input type="date" data-field="contractEnded" value="${esc(String(w.contractEnded||'').slice(0,10))}" max="${localToday()}"></label>
     </div>
@@ -20739,6 +20765,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     p.hidden=false; f.querySelector('[data-tfield="fullName"]').focus();
   });
   document.getElementById('tempTrade').addEventListener('change', e=>{ const r=document.getElementById('tempRole'); r.innerHTML=designationOptionsHtml(e.target.value, r.value); });
+  document.getElementById('addTempForm').addEventListener('input', tempTermHintUpd); document.getElementById('addTempForm').addEventListener('change', tempTermHintUpd);   // Batch 129
   document.getElementById('cancelAddTemp').addEventListener('click', ()=>{ document.getElementById('addTempPanel').hidden=true; document.getElementById('addTempForm').reset(); });
   document.getElementById('addTempForm').addEventListener('submit', async e=>{
     e.preventDefault();
@@ -20750,7 +20777,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(dup){ toast(`${dup.fullName||'A worker'} already has Civil ID ${v.civilId}${dup.deleted?' (in Deleted workers)':''} — open him and use “+ New contract” instead`); return; }
     const site=v.projectId ? siteEquipmentList.find(x=>x.id===v.projectId) : null;
     const now=new Date().toISOString(), me=(auth.currentUser&&auth.currentUser.email)||'';
-    const data={fullName:v.fullName, civilId:v.civilId, mobileNumber:v.mobileNumber, trade:v.trade, designation:v.designation||'', empType:'Temporary', contractor:'Individual — temporary contract', status:'active',
+    const data={fullName:v.fullName, civilId:v.civilId, mobileNumber:v.mobileNumber, trade:v.trade, designation:v.designation||'', empType:'Temporary', tempTerm:(v.tempTerm==='long'||v.tempTerm==='short')?v.tempTerm:'', contractor:'Individual — temporary contract', status:'active',
       contracts:[{id:genId(), agreementNo:v.agreementNo, project:site?(site.siteName||''):'', date:v.start, endType:v.endType||'Fixed end date', expiry:v.end}],
       projectId:site?site.id:null, projectAssignedAt:site?now:null, projectHistory:site?[{projectId:site.id, name:site.siteName||'', from:v.start, to:''}]:[],
       inductions:[],trainings:[],competency:[],medical:[],licenses:[],warnings:[],violations:[], createdAt:now, createdBy:me};
@@ -20921,6 +20948,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(e.target.matches && e.target.matches('#recordForm [data-field="expiry"]')) e.target.dataset.auto='0';
   });
   document.getElementById('drawerBody').addEventListener('change', e=>{
+    if(e.target.matches('#profileForm [data-field="empType"]')){ const l=document.querySelector('#profileForm [data-tempterm]'); if(l) l.hidden=e.target.value!=='Temporary'; }   // Batch 129
     if(e.target.matches('#profileForm [data-field="status"]')){ const l=document.querySelector('#profileForm [data-last-day]'); if(l){ l.hidden=e.target.value!=='inactive'; const i=l.querySelector('input'); if(!l.hidden && i && !i.value) i.value=localToday(); } }   // Batch 118
     if(e.target.matches('#profileForm [data-field="trade"], #profileForm [data-field="subDiv"]')){ const f=document.getElementById('profileForm'), tr=f.querySelector('[data-field="trade"]').value, sd=f.querySelector('[data-field="subDiv"]'), lb=f.querySelector('[data-subdiv]');   // Batch 123
       if(lb) lb.hidden=canonTrade(tr)!=='Sub Contractor'; const d=f.querySelector('select[data-field="designation"]'); if(d) d.innerHTML=designationOptionsHtml(roleTradeFor(tr, sd&&!lb.hidden?sd.value:''), d.value); }
