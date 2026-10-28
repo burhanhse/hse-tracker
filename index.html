@@ -3129,7 +3129,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b129b';
+const APP_BUILD='b130';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -11056,6 +11056,15 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
    project) or at a company location. Old checklists with a typed item are linked when the plate / serial matches one item. */
 const INSP_CK_FOR={extinguishers:'fire', harness:'harness', calibration:'gen', specialPpe:'gen', firstAid:'gen', vehKit:'gen', nh15:'gen', escapeCyl:'gen'};
 const INSP_TOOL_TPL=['grind','drill','cut14','ply','blower','vib','boom','scissor','whm','gen'];
+/* Batch 130: no separate inspection for kit — it is checked in the Vehicle Inspection (BHN-VH-CH-12).
+   Never a separate inspection (anywhere): PPE & Safety kit, NH-15 masks, first aid, escape cylinders, special PPE.
+   Inside a vehicle only fire extinguishers, full body harnesses and power tools keep their own checklist (H2S / calibrated instruments in a vehicle: none).
+   The expiry / calibration date of every item is still tracked. */
+const INSP_NO_SEP=new Set(['vehKit','nh15','firstAid','escapeCyl','specialPpe']);
+const INSP_VEH_OWN=new Set(['extinguishers','harness','powerTools']);
+function inspNeeds(e){ if(!e || !(e.category==='powerTools' || INSP_CK_FOR[e.category])) return false; if(INSP_NO_SEP.has(e.category)) return false;
+  if(String(equipLoc(e)).startsWith('veh:') && !INSP_VEH_OWN.has(e.category)) return false; return true; }
+function inspCoveredNote(e){ return String(equipLoc(e)).startsWith('veh:') ? 'Checked during the vehicle inspection (BHN-VH-CH-12) — no separate inspection' : 'No separate inspection needed — checked when the kit is issued / during the vehicle inspection'; }
 const INSP_FREQ_OPTS=[1,2,3,6,12];
 function inspNorm(x){ return String(x||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
 function inspTplOf(e){ if(!e) return null; if(e.category==='powerTools'){ if(e.ckTpl && INSP_TOOL_TPL.includes(e.ckTpl)) return e.ckTpl; const n=String(e.name||'').toLowerCase();
@@ -11070,7 +11079,7 @@ function inspItemOf(ref){ ref=String(ref||'');
   return null; }
 // items that need a regular checklist
 function inspItemsDue(){ const out=[]; for(const v of activeVehicles()) out.push('veh:'+v.id);
-  for(const e of activeEquipment()) if(e.category==='powerTools' || INSP_CK_FOR[e.category]) out.push('eq:'+e.id); return out; }
+  for(const e of activeEquipment()) if(inspNeeds(e)) out.push('eq:'+e.id); return out; }
 function inspItemOptions(){ const L=[...activeVehicles().map(v=>'veh:'+v.id), ...activeEquipment().filter(e=>e.category!=='chemicals').map(e=>'eq:'+e.id)].map(inspItemOf).filter(Boolean);
   L.sort((a,b)=>(a.kind===b.kind?0:a.kind==='veh'?-1:1) || a.group.localeCompare(b.group) || a.label.localeCompare(b.label));
   return [{value:'', label:'Select the item…'}, ...L.map(x=>({value:x.ref, label:`${x.kind==='veh'?'Vehicle':x.group} · ${x.label}${x.where?' · '+x.where:''}`}))]; }
@@ -11099,7 +11108,7 @@ function inspStateBadge(S){ if(!S) return ''; if(S.notFit) return `<span class="
   if(S.st==='over') return `<span class="badge danger" title="Last inspection ${esc(isoToDmy(S.lastDate))}">Inspection overdue · ${esc(isoToDmy(S.next))}</span>`;
   if(S.st==='due') return `<span class="badge warn" title="Last inspection ${esc(isoToDmy(S.lastDate))}">Inspection due ${esc(isoToDmy(S.next))}</span>`;
   return `<span class="badge ok" title="Last inspection ${esc(isoToDmy(S.lastDate))}">✓ inspected · next ${esc(isoToDmy(S.next))}</span>`; }
-function inspEqBadge(e){ if(!(e.category==='powerTools' || INSP_CK_FOR[e.category]) && !inspLinked('eq:'+e.id).length) return ''; return inspStateBadge(inspState('eq:'+e.id)); }
+function inspEqBadge(e){ if(!inspNeeds(e)){ if(!(e.category==='powerTools' || INSP_CK_FOR[e.category])) return ''; const S=inspState('eq:'+e.id); return S && S.notFit ? inspStateBadge(S) : ''; } return inspStateBadge(inspState('eq:'+e.id)); }   // b130
 /* ---- vehicles: the checklist replaces the old monthly form (old records stay readable) ---- */
 function ckVehResult(r){ if(r.fit===false) return 'A'; return inspCounts(r).no ? 'B' : 'pass'; }
 function vehInspAll(v){ return [...(v.inspections||[]).map(x=>({date:x.date||'', result:x.result||'pass', old:x})), ...inspLinked('veh:'+v.id).filter(inspDone).map(r=>({date:r.date||'', result:ckVehResult(r), ck:r}))]
@@ -11117,14 +11126,16 @@ async function inspNewFor(ref, tplKey){ if(!canEdit() || inspMaking) return; con
   inspMaking=true; try{ const tpl=tplKey||it.tpl; return await regCreate('insp', {item:ref, template:'bhn_'+tpl, subject:it.subject, date:t, projectId:it.projectId||'', inspector:plWho(), answers:{}, comments:{}}, 'checklist'); } finally{ inspMaking=false; } }
 /* ---- the vehicle round: after the vehicle checklist, the items inside it ---- */
 function inspRoundHtml(r){ const ref=inspRefOf(r); let vid=''; if(ref.startsWith('veh:')) vid=ref.slice(4); else if(ref.startsWith('eq:')){ const e=equipmentList.find(x=>x.id===ref.slice(3)); const l=e?equipLoc(e):''; if(l.startsWith('veh:')) vid=l.slice(4); }
-  if(!vid) return ''; const v=vehicles.find(x=>x.id===vid); if(!v) return ''; const items=equipInVeh(vid), t=localToday(), ed=canEdit();
+  if(!vid) return ''; const v=vehicles.find(x=>x.id===vid); if(!v) return ''; let items=equipInVeh(vid); const t=localToday(), ed=canEdit();
   if(!items.length) return ref.startsWith('veh:')?`<div class="panel insp-round"><div class="subhead" style="margin-top:0;">Items inside ${esc(v.vehicleNumber||'')}</div><p class="wsub">No equipment recorded inside this vehicle — add it in the vehicle's "Equipment inside" tab.</p></div>`:'';
+  const cov=items.filter(e=>!inspNeeds(e) && ref!=='eq:'+e.id); items=items.filter(e=>inspNeeds(e) || ref==='eq:'+e.id);   // b130
+  const covHtml=cov.length?`<p class="wsub" style="margin:6px 0 0;">✓ Checked in this vehicle inspection (no separate checklist): ${esc(cov.map(e=>equipTitle(e)).join(' · '))}</p>`:'';
   const rows=items.map(e=>{ const S=inspState('eq:'+e.id), today=S.last&&S.last.date===t, cur=ref==='eq:'+e.id, openToday=S.open&&S.open.date===t;
     return `<div class="ind-mrow${cur?' insp-cur':''}"><span><strong>${esc(equipTitle(e))}</strong> <span class="wsub">${esc(e.serial||'')}</span> ${today?'<span class="badge ok">✓ done today</span>':inspStateBadge(S)}</span><span>${cur?'<span class="wsub">this one</span>':today?`<button type="button" class="btn btn-sm" data-reg-row="insp:${esc(S.last.id)}" data-reg-tab="checklist">Open</button>`:ed?`<button type="button" class="btn btn-sm ${S.st==='ok'&&!openToday?'':'btn-primary'}" data-insp-new="eq:${esc(e.id)}">${openToday?'Carry on':'Inspect'}</button>`:''}</span></div>`; }).join('');
   const left=items.filter(e=>{ const S=inspState('eq:'+e.id); return !(S.last&&S.last.date===t) && S.st!=='ok'; }).length;
   const back=!ref.startsWith('veh:') ? (()=>{ const vr=inspLinked('veh:'+vid)[0]; return vr?`<button type="button" class="btn btn-sm" data-reg-row="insp:${esc(vr.id)}" data-reg-tab="checklist">← Vehicle inspection ${esc(isoToDmy(vr.date))}</button>`:''; })() : '';
   return `<div class="panel insp-round"><div class="section-head"><h3 style="margin:0;">${ic('truck')} Vehicle round — items inside ${esc(v.vehicleNumber||'')} <span class="wsub">${left?left+' still due':'all done'}</span></h3>${back}</div>
-    <p class="wsub" style="margin:-2px 0 6px;">Each item is saved on its own record with its own checklist, PDF and next due date.</p>${rows}</div>`; }
+    <p class="wsub" style="margin:-2px 0 6px;">${items.length?'Fire extinguishers, harnesses and power tools are saved on their own record with their own checklist, PDF and next due date.':'Nothing inside needs its own checklist.'}</p>${rows}${covHtml}</div>`; }
 /* ---- vehicle drawer: inspections + equipment inside ---- */
 function vehInspTabHtml(v){ const ed=canEdit(), S=inspState('veh:'+v.id), dnu=vehDoNotUse(v), L=inspLinked('veh:'+v.id), old=viSorted(v), f=inspFreq('veh');
   const status = dnu ? `<div class="vi-status danger">${ic('stop')} <b>DO NOT USE</b> — the last inspection found it NOT fit for use (or a Class A defect from an old inspection is not fixed). A new inspection that finds it fit clears this.</div>`
@@ -11147,10 +11158,11 @@ function vehKitTabHtml(v){ const ed=canEdit(), items=equipInVeh(v.id).sort((a,b)
     ${ed?`<form id="vehKitAdd" class="ptw-inline" style="margin-top:10px;"><select name="eq" aria-label="Item to put in this vehicle"><option value="">Put an item in this vehicle…</option>${pool.map(e=>`<option value="${esc(e.id)}">${esc((EQUIP_CATEGORIES[e.category]||{}).short||'')} · ${esc(equipTitle(e))} · ${esc(e.serial||'—')} · ${esc(locLabel(equipLoc(e)))}</option>`).join('')}</select><button type="submit" class="btn btn-sm">Put in vehicle</button></form><p class="wsub" style="margin:4px 0 0;">Only items in store, at a company location or at this vehicle's project are listed. New items: Plant &amp; Equipment → add → Location "Inside a vehicle".</p>`:''}`; }
 async function equipMoveTo(e, to, note){ const from=equipLoc(e); if(to===from) return false; const hist=(e.history||[]).concat([{kind:'move', date:localToday(), from, to, fromLabel:locLabel(from), toLabel:locLabel(to), note:note||'', by:plWho()}]); return updateEquip(e.id, {location:to, history:hist}); }
 /* ---- equipment drawer: inspections ---- */
-function equipInspHtml(e){ const ref='eq:'+e.id, ed=canEdit(), L=inspLinked(ref), need=e.category==='powerTools' || !!INSP_CK_FOR[e.category]; if(e.category==='chemicals') return '';
-  const S=inspState(ref), tpl=inspTplOf(e)||'gen', T=CK_TPL.find(t=>t.key===tpl);
-  return `<div class="subhead" style="margin-top:18px;">Inspections ${need?inspStateBadge(S):''}</div>
-    <p class="wsub" style="margin:-4px 0 6px;">${T?`Checklist: <b>${esc(T.title)}</b> (${esc(T.no)}) · ${esc(inspFreqLabel(inspFreq(tpl)))}`:''}${e.expiry?` · the expiry / service date above is tracked separately`:''}.</p>
+function equipInspHtml(e){ const ref='eq:'+e.id, ed=canEdit(), L=inspLinked(ref), need=inspNeeds(e); if(e.category==='chemicals') return '';
+  const S=inspState(ref), tpl=inspTplOf(e)||'gen', T=CK_TPL.find(t=>t.key===tpl), cov=!need && (e.category==='powerTools' || INSP_CK_FOR[e.category]);
+  if(cov && !L.length) return `<div class="subhead" style="margin-top:18px;">Inspections <span class="badge muted">No separate inspection</span></div><p class="wsub" style="margin:-4px 0 6px;">${esc(inspCoveredNote(e))}.${e.expiry?' The expiry date above is still tracked.':''}</p>`;
+  return `<div class="subhead" style="margin-top:18px;">Inspections ${need?inspStateBadge(S):cov?'<span class="badge muted">No separate inspection</span>':''}</div>
+    <p class="wsub" style="margin:-4px 0 6px;">${cov?`${esc(inspCoveredNote(e))} — older records below. `:''}${T&&!cov?`Checklist: <b>${esc(T.title)}</b> (${esc(T.no)}) · ${esc(inspFreqLabel(inspFreq(tpl)))}`:''}${e.expiry?` · the expiry / service date above is tracked separately`:''}.</p>
     ${e.category==='powerTools'&&ed?`<label class="wsub">Checklist for this item <select id="equipCkTpl">${INSP_TOOL_TPL.map(k=>{ const t=CK_TPL.find(x=>x.key===k); return t?`<option value="${k}" ${k===tpl?'selected':''}>${esc(t.title)}</option>`:''; }).join('')}</select></label>`:''}
     ${L.length?L.slice(0,12).map(r=>`<div class="ind-mrow" data-reg-row="insp:${esc(r.id)}" data-reg-tab="checklist" style="cursor:pointer;"><span><strong class="mono">${esc(r.inspNo||'')}</strong> ${esc(isoToDmy(r.date))} <span class="wsub">· ${esc(r.inspector||'')}</span></span><span>${inspResultBadge(r)}</span></div>`).join(''):'<p class="wsub">No inspections recorded.</p>'}
     ${ed?`<p><button type="button" class="btn btn-sm btn-primary" data-insp-new="${esc(ref)}">+ New inspection</button></p>`:''}`; }
