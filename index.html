@@ -3140,7 +3140,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b132';
+const APP_BUILD='b133';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -16868,8 +16868,26 @@ function deletedWorkers(){ return workers.filter(w=>w.deleted); }
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 /* Batch 132: ID & card copies on the worker — civilIdScan (front, older single scan), civilIdBack, opalFront, opalBack */
-const ID_CARD_SLOTS=[{k:'civilIdScan', l:'Civil ID — front', short:'Civil ID front'},{k:'civilIdBack', l:'Civil ID — back', short:'Civil ID back'},{k:'opalFront', l:'OPAL card — front', short:'OPAL card front'},{k:'opalBack', l:'OPAL card — back', short:'OPAL card back'}];
-const WORKER_FILE_KEYS=['photo','signature', ...ID_CARD_SLOTS.map(x=>x.k)];
+const ID_CARD_SLOTS=[{k:'civilIdScan', l:'Civil ID — front', short:'Civil ID front'},{k:'civilIdBack', l:'Civil ID — back', short:'Civil ID back'}];
+/* b133: the OPAL card (front + back, joined into one picture) is the certificate on his OPAL training records (HSE Induction, H2S, SCBA) — not on the profile */
+const OPAL_SLOTS=[{k:'opalFront', l:'OPAL card — front → Training'},{k:'opalBack', l:'OPAL card — back → Training'}];
+const BULK_SLOTS=[...ID_CARD_SLOTS, ...OPAL_SLOTS];
+const OPAL_CODES=['HSEI','H2SI','H2SR','SCBA','SCBA-R'];
+const WORKER_FILE_KEYS=['photo','signature', 'civilIdScan','civilIdBack','opalFront','opalBack'];
+// the OPAL training records the card belongs to: imported from the card (cardRef / provider OPAL), else the latest record of each OPAL course — only those without their own certificate
+function opalTargets(w){ const T=(w.trainings||[]).map((r,i)=>({r,i,c:pdoCourseOf(r.name)})).filter(x=>x.c && OPAL_CODES.includes(x.c.code) && !(x.r.attachment && x.r.attachment.url));
+  const marked=T.filter(x=>x.r.cardRef || /opal/i.test(x.r.provider||'')); if(marked.length) return marked;
+  const fam=c=>({H2SI:'H2S', H2SR:'H2S', 'SCBA-R':'SCBA'})[c]||c, best=new Map(); for(const x of T){ const f=fam(x.c.code); const b=best.get(f); if(!b || String(x.r.expiry||x.r.date||'')>String(b.r.expiry||b.r.date||'')) best.set(f,x); } return [...best.values()]; }
+async function opalJoin(front, back, name){   // front / back: File or data: URL → one JPEG (front on top)
+  const load=src=>new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=typeof src==='string'?src:URL.createObjectURL(src); });
+  const ims=[]; for(const x of [front, back]) if(x){ try{ ims.push(await load(x)); }catch(e){} }
+  if(!ims.length) return null; const W=Math.min(1400, Math.max(...ims.map(i=>i.naturalWidth))), hs=ims.map(i=>Math.round(i.naturalHeight*W/i.naturalWidth)), gap=ims.length>1?16:0;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=hs.reduce((a,b)=>a+b,0)+gap; const ctx=cv.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+  let y=0; ims.forEach((im,k)=>{ ctx.drawImage(im, 0, y, W, hs[k]); y+=hs[k]+gap; });
+  const blob=await new Promise(res=>cv.toBlob(res,'image/jpeg',0.86)); return blob?new File([blob], name||'OPAL_card.jpg', {type:'image/jpeg'}):null; }
+// upload the joined card once per target record (each record owns its own file, so replacing one never breaks another)
+async function opalAttach(w, file){ const tg=opalTargets(w); if(!tg.length || !file) return {n:0, arr:null}; const arr=(w.trainings||[]).slice(); let n=0;
+  for(const x of tg){ const att=await uploadToStorage(file); arr[x.i]={...arr[x.i], attachment:{...att, name:'OPAL card (front + back).jpg'}}; n++; } return {n, arr, names:tg.map(x=>x.c.code)}; }
 function genId(){ return (crypto.randomUUID? crypto.randomUUID() : 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2)); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
 
@@ -17063,7 +17081,7 @@ auth.onAuthStateChanged(user=>{
 async function startData(){
   try{
     unsubscribeWorkers = db.collection('workers').orderBy('fullName','asc').onSnapshot(snap=>{
-      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); workersLoaded=true; if(typeof siteLinksSyncSoon==='function') siteLinksSyncSoon(); if(typeof ppeLinkSyncSoon==='function' && canEdit()) ppeLinkSyncSoon();
+      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); workersLoaded=true; if(typeof opalMoveOldSoon==='function') opalMoveOldSoon(); if(typeof siteLinksSyncSoon==='function') siteLinksSyncSoon(); if(typeof ppeLinkSyncSoon==='function' && canEdit()) ppeLinkSyncSoon();
       document.getElementById('dbUnavailableBanner').hidden=true;
       renderAll();
     }, err=>{ console.error(err); if(!auth.currentUser) return; toast('Sync error — some data may be stale.'); document.getElementById('dbUnavailableBanner').hidden=false; });
@@ -19808,8 +19826,8 @@ function attachmentPreviewHtml(att, label, removeTarget){
 }
 function attachmentBlock(worker, key, record, label, targetKey){
   const att = record ? record.attachment : worker[targetKey];
-  if(record && !(att && att.url) && record.cardRef && worker[record.cardRef] && worker[record.cardRef].url){ const c=worker[record.cardRef], isImg=(c.contentType||'').startsWith('image/');   // Batch 132
-    return `<div class="att-block"><div class="att-present">${isImg?`<a href="${esc(c.url)}" target="_blank" rel="noopener"><img class="att-thumb" src="${esc(c.url)}" alt="OPAL card"></a>`:`<span class="att-file-icon">${ic('file')}</span>`}<div class="att-actions"><span class="wsub">${esc(ID_CARD_SLOTS.find(x=>x.k===record.cardRef)?.l||'Card copy')} — from Profile → ID &amp; card copies</span></div></div><label class="upload-btn">Upload own ${esc(label)}<input type="file" hidden data-attach-for="${key}:${record.id}"></label></div>`; }
+  if(record && !(att && att.url) && record.cardRef && ((worker.opalFront&&worker.opalFront.url)||(worker.opalBack&&worker.opalBack.url))){ const L=[worker.opalFront, worker.opalBack].filter(c=>c&&c.url);   // Batch 132/133: older copies kept on the worker — moved to the records by opalMoveOld()
+    return `<div class="att-block"><div class="att-present">${L.map(c=>`<a href="${esc(c.url)}" target="_blank" rel="noopener"><img class="att-thumb" src="${esc(c.url)}" alt="OPAL card"></a>`).join('')}<div class="att-actions"><span class="wsub">OPAL card — being attached to this record…</span></div></div><label class="upload-btn">Upload ${esc(label)}<input type="file" hidden data-attach-for="${key}:${record.id}"></label></div>`; }
   const uploadFor = record ? `${key}:${record.id}` : targetKey;
   const inner = attachmentPreviewHtml(att, label, uploadFor);
   const uploadCtl = `<label class="upload-btn">${att&&att.url?'Replace':'Upload'} ${esc(label)}<input type="file" hidden data-attach-for="${uploadFor}"></label>`;
@@ -20003,7 +20021,7 @@ function profileTabHtml(w){
   ${workerRecognitionsHtml(w)}
   <div class="section-head" style="margin-top:20px;"><h3>Photo</h3></div>
   ${photo}
-  <div class="section-head" style="margin-top:16px;"><h3>ID &amp; card copies</h3><span class="wsub">Civil ID and OPAL card, front and back — many at once: Workforce → "ID / card copies"</span></div>
+  <div class="section-head" style="margin-top:16px;"><h3>Civil ID copy</h3><span class="wsub">front and back — the OPAL card goes on his training records (Training tab) · many at once: Workforce → "ID / card copies"</span></div>
   ${civilScan}
   ${w.signature&&w.signature.url&&canEdit()?`<div class="notice" style="margin-top:16px;">${ic('alert')} A signature image from before is still stored for this worker. Signatures are no longer kept in the tracker. <button type="button" class="att-link" data-remove-attach="signature" data-armed="0">Delete stored signature</button></div>`:''}
   <div class="danger-zone">
@@ -20756,22 +20774,27 @@ async function confirmImport(){
 let idBulk={files:[]};
 function idBulkGuess(name){ const n=String(name||''), digits=(n.match(/\d{6,12}/g)||[]); let w=null; for(const d of digits){ w=workers.find(x=>!x.deleted && normKey(x.civilId)===d); if(w) break; }
   const back=/back|rear/i.test(n), opal=/opal|hse.?pass/i.test(n); return {wid:w?w.id:'', slot:opal?(back?'opalBack':'opalFront'):(back?'civilIdBack':'civilIdScan')}; }
-function idBulkHtml(){ const L=idBulk.files, ok=L.filter(x=>x.wid && x.slot).length, ws=workers.filter(w=>!w.deleted).slice().sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
+function idBulkOpalTxt(w){ const tg=w?opalTargets(w):[]; return tg.length?'→ Training: '+[...new Set(tg.map(x=>x.c.code==='HSEI'?'HSE Induction':/^H2S/.test(x.c.code)?'H2S':'SCBA'))].join(', '):''; }
+function idBulkHtml(){ const L=idBulk.files, ok=L.filter(x=>x.wid && x.slot && !x.done && (!/^opal/.test(x.slot) || opalTargets(workers.find(y=>y.id===x.wid)||{}).length)).length, ws=workers.filter(w=>!w.deleted).slice().sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
   return `<div class="section-head"><h3>${ic('upload')} ID / card copies — many workers at once</h3><button type="button" class="btn btn-sm" data-idb-close="1">Close</button></div>
-    <p class="wsub" style="margin:-4px 0 8px;">Choose the photos (Civil ID and OPAL card, front and back). A file named with the <b>Civil ID number</b> and <b>CID / OPAL</b> + <b>front / back</b> (e.g. <span class="mono">128243978_OPAL_back.jpg</span>) goes to the right worker and box by itself — check the list, change anything, then Upload. A box that already has a copy is replaced.</p>
+    <p class="wsub" style="margin:-4px 0 8px;">Choose the photos (Civil ID and OPAL card, front and back). A file named with the <b>Civil ID number</b> and <b>CID / OPAL</b> + <b>front / back</b> (e.g. <span class="mono">128243978_OPAL_back.jpg</span>) goes to the right worker by itself — check the list, change anything, then Upload. <b>Civil ID</b> → his profile (replaces an older copy). <b>OPAL card</b> → front and back joined into one picture and attached as the certificate on his OPAL training records (HSE Induction, H2S, SCBA) that have no certificate yet — import the OPAL details first.</p>
     <label class="upload-btn">Choose photos…<input type="file" id="idBulkInput" accept="image/*,application/pdf" multiple hidden></label>
     ${L.length?`<div style="margin-top:8px;">${L.map((x,i)=>{ const w=workers.find(y=>y.id===x.wid), has=w&&w[x.slot]&&w[x.slot].url;
       return `<div class="idb-row"><span>${x.thumb?`<img src="${esc(x.thumb)}" alt="">`:ic('file')}</span><span class="wsub" style="overflow-wrap:anywhere;">${esc(x.file.name)}</span>
         <select data-idb-w="${i}" aria-label="Worker"><option value="">— choose the worker —</option>${ws.map(y=>`<option value="${esc(y.id)}" ${y.id===x.wid?'selected':''}>${esc(y.fullName||'')} · ${esc(y.civilId||'no Civil ID')}</option>`).join('')}</select>
-        <select data-idb-s="${i}" aria-label="Box">${ID_CARD_SLOTS.map(sl=>`<option value="${sl.k}" ${sl.k===x.slot?'selected':''}>${esc(sl.l)}</option>`).join('')}</select>
-        <span>${x.done?'<span class="badge ok">✓ uploaded</span>':x.err?`<span class="badge danger">${esc(x.err)}</span>`:!x.wid?'<span class="badge warn">no worker</span>':has?'<span class="badge info">replaces</span>':'<span class="badge ok">ready</span>'} <button type="button" class="icon-btn" data-idb-del="${i}" aria-label="Remove from the list">✕</button></span></div>`; }).join('')}</div>
+        <select data-idb-s="${i}" aria-label="Box">${BULK_SLOTS.map(sl=>`<option value="${sl.k}" ${sl.k===x.slot?'selected':''}>${esc(sl.l)}</option>`).join('')}</select>
+        <span>${x.done?`<span class="badge ok">✓ ${esc(x.doneTxt||'uploaded')}</span>`:x.err?`<span class="badge danger">${esc(x.err)}</span>`:!x.wid?'<span class="badge warn">no worker</span>':/^opal/.test(x.slot)?(idBulkOpalTxt(w)?`<span class="badge ok">${esc(idBulkOpalTxt(w))}</span>`:'<span class="badge warn">no OPAL training record — import the details first</span>'):has?'<span class="badge info">replaces</span>':'<span class="badge ok">ready</span>'} <button type="button" class="icon-btn" data-idb-del="${i}" aria-label="Remove from the list">✕</button></span></div>`; }).join('')}</div>
     <div class="form-actions"><button type="button" class="btn btn-primary" data-idb-go="1" ${ok&&!idBulk.busy?'':'disabled'}>${idBulk.busy?'Uploading…':`Upload ${ok} file${ok===1?'':'s'}`}</button></div>`:''}`; }
 function idBulkRender(){ const el=document.getElementById('idBulkPanel'); if(el && !el.hidden) el.innerHTML=idBulkHtml(); }
 async function idBulkUpload(){ if(idBulk.busy || !canEdit()) return; idBulk.busy=true; idBulkRender(); let n=0, f=0;
   const by=new Map(); idBulk.files.forEach(x=>{ if(x.wid && x.slot && !x.done){ if(!by.has(x.wid)) by.set(x.wid, []); by.get(x.wid).push(x); } });
-  for(const [wid, L] of by){ const data={}, olds=[];
-    for(const x of L){ try{ const att=await uploadToStorage(x.file); data[x.slot]=att; x.ok=true; }catch(e){ console.error(e); x.err=(e&&e.userMsg)||'upload failed'; f++; } }
-    if(!Object.keys(data).length) continue; const w=workers.find(y=>y.id===wid); if(!w) continue; for(const k of Object.keys(data)) if(w[k] && w[k].path) olds.push(w[k].path);
+  for(const [wid, L] of by){ const data={}, olds=[], w=workers.find(y=>y.id===wid); if(!w) continue;
+    for(const x of L.filter(x=>!/^opal/.test(x.slot))){ try{ const att=await uploadToStorage(x.file); data[x.slot]=att; x.ok=true; }catch(e){ console.error(e); x.err=(e&&e.userMsg)||'upload failed'; f++; } }
+    const op=L.filter(x=>/^opal/.test(x.slot));   // b133: OPAL front + back → one picture → certificate on his OPAL training records
+    if(op.length){ try{ const fr=op.find(x=>x.slot==='opalFront'), bk=op.find(x=>x.slot==='opalBack'), j=await opalJoin(fr&&fr.file, bk&&bk.file, `OPAL_card_${normKey(w.civilId)||w.id}.jpg`), r=await opalAttach(w, j);
+        if(r.n){ data.trainings=r.arr; op.forEach(x=>{ x.ok=true; x.doneTxt='on '+r.n+' training record'+(r.n>1?'s':''); }); } else op.forEach(x=>{ x.err='no OPAL training record'; f++; }); }
+      catch(e){ console.error(e); op.forEach(x=>{ x.err=(e&&e.userMsg)||'upload failed'; f++; }); } }
+    if(!Object.keys(data).length) continue; for(const k of Object.keys(data)) if(k!=='trainings' && w[k] && w[k].path) olds.push(w[k].path);
     try{ await db.collection('workers').doc(wid).update(stamp(deltaize(w, data))); L.filter(x=>x.ok).forEach(x=>{ x.done=true; n++; }); olds.forEach(pth=>deleteStorageFile(pth)); }
     catch(e){ console.error(e); L.forEach(x=>{ if(x.ok){ x.err='could not save'; f++; } }); } }
   idBulk.busy=false; idBulkRender(); toast(`${n} card cop${n===1?'y':'ies'} saved${f?` · ${f} failed`:''}`); }
@@ -20784,6 +20807,14 @@ document.addEventListener('change', e=>{ const t=e.target; if(!t) return;
   if(t.id==='idBulkInput'){ for(const file of [...(t.files||[])]){ const g=idBulkGuess(file.name), x={file, ...g, thumb:''}; if(/^image\//.test(file.type)) try{ x.thumb=URL.createObjectURL(file); }catch(err){} idBulk.files.push(x); } t.value=''; idBulkRender(); return; }
   if(t.dataset && t.dataset.idbW!==undefined){ const x=idBulk.files[Number(t.dataset.idbW)]; if(x){ x.wid=t.value; x.err=''; idBulkRender(); } return; }
   if(t.dataset && t.dataset.idbS!==undefined){ const x=idBulk.files[Number(t.dataset.idbS)]; if(x){ x.slot=t.value; idBulkRender(); } } });
+
+let _opalMoving=false, _opalMoved=new Set();
+async function opalMoveOld(){ if(_opalMoving || !canEdit() || !storage) return; const L=workers.filter(w=>!w.deleted && ((w.opalFront&&w.opalFront.url)||(w.opalBack&&w.opalBack.url)) && !_opalMoved.has(w.id) && opalTargets(w).length); if(!L.length) return; _opalMoving=true;
+  try{ for(const w0 of L){ _opalMoved.add(w0.id); const w=workers.find(x=>x.id===w0.id)||w0; try{ const fr=w.opalFront&&w.opalFront.url?await fetchImageDataUrl(w.opalFront.url):null, bk=w.opalBack&&w.opalBack.url?await fetchImageDataUrl(w.opalBack.url):null;
+      const j=await opalJoin(fr, bk, `OPAL_card_${normKey(w.civilId)||w.id}.jpg`); if(!j) continue; const r=await opalAttach(w, j); if(!r.n) continue; const FV=fsFieldValue(), olds=[w.opalFront, w.opalBack].filter(x=>x&&x.path).map(x=>x.path);
+      await db.collection('workers').doc(w.id).update(stamp({trainings:r.arr, opalFront:FV?FV.delete():null, opalBack:FV?FV.delete():null})); olds.forEach(pth=>deleteStorageFile(pth)); }catch(e){ console.warn('OPAL card move', w.id, e); } } }
+  finally{ _opalMoving=false; } }
+function opalMoveOldSoon(){ clearTimeout(opalMoveOldSoon._t); opalMoveOldSoon._t=setTimeout(()=>{ opalMoveOld().catch(e=>console.warn(e)); }, 1500); }
 
 /* ---------------- worker QR codes ---------------- */
 const QR_LIB_URL='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
