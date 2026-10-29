@@ -419,7 +419,7 @@ table.breakdown-table tbody tr[data-open-site]{cursor:pointer;}
 table.breakdown-table tbody tr.total-row td{border-top:2px solid var(--line); background:var(--surface-2);}
 .updated-note{font-size:11.5px; color:var(--ink-muted); margin:0 0 12px; font-style:italic;}
 .view-only-badge{margin-top:18px; padding:9px 12px; border-radius:9px; background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn); font-size:12px; font-weight:600; line-height:1.35;}
-body.read-only #addWorkerBtn, body.read-only #addTempBtn, body.read-only #clearSampleBtn, body.read-only #addVehicleBtn, body.read-only #addSiteBtn,
+body.read-only #addWorkerBtn, body.read-only #idBulkBtn, body.read-only #addTempBtn, body.read-only #clearSampleBtn, body.read-only #addVehicleBtn, body.read-only #addSiteBtn,
 body.read-only #addEquipBtn, body.read-only #addReportEntryBtn, body.read-only .import-btn,
 body.read-only #trashBtn, body.read-only #vehicleTrashBtn, body.read-only #siteTrashBtn, body.read-only #equipTrashBtn,
 body.read-only [data-edit], body.read-only [data-del], body.read-only [data-redit], body.read-only [data-rdel],
@@ -1158,6 +1158,9 @@ details.icam-grp .cause-list{margin:6px 0;}
 #siteRows tr.pj-done .wname{opacity:.8;}
 :root{--dv-civil:#7fb4ff; --dv-civil-bg:rgba(59,130,246,.16); --dv-scaff:#d4a8ff; --dv-scaff-bg:rgba(168,85,247,.18); --dv-rental:#5eead4; --dv-rental-bg:rgba(20,184,166,.16); --dv-office:#c3cedb; --dv-office-bg:rgba(148,163,184,.18);}
 :root[data-theme="light"]{--dv-civil:#1d4ed8; --dv-civil-bg:#e3ecff; --dv-scaff:#7e22ce; --dv-scaff-bg:#f3e8ff; --dv-rental:#0f766e; --dv-rental-bg:#dcf5f1; --dv-office:#475569; --dv-office-bg:#eceff3;}
+.idc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px;} .idc-slot{border:1px solid var(--line); border-radius:10px; padding:8px 10px;}
+.idb-row{display:grid; grid-template-columns:56px minmax(140px,1.2fr) minmax(160px,1.4fr) minmax(130px,1fr) auto; gap:8px; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line);} .idb-row img{width:56px; height:40px; object-fit:cover; border-radius:6px; border:1px solid var(--line);} .idb-row select{min-width:0;}
+@media (max-width:720px){ .idb-row{grid-template-columns:56px 1fr; } }
 .dv-tag{display:inline-block; padding:3px 10px; border-radius:999px; font-weight:700; font-size:12.5px; white-space:nowrap; border:1px solid currentColor;}
 .dv-Civil{color:var(--dv-civil); background:var(--dv-civil-bg);} .dv-Scaffolding{color:var(--dv-scaff); background:var(--dv-scaff-bg);} .dv-Rental{color:var(--dv-rental); background:var(--dv-rental-bg);} .dv-Office{color:var(--dv-office); background:var(--dv-office-bg);} .wf-subgrp td{font-size:12px; font-weight:700; color:var(--ink-muted); padding:5px 10px; background:transparent;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
 .ptw-cc{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; padding:6px 2px;} .ptw-cc-n{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2);} .ptw-cc-n strong{display:block; font-size:24px; line-height:1.1;} .ptw-cc-n span{font-size:12px; color:var(--ink-muted);}
@@ -1331,6 +1334,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
           <button class="btn btn-ghost btn-sm" id="clearSampleBtn" hidden>Remove sample data</button>
           <button class="btn btn-sm" id="printQrCardsBtn" type="button" hidden title="Print QR ID cards for the workers currently shown"><svg class="ic" aria-hidden="true"><use href="#i-qr"/></svg> QR ID cards</button>
           <button class="btn btn-sm import-btn" id="importWorkersBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Import Excel</button>
+          <button class="btn btn-sm import-btn" id="idBulkBtn" type="button" title="Upload Civil ID / OPAL card photos for many workers at once"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> ID / card copies</button>
           <button class="btn btn-sm" id="trashBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Deleted workers (0)</button>
           <button class="btn" id="addTempBtn" type="button">+ Temporary worker</button>
           <button class="btn btn-primary" id="addWorkerBtn">+ Add worker</button>
@@ -1357,6 +1361,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
       <div id="medFitStrip"></div>
       <div class="lang-strip" id="langStrip" aria-label="Languages spoken"></div>
 
+      <div class="panel" id="idBulkPanel" hidden></div>
       <div class="panel" id="addTempPanel" hidden>
         <h3>Add a temporary contract worker</h3>
         <p class="wsub" style="margin:-6px 0 10px;">For individuals hired for a few days or weeks under a contractor agreement. They count under the division they work for; when the contract ends they are released from the project automatically (records are kept, and “+ New contract” brings them back).</p>
@@ -3135,7 +3140,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b131';
+const APP_BUILD='b132';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -16862,6 +16867,9 @@ function activeWorkers(){ return workers.filter(w=>!w.deleted); }
 function deletedWorkers(){ return workers.filter(w=>w.deleted); }
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+/* Batch 132: ID & card copies on the worker — civilIdScan (front, older single scan), civilIdBack, opalFront, opalBack */
+const ID_CARD_SLOTS=[{k:'civilIdScan', l:'Civil ID — front', short:'Civil ID front'},{k:'civilIdBack', l:'Civil ID — back', short:'Civil ID back'},{k:'opalFront', l:'OPAL card — front', short:'OPAL card front'},{k:'opalBack', l:'OPAL card — back', short:'OPAL card back'}];
+const WORKER_FILE_KEYS=['photo','signature', ...ID_CARD_SLOTS.map(x=>x.k)];
 function genId(){ return (crypto.randomUUID? crypto.randomUUID() : 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2)); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
 
@@ -19800,6 +19808,8 @@ function attachmentPreviewHtml(att, label, removeTarget){
 }
 function attachmentBlock(worker, key, record, label, targetKey){
   const att = record ? record.attachment : worker[targetKey];
+  if(record && !(att && att.url) && record.cardRef && worker[record.cardRef] && worker[record.cardRef].url){ const c=worker[record.cardRef], isImg=(c.contentType||'').startsWith('image/');   // Batch 132
+    return `<div class="att-block"><div class="att-present">${isImg?`<a href="${esc(c.url)}" target="_blank" rel="noopener"><img class="att-thumb" src="${esc(c.url)}" alt="OPAL card"></a>`:`<span class="att-file-icon">${ic('file')}</span>`}<div class="att-actions"><span class="wsub">${esc(ID_CARD_SLOTS.find(x=>x.k===record.cardRef)?.l||'Card copy')} — from Profile → ID &amp; card copies</span></div></div><label class="upload-btn">Upload own ${esc(label)}<input type="file" hidden data-attach-for="${key}:${record.id}"></label></div>`; }
   const uploadFor = record ? `${key}:${record.id}` : targetKey;
   const inner = attachmentPreviewHtml(att, label, uploadFor);
   const uploadCtl = `<label class="upload-btn">${att&&att.url?'Replace':'Upload'} ${esc(label)}<input type="file" hidden data-attach-for="${uploadFor}"></label>`;
@@ -19874,7 +19884,7 @@ async function deleteStorageFile(path, ownerId){
 }
 function collectAttachmentPaths(entity, recordTypesMap, singleKeys){
   recordTypesMap = recordTypesMap || RECORD_TYPES;
-  singleKeys = singleKeys || ['photo','civilIdScan','signature'];
+  singleKeys = singleKeys || WORKER_FILE_KEYS;
   const paths=[];
   for(const k of singleKeys){ if(entity[k] && entity[k].path) paths.push(entity[k].path); }
   for(const key of Object.keys(recordTypesMap)){
@@ -19939,7 +19949,7 @@ function languagesFieldHtml(w){
 function profileTabHtml(w){
   const updatedNote = updatedNoteHtml(w);
   const photo = attachmentBlock(w,null,null,'photo','photo');
-  const civilScan = attachmentBlock(w,null,null,'Civil ID scan','civilIdScan');
+  const civilScan = `<div class="idc-grid">${ID_CARD_SLOTS.map(x=>`<div class="idc-slot"><div class="subhead" style="margin-top:0;">${esc(x.l)}</div>${attachmentBlock(w,null,null,x.short,x.k)}</div>`).join('')}</div>`;   // Batch 132
   const gcc=parseFloat(w.experienceGCCYears)||0, other=parseFloat(w.experienceOtherYears)||0;
   const total=(gcc+other);
   return `${updatedNote}
@@ -19993,7 +20003,7 @@ function profileTabHtml(w){
   ${workerRecognitionsHtml(w)}
   <div class="section-head" style="margin-top:20px;"><h3>Photo</h3></div>
   ${photo}
-  <div class="section-head" style="margin-top:16px;"><h3>Civil ID scan</h3></div>
+  <div class="section-head" style="margin-top:16px;"><h3>ID &amp; card copies</h3><span class="wsub">Civil ID and OPAL card, front and back — many at once: Workforce → "ID / card copies"</span></div>
   ${civilScan}
   ${w.signature&&w.signature.url&&canEdit()?`<div class="notice" style="margin-top:16px;">${ic('alert')} A signature image from before is still stored for this worker. Signatures are no longer kept in the tracker. <button type="button" class="att-link" data-remove-attach="signature" data-armed="0">Delete stored signature</button></div>`:''}
   <div class="danger-zone">
@@ -20479,6 +20489,19 @@ const IMPORT_TYPES = {
     {key:'emergencyContactRelation', h:'Emergency contact relation', ex:'Spouse'},
     {key:'emergencyContactPhone', h:'Emergency contact phone', ex:'+91 98765 43210'},
   ]},
+  idTrain:{label:'ID & OPAL card details (update workers)', noun:'worker', coll:'workers', file:'Burhan_HSE_ID_OPAL_template.xlsx', update:true, cols:[   // Batch 132
+    {key:'fullName', h:'Full name', req:true, help:'Name as on the Civil ID', ex:'MD Shahinur'},
+    {key:'civilId', h:'Civil ID', req:true, help:'Civil number — finds the worker (or the name, if the worker has no Civil ID yet). Not found = added as a new worker', ex:'128243978'},
+    {key:'civilIdExpiry', h:'Civil ID expiry', date:true, ex:'13/04/2027'},
+    {key:'dateOfBirth', h:'Date of birth', date:true, help:'Filled only when empty in the tracker', ex:'15/08/1982'},
+    {key:'nationality', h:'Nationality', help:'Filled only when empty in the tracker', ex:'Bangladeshi'},
+    {key:'trade', h:'Trade / division', help:'Only for workers not yet in the tracker (blank = Civil Division)', ex:'Civil Division'},
+    {key:'designation', h:'Designation', help:'Only for workers not yet in the tracker', ex:''},
+    {key:'opalNo', h:'OPAL verification no.', help:'From the OPAL Unified HSE Passport (front) — saved as the card no. on the trainings', ex:'LCkEMj57cb'},
+    {key:'opalIssued', h:'OPAL card issue date', date:true, help:'Front of the OPAL card — used as the HSE Induction date', ex:'10/07/2025'},
+    {key:'h2s', h:'H2S valid until', date:true, help:'Back of the OPAL card — H2S expiry', ex:'10/07/2028'},
+    {key:'scba', h:'SCBA & Confined Space valid until', date:true, help:'Back of the OPAL card — blank if not on the card', ex:''},
+  ]},
   vehicles:{label:'Vehicles (fleet)', noun:'vehicle', coll:'vehicles', file:'Burhan_HSE_Vehicles_template.xlsx', cols:[
     {key:'vehicleNumber', h:'Vehicle number', req:true, help:'Plate number (used to spot duplicates)', ex:'RSA 12345'},
     {key:'model', h:'Model', ex:'Toyota Hilux 2022'},
@@ -20590,6 +20613,7 @@ function validateImportRows(rows){
     const dates={};
     for(const col of T.cols.filter(x=>x.date)){ const d=importDate(r[col.key]); if(!d.ok) errors.push(`${col.h} "${r[col.key]}" is not a date`); else dates[col.key]=d.value; }
     let doc=null, label='', key='', dupKey='';
+    if(importType==='idTrain'){ const v=idTrainRow(txt, dates, errors, rowNo, seen); if(v) return out.push(v); return; }   // Batch 132
     if(importType==='workers'){
       const trade=mapTrade(txt('trade'));
       if(txt('trade') && trade===null) errors.push(`Trade / division "${txt('trade')}" not recognised`);
@@ -20637,21 +20661,50 @@ function validateImportRows(rows){
   });
   return {rows:out};
 }
+/* Batch 132: ID & OPAL card import — updates the worker found by Civil ID (or name), adds HSE Induction / H2S / SCBA from the OPAL card */
+const OPAL_IMPORT=[{f:'opalIssued', code:'HSEI', fam:['HSEI'], expiry:false},{f:'h2s', code:'H2SI', fam:['H2SI','H2SR'], expiry:true},{f:'scba', code:'SCBA', fam:['SCBA','SCBA-R'], expiry:true}];
+function idTrainMatch(civil, name){ const L=workers.filter(w=>!w.deleted), k=normKey(civil), byId=k?L.find(w=>normKey(w.civilId)===k):null; if(byId) return {w:byId};
+  const n=normKey(name), byName=n?L.filter(w=>normKey(w.fullName)===n):[]; if(byName.length===1){ const w=byName[0]; if(!w.civilId || normKey(w.civilId)===k) return {w}; return {err:`the name matches ${w.fullName} who has Civil ID ${w.civilId} — check the number`}; }
+  if(byName.length>1) return {err:'more than one worker with this name — add the Civil ID to the right one first'}; return {}; }
+function idTrainRecs(w, dates, opalNo, me, now){ const add=[], skip=[];
+  for(const o of OPAL_IMPORT){ const v=dates[o.f]; if(!v) continue; const c=PDO_COURSES.find(x=>x.code===o.code); if(!c) continue;
+    const have=((w&&w.trainings)||[]).filter(r=>{ const pc=pdoCourseOf(r.name); return pc && o.fam.includes(pc.code); });
+    if(o.expiry ? have.some(r=>String(r.expiry||'')>=v) : have.length){ skip.push(c.code); continue; }
+    const date=o.expiry ? compAddMonths(v, -12*(c.years||3)) : v;
+    add.push({id:genId(), name:pdoCourseLabel(c), provider:'OPAL', certNo:opalNo||'', date, expiry:o.expiry?v:'', hours:c.hrs!=null?String(c.hrs):'', notes:`From the OPAL Unified HSE Passport L1${dates.opalIssued?' (card issued '+isoToDmy(dates.opalIssued)+')':''}${o.expiry?' — completion date = valid until − '+(c.years||3)+' years':''}`, attachment:null, cardRef:'opalBack', createdAt:now, createdBy:me}); }
+  return {add, skip}; }
+function idTrainRow(txt, dates, errors, rowNo, seen){ const label=txt('fullName'), key=txt('civilId'), now=new Date().toISOString(), me=(auth.currentUser&&auth.currentUser.email)||'';
+  if(errors.length) return {rowNo, label, key, status:'error', msg:errors.join('; ')};
+  const dk='id|'+normKey(key||label); if(seen.has(dk)) return {rowNo, label, key, status:'skip', msg:'Repeated in this file'}; seen.add(dk);
+  const m=idTrainMatch(key, label); if(m.err) return {rowNo, label, key, status:'error', msg:m.err};
+  const w=m.w, opalNo=txt('opalNo'), T=idTrainRecs(w, dates, opalNo, me, now), ch=[], data={};
+  const tn=T.add.map(r=>pdoCourseOf(r.name).code).join(' + ');
+  if(!w){ const trade=mapTrade(txt('trade')); if(txt('trade') && trade===null) return {rowNo, label, key, status:'error', msg:`Trade / division "${txt('trade')}" not recognised`};
+    const doc={fullName:label, civilId:key, civilIdExpiry:dates.civilIdExpiry||'', nationality:txt('nationality'), dateOfBirth:dates.dateOfBirth||'', designation:(knownRole(txt('designation'))||txt('designation')), trade:trade||'Civil Division', contractor:'', status:'active',
+      inductions:[], trainings:T.add, competency:[], medical:[], licenses:[], warnings:[], violations:[], createdAt:now, createdBy:me, importedAt:now};
+    return {rowNo, label, key, status:'new', msg:`New worker (${doc.trade})${tn?' + '+tn:''}`, doc}; }
+  if(!w.civilId && key){ data.civilId=key; ch.push('Civil ID'); }
+  const ex=dates.civilIdExpiry; if(ex){ if(!w.civilIdExpiry || ex>w.civilIdExpiry){ data.civilIdExpiry=ex; ch.push(`ID expiry ${isoToDmy(ex)}${w.civilIdExpiry?' (was '+isoToDmy(w.civilIdExpiry)+')':''}`); } else if(ex<w.civilIdExpiry) ch.push(`ID expiry kept ${isoToDmy(w.civilIdExpiry)} (file has older ${isoToDmy(ex)})`); }
+  if(dates.dateOfBirth && !w.dateOfBirth){ data.dateOfBirth=dates.dateOfBirth; ch.push('date of birth'); }
+  if(txt('nationality') && !w.nationality){ data.nationality=txt('nationality'); ch.push('nationality'); }
+  if(T.add.length){ data.trainings=[...(w.trainings||[]), ...T.add]; ch.push('+ '+tn); }
+  if(T.skip.length) ch.push(T.skip.join(' + ')+' already recorded');
+  const real=Object.keys(data).length; return {rowNo, label:w.fullName||label, key, status:real?'upd':'skip', msg:real?ch.join(' · '):('Nothing new'+(ch.length?' — '+ch.join(' · '):'')), wid:w.id, data}; }
 function renderImportBody(){
   const T=IMPORT_TYPES[importType];
   const opts=Object.entries(IMPORT_TYPES).map(([k,v])=>`<option value="${k}" ${k===importType?'selected':''}>${esc(v.label)}</option>`).join('');
   let preview='';
   if(importResults && importResults.fileError) preview=`<div class="notice" style="background:var(--danger-bg); color:var(--danger); border-color:var(--danger);">${esc(importResults.fileError)}</div>`;
   else if(importResults){
-    const R=importResults.rows, n={new:0, skip:0, error:0}; R.forEach(r=>n[r.status]++);
-    const badge=r=> r.status==='new' ? '<span class="badge ok">New</span>' : r.status==='skip' ? '<span class="badge muted">Skipped</span>' : '<span class="badge danger">Error</span>';
-    preview = `<div class="import-summary"><span class="badge ok">${n.new} new</span><span class="badge muted">${n.skip} skipped</span><span class="badge danger">${n.error} with errors</span></div>
+    const R=importResults.rows, n={new:0, upd:0, skip:0, error:0}; R.forEach(r=>n[r.status]++);
+    const badge=r=> r.status==='new' ? '<span class="badge ok">New</span>' : r.status==='upd' ? '<span class="badge info">Update</span>' : r.status==='skip' ? '<span class="badge muted">Skipped</span>' : '<span class="badge danger">Error</span>';
+    preview = `<div class="import-summary"><span class="badge ok">${n.new} new</span>${T.update?`<span class="badge info">${n.upd} to update</span>`:''}<span class="badge muted">${n.skip} skipped</span><span class="badge danger">${n.error} with errors</span></div>
       ${n.error?'<p class="wsub" style="margin:0 0 8px;">Rows with errors will not be imported — fix them in Excel and choose the file again, or add them by hand later.</p>':''}
       <div class="table-wrap" style="box-shadow:none; max-height:360px; overflow:auto;"><table class="stats-table import-table">
-        <thead><tr><th>Excel row</th><th>${importType==='workers'?'Name':importType==='vehicles'?'Vehicle':'Item'}</th><th>${importType==='workers'?'Civil ID':importType==='vehicles'?'Number':'Serial no.'}</th><th>Result</th><th>Details</th></tr></thead>
+        <thead><tr><th>Excel row</th><th>${T.coll==='workers'?'Name':importType==='vehicles'?'Vehicle':'Item'}</th><th>${T.coll==='workers'?'Civil ID':importType==='vehicles'?'Number':'Serial no.'}</th><th>Result</th><th>Details</th></tr></thead>
         <tbody>${R.map(r=>`<tr><td class="mono">${r.rowNo}</td><td>${esc(r.label||'—')}</td><td class="mono">${esc(r.key||'—')}</td><td>${badge(r)}</td><td>${esc(r.msg)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty-state">No data rows found in the first sheet.</td></tr>'}</tbody>
       </table></div>
-      <div class="form-actions"><button type="button" class="btn btn-primary" id="importConfirmBtn" ${n.new&&!importBusy?'':'disabled'}>${importBusy?'Importing…':`Import ${n.new} new ${n.new===1?T.noun:T.noun+'s'}`}</button></div>`;
+      <div class="form-actions"><button type="button" class="btn btn-primary" id="importConfirmBtn" ${(n.new||n.upd)&&!importBusy?'':'disabled'}>${importBusy?'Importing…':T.update?`Import — ${n.new} new · ${n.upd} updated`:`Import ${n.new} new ${n.new===1?T.noun:T.noun+'s'}`}</button></div>`;
   }
   document.getElementById('importBody').innerHTML = `
     <label>What are you importing?<select id="importTypeSelect">${opts}</select></label>
@@ -20659,7 +20712,7 @@ function renderImportBody(){
       <li><button type="button" class="btn btn-sm" id="importTemplateBtn">${ic('download')} Download the ${esc(T.label.toLowerCase())} template</button></li>
       <li>Fill it in Excel — one row per ${esc(T.noun)}. Keep the column headings. The "How to fill" sheet explains each column.</li>
       <li>Choose the filled file: <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="width:auto; display:inline-block;"></li>
-      <li>Check the preview below, then press Import. Only new rows are added.</li>
+      <li>Check the preview below, then press Import. ${T.update?'Workers found are <b>updated</b> (nothing is removed); the rest are added.':'Only new rows are added.'}</li>
     </ol>
     ${preview}`;
 }
@@ -20683,18 +20736,54 @@ async function handleImportFile(file){
 }
 async function confirmImport(){
   if(!importResults || !importResults.rows || importBusy) return;
-  const todo=importResults.rows.filter(r=>r.status==='new');
+  const todo=importResults.rows.filter(r=>r.status==='new' || r.status==='upd');
   if(!todo.length) return;
   importBusy=true; renderImportBody();
   const coll=IMPORT_TYPES[importType].coll; let done=0, failed=0;
   for(const r of todo){
-    try{ await db.collection(coll).add(r.doc); r.status='skip'; r.msg='Imported ✓'; done++; }
+    try{ if(r.status==='upd'){ const w=workers.find(x=>x.id===r.wid); await db.collection(coll).doc(r.wid).update(stamp(deltaize(w, r.data))); r.status='skip'; r.msg='Updated ✓ — '+r.msg; done++; }
+      else { await db.collection(coll).add(r.doc); r.status='skip'; r.msg='Imported ✓'; done++; } }
     catch(e){ console.error(e); r.status='error'; r.msg='Could not save — '+(e.code||'error'); failed++; }
     const btn=document.getElementById('importConfirmBtn'); if(btn) btn.textContent=`Importing… ${done+failed} / ${todo.length}`;
   }
   importBusy=false; renderImportBody();
   toast(`Imported ${done} ${IMPORT_TYPES[importType].noun}${done===1?'':'s'}${failed?` · ${failed} failed`:''}`);
 }
+
+/* ---------------- Batch 132: ID / card copies for many workers at once ----------------
+   File names carry the Civil ID and the card side, e.g. 128243978_MD_SHAHINUR_CID_front.jpg / 128243978_OPAL_back.jpg.
+   Each file is matched to the worker (Civil ID) and the slot (CID/ID → Civil ID, OPAL → OPAL card; front / back); you can change both before uploading. */
+let idBulk={files:[]};
+function idBulkGuess(name){ const n=String(name||''), digits=(n.match(/\d{6,12}/g)||[]); let w=null; for(const d of digits){ w=workers.find(x=>!x.deleted && normKey(x.civilId)===d); if(w) break; }
+  const back=/back|rear/i.test(n), opal=/opal|hse.?pass/i.test(n); return {wid:w?w.id:'', slot:opal?(back?'opalBack':'opalFront'):(back?'civilIdBack':'civilIdScan')}; }
+function idBulkHtml(){ const L=idBulk.files, ok=L.filter(x=>x.wid && x.slot).length, ws=workers.filter(w=>!w.deleted).slice().sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  return `<div class="section-head"><h3>${ic('upload')} ID / card copies — many workers at once</h3><button type="button" class="btn btn-sm" data-idb-close="1">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Choose the photos (Civil ID and OPAL card, front and back). A file named with the <b>Civil ID number</b> and <b>CID / OPAL</b> + <b>front / back</b> (e.g. <span class="mono">128243978_OPAL_back.jpg</span>) goes to the right worker and box by itself — check the list, change anything, then Upload. A box that already has a copy is replaced.</p>
+    <label class="upload-btn">Choose photos…<input type="file" id="idBulkInput" accept="image/*,application/pdf" multiple hidden></label>
+    ${L.length?`<div style="margin-top:8px;">${L.map((x,i)=>{ const w=workers.find(y=>y.id===x.wid), has=w&&w[x.slot]&&w[x.slot].url;
+      return `<div class="idb-row"><span>${x.thumb?`<img src="${esc(x.thumb)}" alt="">`:ic('file')}</span><span class="wsub" style="overflow-wrap:anywhere;">${esc(x.file.name)}</span>
+        <select data-idb-w="${i}" aria-label="Worker"><option value="">— choose the worker —</option>${ws.map(y=>`<option value="${esc(y.id)}" ${y.id===x.wid?'selected':''}>${esc(y.fullName||'')} · ${esc(y.civilId||'no Civil ID')}</option>`).join('')}</select>
+        <select data-idb-s="${i}" aria-label="Box">${ID_CARD_SLOTS.map(sl=>`<option value="${sl.k}" ${sl.k===x.slot?'selected':''}>${esc(sl.l)}</option>`).join('')}</select>
+        <span>${x.done?'<span class="badge ok">✓ uploaded</span>':x.err?`<span class="badge danger">${esc(x.err)}</span>`:!x.wid?'<span class="badge warn">no worker</span>':has?'<span class="badge info">replaces</span>':'<span class="badge ok">ready</span>'} <button type="button" class="icon-btn" data-idb-del="${i}" aria-label="Remove from the list">✕</button></span></div>`; }).join('')}</div>
+    <div class="form-actions"><button type="button" class="btn btn-primary" data-idb-go="1" ${ok&&!idBulk.busy?'':'disabled'}>${idBulk.busy?'Uploading…':`Upload ${ok} file${ok===1?'':'s'}`}</button></div>`:''}`; }
+function idBulkRender(){ const el=document.getElementById('idBulkPanel'); if(el && !el.hidden) el.innerHTML=idBulkHtml(); }
+async function idBulkUpload(){ if(idBulk.busy || !canEdit()) return; idBulk.busy=true; idBulkRender(); let n=0, f=0;
+  const by=new Map(); idBulk.files.forEach(x=>{ if(x.wid && x.slot && !x.done){ if(!by.has(x.wid)) by.set(x.wid, []); by.get(x.wid).push(x); } });
+  for(const [wid, L] of by){ const data={}, olds=[];
+    for(const x of L){ try{ const att=await uploadToStorage(x.file); data[x.slot]=att; x.ok=true; }catch(e){ console.error(e); x.err=(e&&e.userMsg)||'upload failed'; f++; } }
+    if(!Object.keys(data).length) continue; const w=workers.find(y=>y.id===wid); if(!w) continue; for(const k of Object.keys(data)) if(w[k] && w[k].path) olds.push(w[k].path);
+    try{ await db.collection('workers').doc(wid).update(stamp(deltaize(w, data))); L.filter(x=>x.ok).forEach(x=>{ x.done=true; n++; }); olds.forEach(pth=>deleteStorageFile(pth)); }
+    catch(e){ console.error(e); L.forEach(x=>{ if(x.ok){ x.err='could not save'; f++; } }); } }
+  idBulk.busy=false; idBulkRender(); toast(`${n} card cop${n===1?'y':'ies'} saved${f?` · ${f} failed`:''}`); }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#idBulkBtn,[data-idb-close],[data-idb-del],[data-idb-go]'); if(!b) return; const el=document.getElementById('idBulkPanel'); if(!el) return;
+  if(b.id==='idBulkBtn'){ if(!canEdit()) return; el.hidden=!el.hidden; if(!el.hidden){ document.getElementById('addTempPanel').hidden=true; document.getElementById('addWorkerPanel').hidden=true; el.innerHTML=idBulkHtml(); el.scrollIntoView({block:'start', behavior:'smooth'}); } return; }
+  if(b.dataset.idbClose){ if(idBulk.busy) return; el.hidden=true; idBulk={files:[]}; return; }
+  if(b.dataset.idbDel!==undefined){ if(idBulk.busy) return; idBulk.files.splice(Number(b.dataset.idbDel),1); idBulkRender(); return; }
+  if(b.dataset.idbGo) idBulkUpload(); });
+document.addEventListener('change', e=>{ const t=e.target; if(!t) return;
+  if(t.id==='idBulkInput'){ for(const file of [...(t.files||[])]){ const g=idBulkGuess(file.name), x={file, ...g, thumb:''}; if(/^image\//.test(file.type)) try{ x.thumb=URL.createObjectURL(file); }catch(err){} idBulk.files.push(x); } t.value=''; idBulkRender(); return; }
+  if(t.dataset && t.dataset.idbW!==undefined){ const x=idBulk.files[Number(t.dataset.idbW)]; if(x){ x.wid=t.value; x.err=''; idBulkRender(); } return; }
+  if(t.dataset && t.dataset.idbS!==undefined){ const x=idBulk.files[Number(t.dataset.idbS)]; if(x){ x.slot=t.value; idBulkRender(); } } });
 
 /* ---------------- worker QR codes ---------------- */
 const QR_LIB_URL='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
@@ -21043,7 +21132,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
       const target=removeBtn.dataset.removeAttach;
       const w=currentWorker(); if(!w) return;
-      if(target==='photo' || target==='civilIdScan' || target==='signature'){
+      if(WORKER_FILE_KEYS.includes(target)){
         const old=w[target];
         const saved=await updateWorker(w.id, {[target]:null});
         if(saved && old && old.path) deleteStorageFile(old.path);
@@ -21099,7 +21188,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const wid=activeWorkerId;
       const att=await uploadToStorage(file);
       const w=workers.find(x=>x.id===wid); if(!w){ if(att && att.path) deleteStorageFile(att.path); return; }
-      if(target==='photo' || target==='civilIdScan' || target==='signature'){
+      if(WORKER_FILE_KEYS.includes(target)){
         const old=w[target];
         const saved=await updateWorker(w.id, {[target]:att});
         if(saved && old && old.path) deleteStorageFile(old.path);
