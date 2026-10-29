@@ -2740,7 +2740,7 @@ const RECORD_TYPES = {
   medical:{
     title:'Medical fitness & screening', addLabel:'+ Add medical record', hasExpiry:true, hasAttachment:true, attachLabel:'medical certificate',
     fields:[
-      {key:'type', label:'Type', type:'select', options:['PDO Medical Fitness','OQ Medical Fitness','OXY Medical Fitness','General Medical Screening','Pre-employment Medical','Other'], required:true},
+      {key:'type', label:'Type', type:'select', options:['PDO Medical Fitness','OQ Medical Fitness','OXY Medical Fitness','BP Medical Fitness','General Medical Screening','Pre-employment Medical','Other'], required:true},   // b136: + BP
       {key:'result', label:'Result', type:'select', options:['Fit','Fit with restrictions','Unfit','Pending'], required:true},
       {key:'date', label:'Screening date', type:'date', required:true},
       {key:'expiry', label:'Valid until', type:'date'},
@@ -3140,7 +3140,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b135';
+const APP_BUILD='b136';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -16868,6 +16868,7 @@ function deletedWorkers(){ return workers.filter(w=>w.deleted); }
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 /* Batch 132: ID & card copies on the worker — civilIdScan (front, older single scan), civilIdBack, opalFront, opalBack */
+const MED_VALID_YEARS=2;   // Batch 136
 const ID_CARD_SLOTS=[{k:'civilIdScan', l:'Civil ID copy', short:'Civil ID copy'}];
 /* b134: one page each — the Civil ID copy on the profile, the OPAL card as the certificate on his OPAL training records (HSE Induction, H2S, SCBA).
    Choosing two photos of the same card (front + back) joins them into one page. */
@@ -21116,7 +21117,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
     let hint=form.querySelector('.pdo-hint'); if(!hint){ hint=document.createElement('p'); hint.className='wsub pdo-hint span-all'; hint.style.margin='0'; const lab=ex.closest('label'); (lab||ex).insertAdjacentElement('afterend', hint); }
     hint.textContent = c.certExpiry ? `${c.code}: no validity is published — type the expiry date printed on the certificate.` : c.years ? `Valid until set automatically: ${c.code}${c.card?' ('+c.card+' card)':''} is valid ${c.years} year${c.years>1?'s':''} — change it if the certificate / card says otherwise.` : `${c.code} has no re-certification — no expiry.`;
   }
+  // Batch 136: medical fitness is valid 2 years — Valid until = screening date + 2 years (a date typed by hand is kept)
+  function medAutoExpiry(form, force){
+    if(!form) return; const dt=form.querySelector('[data-field="date"]'), ex=form.querySelector('[data-field="expiry"]'); if(!dt || !ex) return; const d=dt.value; if(!d) return;
+    const prev=dt.dataset.prev||'', was=prev?compAddMonths(prev, 12*MED_VALID_YEARS):'';
+    if(!force && ex.value && ex.dataset.auto!=='1' && ex.value!==was) return;
+    ex.value=compAddMonths(d, 12*MED_VALID_YEARS); ex.dataset.auto='1'; dt.dataset.prev=d;
+    let hint=form.querySelector('.med-hint'); if(!hint){ hint=document.createElement('p'); hint.className='wsub med-hint span-all'; hint.style.margin='0'; const lab=ex.closest('label'); (lab||ex).insertAdjacentElement('afterend', hint); }
+    hint.textContent=`Valid until set automatically: medical fitness is valid ${MED_VALID_YEARS} years from the screening date — change it if the certificate says otherwise.`;
+  }
+  document.getElementById('drawerBody').addEventListener('focusin', e=>{ if(activeTab==='medical' && e.target.matches && e.target.matches('#recordForm [data-field="date"]')) e.target.dataset.prev=e.target.value||''; });
+  document.getElementById('drawerBody').addEventListener('input', e=>{ if(activeTab==='medical' && e.target.matches && e.target.matches('#recordForm [data-field="date"]') && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value||'')) medAutoExpiry(e.target.closest('form')); });
   document.getElementById('drawerBody').addEventListener('change', e=>{
+    if(activeTab==='medical' && e.target.matches && e.target.matches('#recordForm [data-field="date"]')) medAutoExpiry(e.target.closest('form'));
     const pk=e.target.closest('[data-pdo-pick]'); if(pk){ const form=pk.closest('form'), c=PDO_COURSES.find(x=>x.code===pk.value), nm=form && form.querySelector('[data-field="name"]'); if(c && nm){ nm.value=pdoCourseLabel(c); { const hf=form.querySelector('[data-field="hours"]'); if(hf && (!hf.value || hf.dataset.auto==='1')){ hf.value=c.hrs||''; hf.dataset.auto=c.hrs?'1':''; } } const ex=form.querySelector('[data-field="expiry"]'); if(ex && !ex.value) ex.dataset.auto='1'; pdoAutoExpiry(form); } return; }
     if(e.target.matches && e.target.matches('#recordForm [data-field="date"], #recordForm [data-field="name"]') && activeTab==='trainings'){ const form=e.target.closest('form'); const ex=form.querySelector('[data-field="expiry"]'); if(ex && !ex.value) ex.dataset.auto='1'; pdoAutoExpiry(form); }
     if(e.target.matches && e.target.matches('#recordForm [data-field="expiry"]')) e.target.dataset.auto='0';
