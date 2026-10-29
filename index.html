@@ -3140,7 +3140,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b134';
+const APP_BUILD='b135';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -11147,7 +11147,7 @@ function inspPrefillH(T, it){ const h={}, has=k=>T.head.some(x=>x[0]===k), put=(
   const pj=it.projectId?projectName(it.projectId):'';
   if(it.kind==='veh'){ const v=it.v; put('veh', v.vehicleNumber); put('model', [v.model, v.vehicleType].filter(Boolean).join(' · ')); put('owner', v.ownership==='Rental'?(v.rentalCompany||'Rental'):'Burhan Oil & Trade Services'); put('loc', pj); const d=vehDrivers(v)[0]; put('driver', d&&d.fullName); }
   else { const e=it.e; put('eqno', e.serial); put('unit', e.serial); put('type', e.extType||e.type||e.kitType||e.instType||e.name||(EQUIP_CATEGORIES[e.category]||{}).short); put('make', e.make); put('model', e.make);
-    put('cap', e.capacityKg?e.capacityKg+' kg':(e.swl||e.range||'')); put('loc', it.where+(pj&&!/^In vehicle/.test(it.where)?'':pj?' · '+pj:'')); put('exp', e.expiry?isoToDmy(e.expiry):''); }
+    put('cap', e.capacityKg?e.capacityKg+(['Foam','Water','Wet chemical'].includes(e.extType)?' L':' kg'):(e.swl||e.range||'')); put('loc', it.where+(pj&&!/^In vehicle/.test(it.where)?'':pj?' · '+pj:'')); put('exp', e.expiry?isoToDmy(e.expiry):''); }
   put('comp', pj||'Burhan Oil & Trade Services'); put('proj', pj); return h; }
 let inspMaking=false;
 async function inspNewFor(ref, tplKey){ if(!canEdit() || inspMaking) return; const it=inspItemOf(ref); if(!it){ toast('Item not found'); return; }
@@ -16461,12 +16461,12 @@ const EQUIP_CATEGORIES = {
   extinguishers:{ label:'Fire extinguishers', short:'Fire extinguishers', icon:'extinguisher', noun:'fire extinguisher', emailLabel:'Fire extinguisher',
     fields:[
       {key:'extType', label:'Type', type:'select', required:true, options:['DCP (dry powder)','CO₂','Foam','Water','Wet chemical','Other']},
-      {key:'capacityKg', label:'Capacity (kg)', type:'number', required:true},
+      {key:'capacityKg', label:'Capacity (kg — litres for foam / water)', type:'number', required:true},
       {key:'serial', label:'Serial number', type:'text', required:true},
       {key:'expiry', label:'Expiry / next inspection', type:'date', required:true},
       {key:'notes', label:'Notes', type:'textarea'},
     ],
-    display:e=>`${e.extType||'Fire extinguisher'}${e.capacityKg?` · ${e.capacityKg} kg`:''}` },
+    display:e=>`${e.extType||'Fire extinguisher'}${e.capacityKg?` · ${e.capacityKg} ${['Foam','Water','Wet chemical'].includes(e.extType)?'L':'kg'}`:''}` },   // b135: foam / water in litres
   specialPpe:{ label:'Specialized PPE', short:'Specialized PPE', icon:'goggles', noun:'PPE item', emailLabel:'Specialized PPE',
     fields:[
       {key:'name', label:'Item', type:'text', required:true, placeholder:'e.g. SCBA set, fall arrester'},
@@ -20537,7 +20537,7 @@ const IMPORT_TYPES = {
     {key:'expiry', h:'Expiry / inspection due', req:true, date:true, help:'Date, e.g. 31/03/2027', ex:'31/03/2027'},
     {key:'capacityKg', h:'Capacity (kg)', help:'Fire extinguishers only (required for them)', ex:''},
     {key:'swl', h:'SWL', help:'Lifting gear only, e.g. 2 T', ex:''},
-    {key:'location', h:'Location', help:'Store, or the exact project name as it appears in Project Details (blank = Store)', ex:'Store'},
+    {key:'location', h:'Location', help:'Store, the exact project name as in Project Details, or a company location (e.g. Head Office, Samail Yard) (blank = Store)', ex:'Store'},
     {key:'condition', h:'Condition', help:'In service, Out for TPI / repair, or Damaged / quarantined (blank = In service)', ex:'In service'},
     {key:'notes', h:'Notes', ex:''},
   ]},
@@ -20598,7 +20598,9 @@ function mapEquipCategory(v){
 function projectByName(name){
   const n=String(name||'').trim().toLowerCase(); if(!n || n==='store' || n==='in store') return 'store';
   const s=activeSites().find(x=>(x.siteName||'').trim().toLowerCase()===n);
-  return s ? s.id : null;
+  if(s) return s.id;
+  const l=(typeof plLocs==='function'?plLocs():[]).find(x=>String(x.name||'').trim().toLowerCase()===n);   // b135: company locations (Head Office, Samail Yard…)
+  return l ? 'loc:'+l.id : null;
 }
 async function downloadImportTemplate(){
   await loadScriptOnce(XLSX_URL);
@@ -20651,7 +20653,7 @@ function validateImportRows(rows){
       const cat=mapEquipCategory(txt('category'));
       if(txt('category') && cat===null) errors.push(`Category "${txt('category')}" not recognised`);
       const loc=projectByName(txt('location'));
-      if(loc===null) errors.push(`Project "${txt('location')}" not found — type the exact project name, or Store`);
+      if(loc===null) errors.push(`Location "${txt('location')}" not found — type the exact project name, a company location (Project Details → Man-hours rules, locations) or Store`);
       const cond = EQUIP_CONDITIONS.find(x=>x.toLowerCase().startsWith(txt('condition').toLowerCase().slice(0,6))) || 'In service';
       key=txt('serial'); dupKey=(cat||'')+'|'+normKey(key);
       doc={category:cat||'', serial:key, make:txt('make'), certNo:txt('certNo'), expiry:dates.expiry||'', notes:txt('notes'), location:loc||'store', condition:txt('condition')?cond:'In service', attachment:null};
