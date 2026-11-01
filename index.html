@@ -3110,7 +3110,7 @@ function startSettingsData(){
   try{
     unsubscribeSettings = db.collection('settings').onSnapshot(snap=>{
       settingsLoadError=null;
-      const map={}; snap.docs.forEach(d=>{ map[d.id]=d.data()||{}; }); settingsDocs=map;
+      const map={}; snap.docs.forEach(d=>{ map[d.id]=d.data()||{}; }); settingsDocs=map; settingsSnapLoaded=true; if(typeof reportSnapSoon==='function') reportSnapSoon();
       appSettings=map.app||{};
       trainingReq=map.trainingMatrix||{trainings:[]};
       appTargets=map.targets||{};
@@ -3141,7 +3141,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b137';
+const APP_BUILD='b138';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -16761,6 +16761,32 @@ function liveReportEntries(){
   return base.filter(e=>!(e.category==='manHours' && e.projectId && mh.replaced.has(e.projectId) && entryMonth(e)>=mh.replaced.get(e.projectId))
     && !(mh.officeFrom && e.category==='manHours' && !e.projectId && e.division==='Office staff' && entryMonth(e)>=mh.officeFrom)).concat(mh.entries);   // Batch 106: office staff automatic
 }
+/* Batch 138: the monthly e-mail (Apps Script) must show the SAME figures as the tracker — automatic man-hours (projects, yard / office,
+   visits, travel, site surveys) are only calculated here, never stored. So an editor's tracker keeps settings/reportSnap up to date:
+   {at, today, by, ver, months:{ 'YYYY-MM': {m:{...}, proj:{<projectId>:{...}}}}} for this year's months (+ last year's in January).
+   Written only when the figures (or the date) change, at most every 2 minutes. The e-mail waits for a snapshot made after the month ended. */
+const SNAP_KEYS=['manHours','proactiveTotal','nearMiss','fac','mti','lti','ltiDaysLost','incident','vehicleIncident','vehicleKm','ivms','dfms','lsr','campaign','tbt','training','inductionSessions','siteVisit','internalAudit','vehicleInspection','hseObservation'];
+const SNAP_PKEYS=['manHours','nearMiss','fac','mti','lti','incident','vehicleIncident'];
+let hseLogsLoaded=false, settingsSnapLoaded=false, _snapLast='', _snapT=null, _snapAt=0;
+function stableStr(o){ return o && typeof o==='object' ? (Array.isArray(o) ? '['+o.map(stableStr).join(',')+']' : '{'+Object.keys(o).sort().map(k=>JSON.stringify(k)+':'+stableStr(o[k])).join(',')+'}') : JSON.stringify(o===undefined?null:o); }
+function reportSnapBuild(){ const t=localToday(), y=Number(t.slice(0,4)), cm=Number(t.slice(5,7)), months=[], r1=x=>Math.round((Number(x)||0)*10)/10;
+  if(cm===1) for(let i=1;i<=12;i++) months.push(`${y-1}-${String(i).padStart(2,'0')}`); for(let i=1;i<=cm;i++) months.push(`${y}-${String(i).padStart(2,'0')}`);
+  const all=liveReportEntries(), out={};
+  for(const ym of months){ const L=all.filter(e=>entryMonth(e).startsWith(ym)), M=computeReportMetrics(L), m={}; for(const k of SNAP_KEYS) m[k]=r1(M[k]);
+    const byP=new Map(); for(const e of L) if(e.projectId){ if(!byP.has(e.projectId)) byP.set(e.projectId, []); byP.get(e.projectId).push(e); }
+    const proj={}; for(const [pid, PL] of byP){ const pm=computeReportMetrics(PL), o={}; for(const k of SNAP_PKEYS) o[k]=r1(pm[k]); proj[pid]=o; }
+    out[ym]={m, proj}; }
+  return out; }
+function reportSnapSoon(ms){ clearTimeout(_snapT); _snapT=setTimeout(()=>{ reportSnapSync().catch(e=>console.warn('report snapshot', e)); }, ms==null?8000:ms); }
+async function reportSnapSync(){ if(!auth.currentUser || !canEdit() || !workersLoaded || !sitesLoaded || !hseLogsLoaded || !settingsSnapLoaded) return;
+  const months=reportSnapBuild(), j=stableStr(months), cur=settingsDocs.reportSnap||null, t=localToday();
+  if(cur && cur.today===t && stableStr(cur.months||{})===j){ _snapLast=j; return; }
+  if(j===_snapLast && cur && cur.today===t) return;
+  const wait=120000-(Date.now()-_snapAt); if(wait>0){ reportSnapSoon(wait+500); return; }
+  _snapAt=Date.now();
+  try{ await db.collection('settings').doc('reportSnap').set({at:new Date().toISOString(), today:t, by:(auth.currentUser&&auth.currentUser.email)||'', ver:1, months}); _snapLast=j; }
+  catch(e){ console.warn('report snapshot not saved', e&&e.code); } }
+setInterval(()=>reportSnapSoon(1000), 10*60*1000);   // also picks up the new day / month
 function reportEntriesFor(division, periodKey, project){
   return liveReportEntries().filter(e=> (division==='all' || e.division===division) && entryMonth(e).startsWith(periodKey) && reportProjectMatch(e, project));
 }
@@ -17103,7 +17129,7 @@ auth.onAuthStateChanged(user=>{
 async function startData(){
   try{
     unsubscribeWorkers = db.collection('workers').orderBy('fullName','asc').onSnapshot(snap=>{
-      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); workersLoaded=true; if(typeof opalMoveOldSoon==='function') opalMoveOldSoon(); if(typeof siteLinksSyncSoon==='function') siteLinksSyncSoon(); if(typeof ppeLinkSyncSoon==='function' && canEdit()) ppeLinkSyncSoon();
+      workers = snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); workersLoaded=true; if(typeof reportSnapSoon==='function') reportSnapSoon(); if(typeof opalMoveOldSoon==='function') opalMoveOldSoon(); if(typeof siteLinksSyncSoon==='function') siteLinksSyncSoon(); if(typeof ppeLinkSyncSoon==='function' && canEdit()) ppeLinkSyncSoon();
       document.getElementById('dbUnavailableBanner').hidden=true;
       renderAll();
     }, err=>{ console.error(err); if(!auth.currentUser) return; toast('Sync error — some data may be stale.'); document.getElementById('dbUnavailableBanner').hidden=false; });
@@ -17122,7 +17148,7 @@ function startVehicleData(){
 function startSiteData(){
   try{
     unsubscribeSiteEquipment = db.collection('siteEquipment').orderBy('siteName','asc').onSnapshot(snap=>{
-      siteEquipmentList = snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); sitesLoaded=true;
+      siteEquipmentList = snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); sitesLoaded=true; if(typeof reportSnapSoon==='function') reportSnapSoon();
       renderSiteAll();
       if(typeof renderTricPanel==='function'){ renderTricPanel(); if(canEdit()){ ppeLinkSyncSoon(); clearTimeout(tricUi.t); tricUi.t=setTimeout(async()=>{ try{ await tbtAutoDedupe(); }catch(e){} tricAutoComplete(); }, 1000); } }   // Batch 77: project names on TRIC cards / link
       renderEquipAll();           // location names come from projects
@@ -17194,7 +17220,7 @@ async function migrateLegacySiteEquipment(){
 function startReportData(){
   try{
     unsubscribeReportEntries = db.collection('hseLogs').orderBy('date','desc').onSnapshot(snap=>{
-      reportEntries = snap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
+      reportEntries = snap.docs.map(d=>({id:d.id, ...(d.data()||{})})); hseLogsLoaded=true; if(typeof reportSnapSoon==='function') reportSnapSoon();
       renderReportAll();
       renderSiteSummary();                   // Project Details summary card
       if(activeSiteId) renderSiteDrawer();   // project HSE statistics tab
