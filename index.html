@@ -1162,6 +1162,10 @@ details.icam-grp .cause-list{margin:6px 0;}
 .idc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px;} .idc-slot{border:1px solid var(--line); border-radius:10px; padding:8px 10px;}
 .idb-row{display:grid; grid-template-columns:56px minmax(140px,1.2fr) minmax(160px,1.4fr) minmax(130px,1fr) auto; gap:8px; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line);} .idb-row img{width:56px; height:40px; object-fit:cover; border-radius:6px; border:1px solid var(--line);} .idb-row select{min-width:0;}
 @media (max-width:720px){ .idb-row{grid-template-columns:56px 1fr; } }
+.tbt-mhdr{margin:16px 0 6px; padding:8px 12px; border-radius:10px; background:linear-gradient(90deg, rgba(14,165,233,.28), rgba(14,165,233,.08)); border-left:6px solid #0ea5e9; color:#38bdf8; font-weight:800; font-size:14px; text-transform:uppercase; letter-spacing:.05em; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;} .tbt-mhdr span{font-weight:600; text-transform:none; letter-spacing:0; font-size:12.5px; color:var(--ink);}
+.tbt-dhdr{margin:10px 0 6px; padding:5px 10px; border-radius:8px; background:rgba(245,158,11,.14); border-left:4px solid #f59e0b; color:#fbbf24; font-weight:700; font-size:13px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;} .tbt-dhdr span{font-weight:500; color:var(--ink-muted); font-size:12px;}
+:root[data-theme="light"] .tbt-mhdr{color:#0369a1;} :root[data-theme="light"] .tbt-dhdr{color:#b45309;}
+#recordList > .tbt-mhdr:first-child{margin-top:0;}
 .dv-tag{display:inline-block; padding:3px 10px; border-radius:999px; font-weight:700; font-size:12.5px; white-space:nowrap; border:1px solid currentColor;}
 .dv-Civil{color:var(--dv-civil); background:var(--dv-civil-bg);} .dv-Scaffolding{color:var(--dv-scaff); background:var(--dv-scaff-bg);} .dv-Rental{color:var(--dv-rental); background:var(--dv-rental-bg);} .dv-Office{color:var(--dv-office); background:var(--dv-office-bg);} .wf-subgrp td{font-size:12px; font-weight:700; color:var(--ink-muted); padding:5px 10px; background:transparent;} .ck-blank{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ck-blank select{max-width:100%; min-width:0;} .ck-eq input,.ck-eq select{width:100%; min-width:60px;}
 .ptw-cc{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; padding:6px 2px;} .ptw-cc-n{border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--surface-2);} .ptw-cc-n strong{display:block; font-size:24px; line-height:1.1;} .ptw-cc-n span{font-size:12px; color:var(--ink-muted);}
@@ -3141,7 +3145,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b138b';
+const APP_BUILD='b139';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -12769,8 +12773,9 @@ async function tricMonthList(ym){
   const snap=await db.collection('tbtSubmissions').where('tbtDate','>=',ym+'-01').get();
   return snap.docs.map(d=>({id:d.id, ...(d.data()||{})})).filter(x=>x.status==='done' && String(x.tbtDate||'')<next).sort((a,b)=>String(a.tbtDate).localeCompare(String(b.tbtDate)) || String((a.data||{}).time||'').localeCompare(String((b.data||{}).time||'')));
 }
-async function tricDownload(kind, site){
-  const one=site && site!=='all', ym=(document.getElementById(one?'tricMonthP':'tricMonthAll')||{}).value || tricUi.month || localToday().slice(0,7);
+async function tricDownload(kind, site, btn){
+  const box=btn && btn.closest ? btn.closest('.tric-panel, #tricAllPanel, .toolbar, .section-head') : null, near=box ? box.querySelector('input[type="month"]') : null;   // Batch 139: the month box next to the button — not the first one on the page
+  const one=site && site!=='all', ym=(near && near.value) || (document.getElementById(one?'tricMonthP':'tricMonthAll')||{}).value || tricUi.month || localToday().slice(0,7);
   let list; try{ list=await tricMonthList(ym); }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not load the TBTs'); return; }
   const pn=one?(projectName(site)||'project'):''; if(one) list=list.filter(x=>tricSiteId(x)===site);
   if(!list.length){ toast('No complete TBTs'+(one?' for '+pn:'')+' in '+monthLabel(ym)+' (or they were already deleted after '+TRIC_KEEP_DAYS+' days)'); return; }
@@ -20110,7 +20115,13 @@ function readRecordForm(form){
 }
 
 function recordTabHtml(w,key,cfg){
-  const recs=(w[key]||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const recs=(w[key]||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'') || String(b.time||b.createdAt||'').localeCompare(String(a.time||a.createdAt||'')));
+  // Batch 139: toolbox talks grouped by month (coloured band) and by day (coloured line) — several TBTs a day
+  let _lm=null, _ld=null; const recHdr = key!=='toolboxTalks' ? ()=>'' : r=>{ const d=String(r.date||'').slice(0,10), m=d.slice(0,7); let h='';
+    const ppl=L=>L.reduce((n,x)=>n+tbtAttendeeCount(x),0);
+    if(m!==_lm){ _lm=m; _ld=null; const L=recs.filter(x=>String(x.date||'').slice(0,7)===m); h+=`<div class="tbt-mhdr">${esc(m?periodLabel(m):'No date')}<span>${L.length} TBT${L.length===1?'':'s'} · ${ppl(L)} attendances</span></div>`; }
+    if(d!==_ld){ _ld=d; const L=recs.filter(x=>String(x.date||'').slice(0,10)===d), wd=d?new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long'}):''; h+=`<div class="tbt-dhdr">${esc(wd)} ${esc(d?isoToDmy(d):'—')}<span>${L.length} TBT${L.length===1?'':'s'} · ${ppl(L)} people</span></div>`; }
+    return h; };
   const cards = recs.length ? recs.map(r=>{
     const titleField=cfg.fields[0].key;
     const resultBadge = r.result==='Unfit' ? `<span class="badge danger">Unfit</span>` : (r.result==='Fit with restrictions' ? `<span class="badge warn">Fit with restrictions</span>` : (r.result==='Fit' ? `<span class="badge ok">Fit</span>` : ''));
@@ -20125,7 +20136,7 @@ function recordTabHtml(w,key,cfg){
       return r[f.key] ? `<div class="rf"><span class="rf-k">${esc(f.label)}</span><span class="rf-v">${esc(r[f.key])}</span></div>` : '';
     }).join('');
     const attach = cfg.hasAttachment ? attachmentBlock(w,key,r,cfg.attachLabel) : '';
-    return `<div class="record-card">
+    return `${recHdr(r)}<div class="record-card">
       <div class="record-card-top">
         <div class="record-card-title">${esc(key==='inductions' && cfg===RECORD_TYPES.inductions ? inductionTitle(r) : (r[titleField]||''))} ${key==='medical'?resultBadge:''} ${expiryBadge}${key==='ppeIssued'?' '+ppeRecBadge(r):''}</div>
         <div class="record-card-actions">
@@ -22178,7 +22189,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(D.tbtDrax){ const [id,i]=D.tbtDrax.split('|'), x=tricSubs.find(s=>s.id===id); if(x){ tricRv(x).dra.splice(+i,1); renderTricPanel(); } return; }
     if('tricGoto' in D){ tricGoto(D.tricGoto); return; }
     if(D.tricPdf){ await tricOnePdf(D.tricPdf); return; }
-    if(D.tricDl){ await tricDownload(D.tricDl, D.tricSite); return; }
+    if(D.tricDl){ await tricDownload(D.tricDl, D.tricSite, b); return; }
     if(D.tbtRm){ const [id,w]=D.tbtRm.split('|'), x=tricSubs.find(s=>s.id===id); if(x){ const r=tricRv(x); r.att=r.att.filter(p=>p.w!==w); renderTricPanel(); } return; }
     if(D.tbtAllm){ const x=tricSubs.find(s=>s.id===D.tbtAllm); if(x){ const r=tricRv(x); TRIC_MUSTED.forEach((m,i)=>r.m.add(i)); renderTricPanel(); } return; }
     if((D.tbtNo||D.tbtCancel) && b.dataset.armed!=='1'){ b.dataset.armed='1'; b.textContent='Tap again to '+(D.tbtNo?'reject':'cancel'); return; }
