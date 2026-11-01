@@ -3145,7 +3145,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b139';
+const APP_BUILD='b140';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -6778,6 +6778,48 @@ function kpiPickOptions(){ return TARGET_DEFS.map(d=>({value:d.key, label:`${d.k
 
 /* =============================== OBJECTIVES =============================== */
 const OBJ_STATUSES=['Not started','On track','At risk','Achieved','Not achieved'];
+/* Batch 140: the agreed 2027 annual plan (objectives + KPI targets) — "Load 2027 draft" adds what is missing; nothing already entered is changed */
+const PLAN_2027={
+  targets:{lti:0, ltif:0, trcf:2, mti:0, fac:3, vehicleInc:0, incidents:2, daysLost:0, complaints:2, heatCases:0, training:95, trainingHoursPw:24, tbtPerMonth:80, inspPerMonth:20, obsPerMonth:20, mgmtVisits:12, nearMiss:24, drills:6, capaOnTime:90, auditScore:85, internalAudits:4, assurance:90, schedule:90, legalCompliance:100, alertBriefing:100, committee:12, subconScore:75, checklists:20},
+  objectives:[
+    {objNo:'OBJ-2027-01', objective:'Zero harm: no LTI and no MTI in 2027; TRCF ≤ 2.0 per million man-hours', policy:'Prevent injury & ill health', division:'', kpi:'trcf', target:'LTI 0 · MTI 0 · TRCF ≤ 2.0', measure:'Monthly Report / dashboard (LTI, MTI, TRCF) — reviewed every month', owner:'Operations Manager',
+      plan:[['Life-Saving Rules campaign Q1 (one LSR focus per quarter, TBT pack) — repeat Q2 30-06, Q3 30-09, Q4 15-12','HSE','2027-03-31'],['Every incident / near miss investigated within 7 days, lessons shared to all crews (ongoing)','HSE','2027-12-31'],['Monthly incident & near-miss trend in the HSE committee (monthly)','HSE','2027-12-31']]},
+    {objNo:'OBJ-2027-02', objective:'Work at height & scaffolding: full compliance with PDO SP-1257 at all wellhead scaffolds', policy:'Eliminate hazards & reduce risks', division:'Scaffolding', kpi:'', target:'SP-1257 evaluation ≥ 95 % items compliant (Jun & Dec) · 100 % scaffolders hold the right CISRS card · 100 % harness formal inspections on time', measure:'SP-1257 applicability checklist (6-monthly) + Training matrix + harness inspections', owner:'Scaffolding Supervisor',
+      plan:[['First SP-1257 evaluation with evidence; actions for every gap','HSE','2027-01-31'],['LXE 044 Scaffolding Appreciation for all scaffolding supervisors & HSE staff','HSE / Training','2027-03-31'],['Written rescue-at-height plan (SG19) + 2 rescue drills','Scaffolding Supervisor','2027-04-30'],['Harness formal inspection every 6 months, tagged (June) — repeat December','Store / HSE','2027-06-30'],['Purpose / load class / PTW no. on every scaffold job record','HSE','2027-01-31']]},
+    {objNo:'OBJ-2027-03', objective:'Competent workforce: PDO mandatory training compliance ≥ 95 % and ≥ 24 training hours per worker', policy:'Prevent injury & ill health', division:'', kpi:'training', target:'≥ 95 % compliance · ≥ 24 h per worker', measure:'Training matrix compliance % + training hours (Monthly Report)', owner:'HSE Manager',
+      plan:[['Monthly expiry check — renewals booked 30 days before expiry (monthly)','HSE','2027-12-31'],['OPAL HSE passport + H2S for workers without a card (e.g. Mohammed Akram, Abul Hossen)','HSE','2027-02-28'],['Competency assessment for every critical role','Supervisors','2027-06-30']]},
+    {objNo:'OBJ-2027-04', objective:'Road safety: zero vehicle incidents and safer driving', policy:'Prevent injury & ill health', division:'', kpi:'vehicleInc', target:'0 vehicle incidents · IVMS violations ≤ 5 per 100,000 km · 100 % monthly vehicle inspections · 100 % Scaffolding vehicles with mandatory kit', measure:'Monthly Report (vehicle incidents, IVMS / DFMS), vehicle inspections, mandatory-kit panel', owner:'Logistics Manager',
+      plan:[['Monthly vehicle inspection (BHN-VH-CH-12) for every vehicle (monthly)','Drivers / Logistics','2027-12-31'],['IVMS / DFMS review with each driver who has a violation (monthly)','Logistics','2027-12-31'],['Defensive driving refresher for all drivers due in 2027','HSE','2027-09-30']]},
+    {objNo:'OBJ-2027-05', objective:'Strong reporting culture: more hazards found before they hurt someone', policy:'Consultation & participation of workers', division:'', kpi:'obsPerMonth', target:'≥ 20 HSE observations / month · ≥ 24 near misses / year · TBT every working day on every active site · 12 management site visits', measure:'Monthly Report (observations, near misses, TBTs, site visits)', owner:'HSE Manager',
+      plan:[['Monthly "Best observation" recognition (Star of the month) (monthly)','HSE','2027-12-31'],['Management (MD / Ops) site visit every month — Site Visit Report (monthly)','MD / Ops','2027-12-31'],['Observation cards / link available at every site','HSE','2027-01-31']]},
+    {objNo:'OBJ-2027-06', objective:'Legal & client compliance: complete, evaluated legal register', policy:'Comply with legal & other requirements', division:'', kpi:'legalCompliance', target:'Legal register complete by 31-03-2027 · 100 % items evaluated on time · 100 % compliant · client HSE complaints ≤ 2', measure:'Legal register (compliance %), client complaints', owner:'HSE Manager',
+      plan:[['Load all applicable laws + PDO / client specs (1–2 documents per week)','HSE','2027-03-31'],['Applicability checklist for each high-risk spec (PTW, H2S, lifting, excavation…)','HSE','2027-06-30'],['Monthly "check legal / PDO updates" task (monthly)','HSE','2027-12-31']]},
+    {objNo:'OBJ-2027-07', objective:'Management system that works: audits done, actions closed on time', policy:'Continual improvement of HSE performance', division:'', kpi:'capaOnTime', target:'100 % internal audit programme done · ≥ 90 % actions closed on time · assurance plan ≥ 90 % · Monthly Schedule ≥ 90 %', measure:'Audit programme, Action tracker, Assurance plan %, Monthly Schedule %', owner:'HSE Manager',
+      plan:[['Internal audit every quarter (one division / process each) — Q1 March, then Jun / Sep / Nov','Internal auditor','2027-03-31'],['Overdue actions reviewed in the monthly HSE committee (monthly)','HSE','2027-12-31'],['Management Review — mid-year (repeat year end December)','MD','2027-07-31']]},
+    {objNo:'OBJ-2027-08', objective:'Health & environment: fit workforce, no heat illness, no pollution', policy:'Protect the environment / prevent pollution', division:'', kpi:'heatCases', target:'0 heat illness cases · medical fitness ≥ 95 % in every division · 0 spills · 100 % waste disposed with records', measure:'Heat stress log, Medical fitness % by division, waste log', owner:'HSE Manager',
+      plan:[['Heat stress plan Apr–Sep (midday break, water, rest shelters, buddy system)','HSE / Supervisors','2027-03-31'],['Medicals renewed before expiry (2-year validity) (monthly)','HSE / Admin','2027-12-31'],['Waste segregation + licensed disposal records each month (monthly)','Site supervisors','2027-12-31']]},
+  ]};
+let plan2027Busy=false;
+async function plan2027Load(btn){ if(!canEdit() || plan2027Busy) return; if(!compArm(btn, 'Tap again — add the 2027 plan')) return; plan2027Busy=true; btn.disabled=true;
+  let addedO=0, skippedO=0, tN=0; const now=new Date().toISOString(), me=(auth.currentUser&&auth.currentUser.email)||'';
+  try{
+    // KPI targets 2027 — only the ones not set yet
+    const cur=(appTargets||{})['2027']||{}, vals={...cur}; for(const [k,v] of Object.entries(PLAN_2027.targets)) if(cur[k]===undefined || cur[k]==='' || cur[k]===null){ vals[k]=v; tN++; }
+    if(tN){ if(await saveSettings('targets', {'2027':vals})) appTargets={...appTargets, '2027':vals}; else tN=0; }
+    // objectives — skipped when the number is already used
+    const have=new Set(regActive('objectives').map(r=>String(r.objNo||'')));
+    for(const o of PLAN_2027.objectives){
+      if(have.has(o.objNo)){ skippedO++; continue; }
+      try{ const q=await db.collection('objectives').where('objNo','==',o.objNo).limit(1).get(); if(!q.empty && (q.docs||[]).length){ skippedO++; continue; } }catch(e){}
+      const {plan, ...rest}=o;
+      const d={...rest, year:'2027', status:'Not started', startDate:'2027-01-01', dueDate:'2027-12-31', resources:'', deleted:false, createdAt:now, createdBy:me, source:'plan2027',
+        plan:plan.map(([action, owner, targetDate])=>({id:genId(), action, owner, targetDate, status:'Open', createdAt:now}))};
+      await db.collection('objectives').add(stamp(d)); addedO++; }
+    toast(`2027 plan loaded — ${addedO} objective${addedO===1?'':'s'} added${skippedO?` (${skippedO} already there)`:''} · ${tN} KPI target${tN===1?'':'s'} set`);
+  }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not load the 2027 plan'); }
+  finally{ plan2027Busy=false; btn.disabled=false; if(typeof renderKpiPanel==='function') try{ renderKpiPanel(); }catch(e){} }
+}
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#plan2027Btn'); if(b) plan2027Load(b); });
 const POLICY_COMMITMENTS=['Prevent injury & ill health','Eliminate hazards & reduce risks','Comply with legal & other requirements','Consultation & participation of workers','Continual improvement of HSE performance','Protect the environment / prevent pollution','Customer & client satisfaction'];
 function objStatusBadge(r){ const s=r.status||'Not started'; const c=s==='Achieved'||s==='On track'?'ok':s==='At risk'?'warn':s==='Not achieved'?'danger':'muted'; return `<span class="badge ${c}">${esc(s)}</span>`; }
 function objKpiLive(r){
@@ -6789,6 +6831,7 @@ function objKpiLive(r){
 function objProgress(r){ const p=(r.plan||[]); if(r.progress!==''&&r.progress!==undefined&&r.progress!==null) return Number(r.progress); if(!p.length) return 0; return Math.round(p.filter(x=>x.status==='Closed').length*100/p.length); }
 regDefine({
   key:'objectives', collection:'objectives', singular:'Objective', title:'Objectives & KPIs', tagline:'Set · Measure · Review · Improve',
+  headerButtons:'<button class="btn btn-sm reg-edit-only" type="button" id="plan2027Btn" title="Adds the agreed 2027 QHSE objectives (with action plans) and KPI targets — nothing already entered is changed">Load 2027 draft</button>',   // Batch 140
   addLabel:'+ Add objective', noField:'objNo', noPrefix:'OBJ', noYear:true, dateField:'startDate', yearFilter:false,
   searchPlaceholder:'Search objective, owner…', statuses:OBJ_STATUSES, emptyEditor:'No objectives yet — click “+ Add objective”. Each objective can be linked to a KPI so progress is measured automatically.',
   titleOf:r=>r.objective?String(r.objective).slice(0,70):'Objective', subOf:r=>[r.year, r.owner?'owner '+r.owner:'', r.division].filter(Boolean).join(' · '),
