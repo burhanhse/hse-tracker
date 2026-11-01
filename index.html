@@ -789,7 +789,7 @@ body.auth-open{overflow:hidden; height:100%;}
 th.as-now{color:var(--accent);} .as-c.as-now:not(.as-done):not(.as-overdue){box-shadow:0 0 0 2px var(--accent) inset;}
 .as-legend{display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-top:12px; font-size:12px; color:var(--ink-muted);} .as-legend span{display:inline-flex; align-items:center; gap:6px;} .as-legend .as-c{width:22px; height:20px; cursor:default;}
 .as-edit input, .as-edit select{width:100%;}
-body.read-only #addAudBtn, body.read-only #audTrashBtn, body.read-only #audFindingToggle, body.read-only [data-fedit], body.read-only [data-fdel], body.read-only #deleteAudBtn, body.read-only #asEditBtn, body.read-only [data-aud-file], body.read-only .upload-btn:has([data-aud-file]){display:none !important;}
+body.read-only #addAudBtn, body.read-only #aud2027Btn, body.read-only #as2027Btn, body.read-only #audTrashBtn, body.read-only #audFindingToggle, body.read-only [data-fedit], body.read-only [data-fdel], body.read-only #deleteAudBtn, body.read-only #asEditBtn, body.read-only [data-aud-file], body.read-only .upload-btn:has([data-aud-file]){display:none !important;}
 
 /* ---- Batch 11: grouped sidebar, registers, KPIs, action tracker, history ---- */
 .sidenav{max-height:calc(100vh - 40px); overflow-y:auto; scrollbar-width:thin;}
@@ -1877,6 +1877,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
           <p class="page-tagline"><span class="pt-co">Burhan Oil &amp; Trade Services</span><span class="pt-sep" aria-hidden="true"></span><span class="pt-slogan">Plan · Audit · Correct · Improve</span></p>
         </div>
         <div class="topbar-actions">
+          <button class="btn btn-sm" id="aud2027Btn" type="button" title="Adds the agreed 2027 internal audit programme (one audit per quarter) — an existing 2027 programme is not changed">Load 2027 draft</button>
           <button class="btn btn-sm" id="audTrashBtn" type="button">Deleted audits (0)</button>
           <button class="btn btn-primary" id="addAudBtn" type="button">+ Add audit</button>
         </div>
@@ -1918,6 +1919,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
         </div>
         <div class="topbar-actions">
           <select id="asYear" aria-label="Plan year"></select>
+          <button class="btn btn-sm" id="as2027Btn" type="button" title="Adds the agreed 2027 assurance activities — activities already in the 2027 plan are not changed">Load 2027 draft</button>
           <button class="btn btn-sm" id="asPrintBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Plan PDF</button>
           <button class="btn btn-primary" id="asEditBtn" type="button" hidden>Edit activities</button>
         </div>
@@ -3145,7 +3147,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b140';
+const APP_BUILD='b141';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -6212,6 +6214,7 @@ function renderAudTiles(){
 }
 function renderAudFilters(){
   const ys=new Set([String(new Date().getFullYear())]); for(const a of activeAudits()) if(auditYear(a)) ys.add(auditYear(a));
+  for(const k of Object.keys(((settingsDocs.auditProgramme||{}).years)||{})) if(/^\d{4}$/.test(k)) ys.add(k);   // b141: a year with a programme (e.g. next year) can be chosen
   const s=document.getElementById('audYearFilter'); s.innerHTML=[...ys].sort().reverse().map(y=>`<option value="${y}">${y}</option>`).join('')+'<option value="all">All years</option>'; s.value=audFilters.year;
   document.getElementById('audPartyTabs').innerHTML=[{key:'all',label:'All audits'},...AUDIT_PARTIES].map(p=>`<button type="button" class="seg-btn ${p.key===audFilters.party?'active':''}" data-audparty="${p.key}">${esc(p.label)}<span class="tab-count">${activeAudits().filter(a=>(audFilters.year==='all'||auditYear(a)===audFilters.year) && (p.key==='all'||auditParty(a.auditType)===p.key)).length}</span></button>`).join('');
 }
@@ -6799,6 +6802,42 @@ const PLAN_2027={
     {objNo:'OBJ-2027-08', objective:'Health & environment: fit workforce, no heat illness, no pollution', policy:'Protect the environment / prevent pollution', division:'', kpi:'heatCases', target:'0 heat illness cases · medical fitness ≥ 95 % in every division · 0 spills · 100 % waste disposed with records', measure:'Heat stress log, Medical fitness % by division, waste log', owner:'HSE Manager',
       plan:[['Heat stress plan Apr–Sep (midday break, water, rest shelters, buddy system)','HSE / Supervisors','2027-03-31'],['Medicals renewed before expiry (2-year validity) (monthly)','HSE / Admin','2027-12-31'],['Waste segregation + licensed disposal records each month (monthly)','Site supervisors','2027-12-31']]},
   ]};
+// Batch 141: part 2 — internal audit programme (one audit per quarter) + assurance plan 2027
+PLAN_2027.audit=[{id:'Scaffolding', label:'Scaffolding Division', div:'Scaffolding', months:[3]},{id:'Rental', label:'Logistics & Rental Division', div:'Rental', months:[6]},{id:'Civil', label:'Civil Division', div:'Civil', months:[9]},{id:'Office staff', label:'HSE / IMS management (office)', div:'Office staff', months:[11]}];
+PLAN_2027.assurance=(()=>{ const all=[1,2,3,4,5,6,7,8,9,10,11,12]; return [
+  {activity:'HSE policy & objectives review (mid-year check of OBJ-2027)', clause:'5.2 / 6.2', owner:'MD / HSE', months:[1,7], auto:''},
+  {activity:'Hazard identification & risk assessment (HIRA) review', clause:'6.1.2', owner:'HSE', months:[1,7], auto:'hira:reviewed'},
+  {activity:'Evaluation of legal & other requirements (incl. SP-1257 for Scaffolding)', clause:'9.1.2', owner:'HSE', months:[6,12], auto:'legal:eval'},
+  {activity:'Heat stress management checks (summer)', clause:'8.1', owner:'Supervisors', months:[4,5,6,7,8,9], auto:'heat:logged'},
+  {activity:'HSE committee / worker consultation meeting', clause:'5.4', owner:'HSE', months:all, auto:'meeting:committee'},
+  {activity:'Management site visit / safety walk (Site Visit Report)', clause:'5.1', owner:'MD / Ops', months:all, auto:'report:siteVisit'},
+  {activity:'Site HSE inspections & observations', clause:'9.1.1', owner:'HSE', months:all, auto:'report:hseObservation'},
+  {activity:'Equipment & site checklist inspections', clause:'9.1.1', owner:'Supervisors', months:all, auto:'inspection:done'},
+  {activity:'Vehicle inspections (BHN-VH-CH-12)', clause:'8.1', owner:'Logistics', months:all, auto:'report:vehicleInspection'},
+  {activity:'Toolbox talks (daily on every site)', clause:'7.4', owner:'Supervisors', months:all, auto:'report:tbt'},
+  {activity:'HSE training programme (renewals + internal)', clause:'7.2', owner:'HSE', months:all, auto:'report:training'},
+  {activity:'Emergency mock drill (fire, H2S, first aid, rescue at height, vehicle, spill)', clause:'8.2', owner:'HSE', months:[2,4,6,8,10,12], auto:'report:mockDrill'},
+  {activity:'Life-Saving Rules campaign (one LSR per quarter)', clause:'7.3 / 7.4', owner:'HSE', months:[3,6,9,12], auto:''},
+  {activity:'Harness / fall-protection formal inspection (6-monthly, SP-1257)', clause:'8.1', owner:'Store / HSE', months:[6,12], auto:''},
+  {activity:'Equipment & lifting gear TPI review', clause:'8.1', owner:'Maintenance', months:[3,6,9,12], auto:''},
+  {activity:'Internal IMS audit (per audit programme)', clause:'9.2', owner:'Internal auditor', months:[3,6,9,11], auto:'audit:internal'},
+  {activity:'Client / external audit (as scheduled by the client)', clause:'9.2', owner:'HSE', months:[], auto:'audit:external'},
+  {activity:'Subcontractor HSE performance evaluation', clause:'8.1.4', owner:'HSE', months:[6,12], auto:'subcon:eval'},
+  {activity:'Health surveillance / medical fitness review (2-year medicals)', clause:'8.1', owner:'HSE / Admin', months:[1,4,7,10], auto:''},
+  {activity:'Incident & corrective action review', clause:'10.2', owner:'HSE', months:all, auto:'incident:closed'},
+  {activity:'HSE performance report to management (Monthly Report + e-mail)', clause:'9.1', owner:'HSE', months:all, auto:''},
+  {activity:'Management review meeting', clause:'9.3', owner:'MD', months:[7,12], auto:'meeting:mgmt'}]; })();
+async function aud2027Load(btn){ if(!canEdit() || !btn || btn.disabled) return; if(audProgData('2027')){ toast('A 2027 audit programme already exists — open it with year 2027 and edit it there'); return; }
+  if(!compArm(btn, 'Tap again — add the 2027 programme')) return; btn.disabled=true;
+  try{ const me=(auth.currentUser&&auth.currentUser.email)||'', yearData={rows:PLAN_2027.audit.map(r=>({...r, months:r.months.slice()})), preparedBy:plWho().slice(0,60), approvedBy:'', approvedAt:'', rev:0, savedAt:new Date().toISOString(), savedBy:me, source:'plan2027'};
+    if(await saveSettings('auditProgramme', {years:{'2027':yearData}}, settingsStamp('auditProgramme'))){ toast('2027 internal audit programme added — Scaffolding Mar · Logistics & Rental Jun · Civil Sep · HSE / IMS office Nov. Write the MD approval in the programme.'); audFilters.year='2027'; try{ renderAuditAll(); }catch(e){ renderAudProg(); renderAudTiles(); } } }
+  finally{ btn.disabled=false; } }
+async function as2027Load(btn){ if(!canEdit() || !btn || btn.disabled) return; if(!compArm(btn, 'Tap again — add the 2027 assurance plan')) return; btn.disabled=true;
+  try{ const cur=(appAssurance['2027']&&appAssurance['2027'].items)||[], have=new Set(cur.map(x=>String(x.activity||'').trim().toLowerCase())), add=PLAN_2027.assurance.filter(x=>!have.has(x.activity.toLowerCase())).map(x=>({...x, months:x.months.slice()}));
+    if(!add.length){ toast('The 2027 assurance plan already has all these activities'); return; }
+    const items=[...cur, ...add]; if(await saveSettings('assurance', {'2027':{items}})){ appAssurance={...appAssurance, '2027':{items}}; assuranceYear='2027'; renderAssuranceAll(); toast(`2027 assurance plan — ${add.length} activit${add.length===1?'y':'ies'} added${cur.length?` (${cur.length} already there kept)`:''}`); } }
+  finally{ btn.disabled=false; } }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#aud2027Btn,#as2027Btn'); if(!b) return; if(b.id==='aud2027Btn') aud2027Load(b); else as2027Load(b); });
 let plan2027Busy=false;
 async function plan2027Load(btn){ if(!canEdit() || plan2027Busy) return; if(!compArm(btn, 'Tap again — add the 2027 plan')) return; plan2027Busy=true; btn.disabled=true;
   let addedO=0, skippedO=0, tN=0; const now=new Date().toISOString(), me=(auth.currentUser&&auth.currentUser.email)||'';
