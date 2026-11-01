@@ -3141,7 +3141,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b138';
+const APP_BUILD='b138b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -16775,7 +16775,10 @@ function reportSnapBuild(){ const t=localToday(), y=Number(t.slice(0,4)), cm=Num
   for(const ym of months){ const L=all.filter(e=>entryMonth(e).startsWith(ym)), M=computeReportMetrics(L), m={}; for(const k of SNAP_KEYS) m[k]=r1(M[k]);
     const byP=new Map(); for(const e of L) if(e.projectId){ if(!byP.has(e.projectId)) byP.set(e.projectId, []); byP.get(e.projectId).push(e); }
     const proj={}; for(const [pid, PL] of byP){ const pm=computeReportMetrics(PL), o={}; for(const k of SNAP_PKEYS) o[k]=r1(pm[k]); proj[pid]=o; }
-    out[ym]={m, proj}; }
+    // b138b: company cumulative safe (LTI-free) man-hours + days without LTI at month end (today for this month) — same as the dashboard
+    let cum=null; try{ const [yy,mm]=ym.split('-').map(Number), me=`${ym}-${String(new Date(yy, mm, 0).getDate()).padStart(2,'0')}`, c=ccLtiStreak('all', 'all', me<t?me:t);
+      if(c) cum={hours:Math.round(c.hours)||0, days:c.days||0, lastLti:c.lastLti||'', since:c.since||'', fromStart:!!c.fromStart, at:me<t?me:t}; }catch(e){}
+    out[ym]={m, proj, ...(cum?{cum}:{})}; }
   return out; }
 function reportSnapSoon(ms){ clearTimeout(_snapT); _snapT=setTimeout(()=>{ reportSnapSync().catch(e=>console.warn('report snapshot', e)); }, ms==null?8000:ms); }
 async function reportSnapSync(){ if(!auth.currentUser || !canEdit() || !workersLoaded || !sitesLoaded || !hseLogsLoaded || !settingsSnapLoaded) return;
