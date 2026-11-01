@@ -1133,6 +1133,7 @@ details.icam-grp .cause-list{margin:6px 0;}
 .ptw-g6{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
 .ck-sec{margin:12px 0 4px; padding:6px 10px; border-radius:8px; background:var(--surface-2); font-weight:800; font-size:13px; letter-spacing:.02em; text-transform:uppercase;} .ck-headline{margin-bottom:8px;} .ck-num{display:flex; gap:6px; align-items:center;} .ck-num input{max-width:140px;}
 .ck-fit{display:flex; gap:8px; flex-wrap:wrap;}
+.pl-survey strong{color:#a78bfa;} .badge.pl-b-survey{background:rgba(139,92,246,.16); color:#a78bfa;} :root[data-theme="light"] .badge.pl-b-survey{color:#6d28d9;}
 .pl-chips{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px;}
 .pl-projs{margin-top:10px; display:flex; flex-direction:column; gap:8px;} .pl-pdiv{border:1px solid var(--line); border-left:5px solid var(--line); border-radius:12px; padding:8px 10px;} .pl-pdh{font-weight:800; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; margin:0 0 6px;} .pl-pdh span{font-weight:500; text-transform:none; letter-spacing:0; color:var(--ink-muted); margin-left:6px;}
 .pl-pdiv-Scaffolding{border-left-color:var(--dv-scaff); background:var(--dv-scaff-bg);} .pl-pdiv-Scaffolding .pl-pdh{color:var(--dv-scaff);} .pl-pdiv-Civil{border-left-color:var(--dv-civil); background:var(--dv-civil-bg);} .pl-pdiv-Civil .pl-pdh{color:var(--dv-civil);}
@@ -3140,7 +3141,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b136';
+const APP_BUILD='b137';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10651,8 +10652,11 @@ if(REG.obs){ REG.obs.tabs.push({key:'wl', label:'Warning letter', showIf:r=>['Un
    Man-hours follow the moves: a project (automatic man-hours) counts only its people who are not at another place that day
    (standby at the project still counts there). Workshop / yard hours go to the company total (from the date set in the rules).
    settings/places = {counts:{place:true|false}, hpd, dpw, from, locks:{'YYYY-MM':{at, by, proj:{pid:hours}, int:{division:hours}}}, reopened:[…]} */
-const PL_PLACES={workshop:{l:'Workshop', s:'Workshop', count:true, internal:true}, yard:{l:'Yard', s:'Yard', count:true, internal:true}, camp:{l:'Camp / room — no work', s:'Camp — no work', count:false}, standby:{l:'Standby at the project', s:'Standby', count:true, project:true}, travel:{l:'Travelling (for work)', s:'Travelling', count:true, project:true}, leave:{l:'On leave / vacation', s:'Leave', count:false}, sick:{l:'Sick / medical rest', s:'Sick', count:false}};
-const PL_ORDER=['workshop','yard','standby','travel','camp','leave','sick'];   // Batch 110: travel
+const PL_PLACES={workshop:{l:'Workshop', s:'Workshop', count:true, internal:true}, yard:{l:'Yard', s:'Yard', count:true, internal:true}, camp:{l:'Camp / room — no work', s:'Camp — no work', count:false}, standby:{l:'Standby at the project', s:'Standby', count:true, project:true}, travel:{l:'Travelling (for work)', s:'Travelling', count:true, project:true}, leave:{l:'On leave / vacation', s:'Leave', count:false}, sick:{l:'Sick / medical rest', s:'Sick', count:false},
+  survey:{l:'Site survey / scope visit', s:'Site survey', count:true, internal:true}};   // Batch 137: out to check a new job's scope (not a project yet) — a working day to the company total
+const PL_ORDER=['workshop','yard','standby','travel','survey','camp','leave','sick'];   // Batch 110: travel · b137: site survey
+const SV_SURVEY_PURPOSES=['Scope check','Quotation / measurement','Client meeting','Site condition check','Other'];
+function plSurveyTxt(p){ return [p.svWhere||'', p.svPurpose||'', p.svLeadName?'led by '+p.svLeadName:''].filter(Boolean).join(' · '); }
 const PL_REASONS=['Waiting for permit','Client stop-work','No work available','Equipment breakdown','Bad weather','Workshop job','Rest day','Medical','Annual leave','Other'];
 function plCfg(){ const s=settingsDocs.places||{}; const counts={}; for(const k of PL_ORDER) counts[k]=(s.counts&&typeof s.counts[k]==='boolean')?s.counts[k]:PL_PLACES[k].count;
   const o=s.office||{};   // Batch 106: office staff man-hours
@@ -10735,7 +10739,7 @@ function plWho(){ const u=auth.currentUser||{}; return (hseSigOf(u.email)||{}).n
 async function plAdd(ids, e){
   const lk=plLockedUpto(); if(lk && e.from.slice(0,7)<=lk){ toast(`${periodLabel(lk)} is closed — reopen the month (with a reason) before changing days in it`); return 0; }
   let n=0; for(const id of ids){ const w=workers.find(x=>x.id===id); if(!w) continue;
-    const x={id:'pl'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), place:e.place, ...(e.loc?{loc:e.loc}:{}), ...(e.place==='travel'?{forPid:e.forPid||'', tfrom:e.tfrom||'', tto:e.tto||''}:{}), from:e.from, to:e.to||'', reason:e.reason||'', note:e.note||'', by:plWho(), at:new Date().toISOString(), projectId:w.projectId||''};
+    const x={id:'pl'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), place:e.place, ...(e.loc?{loc:e.loc}:{}), ...(e.place==='travel'?{forPid:e.forPid||'', tfrom:e.tfrom||'', tto:e.tto||''}:{}), ...(e.place==='survey'?{svId:e.svId||'', svWhere:e.svWhere||'', svPurpose:e.svPurpose||'', svLead:e.svLead||'', svLeadName:e.svLeadName||''}:{}), from:e.from, to:e.to||'', reason:e.reason||'', note:e.note||'', by:plWho(), at:new Date().toISOString(), projectId:w.projectId||''};
     if(await plSaveWorker(w, [...plList(w), x])) n++; }
   return n; }
 // take one day out of a place entry (he was working on the project that day)
@@ -10774,12 +10778,12 @@ function plTodayHtml(){   // Batch 108: one chip per company location (Samail Ya
   const mm=plMismatches(), cps=plCompletedHolding(), vis=plOpenVisits(), away=[...by.values()].reduce((n,l)=>n+l.length,0);
   if(!away && !mm.length && !ed && !cps.length && !vis.length) return '';
   const keysOf=type=>{ const L=plLocs().filter(l=>l.type===type).map(l=>l.id); return L.length?L:[type]; };
-  const order=[...keysOf('workshop'), ...keysOf('yard'), 'standby', 'travel', ...keysOf('camp'), 'leave', 'sick', ...keysOf('office')];
+  const order=[...keysOf('workshop'), ...keysOf('yard'), 'standby', 'travel', 'survey', ...keysOf('camp'), 'leave', 'sick', ...keysOf('office')];
   for(const k of by.keys()) if(!order.includes(k)) order.push(k);   // e.g. a closed location someone is still at
   const typeOf=k=>plLocById(k)?plLocById(k).type:k, nameOf=k=>plLocById(k)?baseLabel(k):k==='office'?'Office':(PL_PLACES[k]||{}).s||k;
   const countsTxt=k=>{ const ty=typeOf(k); return ty==='office'?(C.office.on?'counts':'not counted yet'):(C.counts[ty]?'counts':'0 hours'); };
   const chip=k=>`<button type="button" class="pl-chip pl-${esc(typeOf(k))} ${plUi.open===k?'on':''}" data-pl-show="${esc(k)}"><strong>${(by.get(k)||[]).length}</strong><span>${esc(nameOf(k))}</span><i>${countsTxt(k)}</i></button>`;
-  const row=({w,p,b})=>p?`<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')}${w.projectId?' · from '+esc(projectName(w.projectId)):''}${p.place==='travel'?' · '+esc(plTravelTxt(p)):''} · ${esc(p.reason||'')}${p.to?` · until ${esc(isoToDmy(p.to))}`:' · open-ended'}</span></span><span>${ed?`<button type="button" class="btn btn-sm" data-pl-back="${esc(w.id)}|${esc(p.id)}">Back on project from today</button> `:''}<button type="button" class="btn btn-sm" data-pl-open="${esc(w.id)}">Open</button></span></div>`
+  const row=({w,p,b})=>p?`<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')}${w.projectId?' · from '+esc(projectName(w.projectId)):''}${p.place==='travel'?' · '+esc(plTravelTxt(p)):''}${p.place==='survey'?' · '+esc(plSurveyTxt(p)):''}${p.reason?' · '+esc(p.reason):''}${p.to?` · until ${esc(isoToDmy(p.to))}`:' · open-ended'}</span></span><span>${ed?`<button type="button" class="btn btn-sm" data-pl-back="${esc(w.id)}|${esc(p.id)}">Back on project from today</button> `:''}<button type="button" class="btn btn-sm" data-pl-open="${esc(w.id)}">Open</button></span></div>`
     :(()=>{ const L=baseHist(w).find(x=>x.base===b && !x.to); return `<div class="ind-mrow"><span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')} · ${b==='office'&&!w.base?'office staff':'home base '+esc(baseLabel(b))}${L&&L.from?' since '+esc(isoToDmy(L.from)):''}</span></span><span><button type="button" class="btn btn-sm" data-pl-open="${esc(w.id)}">Open</button></span></div>`; })();
   return `<div class="panel pl-today"><div class="section-head"><h3>${ic('users')} Where are the crews today <span class="wsub">${esc(isoToDmy(t))}</span></h3><span style="display:flex; gap:6px; flex-wrap:wrap;">${ed?'<button type="button" class="btn btn-sm btn-primary" data-mv-open="today|">↔ Move people</button>':''}<button type="button" class="btn btn-sm" data-mv-toggle="1">${ic('move')} Movements</button>${ed?`<button type="button" class="btn btn-sm" data-pl-rules="1">${ic('gear')} Man-hours rules, locations & month close</button>`:''}</span></div>
     <div class="pl-chips"><button type="button" class="pl-chip pl-proj ${plUi.open==='__proj'?'on':''}" data-pl-show="__proj" title="Tap to see each project"><strong>${onProj}</strong><span>On their projects</span><i>counts · tap: each project ${plUi.open==='__proj'?'▴':'▾'}</i></button>${order.map(chip).join('')}${none?`<div class="pl-chip"><strong>${none}</strong><span>Not assigned</span><i>—</i></div>`:''}</div>
@@ -10832,7 +10836,7 @@ function plMoveFormHtml(mode, s){ const sites=activeSites().filter(x=>projectSta
       <label class="chk span-all"><input type="checkbox" name="ltrv"> First day is a travel day</label><label>Travelling from<input name="ltfrom" maxlength="40" placeholder="e.g. Muscat"></label><label>To<input name="ltto" maxlength="40" placeholder="e.g. Nimr"></label></div>
       <p class="wsub" style="margin:4px 0 0;">They leave the project team. Their project history keeps the dates they worked here; days away still open end the day before.</p></div>` : '';
   return `<form data-pl-form="${mode}" class="pl-move">${mode==='crew'?`<div class="pl-kind"><label class="chk"><input type="radio" name="kind" value="away" checked> Away for a while — stays on this project</label><label class="chk"><input type="radio" name="kind" value="leave"> Leaves this project for good</label></div>`:''}${leave}<div data-pl-k="away"><div class="form-grid">
-    <label>Where${mode==='crew'?' (selected men)':''}<select name="place"><option value="">Select…</option><optgroup label="Not on the project">${PL_ORDER.map(k=>{ const L=PL_LOC_PLACES.includes(k)?plLocs().filter(l=>l.type===k):[]; return L.length?L.map(l=>`<option value="${k}@${esc(l.id)}">${esc(l.name)}${k==='camp'?' — no work':''}</option>`).join(''):`<option value="${k}">${esc(PL_PLACES[k].l)}</option>`; }).join('')}</optgroup>${mode==='crew'?`<optgroup label="Another project">${sites.map(x=>`<option value="p:${esc(x.id)}">${esc(x.siteName||'Project')}</option>`).join('')}</optgroup>`:''}</select></label>
+    <label>Where${mode==='crew'?' (selected men)':''}<select name="place"><option value="">Select…</option><optgroup label="Not on the project">${PL_ORDER.filter(k=>k!=='survey').map(k=>{ const L=PL_LOC_PLACES.includes(k)?plLocs().filter(l=>l.type===k):[]; return L.length?L.map(l=>`<option value="${k}@${esc(l.id)}">${esc(l.name)}${k==='camp'?' — no work':''}</option>`).join(''):`<option value="${k}">${esc(PL_PLACES[k].l)}</option>`; }).join('')}</optgroup>${mode==='crew'?`<optgroup label="Another project">${sites.map(x=>`<option value="p:${esc(x.id)}">${esc(x.siteName||'Project')}</option>`).join('')}</optgroup>`:''}</select></label>
     <label>For<select name="span"><option value="today">Today only</option><option value="until">Until a date (last day)</option><option value="open">Until further notice</option></select></label>
     <label>Last day<input type="date" name="to" min="${esc(localToday())}"></label>
     <label>Reason<select name="reason">${PL_REASONS.map(r=>`<option>${esc(r)}</option>`).join('')}</select></label>
@@ -10841,7 +10845,7 @@ function plMoveFormHtml(mode, s){ const sites=activeSites().filter(x=>projectSta
     <label class="span-all">Note<input name="note" maxlength="140" placeholder="optional — e.g. permit PTW-123 not issued, client stopped hot work"></label></div></div>
     <div class="form-actions" style="justify-content:flex-start;"><button type="submit" class="btn btn-sm btn-primary">${mode==='crew'?'Move selected':'Save'}</button>${mode==='crew'?' <button type="button" class="btn btn-sm" data-pl-crewcancel="1">Cancel</button>':''}</div></form>`; }
 function plTimelineHtml(w){ const L=plList(w).sort((a,b)=>String(b.from).localeCompare(String(a.from))).slice(0,30), t=localToday(), ed=canEdit();
-  return L.length?L.map(p=>`<div class="rf"><span class="rf-k mono">${esc(isoToDmy(p.from))} → ${p.to?esc(isoToDmy(p.to)):'<strong>open</strong>'}</span><span class="rf-v"><span class="badge pl-b-${p.place}">${esc(p.loc?baseLabel(p.loc):PL_PLACES[p.place].s)}</span> ${p.place==='travel'?esc(plTravelTxt(p))+' ':''}${esc(p.reason||'')}${p.note?' — '+esc(p.note):''} <span class="wsub">· ${esc(p.by||'')}, ${esc(isoToDmy(isoToLocalDate(p.at||'')))}</span>${ed&&p.from<=t&&(!p.to||p.to>=t)?` <button type="button" class="att-link" data-pl-end="${esc(p.id)}">back on the project from today</button>`:''}${ed?` <button type="button" class="att-link att-remove" data-pldel="${esc(w.id+'§'+p.id)}" data-armed="0" title="Wrong entry — he was at work normally">🗑 Delete</button>`:''}</span></div>`).join(''):'<p class="wsub" style="margin:4px 0 0;">No days away from the project recorded.</p>'; }
+  return L.length?L.map(p=>`<div class="rf"><span class="rf-k mono">${esc(isoToDmy(p.from))} → ${p.to?esc(isoToDmy(p.to)):'<strong>open</strong>'}</span><span class="rf-v"><span class="badge pl-b-${p.place}">${esc(p.loc?baseLabel(p.loc):PL_PLACES[p.place].s)}</span> ${p.place==='travel'?esc(plTravelTxt(p))+' ':''}${p.place==='survey'?esc(plSurveyTxt(p))+' ':''}${esc(p.reason||'')}${p.note?' — '+esc(p.note):''} <span class="wsub">· ${esc(p.by||'')}, ${esc(isoToDmy(isoToLocalDate(p.at||'')))}</span>${ed&&p.from<=t&&(!p.to||p.to>=t)?` <button type="button" class="att-link" data-pl-end="${esc(p.id)}">back on the project from today</button>`:''}${ed?` <button type="button" class="att-link att-remove" data-pldel="${esc(w.id+'§'+p.id)}" data-armed="0" title="Wrong entry — he was at work normally">🗑 Delete</button>`:''}</span></div>`).join(''):'<p class="wsub" style="margin:4px 0 0;">No days away from the project recorded.</p>'; }
 function plSpanOf(F){ const t=localToday(); const span=String(F.get('span')||'today'), to=String(F.get('to')||''); if(span==='today') return {from:t, to:t}; if(span==='open') return {from:t, to:''}; if(!to || to<t) return null; return {from:t, to}; }
 document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement) || !f.dataset.plForm) return; e.preventDefault(); if(!canEdit()) return;
   const k=f.dataset.plForm, F=isoFormData(f);
@@ -11255,7 +11259,7 @@ document.addEventListener('change', e=>{ const t=e.target; if(!t || t.name!=='pl
    Workload % = deployed ÷ available × 100, per division (worker's trade). Manpower needed per project (siteEquipment.mhNeed)
    → needed vs on site, shortage, and "hire N" when the needs are more than the people available. */
 const WL_DIVS=['Scaffolding','Civil','Rental'];
-const WL_SPARE=['camp'], WL_INT=['workshop','yard'], WL_OUT=['leave','sick'];   // Batch 111b: workshop / yard work = engaged, not spare
+const WL_SPARE=['camp'], WL_INT=['workshop','yard','survey'], WL_OUT=['leave','sick'];   // Batch 111b: workshop / yard work = engaged, not spare
 function wlInPool(w){ if(!w || w.deleted || plIsOfficeTrade(w)) return false; const t=canonTrade(w.trade||''); if(t==='Sub Contractor') return false; return WL_DIVS.includes(workerDivKey(w)||''); }
 // Batch 118: no joining date → he is not counted before his first line in the tracker (was "spare", which pulled the month's % down)
 function wlFirstDay(w){ return [...projHistory(w), ...baseHist(w), ...plList(w), {from:w.createdAt}, ...(isTemp(w)?(w.contracts||[]).map(c=>({from:c&&c.date})):[])].map(h=>String(h.from||'').slice(0,10)).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).sort()[0]||''; }
@@ -11492,7 +11496,12 @@ function mvDestOptions(){ const sites=activeSites().filter(projectLive).sort((a,
   return `<option value="">Select…</option>${sites.length?`<optgroup label="Projects">${sites.map(x=>`<option value="p:${esc(x.id)}">${esc(x.siteName||'Project')}</option>`).join('')}</optgroup>`:''}
     <optgroup label="Yard / workshop / office">${plBaseChoices().filter(o=>o.ty!=='camp').map(o=>`<option value="b:${esc(o.k)}">${esc(o.l)}</option>`).join('')}</optgroup>
     <optgroup label="Not working / away">${camps.length?camps.map(l=>`<option value="x:camp@${esc(l.id)}">${esc(l.name)} — no work</option>`).join(''):'<option value="x:camp">Camp / room — no work</option>'}<option value="x:standby">Standby at the project (waiting permit / stop-work)</option><option value="x:travel">Travelling (for work)</option><option value="x:leave">Leave / vacation</option><option value="x:sick">Sick / medical rest</option></optgroup>
+    <optgroup label="Other work"><option value="x:survey">Site survey / scope visit (not a project yet)</option></optgroup>
     <option value="none">Not assigned</option>`; }
+function mvLeadOpts(){ const L=activeWorkers().filter(w=>(w.status||'active')==='active'), eng=w=>/engineer|manager|supervisor|foreman|coordinator|executive|hse|officer/i.test(String(w.designation||''))||plIsOfficeTrade(w);
+  const A=L.filter(eng).sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||''))), B=L.filter(w=>!eng(w)).sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  const o=w=>`<option value="${esc(w.id)}">${esc(w.fullName||'')}${w.designation?' — '+esc(w.designation):''}</option>`;
+  return `<option value="">Select who leads…</option>${A.length?`<optgroup label="Engineers / office staff / supervisors">${A.map(o).join('')}</optgroup>`:''}${B.length?`<optgroup label="Others">${B.map(o).join('')}</optgroup>`:''}<option value="__other">Someone else (type the name)</option>`; }
 function mvPickerHtml(){ const L=activeWorkers().filter(w=>(w.status||'active')==='active').sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
   return `<div class="mv-who"><input type="search" class="pl-vq" placeholder="Search name or place…" aria-label="Search people"><div class="pl-vpick">${L.map(w=>`<label class="chk" data-q="${esc(String((w.fullName||'')+' '+(w.designation||'')+' '+plWhereLabel(w)).toLowerCase())}"><input type="checkbox" name="mvw" value="${esc(w.id)}"> <span><strong>${esc(w.fullName||'')}</strong> <span class="wsub">${esc(w.designation||'')} · now: ${esc(plWhereLabel(w))}</span></span></label>`).join('')}</div></div>`; }
 function mvFormHtml(ctx, opt){ opt=opt||{}; const t=localToday();
@@ -11500,6 +11509,10 @@ function mvFormHtml(ctx, opt){ opt=opt||{}; const t=localToday();
     : ctx==='team' ? `<p class="wsub" style="margin:0 0 6px;">Tick the people in the list below (<span id="plSelN">${(plUi.sel||new Set()).size}</span> ticked).</p>` : `<div class="subhead" style="margin-top:0;">1. Who?</div>${mvPickerHtml()}`;
   return `<form data-mv-form="${esc(ctx)}" class="mv-form panel">${ctx==='worker'?'':`<div class="subhead" style="margin-top:0;">↔ Move people</div>`}${who}
     <div class="subhead">${ctx==='today'?'2. ':''}Where to?</div><select name="dest" class="mv-dest" required>${mvDestOptions()}</select>
+    <div data-mv-part="survey" hidden><div class="form-grid"><label class="span-all">Where — client / place *<input name="svwhere" maxlength="80" placeholder="e.g. PDO – Nimr, new rig-up enquiry"></label>
+      <label>Purpose<select name="svpurpose">${SV_SURVEY_PURPOSES.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label>
+      <label>Led by (engineer / office staff)<select name="svlead">${mvLeadOpts()}</select></label><label data-mv-part="svleadx" hidden>Name of the person leading<input name="svleadx" maxlength="60" placeholder="e.g. visitor from head office"></label></div>
+      <p class="wsub" style="margin:2px 0 0;">The person leading is marked on the survey too (if he is in the tracker). A survey day counts as a working day to the company total — no project hours.</p></div>
     <div data-mv-part="travel" hidden><div class="form-grid"><label>Travelling from<input name="tfrom" maxlength="40" placeholder="e.g. Muscat"></label><label>To<input name="tto" maxlength="40" placeholder="e.g. Nimr"></label><label>For the project<select name="tpid">${plTravelProjOpts(opt.pid||'')}</select></label></div></div>
     <div class="subhead">${ctx==='today'?'3. ':''}For how long?</div>
     <div class="pl-kind"><label class="chk"><input type="radio" name="span" value="perm" checked> From now on (permanent)</label><label class="chk"><input type="radio" name="span" value="days"> Only some days, then back</label></div>
@@ -11517,9 +11530,11 @@ function mvSync(f){ const dest=String((f.querySelector('[name="dest"]')||{}).val
   const isDays=(f.querySelector('input[name="span"]:checked')||{}).value==='days', open=(f.querySelector('[name="open"]')||{}).checked;
   f.querySelectorAll('[data-mv-part="days"]').forEach(x=>x.hidden=!isDays); f.querySelector('[name="last"]').disabled=!!open && isDays;
   f.querySelectorAll('[data-mv-part="travel"]').forEach(x=>x.hidden=dest!=='x:travel');
+  f.querySelectorAll('[data-mv-part="survey"]').forEach(x=>x.hidden=dest!=='x:survey'); f.querySelectorAll('[data-mv-part="svleadx"]').forEach(x=>x.hidden=(f.querySelector('[name="svlead"]')||{}).value!=='__other');   // Batch 137
+  if(dest==='x:survey'){ const l=f.querySelector('[name="last"]'), dd=f.querySelector('[name="day"]'); if(l && !l.value && dd && dd.value) l.value=dd.value; const rs=f.querySelector('[name="reason"]'); if(rs) rs.closest('label').hidden=true; } else { const rs=f.querySelector('[name="reason"]'); if(rs) rs.closest('label').hidden=false; }
   const trvOk=!isDays && dest.startsWith('p:'); f.querySelectorAll('[data-mv-part="trvtick"]').forEach(x=>x.hidden=!trvOk); f.querySelectorAll('[data-mv-part="trvtxt"]').forEach(x=>x.hidden=!(trvOk && (f.querySelector('[name="trv"]')||{}).checked));
   const lbl=f.querySelector('[data-mv-lbl]'); if(lbl) lbl.textContent=isDays?'First day':'From (first day there)';
-  const h=f.querySelector('[data-mv-hint]'); if(h) h.textContent=!dest?'':isDays?(dest.startsWith('p:')?'Temporary move to that project — back to his own project the day after the last day.':'Days away — he stays on his project / base; those days are counted by the man-hours rules (standby / travel count, camp / leave / sick = 0).'):'His project / home base changes from that date; the history keeps where he was before.'; }
+  const h=f.querySelector('[data-mv-hint]'); if(h) h.textContent=!dest?'':dest==='x:survey'?'Site survey — they stay on their own project / base; on the day after the last day they are back there by themselves.':isDays?(dest.startsWith('p:')?'Temporary move to that project — back to his own project the day after the last day.':'Days away — he stays on his project / base; those days are counted by the man-hours rules (standby / travel count, camp / leave / sick = 0).'):'His project / home base changes from that date; the history keeps where he was before.'; }
 document.addEventListener('change', e=>{ const f=e.target.closest && e.target.closest('form[data-mv-form]'); if(f) mvSync(f); });
 // Batch 118: "Move back" from a temporary move is dated on the planned return day (not the day someone pressed the button) — not into a closed month
 function mvBackDay(w){ const t=localToday(); let d=(w.returnDate && w.returnDate<=t) ? w.returnDate : t; const lk=plLockedUpto(), st=mvLineStart(w);
@@ -11528,6 +11543,7 @@ function mvLineStart(w){ return [...projHistory(w), ...baseHist(w)].filter(h=>!h
 function mvNowLabel(w){ return w.projectId ? projectName(w.projectId) : w.base ? baseLabel(w.base) : 'his present place'; }
 function mvIdsOf(f){ const ctx=f.dataset.mvForm; if(ctx==='worker') return mvUi.wid?[mvUi.wid]:[]; if(ctx==='team') return [...(plUi.sel||new Set())]; return [...f.querySelectorAll('input[name="mvw"]:checked')].map(x=>x.value); }
 async function mvApply(ids, F){ const t=localToday(), dest=String(F.get('dest')||''), span=String(F.get('span')||'perm'), day=String(F.get('day')||''), last=String(F.get('last')||''), open=!!F.get('open'), reason=String(F.get('reason')||''), note=String(F.get('note')||'').trim();
+  if(dest==='x:survey'){ const lead=String(F.get('svlead')||''); if(lead && lead!=='__other' && !ids.includes(lead)) ids=[...ids, lead]; }   // Batch 137: the leader goes too
   if(!ids.length) return {err:'Choose who moves'}; if(!dest) return {err:'Choose where to'}; if(!/^\d{4}-\d{2}-\d{2}$/.test(day) || day>t) return {err:'The date must be today or earlier'};
   // Batch 118: no moves into a closed month; a project / base move cannot start before his present line started (two places at once = hours counted twice)
   const lk=plLockedUpto(); if(lk && day.slice(0,7)<=lk) return {err:`${periodLabel(lk)} is closed — reopen the month (with a reason) or choose a later date`};
@@ -11544,9 +11560,13 @@ async function mvApply(ids, F){ const t=localToday(), dest=String(F.get('dest')|
     mhCache=null; return {msg:`${n} on a temporary move to ${projectName(pid)} until ${isoToDmy(last)}${skip?` · ${skip} skipped (no own project to come back to — use "From now on")`:''}`}; }
   let place='', loc='', extra={};
   if(dest.startsWith('b:')){ const k=dest.slice(2), ty=plBaseType(k); if(!['workshop','yard'].includes(ty)) return {err:'Office is only for a permanent move'}; place=ty; loc=plLocById(k)?k:''; }
-  else if(dest.startsWith('x:')){ const v=dest.slice(2); place=v.split('@')[0]; loc=v.split('@')[1]||''; if(place==='travel') extra={forPid:String(F.get('tpid')||''), tfrom:String(F.get('tfrom')||'').trim(), tto:String(F.get('tto')||'').trim()}; }
+  else if(dest.startsWith('x:')){ const v=dest.slice(2); place=v.split('@')[0]; loc=v.split('@')[1]||''; if(place==='travel') extra={forPid:String(F.get('tpid')||''), tfrom:String(F.get('tfrom')||'').trim(), tto:String(F.get('tto')||'').trim()};
+    if(place==='survey'){ const where=String(F.get('svwhere')||'').trim(), lead=String(F.get('svlead')||''), lw=lead&&lead!=='__other'?workers.find(x=>x.id===lead):null, lname=lw?(lw.fullName||''):String(F.get('svleadx')||'').trim();   // Batch 137
+      if(!where) return {err:'Write where the site survey is (client / place)'}; if(!lname) return {err:'Choose who leads the site survey'};
+      extra={svId:'svy'+Date.now().toString(36), svWhere:where.slice(0,80), svPurpose:String(F.get('svpurpose')||''), svLead:lw?lw.id:'', svLeadName:lname.slice(0,60)}; } }
   else return {err:'Choose where to'};
-  const n=await plAdd(ids, {place, loc, from:day, to:open?'':last, reason, note, ...extra}); mhCache=null;
+  const n=await plAdd(ids, {place, loc, from:day, to:open?'':last, reason:place==='survey'?'':reason, note, ...extra}); mhCache=null;
+  if(place==='survey') return n?{msg:`${n} on a site survey — ${extra.svWhere} (led by ${extra.svLeadName}) ${open?'until further notice':last===day?'on '+isoToDmy(day):'until '+isoToDmy(last)}`}:{err:''};
   return n?{msg:`${n} marked "${loc?baseLabel(loc):plLabel(place)}" ${open?'until further notice':last===day?'for '+isoToDmy(day):'until '+isoToDmy(last)}`}:{err:''}; }
 document.addEventListener('submit', async e=>{ const f=e.target; if(!(f instanceof HTMLFormElement) || !f.dataset.mvForm) return; e.preventDefault(); e.stopImmediatePropagation(); if(!canEdit()) return;
   const r=await mvApply(mvIdsOf(f), isoFormData(f)); if(r.err){ toast(r.err); return; } if(r.err==='' ) return;
@@ -11568,7 +11588,7 @@ function mvEvents(){ const out=[];
     for(const x of fixLines(w).filter(y=>y.h.to)){ if(fixLines(w).some(y=>y.h.from===x.h.to)) continue; if(x.h.to>localToday()) continue;
       out.push({d:x.h.to, w, from:mvLineLabel(x), to:'Not assigned', how:'permanent', by:'', perm:true}); }
     for(const p of plList(w)){ const pr=p.projectId||projectOn(w, p.from), b=pr?'':baseOn(w, p.from), nd=p.to?daysBetween(p.from, p.to)+1:0;
-      out.push({d:p.from, w, from:pr?projectName(pr):b?baseLabel(b):'—', to:(p.loc?baseLabel(p.loc):plLabel(p.place))+(p.place==='travel'?' · '+plTravelTxt(p):''), how:p.to?(nd===1?'1 day':`${nd} days (back ${isoToDmy(dateAddDays(p.to,1))})`):'until further notice', by:p.by||'', perm:false, reason:p.reason||''}); } }
+      out.push({d:p.from, w, from:pr?projectName(pr):b?baseLabel(b):'—', to:(p.loc?baseLabel(p.loc):plLabel(p.place))+(p.place==='travel'?' · '+plTravelTxt(p):'')+(p.place==='survey'?' — '+plSurveyTxt(p):''), how:p.to?(nd===1?'1 day':`${nd} days (back ${isoToDmy(dateAddDays(p.to,1))})`):'until further notice', by:p.by||'', perm:false, reason:p.reason||''}); } }
   return out; }
 function mvGrouped(){ const t=localToday(), q=mvList.q.trim().toLowerCase(), since=mvList.month?'':dateAddDays(t,-30), m=new Map();
   for(const e of mvEvents()){ if(mvList.month ? !String(e.d).startsWith(mvList.month) : e.d<since) continue; if(q && !String(e.w.fullName||'').toLowerCase().includes(q)) continue; if(mvList.place && e.from!==mvList.place && !String(e.to).startsWith(mvList.place)) continue;
