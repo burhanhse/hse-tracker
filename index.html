@@ -1907,7 +1907,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 
     <main class="app-main" id="scheduleSection" hidden>
       <div class="topbar"><div><h1>Monthly Schedule</h1><p class="page-tagline"><span class="pt-co">Burhan Oil &amp; Trade Services</span><span class="pt-sep" aria-hidden="true"></span><span class="pt-slogan">Plan · Go · Check · Close</span></p></div>
-        <div class="topbar-actions"><button class="btn btn-sm" id="msPdfBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Schedule PDF</button><button class="btn btn-sm" id="msQuickBtn" type="button" hidden>⚡ Quick plan</button><button class="btn btn-primary" id="msAddBtn" type="button" hidden>+ Add task</button></div></div>
+        <div class="topbar-actions"><button class="btn btn-sm" id="msPdfBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Schedule PDF</button><button class="btn btn-sm" id="ms2027Btn" type="button" hidden title="Adds the 7 agreed monthly tasks for 2027 (repeat every month Jan–Dec 2027) — tasks already there are not changed">Load 2027 draft</button><button class="btn btn-sm" id="msQuickBtn" type="button" hidden>⚡ Quick plan</button><button class="btn btn-primary" id="msAddBtn" type="button" hidden>+ Add task</button></div></div>
       <div id="msBody"><p class="wsub">Sign in to load…</p></div>
     </main>
 
@@ -3147,7 +3147,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b141';
+const APP_BUILD='b142';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -6662,7 +6662,7 @@ function renderRegAll(key){
   const tbtn=document.querySelector(`[data-reg-trash="${key}"]`); if(tbtn) tbtn.innerHTML=ic('trash')+` Deleted (${regDeleted(key).length})`;
   document.getElementById(key+'Tiles').innerHTML = (cfg.tiles(regActive(key))||[]).map(t=>`<div class="tile"><div class="tile-head"><div class="tile-icon">${ic(t.icon||'chart')}</div><div class="tile-label">${esc(t.label)}</div></div><div class="tile-num ${t.cls||''}">${esc(String(t.num))}</div><div class="tile-sub">${esc(t.sub||'')}</div></div>`).join('');
   if(cfg.topPanel) cfg.topPanel();
-  if(cfg.yearFilter){ const ys=new Set([String(new Date().getFullYear())]); for(const r of regActive(key)){ const y=regRowYear(cfg,r); if(y) ys.add(y); } const s=document.getElementById(key+'Year'); s.innerHTML=[...ys].sort().reverse().map(y=>`<option value="${y}">${y}</option>`).join('')+'<option value="all">All years</option>'; s.value=st.f.year; }
+  if(cfg.yearFilter){ const ys=new Set([String(new Date().getFullYear())]); for(const r of regActive(key)){ const y=regRowYear(cfg,r); if(y) ys.add(y); } if(cfg.extraYears) try{ for(const y of cfg.extraYears()) if(/^\d{4}$/.test(y)) ys.add(y); }catch(e){} const s=document.getElementById(key+'Year'); s.innerHTML=[...ys].sort().reverse().map(y=>`<option value="${y}">${y}</option>`).join('')+'<option value="all">All years</option>'; s.value=st.f.year; }
   if(cfg.segs) document.getElementById(key+'Segs').innerHTML=[{key:'all',label:cfg.segAllLabel||'All'},...cfg.segs].map(s=>`<button type="button" class="seg-btn ${s.key===st.f.seg?'active':''}" data-reg-seg="${key}:${s.key}">${esc(s.label)}<span class="tab-count">${regActive(key).filter(r=>(!cfg.yearFilter||st.f.year==='all'||regRowYear(cfg,r)===st.f.year) && (s.key==='all'||s.match(r))).length}</span></button>`).join('');
   const n=cfg.columns.length;
   if(st.err==='rules') tb.innerHTML=`<tr><td colspan="${n}" class="empty-state">${esc(RULES_UPDATE_MSG)}</td></tr>`;
@@ -6838,6 +6838,37 @@ async function as2027Load(btn){ if(!canEdit() || !btn || btn.disabled) return; i
     const items=[...cur, ...add]; if(await saveSettings('assurance', {'2027':{items}})){ appAssurance={...appAssurance, '2027':{items}}; assuranceYear='2027'; renderAssuranceAll(); toast(`2027 assurance plan — ${add.length} activit${add.length===1?'y':'ies'} added${cur.length?` (${cur.length} already there kept)`:''}`); } }
   finally{ btn.disabled=false; } }
 document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#aud2027Btn,#as2027Btn'); if(!b) return; if(b.id==='aud2027Btn') aud2027Load(b); else as2027Load(b); });
+// Batch 142: part 3 — drill plan 2027 (6 drills, one every 2 months) + monthly recurring tasks (not already in the assurance plan)
+function plan2027Site(div){ const s=activeSites().filter(x=>projectStatus(x)!=='Completed' && (x.division||'Civil')===div).sort((a,b)=>String(a.siteName||'').localeCompare(String(b.siteName||'')))[0]; return s?'p:'+s.id:''; }
+function plan2027Loc(re){ const l=(typeof plLocs==='function'?plLocs():[]).find(x=>re.test(String(x.name||''))); return l?l.name:''; }
+function plan2027Drills(){ const sc=plan2027Site('Scaffolding'), cv=plan2027Site('Civil'), yard=plan2027Loc(/samail|yard/i);
+  return [{id:'p27_h2s', type:'H2S release', place:sc||'o:PDO wellhead site (Scaffolding)', months:[2]},
+    {id:'p27_rescue', type:'Rescue from height', place:sc||'o:PDO wellhead site (Scaffolding)', months:[4]},
+    {id:'p27_fire', type:'Fire evacuation', place:'o:Head office + Camp', months:[6]},
+    {id:'p27_med', type:'Medical emergency / casualty', place:cv||'o:Civil project site', months:[8]},
+    {id:'p27_veh', type:'Vehicle accident', place:'o:Logistics & Rental — road / yard (crane / vehicle rollover)', months:[10]},
+    {id:'p27_spill', type:'Spill response', place:'o:'+(yard||'Samail Yard')+' — diesel spill at refuelling point', months:[12]}]; }
+function plan2027Tasks(){ const yard=plan2027Loc(/samail|yard/i), ws=plan2027Loc(/gabha|workshop/i);
+  return [[2,'Monthly Report check + KPI vs 2027 targets (before the 1st-of-month e-mail)','Meeting','HSE','Office staff'],
+    [3,'Training & medical expiry check — book renewals due in the next 60 days','Training','HSE','co'],
+    [5,'Check legal / PDO updates (new laws, revised SPs, HSE alerts) — update the Legal register','Other','HSE','co'],
+    [10,'Overdue actions review (Action Tracker) before the HSE committee','Meeting','HSE','co'],
+    [20,'Fire extinguisher monthly check — Head Office, yard, vehicles','HSE inspection','HSE / Store','co'],
+    [25,`Housekeeping check — ${[yard||'Samail Yard', ws||'Gabha Workshop'].join(' & ')}`,'Housekeeping check','Yard supervisor','Rental'],
+    [28,'Star of the month — best observation / safe behaviour','Other','HSE','co']]; }
+async function drill2027Load(btn){ if(!canEdit() || !btn || btn.disabled) return; if((((settingsDocs.drillPlan||{}).years)||{})['2027']){ toast('A 2027 drill plan already exists — choose year 2027 and edit it there'); return; }
+  if(!compArm(btn, 'Tap again — add the 2027 drill plan')) return; btn.disabled=true;
+  try{ const u=auth.currentUser; if(await saveSettings('drillPlan', {years:{'2027':{rows:plan2027Drills(), savedBy:(u&&u.email)||'', savedAt:new Date().toISOString(), source:'plan2027'}}}, settingsStamp('drillPlan'))){
+      try{ regState.drills.f.year='2027'; renderRegAll('drills'); }catch(e){} toast('2027 drill plan added — 6 drills (Feb H2S · Apr rescue at height · Jun fire · Aug medical · Oct vehicle · Dec spill). Change the place of any drill in the plan.'); } }
+  finally{ btn.disabled=false; } }
+async function ms2027Load(btn){ if(!canEdit() || !btn || btn.disabled) return; if(!compArm(btn, 'Tap again — add the 2027 monthly tasks')) return; btn.disabled=true;
+  try{ const cur=Object.values(msData().tasks||{}), have=new Set(cur.filter(t=>String(t.date||'').startsWith('2027')||(t.rep && String(t.until||'9999')>='2027')).map(t=>String(t.title||'').trim().toLowerCase())), add={}, now=new Date().toISOString(); let n=0;
+    plan2027Tasks().forEach(([day, title, what, who, div], i)=>{ if(have.has(title.toLowerCase())) return; const id='p27_'+i+'_'+Date.now().toString(36);
+      add[id]={id, date:`2027-01-${String(day).padStart(2,'0')}`, what:MS_WHAT.includes(what)?what:'Other', title, where:'', div:MS_DIVS.includes(div)?div:'co', who, rep:'m', until:'2027-12-31', note:'2027 annual plan', by:msWho(), at:now}; n++; });
+    if(!n){ toast('The 2027 monthly tasks are already in the schedule'); return; }
+    if(await msSave({tasks:add})){ toast(`${n} monthly task${n===1?'':'s'} added — they repeat every month from January to December 2027`); msRender(); } }
+  finally{ btn.disabled=false; } }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#drill2027Btn,#ms2027Btn'); if(!b) return; if(b.id==='drill2027Btn') drill2027Load(b); else ms2027Load(b); });
 let plan2027Busy=false;
 async function plan2027Load(btn){ if(!canEdit() || plan2027Busy) return; if(!compArm(btn, 'Tap again — add the 2027 plan')) return; plan2027Busy=true; btn.disabled=true;
   let addedO=0, skippedO=0, tN=0; const now=new Date().toISOString(), me=(auth.currentUser&&auth.currentUser.email)||'';
@@ -7950,7 +7981,8 @@ async function syncDrillToReport(r){
 regDefine({
   key:'drills', collection:'drills', singular:'Drill', title:'Emergency Drills', tagline:'Plan · Practise · Time · Improve',
   addLabel:'+ Record a drill', noField:'drillNo', noPrefix:'DRL', noYear:true, dateField:'date', yearFilter:true, statuses:DRILL_RESULTS, statusOf:r=>r.result||'',
-  headerButtons:'<button class="btn btn-sm" type="button" id="drillPlanPdfBtn">'+ic('download')+' Drill plan PDF</button>',
+  extraYears:()=>Object.keys(((settingsDocs.drillPlan||{}).years)||{}),   // b142: a year with a drill plan (e.g. next year) can be chosen
+  headerButtons:'<button class="btn btn-sm reg-edit-only" type="button" id="drill2027Btn" title="Adds the agreed 2027 drill plan (6 drills) — an existing 2027 plan is not changed">Load 2027 draft</button><button class="btn btn-sm" type="button" id="drillPlanPdfBtn">'+ic('download')+' Drill plan PDF</button>',
   searchPlaceholder:'Search drill no., type, scenario, place…', emptyEditor:'No drills recorded yet — record each drill with the scenario, the times and what to improve. Each drill also counts in the Monthly Report.',
   titleOf:r=>r.drillType||'Drill', subOf:r=>[isoToDmy(r.date), drillPlaceLabel(drillPlaceKey(r)), r.announced].filter(Boolean).join(' · '),
   badgesOf:r=>`${drillMetBadge(r)} ${r.result?`<span class="badge ${r.result===DRILL_RESULTS[0]?'ok':r.result===DRILL_RESULTS[1]?'warn':'danger'}">${esc(r.result)}</span>`:''} <span class="badge muted">${drillPeople(r)} people</span>${r.expected&&r.accounted!==undefined&&r.accounted!==''&&Number(r.accounted)<Number(r.expected)?` <span class="badge danger">${Number(r.expected)-Number(r.accounted)} not accounted for</span>`:''}`,
@@ -10458,7 +10490,7 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
 function msRender(){ const el=document.getElementById('msBody'); if(!el || !auth.currentUser) return; const sec=document.getElementById('scheduleSection'); if(sec && sec.hidden) return;
   if(formDirtyIn('msBody')) return;
   const ym=msYm(), cur=localToday().slice(0,7), ed=canEdit(), own=msOwnRows(ym), car=msCarried(ym), as=msAssuranceRows(ym), ins=msInspRows(ym), ex=msExpiryRows(ym), act=msActionRows(ym), S=msStats(ym);
-  const ab=document.getElementById('msAddBtn'); if(ab) ab.hidden=!ed; const qb=document.getElementById('msQuickBtn'); if(qb) qb.hidden=!ed;
+  const ab=document.getElementById('msAddBtn'); if(ab) ab.hidden=!ed; const qb=document.getElementById('msQuickBtn'); if(qb) qb.hidden=!ed; const lb=document.getElementById('ms2027Btn'); if(lb) lb.hidden=!ed;
   const tiles=[{label:'Planned', num:S.planned, sub:'tasks + plan + inspections + expiries', icon:'clipboard'},
     {label:'Done', num:S.done, sub:S.late?`${S.late} done late`:'ticked / recorded', icon:'checkcircle', cls:S.done?'ok':''},
     {label:ym<cur?'Missed':'Missed / overdue', num:S.miss, sub:ym<cur?'not done in the month':'date passed, not done', icon:'alert', cls:S.miss?'danger':'ok'},
