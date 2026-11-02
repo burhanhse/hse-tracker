@@ -1252,6 +1252,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .vk-check{border-left:3px solid var(--ok);} .vk-check.vk-bad{border-left-color:var(--danger);} .vk-tbl td,.vk-tbl th{border:1px solid var(--line); padding:6px 10px;} .vk-tbl{border-collapse:collapse; width:100%;} .vk-row-miss td{background:var(--danger-bg);}
 .vk-head{display:flex; gap:10px; align-items:center; flex-wrap:wrap;} .vk-fold{padding-top:10px; padding-bottom:10px;} .vk-grid th{font-size:11px; text-align:center; white-space:normal; min-width:70px;} .vk-grid td{text-align:center;} .vk-grid td:first-child,.vk-grid th:first-child{text-align:left;} .vk-grid .vk-m{background:var(--danger-bg); color:var(--danger); font-weight:800;} .vk-grid .vk-y{color:var(--ok);}
 .mf-panel{margin:10px 0;} .mf-head{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;} .mf-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px;}
+.yard-ctl{display:inline-flex; gap:6px; flex-wrap:wrap; margin-left:6px;} .yard-ctl select,.yard-ctl input{max-width:230px;}
 .mf-sub{border-style:dashed;} .mf-cos{margin-top:6px; border-top:1px dashed var(--line); padding-top:5px;} .mf-co{font-size:11.5px; line-height:1.5;} .mf-co span{color:var(--muted, #94a3b8);}
 .mf-card{border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:var(--surface);} .mf-all{border-color:var(--accent);} .mf-l{font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-muted);}
 .mf-p{font-size:28px; font-weight:800; line-height:1.15;} .mf-p.ok{color:var(--ok);} .mf-p.warn{color:var(--warn);} .mf-p.danger{color:var(--danger);} .mf-s{font-size:12px; color:var(--ink-muted);}
@@ -3156,7 +3157,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b145';
+const APP_BUILD='b146';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4707,6 +4708,8 @@ const IMS_BHN_EXTRA=[
   ['GM-CH-09','Grinding Machine Inspection Checklist','Checklist','','ck_grind','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
   ['CM-CH-10','Plywood Cutting Machine Inspection Checklist','Checklist','','ck_ply','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
   ['SLT-CH-11','Scissor Lift Inspection Checklist','Checklist','','ck_scissor','Made by the tracker — Inspection Checklists (monthly), Rev 01'],
+  ['SY-CH-14','Scaffolding Storage Yard Inspection Checklist','Checklist','','ck_yardsc','Made by the tracker — Inspection Checklists (monthly, company locations), Rev 00 (b146)'],
+  ['WS-CH-15','Workshop Yard Inspection Checklist','Checklist','','ck_yardws','Made by the tracker — Inspection Checklists (monthly, company locations), Rev 00 (b146)'],
   ['GI-CH-13','General Equipment Inspection Checklist','Checklist','','ck_gen','Made by the tracker — Inspection Checklists (items without their own checklist), Rev 01 — suggested number'],
   ['F0913-04','Yearly HSE Report','Form','P0913-02','yearlyReport','Made by the tracker — Monthly Report → yearly PDF'],
   ['F0913-05','Client Monthly HSE Report','Form','P0913-02','clientPack','Made by the tracker — Monthly Report → client report'],
@@ -9320,7 +9323,7 @@ function ckFormHtml(r, cl){
       <input type="text" class="ck-comment" data-ck-comment="${i}" value="${esc(cm[i]||'')}" placeholder="${a[i]==='No'?'What is wrong?':'Remarks'}" ${ed?'':'disabled'}></div>`; }
   const sigs=r.ckSigns||{}, hs=hseSigOf((auth.currentUser||{}).email)||{};
   return `<datalist id="ckVehList">${vehicles.filter(v=>!v.deleted&&v.vehicleNumber).map(v=>`<option value="${esc(v.vehicleNumber)}">`).join('')}</datalist><datalist id="ckWkList">${activeWorkers().slice(0,400).map(w=>`<option value="${esc(w.fullName||'')}">`).join('')}</datalist>
-  <form data-reg-custom="checklist" class="ck-form"><div class="ck-headline"><strong>${esc(T.title)}</strong> <span class="wsub">${esc(T.no)} · Rev 01 · monthly — next inspection <b>${esc(isoToDmy(next)||'—')}</b></span></div>
+  <form data-reg-custom="checklist" class="ck-form"><div class="ck-headline"><strong>${esc(T.title)}</strong> <span class="wsub">${esc(T.no)} · Rev ${T.yard?'00':'01'} · monthly — next inspection <b>${esc(isoToDmy(next)||'—')}</b></span></div>
     <div class="panel"><div class="form-grid">${T.head.map(hf).join('')}</div></div>
     ${T.ppe?`<div class="panel"><div class="subhead" style="margin-top:0;">PPE to be worn while using the machine</div><div class="ptw-ticks">${T.ppe.map(p=>`<label class="chk"><input type="checkbox" data-ck-ppe value="${esc(p)}" ${ppe.includes(p)?'checked':''} ${ed?'':'disabled'}> ${esc(p)}</label>`).join('')}</div></div>`:''}
     ${T.eq?`<div class="panel"><div class="subhead" style="margin-top:0;">${esc(T.eq.title)}</div><div class="ptw-tbl-wrap"><table class="ptw-tbl ck-eq"><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Result</th><th>Expiry / due date</th><th>Remarks</th></tr></thead><tbody>${T.eq.items.map(([l,hint],i)=>{ const x=eq[i]||{}; return `<tr><td>${i+1}</td><td>${esc(l)}</td><td><input data-cke="${i}|q" value="${esc(x.q||'')}" maxlength="6" style="max-width:60px;" ${ed?'':'disabled'}></td><td><select data-cke="${i}|r" ${ed?'':'disabled'}><option value="">—</option>${[['ok','OK'],['no','Not OK'],['na','N/A']].map(([v,t])=>`<option value="${v}" ${x.r===v?'selected':''}>${t}</option>`).join('')}</select></td><td><input data-cke="${i}|d" value="${esc(x.d||'')}" maxlength="30" placeholder="${esc(hint||'')}" ${ed?'':'disabled'}></td><td><input data-cke="${i}|rm" value="${esc(x.rm||'')}" maxlength="80" ${ed?'':'disabled'}></td></tr>`; }).join('')}</tbody></table></div></div>`:''}
@@ -9904,12 +9907,31 @@ const CK_TPL=[
  {key:'gen', no:'BHN-GI-CH-13', title:'General Equipment Inspection Checklist', short:'General item',
   head:[['comp','Company / project'],['type','Item / type'],['make','Make / model'],['eqno','Item no. / serial no.'],['loc','Location / vehicle'],['exp','Expiry / calibration due']],
   secs:[[null,['In its place and easy to reach','General condition good — no damage, cracks, corrosion or heavy wear','Tag / label, seal or safety pin in place and readable','In date — expiry, calibration or service date not passed','Clean and stored correctly (protected from sun, heat, dust and water)','Complete — all parts / contents present (e.g. first aid kit contents, spill kit items)','Works correctly — function or bump test done where it applies (gas monitors, torches)','Battery charged / spare available (electronic items)','Instructions and markings legible']]], signs:['Inspected by','Reviewed by (HSE)']},
+ {key:'yardsc', no:'BHN-SY-CH-14', title:'Scaffolding Storage Yard Inspection Checklist', short:'Scaffolding storage yard', yard:true,
+  head:[['yard','Yard / location'],['comp','Company'],['incharge','Yard in-charge / storekeeper'],['activity','Main activity'],['staff','Persons working in the yard today'],['time','Time of inspection']],
+  secs:[['Access, layout and traffic',['Gate, fence and yard signboard in good condition — no unauthorised entry','Pedestrian walkways marked and kept apart from truck / forklift routes','Loading and unloading area level, marked and free of stored material','Speed limit and reversing signs displayed; banksman used when trucks reverse','Lighting enough for early-morning / night loading']],
+   ['Storage of scaffold materials',['Tubes on racks or level bearers, sorted by length, stacks stable and not higher than the rack posts','Racks and bays in good condition — uprights, end stoppers and bearers in place, not overloaded','Boards stacked flat on bearers, sorted by length, banded — none leaning or standing loose','Fittings (couplers, base plates, joint pins, clamps) in bins / cages by type — none loose on the ground','System scaffold parts (standards, ledgers, transoms, braces) stored by type on stillages / racks','Ladders stored flat on brackets or racks — not standing loose','Pallets and stillages in good condition and stacked to a safe height','Material kept clear of walkways, gate, fire points and electrical panels']],
+   ['Material condition and quarantine',['Material returning from sites checked before it goes back into stock','Bent, cracked or corroded tubes, split boards and faulty fittings kept apart in a marked QUARANTINE area','Quarantined items tagged "DO NOT USE" and listed for repair or scrap','Boards checked for splits, end bands and warping; fittings for damaged threads, cracks and missing bolts','Tube ends square and free of burrs','Scrap removed from the yard regularly']],
+   ['Lifting, handling and loading',['Forklift / HIAB / crane in good condition with a valid inspection (TPI) certificate and daily check done','Operators and riggers hold valid cards','Slings, chains and shackles colour-coded for the period, SWL marked, stored off the ground','Bundles banded before lifting; nobody under a suspended load','Long tubes and heavy loads carried by two people; gloves worn','Trucks loaded evenly, material strapped / chained, overhang flagged, not over the truck capacity']],
+   ['Fire, emergency and first aid',['Fire extinguishers in place, easy to reach and in date (monthly check done)','First aid box complete and in date; first aider named','Emergency numbers and assembly point displayed','No smoking near stored material — smoking only in the marked area']],
+   ['Housekeeping, welfare, environment and PPE',['Yard clean — no loose fittings, nails, offcuts or slip / trip hazards','Cool drinking water, shaded rest area and toilets available (heat stress)','Waste separated (wood, metal, general) and removed','No oil / fuel leaks on the ground; spill kit available','Distribution boards closed, cables and sockets undamaged, RCD / ELCB working (where power is used)','Everyone in the yard wears helmet, safety shoes, gloves, coverall and hi-vis','Toolbox talk held; yard rules known by the crew']]],
+  result:'Yard in a safe condition', signs:['Inspected by (HSE)','Yard in-charge']},
+ {key:'yardws', no:'BHN-WS-CH-15', title:'Workshop Yard Inspection Checklist', short:'Workshop yard', yard:true,
+  head:[['yard','Workshop / yard'],['comp','Company'],['incharge','Workshop in-charge / supervisor'],['activity','Work going on today'],['staff','Persons working today'],['time','Time of inspection']],
+  secs:[['General workshop and yard',['Gate, fence and signboards in good condition','Walkways and emergency exits clear and marked; vehicle / forklift routes kept apart from people','Lighting and ventilation good inside the workshop shed','Floor clean — no offcuts, slag, oil or trip hazards','Steel sections, plates and pipes stored on racks, stable and sorted']],
+   ['Welding and cutting (hot work)',['Welding machines in good condition; cables, holders and earth clamps undamaged, connections tight','Machine earthed; return clamp fixed close to the job','Gas cylinders upright, chained, caps on cylinders not in use','Oxygen stored apart from acetylene / LPG — about 6 m away or behind a fire-resistant partition','Flashback arrestors fitted at the regulators and torch; hoses in good condition, right colour, crimped (not wire-tied)','Regulators and gauges working; no oil or grease on oxygen fittings','Welding screens / curtains protect other people from the arc','Fire extinguisher at each hot-work point; anything that can burn removed or covered (about 11 m around)','Fumes taken away by extraction or good natural airflow; no welding in a confined space without a permit','Welders wear welding helmet / correct shade, leather gloves and apron; helpers wear eye protection','Hot work outside the workshop done under a permit with a fire watch']],
+   ['Fabrication tools and machines',['Grinders and cutting machines guarded, disc right size / speed and in date, no damaged discs','Bench grinder and drill press guards, tool rests and eye shields in place','Power tools inspected and colour-coded; cables and plugs undamaged','Emergency stop buttons work on fixed machines','Compressor safety valve, pressure gauge, hoses and couplings in good condition; receiver inspection valid']],
+   ['Interlock / block production',['Block making machine guards and safety interlocks in place; emergency stop works','Mixer guard over the drum / paddles; nobody reaches in unless the mixer is isolated','Conveyor and hopper nip points guarded; nobody cleans moving parts','Lock-out / tag-out used for cleaning, mould change and repairs — locks and tags available','Cement and sand dust kept down (water spray); dust masks (FFP2 / N95) worn when dusty','Cement bags and admixtures stored dry on pallets; safety data sheets available; gloves and goggles worn with wet concrete','Pallets of finished blocks stacked level, to a safe height, on firm ground with space to walk between','Curing area tidy — hoses rolled up, no slippery surfaces on walkways','Forklift / loader: daily check done, operator licensed, reversing alarm works, no passengers','Hearing protection worn near the block machine and compressor']],
+   ['Electrical',['Distribution boards closed and labelled, RCD / ELCB working, no exposed live parts','Cables off the ground or protected from vehicles, no taped joints, industrial plugs','Generator (if used) earthed; fuel stored with a drip tray']],
+   ['Fire, emergency and first aid',['Fire extinguishers in place, right type and in date; fire blanket near hot work','First aid box complete; eye wash available (cement, grinding)','Emergency numbers, assembly point and escape route displayed','Paint, thinners and fuel kept in a closed, ventilated store away from hot work']],
+   ['Welfare, environment and PPE',['Cool drinking water, shaded rest area and toilets; heat stress rules followed in summer','Waste separated (scrap metal, concrete waste, general); oily rags in a closed bin','No oil / fuel spills; spill kit available; cement wash water not drained onto open ground','Everyone wears helmet, safety shoes, coverall, gloves and eye / ear protection as needed','Toolbox talk held; crew knows the hazards (welding, lifting, machine guards)']]],
+  result:'Workshop in a safe condition', signs:['Inspected by (HSE)','Workshop in-charge']},
 ];
-const CK_ORDER=['veh','cut14','blower','boom','drill','vib','fire','whm','harness','grind','ply','scissor','gen'];
+const CK_ORDER=['veh','cut14','blower','boom','drill','vib','fire','whm','harness','grind','ply','scissor','gen','yardsc','yardws'];
 function ckItems(T){ const out=[]; let n=0; for(const [sec, items] of T.secs) for(const it of items){ n++; out.push({n, sec, num:typeof it==='object'?it:null, t:typeof it==='object'?it.n:it}); } return out; }
 function ckPdfDoc(T, D, blank){
   D=D||{}; const H=D.h||{};
-  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'ck_'+T.key, docTitle:T.title, docSub:blank?'Monthly inspection · blank form':[H.eqno||H.veh||H.unit||H.well||'', D.date?isoToDmy(D.date):''].filter(Boolean).join(' · ')});
+  const doc=pdfDoc({unit:'pt', format:'a4', docKey:'ck_'+T.key, docTitle:T.title, docSub:blank?'Monthly inspection · blank form':[H.eqno||H.veh||H.unit||H.well||H.yard||'', D.date?isoToDmy(D.date):''].filter(Boolean).join(' · ')});
   const g=compGrid(doc, 32), CW=g.CW, LBL=g.LBL, K=100, hw=(CW-2*K)/2, v=t=>blank?{t:'', blank:true}:{t:t||'—'};
   const resTxt=blank?' ':(D.fit===true?(T.result?'YES':'FIT FOR USE'):D.fit===false?(T.result?'NO':'NOT FIT FOR USE'):' ');
   g.title(T.title.toUpperCase(), resTxt, D.fit?[15,118,80]:g.RED);
@@ -9937,7 +9959,7 @@ function ckPdfDoc(T, D, blank){
 const CK_GROUP='Burhan checklists';
 function ckToEngine(T){ const key=(T.head.find(h=>['veh','eqno','unit','well'].includes(h[0]))||T.head[0]);
   return {key:'bhn_'+T.key, group:CK_GROUP, name:T.title, no:T.no, subjectLabel:key[1], items:ckItems(T).map(it=>it.num?`${it.t} (${it.num.u})`:it.t), bhn:T}; }
-function ckDocDefault(key){ if(!/^ck_/.test(String(key||''))) return null; const T=CK_TPL.find(t=>'ck_'+t.key===key); return T?{no:T.no, rev:'01', date:''}:null; }
+function ckDocDefault(key){ if(!/^ck_/.test(String(key||''))) return null; const T=CK_TPL.find(t=>'ck_'+t.key===key); return T?{no:T.no, rev:T.yard?'00':'01', date:''}:null; }
 function ckSubjKey(T){ return (T.head.find(h=>['veh','eqno','unit','well'].includes(h[0]))||T.head[0])[0]; }
 function ckQTotal(cl){ return cl&&cl.bhn ? ckItems(cl.bhn).filter(it=>!it.num).length : (cl?cl.items.length:0); }
 // Batch 100b: the template copy is stored as JSON text (ckSnapJ); read it once per record
@@ -9967,7 +9989,7 @@ function allChecklists(){ return BUILTIN_CHECKLISTS.concat(customChecklists.map(
 // An inspection keeps its own copy of the questions (itemsSnapshot), so later edits to a custom checklist never shift old answers.
 function checklistOf(r){ if(ckSnapOf(r)) return {key:r.template, name:r.templateName||r.ckSnap.title, items:(r.itemsSnapshot&&r.itemsSnapshot.length)?r.itemsSnapshot:ckItems(r.ckSnap).map(it=>it.t), bhn:r.ckSnap}; if(r.itemsSnapshot && r.itemsSnapshot.length) return {key:r.template, name:r.templateName||'Checklist', items:r.itemsSnapshot}; return allChecklists().find(c=>c.key===r.template) || LEGACY_CHECKLISTS.find(c=>c.key===r.template) || null; }
 function inspCounts(r){ const a=r.answers||{}, v=Object.values(a); return {yes:v.filter(x=>x==='Yes').length, no:v.filter(x=>x==='No').length, na:v.filter(x=>x==='N/A').length, done:v.length}; }
-function ckBadge(r, cl){ const c=inspCounts(r), total=ckQTotal(cl); if(!c.done && r.fit===undefined) return '<span class="badge muted">Not started</span>'; if(r.fit===false) return '<span class="badge danger">NOT fit for use</span>'; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; if(r.fit===true) return `<span class="badge ok">${cl.bhn.result?'Done — safe':'Fit for use'}</span>${c.no?` <span class="badge warn">${c.no} not OK</span>`:''}`; return '<span class="badge warn">Choose the result</span>'; }
+function ckBadge(r, cl){ const c=inspCounts(r), total=ckQTotal(cl); if(!c.done && r.fit===undefined) return '<span class="badge muted">Not started</span>'; if(r.fit===false) return `<span class="badge danger">${cl.bhn.result?'NOT safe — action needed':'NOT fit for use'}</span>`; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; if(r.fit===true) return `<span class="badge ok">${cl.bhn.result?'Done — safe':'Fit for use'}</span>${c.no?` <span class="badge warn">${c.no} not OK</span>`:''}`; return '<span class="badge warn">Choose the result</span>'; }
 function inspResultBadge(r){ const cl=checklistOf(r); if(cl && cl.bhn) return ckBadge(r, cl); const c=inspCounts(r), total=cl?cl.items.length:0; if(!c.done) return '<span class="badge muted">Not started</span>'; if(c.done<total) return `<span class="badge warn">In progress ${c.done}/${total}</span>`; return c.no?`<span class="badge danger">${c.no} defect${c.no===1?'':'s'}</span>`:'<span class="badge ok">Pass</span>'; }
 function inspChecklistHtml(r){
   const cl=checklistOf(r); if(!cl) return '<p class="wsub">This checklist template no longer exists.</p>';
@@ -10005,7 +10027,7 @@ regDefine({
   multiFiles:{key:'photos', label:'Photos', accept:'image/*'},
   columns:[
     {label:'No.', cls:'mono', html:r=>`<strong>${esc(r.inspNo||'—')}</strong><div class="wsub">${esc(r.date||'')}</div>`},
-    {label:'Checklist', html:r=>{ const c=checklistOf(r), it=inspItemOf(inspRefOf(r)); return `<div class="wname">${esc(c?c.name:'—')}</div><div class="wsub">${it?ic(it.kind==='veh'?'truck':'wrench')+' '+esc(it.label):esc(r.subject||'')}${!it&&r.subject?' <span class="badge muted">not linked</span>':''}</div>`; }},
+    {label:'Checklist', html:r=>{ const c=checklistOf(r), it=inspItemOf(inspRefOf(r)); return `<div class="wname">${esc(c?c.name:'—')}</div><div class="wsub">${it?ic(it.kind==='veh'?'truck':it.kind==='loc'?'pin':'wrench')+' '+esc(it.label):esc(r.subject||'')}${!it&&r.subject?' <span class="badge muted">not linked</span>':''}</div>`; }},
     {label:'Project', html:r=>esc(r.projectId?projectName(r.projectId):'—')},
     {label:'Inspector', html:r=>esc(r.inspector||'—')},
     {label:'Result', html:r=>inspResultBadge(r)},
@@ -10027,7 +10049,12 @@ REG.insp.beforeCreate = d=>{ const c=allChecklists().find(x=>x.key===d.template)
 REG.insp.customSubmit = {
   checklist: async (r, form)=>{
     const cl=checklistOf(r); if(!cl) return;
-    if(ckSnapOf(r)){ const x=ckCollect(r, form); if(await regUpdate('insp', r.id, x, true)) toast(x.fit===false?'Saved — NOT fit for use: do not use it':'Checklist saved'); return; }   // Batch 100: record only, no actions
+    if(ckSnapOf(r)){ const x=ckCollect(r, form), T=ckSnapOf(r); let added=0;
+      if(T.yard){ const acts=(r.actions||[]).slice(), it=inspItemOf(inspRefOf(r)), who=(x.ckH||{}).incharge||(it&&it.incharge)||'Yard in-charge', due=dateAddDays(r.date||localToday(), 7), where=(x.ckH||{}).yard||r.subject||'';   // Batch 146: every "No" = an action
+        for(const q of ckItems(T)){ const i=q.n-1; if(x.answers[i]!=='No' || acts.some(a=>a.fromItem===i)) continue; const c=x.comments[i];
+          acts.push({id:'a'+Date.now().toString(36)+i, fromItem:i, action:`Fix: ${q.t}${c?' — '+c:''}${where?' ('+where+')':''}`, owner:who, targetDate:due, status:'Open'}); added++; }
+        x.actions=acts; }
+      if(await regUpdate('insp', r.id, x, true)) toast(T.yard ? (added?`Checklist saved — ${added} action${added===1?'':'s'} raised in the Action Tracker`:x.fit===false?'Saved — NOT in a safe condition':'Checklist saved') : x.fit===false?'Saved — NOT fit for use: do not use it':'Checklist saved'); return; }   // Batch 100: record only, no actions
     const answers={}, comments={};
     cl.items.forEach((_,n)=>{ const v=form.querySelector(`input[name="ck${n}"]:checked`); if(v) answers[n]=v.value; const c=form.querySelector(`[data-ck-comment="${n}"]`); if(c && c.value.trim()) comments[n]=c.value.trim(); });
     const actions=(r.actions||[]).slice(), due=localDatePlus(3); let added=0;
@@ -10505,7 +10532,7 @@ function msDivLabel(k){ return k==='co'?'Company-wide':divLabel(k); }
 function msDivTag(k){ return k==='co'?'<span class="badge muted">Company-wide</span>':divTagHtml(k); }
 function msSiteDiv(pid){ const s=pid&&siteEquipmentList.find(x=>x.id===pid); return s ? (s.division||'Civil') : ''; }
 function msTaskDiv(t){ if(t && MS_DIVS.includes(t.div)) return t.div; const w=String((t&&t.where)||''); return (w.startsWith('p:') && msSiteDiv(w.slice(2))) || 'co'; }
-function msInspDiv(it){ if(it.kind==='veh'){ const v=it.v||{}; return (DIVISIONS.includes(v.division)&&v.division) || msSiteDiv(v.projectId) || 'co'; } return msSiteDiv(it.projectId) || 'co'; }
+function msInspDiv(it){ if(it.kind==='loc') return it.div||'co'; if(it.kind==='veh'){ const v=it.v||{}; return (DIVISIONS.includes(v.division)&&v.division) || msSiteDiv(v.projectId) || 'co'; } return msSiteDiv(it.projectId) || 'co'; }
 function msData(){ const s=settingsDocs.schedule||{}; return {tasks:(s.tasks && typeof s.tasks==='object' && !Array.isArray(s.tasks))?s.tasks:{}, st:(s.st && typeof s.st==='object' && !Array.isArray(s.st))?s.st:{}}; }
 function msYm(){ return msUi.ym || localToday().slice(0,7); }
 function msMonthEnd(ym){ const nx=compAddMonths(ym+'-01', 1); return nx ? dateAddDays(nx, -1) : ym+'-31'; }
@@ -11381,9 +11408,16 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
     let c=(v.came||{})[wid]||'none'; if(c.startsWith('p:')){ const q=siteEquipmentList.find(x=>x.id===c.slice(2)); if(!q || q.deleted || !projectLive(q) || q.id===sid) c='none'; }
     if(await plRelocate([wid], c, dateAddDays(localToday(),1))){ toast(`${w.fullName} goes back to ${plDestLabel(c)} from tomorrow`); renderSiteDrawerBody(); plRender(); } } });
 /* ---- company locations (settings) ---- */
+/* Batch 146: the monthly yard inspection checklist of a yard / workshop + its in-charge (owner of the actions) */
+function yardLocCtl(l){ const ed=canEdit()?'':'disabled';
+  return `<span class="yard-ctl"><select data-pl-locck="${esc(l.id)}" aria-label="Monthly inspection checklist — ${esc(l.name)}" ${ed}><option value="">No monthly yard inspection</option>${YARD_CK.map(k=>{ const T=CK_TPL.find(t=>t.key===k); return `<option value="${k}" ${l.ck===k?'selected':''}>${esc(T.short)} (${esc(T.no)})</option>`; }).join('')}</select>${yardCkOf(l)?` <input data-pl-locinch="${esc(l.id)}" value="${esc(l.incharge||'')}" maxlength="60" placeholder="In-charge (owner of actions)" aria-label="In-charge — ${esc(l.name)}" ${ed}>`:''}</span>`; }
+document.addEventListener('change', async e=>{ const t=e.target; if(!t || !t.dataset || !(t.dataset.plLocck!==undefined || t.dataset.plLocinch!==undefined) || !canEdit()) return; e.stopImmediatePropagation();
+  const id=t.dataset.plLocck||t.dataset.plLocinch, L=plLocs(true), l=L.find(x=>x.id===id); if(!l) return;
+  const upd=t.dataset.plLocck!==undefined ? {ck:YARD_CK.includes(t.value)?t.value:''} : {incharge:t.value.trim().replace(/\s+/g,' ').slice(0,60)};
+  if(await plSaveLocs(L.map(x=>x.id===id?{...x, ...upd}:x))){ clearDirtyForms(); toast(upd.ck!==undefined ? (upd.ck?`${l.name}: monthly ${CK_TPL.find(x=>x.key===upd.ck).short.toLowerCase()} inspection — it shows in Inspection Checklists and the Monthly Schedule`:`${l.name}: no monthly yard inspection`) : 'In-charge saved'); try{ renderRegAll('insp'); }catch(_){} } }, true);
 function plLocsHtml(){ const L=plLocs(true);
   return `<div class="pl-off"><div class="subhead" style="margin-top:0;">Company locations</div><p class="wsub" style="margin:-4px 0 6px;">Your own workshops, yards, offices and camps — used for home base, Move crew and the days away. Until you add one of a type, the plain "Workshop" / "Yard" / "Office" is used; people already there show at the first location of that type until you move them.</p>
-    ${L.length?`<div class="pl-locs">${L.map(l=>`<div class="ind-mrow${l.retired?' pl-locoff':''}"><span><input value="${esc(l.name)}" maxlength="60" data-pl-locname="${esc(l.id)}" aria-label="Location name"> <span class="badge pl-b-${esc(l.type)}">${esc(PL_LOC_TYPES[l.type])}</span>${l.retired?' <span class="badge muted">closed</span>':''}</span><span><button type="button" class="btn btn-sm" data-pl-locret="${esc(l.id)}">${l.retired?'Reopen':'Close'}</button></span></div>`).join('')}</div>`:'<p class="wsub"><i>None yet.</i></p>'}
+    ${L.length?`<div class="pl-locs">${L.map(l=>`<div class="ind-mrow${l.retired?' pl-locoff':''}"><span><input value="${esc(l.name)}" maxlength="60" data-pl-locname="${esc(l.id)}" aria-label="Location name"> <span class="badge pl-b-${esc(l.type)}">${esc(PL_LOC_TYPES[l.type])}</span>${l.retired?' <span class="badge muted">closed</span>':''}${['yard','workshop'].includes(l.type)?yardLocCtl(l):''}</span><span><button type="button" class="btn btn-sm" data-pl-locret="${esc(l.id)}">${l.retired?'Reopen':'Close'}</button></span></div>`).join('')}</div>`:'<p class="wsub"><i>None yet.</i></p>'}
     <form data-pl-form="loc" class="ptw-inline"><input name="name" maxlength="60" required placeholder="e.g. Samail Yard"><select name="type" aria-label="Type">${Object.entries(PL_LOC_TYPES).map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('')}</select><button type="submit" class="btn btn-sm">+ Add location</button></form></div>`; }
 function plLocHoursHtml(C){ const ms=[]; for(let i=0;i<3;i++){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); ms.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }
   const cols=ms.map(ym=>{ const L=C.locks[ym]; return (L && L.loc) ? L.loc : plMonthFigures(ym).loc; }), keys=[...new Set(cols.flatMap(o=>Object.keys(o||{})))];
@@ -11426,15 +11460,22 @@ function inspTplOf(e){ if(!e) return null; if(e.category==='powerTools'){ if(e.c
   return INSP_CK_FOR[e.category]||null; }
 function inspFreq(tpl){ const m=((settingsDocs.inspFreq||{}).m)||{}; const n=Number(m[tpl]); return INSP_FREQ_OPTS.includes(n)?n:1; }
 function inspFreqLabel(n){ return n===1?'monthly':n===12?'yearly':`every ${n} months`; }
+/* Batch 146: yards / workshops (company locations) — monthly yard inspection; the checklist is chosen per location (Company locations) */
+const YARD_CK=['yardsc','yardws'];
+function yardCkOf(l){ return l && YARD_CK.includes(l.ck) ? l.ck : ''; }
+function yardActivity(tpl){ return tpl==='yardsc' ? 'Scaffolding material storage, sorting and loading' : 'Welding / fabrication and interlock production'; }
 function inspItemOf(ref){ ref=String(ref||'');
+  if(ref.startsWith('loc:')){ const l=typeof plLocById==='function'?plLocById(ref.slice(4)):null; if(!l) return null; const tpl=yardCkOf(l)||'yardsc', T=CK_TPL.find(t=>t.key===tpl);
+    return {ref, kind:'loc', l, tpl, label:l.name, short:l.name, subject:l.name, projectId:'', group:T.short, gone:!!l.retired || !yardCkOf(l), where:PL_LOC_TYPES[l.type]||'', div:tpl==='yardsc'?'Scaffolding':'co', incharge:l.incharge||''}; }
   if(ref.startsWith('veh:')){ const v=vehicles.find(x=>x.id===ref.slice(4)); if(!v) return null; return {ref, kind:'veh', v, tpl:'veh', label:`${v.vehicleNumber||'—'}${v.model?' · '+v.model:''}`, short:v.vehicleNumber||'Vehicle', subject:v.vehicleNumber||'', projectId:v.projectId||'', group:'Vehicles', gone:!!v.deleted}; }
   if(ref.startsWith('eq:')){ const e=equipmentList.find(x=>x.id===ref.slice(3)); if(!e) return null; const C=EQUIP_CATEGORIES[e.category]||{};
     return {ref, kind:'eq', e, tpl:inspTplOf(e)||'gen', label:`${equipTitle(e)} · ${e.serial||'—'}`, short:`${C.short||'Item'} ${e.serial||''}`.trim(), subject:e.serial||equipTitle(e), projectId:equipSite(e), group:C.label||'Equipment', gone:!!e.deleted, where:locLabel(equipLoc(e))}; }
   return null; }
 // items that need a regular checklist
 function inspItemsDue(){ const out=[]; for(const v of activeVehicles()) out.push('veh:'+v.id);
+  if(typeof plLocs==='function') for(const l of plLocs()) if(yardCkOf(l)) out.push('loc:'+l.id);   // Batch 146
   for(const e of activeEquipment()) if(inspNeeds(e)) out.push('eq:'+e.id); return out; }
-function inspItemOptions(){ const L=[...activeVehicles().map(v=>'veh:'+v.id), ...activeEquipment().filter(e=>e.category!=='chemicals').map(e=>'eq:'+e.id)].map(inspItemOf).filter(Boolean);
+function inspItemOptions(){ const L=[...activeVehicles().map(v=>'veh:'+v.id), ...(typeof plLocs==='function'?plLocs().filter(yardCkOf).map(l=>'loc:'+l.id):[]), ...activeEquipment().filter(e=>e.category!=='chemicals').map(e=>'eq:'+e.id)].map(inspItemOf).filter(Boolean);
   L.sort((a,b)=>(a.kind===b.kind?0:a.kind==='veh'?-1:1) || a.group.localeCompare(b.group) || a.label.localeCompare(b.label));
   return [{value:'', label:'Select the item…'}, ...L.map(x=>({value:x.ref, label:`${x.kind==='veh'?'Vehicle':x.group} · ${x.label}${x.where?' · '+x.where:''}`}))]; }
 // old records: link by plate / serial when exactly one item matches
@@ -11457,7 +11498,7 @@ function inspState(ref){ const it=inspItemOf(ref); if(!it) return null; const L=
   if(it.kind==='veh'){ const o=viSorted(it.v)[0]; if(o && String(o.date||'')>lastDate){ lastDate=o.date; fit=o.result!=='A'; } }
   const tpl=last?inspTplKeyOf(last)||it.tpl:it.tpl, next=lastDate?compAddMonths(lastDate, inspFreq(tpl)):'';
   return {it, last, open, lastDate, next, fit, notFit:fit===false, st:!lastDate?'never':next<t?'over':next<=soon?'due':'ok'}; }
-function inspStateBadge(S){ if(!S) return ''; if(S.notFit) return `<span class="badge danger" title="Last inspection: NOT fit for use">NOT fit for use</span>`;
+function inspStateBadge(S){ if(!S) return ''; if(S.notFit) return S.it&&S.it.kind==='loc' ? `<span class="badge danger" title="Last inspection: not in a safe condition">Not safe — actions open</span>` : `<span class="badge danger" title="Last inspection: NOT fit for use">NOT fit for use</span>`;
   if(S.st==='never') return '<span class="badge warn">Not inspected yet</span>';
   if(S.st==='over') return `<span class="badge danger" title="Last inspection ${esc(isoToDmy(S.lastDate))}">Inspection overdue · ${esc(isoToDmy(S.next))}</span>`;
   if(S.st==='due') return `<span class="badge warn" title="Last inspection ${esc(isoToDmy(S.lastDate))}">Inspection due ${esc(isoToDmy(S.next))}</span>`;
@@ -11470,6 +11511,7 @@ function vehInspAll(v){ return [...(v.inspections||[]).map(x=>({date:x.date||'',
 /* ---- creating a linked inspection (from an item, the due list or the vehicle round) ---- */
 function inspPrefillH(T, it){ const h={}, has=k=>T.head.some(x=>x[0]===k), put=(k,v)=>{ if(has(k) && v) h[k]=String(v); };
   const pj=it.projectId?projectName(it.projectId):'';
+  if(it.kind==='loc'){ put('yard', it.l.name); put('incharge', it.l.incharge); put('activity', yardActivity(it.tpl)); put('comp', 'Burhan Oil & Trade Services'); return h; }
   if(it.kind==='veh'){ const v=it.v; put('veh', v.vehicleNumber); put('model', [v.model, v.vehicleType].filter(Boolean).join(' · ')); put('owner', v.ownership==='Rental'?(v.rentalCompany||'Rental'):'Burhan Oil & Trade Services'); put('loc', pj); const d=vehDrivers(v)[0]; put('driver', d&&d.fullName); }
   else { const e=it.e; put('eqno', e.serial); put('unit', e.serial); put('type', e.extType||e.type||e.kitType||e.instType||e.name||(EQUIP_CATEGORIES[e.category]||{}).short); put('make', e.make); put('model', e.make);
     put('cap', e.capacityKg?e.capacityKg+(['Foam','Water','Wet chemical'].includes(e.extType)?' L':' kg'):(e.swl||e.range||'')); put('loc', it.where+(pj&&!/^In vehicle/.test(it.where)?'':pj?' · '+pj:'')); put('exp', e.expiry?isoToDmy(e.expiry):''); }
@@ -11523,6 +11565,11 @@ function equipInspHtml(e){ const ref='eq:'+e.id, ed=canEdit(), L=inspLinked(ref)
 /* ---- Inspection Checklists: one due list for all items + frequency + old records to link ---- */
 let inspUi={never:false, freq:false};
 function ckDueRows(){ const t=localToday(), soon=localDatePlus(7); return inspItemsDue().map(inspState).filter(Boolean).map(S=>({S, r:S.last, next:S.next, st:S.st})).sort((a,b)=>(a.st==='never')-(b.st==='never') || String(a.next).localeCompare(String(b.next))); }
+/* Batch 146: yards & workshops — choose the checklist, see the monthly state, inspect */
+function yardPanelHtml(){ const L=(typeof plLocs==='function'?plLocs():[]).filter(l=>['yard','workshop'].includes(l.type)), ed=canEdit();
+  if(!L.length) return `<div class="panel yard-panel"><div class="subhead" style="margin-top:0;">${ic('pin')} Yards &amp; workshops — monthly inspection</div><p class="wsub" style="margin:0;">Add your yards and workshops (e.g. Gabha, Samail) in Workforce → Where are the crews → Company locations, then choose their checklist here.</p></div>`;
+  return `<div class="panel yard-panel"><div class="subhead" style="margin-top:0;">${ic('pin')} Yards &amp; workshops — monthly inspection</div><p class="wsub" style="margin:-4px 0 6px;">Scaffolding storage yard (BHN-SY-CH-14) or workshop yard — welding, fabrication, interlock (BHN-WS-CH-15). Every "No" becomes an action for the in-charge (7 days). It also shows in the Monthly Schedule.</p>
+    ${L.map(l=>{ const ck=yardCkOf(l), S=ck?inspState('loc:'+l.id):null; return `<div class="ind-mrow"><span><strong>${esc(l.name)}</strong> <span class="badge pl-b-${esc(l.type)}">${esc(PL_LOC_TYPES[l.type])}</span> ${yardLocCtl(l)} ${S?inspStateBadge(S):''}</span>${ed&&ck?`<span><button type="button" class="btn btn-sm btn-primary" data-insp-new="loc:${esc(l.id)}">${S&&S.open?'Carry on':'Inspect'}</button></span>`:''}</div>`; }).join('')}</div>`; }
 function ckTopHtml(){ if(!regState.insp) return ''; const rows=ckDueRows(), ed=canEdit(), over=rows.filter(x=>x.st==='over' || x.S.notFit), due=rows.filter(x=>x.st==='due' && !x.S.notFit), never=rows.filter(x=>x.st==='never');
   const item=x=>{ const it=x.S.it; return `<div class="ind-mrow"><span><strong>${esc(it.kind==='veh'?'Vehicle':it.group)}</strong> — ${esc(it.label)} <span class="wsub">${it.where?'· '+esc(it.where)+' ':''}${x.S.lastDate?'· last '+esc(isoToDmy(x.S.lastDate))+' · next '+esc(isoToDmy(x.S.next)):''}</span> ${inspStateBadge(x.S)}</span>${ed?`<span><button type="button" class="btn btn-sm btn-primary" data-insp-new="${esc(it.ref)}">${x.S.open?'Carry on':'Inspect'}</button></span>`:''}</div>`; };
   const unl=regActive('insp').filter(r=>!inspRefOf(r) && (ckSnapOf(r) || r.subject)).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
@@ -11533,6 +11580,7 @@ function ckTopHtml(){ if(!regState.insp) return ''; const rows=ckDueRows(), ed=c
       ${never.length?`<button type="button" class="att-link" data-insp-never="1">${inspUi.never?'Hide':'Show'} the ${never.length} item${never.length===1?'':'s'} not inspected yet</button>${inspUi.never?never.slice(0,80).map(item).join(''):''}`:''}</div>
     ${unl.length?`<div class="panel"><div class="subhead" style="margin-top:0;">🔗 Old inspections to link to an item (${unl.length})</div><p class="wsub" style="margin:-4px 0 6px;">These were saved with a typed item name that did not match one vehicle plate or serial number. Link each to its item so its due date counts.</p>
       ${unl.slice(0,25).map(r=>`<div class="ind-mrow"><span><strong class="mono">${esc(r.inspNo||'')}</strong> ${esc(isoToDmy(r.date))} · ${esc((checklistOf(r)||{}).name||'')} — <b>${esc(r.subject||'')}</b></span>${ed?`<span class="insp-link"><select data-insp-linksel="${esc(r.id)}" aria-label="Item">${opts}</select><button type="button" class="btn btn-sm" data-insp-link="${esc(r.id)}">Link</button></span>`:''}</div>`).join('')}</div>`:''}
+    ${yardPanelHtml()}
     <div class="panel ck-blank"><span class="wsub">Blank checklist for paper:</span> <select id="ckBlankSel">${CK_TPL.map(t=>`<option value="${t.key}">${esc(t.title)} (${esc(t.no)})</option>`).join('')}</select> <button type="button" class="btn btn-sm" id="ckBlankBtn">${ic('printer')} Blank PDF</button>
       <button type="button" class="att-link" data-insp-freqopen="1">${inspUi.freq?'Hide':'How often'} — inspection frequency per checklist</button></div>
     ${inspUi.freq?`<div class="panel insp-freq"><div class="subhead" style="margin-top:0;">How often each checklist is due</div>${freqRows}</div>`:''}`; }
