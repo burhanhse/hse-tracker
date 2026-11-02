@@ -3157,7 +3157,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b146';
+const APP_BUILD='b147';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -3873,15 +3873,20 @@ document.addEventListener('submit', async e=>{
 const VEH_DD_REQ={'Car / SUV':['LV'],'Pickup':['LV'],'Bus':['LB/HB'],'Truck':['HV'],'Prime Mover':['HV'],'HIAB Truck':['HV'],'Crane':['HV'],'Green Water Tanker':['HV','TN']};
 function vehDDCodes(v){ const c=(VEH_DD_REQ[v && v.vehicleType]||[]).slice(); if(v && v.gradedRoads && c.length) c.push('GR'); return c; }
 function vehDrivers(v){ return (v && Array.isArray(v.driverIds) ? v.driverIds : []).map(id=>workers.find(w=>w.id===id && !w.deleted)).filter(Boolean); }
+/* Batch 147: a driving licence is often saved by its class ("HEAVY VEHICLE", "Light vehicle", "HV") with ROP as the issuing authority —
+   that counts too. Labour card, passport, visa, insurance, residency, Civil ID never count. */
+function isDrivingLicence(r){ const t=String((r&&r.type)||''), a=String((r&&r.issuingAuthority)||'');
+  if(/labou?r|passport|visa|insurance|residen|civil ?id|\bid card\b/i.test(t)) return false;
+  return /driv|\brop\b|licen[cs]e|heavy|light|vehicle|\b(hv|lv|lb|hb)\b|\bbus\b|motor|truck|trailer|tanker/i.test(t) || /\brop\b|royal oman police|\bpolice\b/i.test(a); }
 function workerLicence(w){
-  const recs=(w.licenses||[]).filter(r=>/driv|rop|licen[cs]e/i.test(String(r.type||'')) && !/labou?r|passport|visa|insurance|residen/i.test(String(r.type||'')));
+  const recs=(w.licenses||[]).filter(isDrivingLicence);
   if(!recs.length) return {status:'missing'};
   const best=recs.slice().sort((a,b)=>String(b.expiry||'9999').localeCompare(String(a.expiry||'9999')))[0];
   return {status:best.expiry?statusFor(best.expiry):'valid', expiry:best.expiry||'', type:best.type};
 }
 function driverCheck(w, v){
   const items=[];
-  const lic=workerLicence(w); items.push({k:'ROP driving licence', st:lic.status, exp:lic.expiry});
+  const lic=workerLicence(w); items.push({k:'ROP driving licence'+(lic.type&&!/^\s*(rop )?driving licen[cs]e\s*$/i.test(lic.type)?' — '+String(lic.type).slice(0,40):''), st:lic.status, exp:lic.expiry});
   for(const code of vehDDCodes(v)){ const c=PDO_COURSES.find(x=>x.code===code); const st=c ? trainingStatusFor(w, pdoCourseLabel(c)) : {status:'missing'}; items.push({k:`Defensive driving ${code}${c?' — '+c.name.replace(/^Defensive Driving,?\s*/i,''):''}`, st:st.status, exp:st.expiry||''}); }
   const med=computeFlags(w).medical.status; items.push({k:'Medical fitness', st: med==='unfit'?'expired':med==='none'?'missing':med, exp:'', note:med==='unfit'?'UNFIT':''});
   const bad=items.filter(x=>x.st==='missing'||x.st==='expired'), soon=items.filter(x=>x.st==='expiring');
@@ -13511,7 +13516,7 @@ function compPapers(w, role){
   if(['inspector','foreman'].includes(role)) want.push(['Scaffold inspection training',/inspect/i]);
   if(role==='driver') want.push(['Defensive Driving',/defensive/i]);
   for(const [name, re] of want){ if(cells.some(c=>re.test(c.name))) continue; add('t_'+name, name, compTrainBy(w, re), 'Needed for this assessment'); }
-  if(role==='driver'){ const lic=currentRecs(w.licenses||[], 'licenses').filter(r=>/driv/i.test(String(r.type||''))); add('lic','Driving licence', !lic.length?'missing':(()=>{ const s=worstStatusOf(lic); return s==='valid'?'ok':s; })()); }
+  if(role==='driver'){ const lic=currentRecs(w.licenses||[], 'licenses').filter(isDrivingLicence); add('lic','Driving licence', !lic.length?'missing':(()=>{ const s=worstStatusOf(lic); return s==='valid'?'ok':s; })()); }
   if(!workerRoles(w).length) out.push({k:'norole', label:'No role set in the Training matrix — check his certificates by hand', st:'info', sub:''});
   return out;
 }
