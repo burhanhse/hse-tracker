@@ -733,6 +733,7 @@ td.lib-file .att-link + .att-link{margin-left:10px;}
 table.import-table{min-width:560px;}
 table.import-table td{font-size:12.5px; padding:6px 10px;}
 table.import-table tbody tr{cursor:default;}
+.dup-card{padding:10px 12px; margin-bottom:8px;} .dup-head{font-size:13px; margin-bottom:6px;} .dup-row{font-size:12.5px; padding:3px 0; border-top:1px dashed var(--line, #e5e7eb); overflow-wrap:anywhere;} .dup-btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
 .notice{background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn); border-radius:9px; padding:10px 12px; font-size:12.5px; margin-bottom:12px;}
 .tiles-4{grid-template-columns:repeat(4,1fr) !important;}
 @media (max-width:900px){.tiles-4{grid-template-columns:repeat(2,1fr) !important;}}
@@ -2004,7 +2005,8 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 
     <main class="app-main" id="actionsSection" hidden>
       <div class="topbar"><div><h1>Action Tracker</h1><p class="page-tagline"><span class="pt-co">Burhan Oil &amp; Trade Services</span><span class="pt-sep" aria-hidden="true"></span><span class="pt-slogan">Every action · One list · Closed on time</span></p></div>
-        <div class="topbar-actions"><button class="btn btn-sm" id="actPdfBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Action list PDF</button></div></div>
+        <div class="topbar-actions"><button class="btn btn-sm" id="dupBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg> Duplicate check</button><button class="btn btn-sm" id="actPdfBtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Action list PDF</button></div></div>
+      <div class="notice" id="actDupNote" hidden></div>
       <div class="tiles tiles-4" id="actTiles"></div>
       <div class="seg-tabs" id="actSrcTabs"></div>
       <div class="toolbar"><input type="search" id="actSearch" placeholder="Search action, reference, owner…">
@@ -2184,6 +2186,11 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
   <div class="drawer-body" id="audTrashBody"></div>
 </aside>
 
+<div class="drawer-overlay" id="dupOverlay" hidden></div>
+<aside class="drawer" id="dupDrawer" hidden>
+  <div class="drawer-head"><div><h2>Duplicate check</h2><div class="wsub">Things saved more than once anywhere in the tracker.</div></div><button class="icon-btn" id="dupClose" aria-label="Close"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+  <div class="drawer-body" id="dupBody"></div>
+</aside>
 <div class="drawer-overlay" id="ckOverlay" hidden></div>
 <aside class="drawer" id="ckDrawer" hidden>
   <div class="drawer-head"><div><h2>My checklists</h2><div class="wsub">Build your own inspection checklists — one question per line.</div></div><button class="icon-btn" id="ckClose" aria-label="Close"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button></div>
@@ -3148,7 +3155,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b143';
+const APP_BUILD='b144';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -6611,22 +6618,27 @@ function startRegData(){
   for(const key of Object.keys(REG)){
     const st=regState[key], cfg=REG[key];
     try{
-      const onList=list=>{ st.err=null; st.list=list.map(renameOldLabels); renderRegAll(key); if(cfg.onData) cfg.onData(); renderActionTracker(); };
+      const onList=list=>{ st.err=null; st.loaded=true; st.list=list.map(renameOldLabels); renderRegAll(key); if(cfg.onData) cfg.onData(); renderActionTracker(); };
       const onErr=err=>{ console.error(err); if(!auth.currentUser) return; st.err = err&&err.code==='permission-denied'?'rules':'other'; renderRegAll(key); };
       if(cfg.listen){ st.unsub=cfg.listen(onList, onErr); continue; }
-      st.unsub = db.collection(cfg.collection).onSnapshot(snap=>{ st.err=null; st.list=snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); renderRegAll(key); if(cfg.onData) cfg.onData(); renderActionTracker(); },
+      st.unsub = db.collection(cfg.collection).onSnapshot(snap=>{ st.err=null; st.loaded=true; st.list=snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); renderRegAll(key); if(cfg.onData) cfg.onData(); renderActionTracker(); },
         err=>{ console.error(err); if(!auth.currentUser) return; st.err = err&&err.code==='permission-denied'?'rules':'other'; renderRegAll(key); });
     }catch(e){ console.error(e); }
   }
 }
-function stopRegData(){ for(const key of Object.keys(regState)){ const st=regState[key]; if(st.unsub){ st.unsub(); st.unsub=null; } st.list=[]; } }
+function stopRegData(){ for(const key of Object.keys(regState)){ const st=regState[key]; if(st.unsub){ st.unsub(); st.unsub=null; } st.list=[]; st.loaded=false; } }
 async function regUpdate(key, id, data, quiet){
   if(REG[key].prepare){ const cur=regState[key].list.find(x=>x.id===id)||{}; await REG[key].prepare({...cur, ...data}, data, cur); }
   if(REG[key].beforeUpdate){ data=REG[key].beforeUpdate({...data}, regState[key].list.find(x=>x.id===id)||{}); if(!data) return false; }
   try{ await db.collection(REG[key].collection).doc(id).update(stamp(deltaize(regState[key].list.find(x=>x.id===id), data))); if(!quiet) toast('Saved'); if(REG[key].afterSave) REG[key].afterSave({...(regState[key].list.find(x=>x.id===id)||{}), ...data, id}); return true; }
   catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not save — '+((e&&e.code)||'error')); return false; }
 }
-async function regCreate(key, data, openTab){
+async function regCreate(key, data, openTab){   // Batch 144: one save at a time; a double tap does not make a second copy
+  if(regCreating.has(key)){ toast('Still saving — please wait'); return null; }
+  if(key!=='waste'){ const tw=regRecentTwin(key, data); if(tw){ toast(`Already saved as ${tw[REG[key].noField]||REG[key].singular} — not saved twice`); openRegDrawer(key, tw.id); return null; } }
+  regCreating.add(key); try{ return await regCreateRun(key, data, openTab); } finally{ regCreating.delete(key); }
+}
+async function regCreateRun(key, data, openTab){
   const cfg=REG[key], u=auth.currentUser;
   const d={deleted:false, createdAt:new Date().toISOString(), createdBy:(u&&u.email)||'', ...data};
   for(const s of Object.keys(cfg.subs||{})) if(!d[s]) d[s]=[];
@@ -7422,7 +7434,166 @@ function renderActionTracker(){
     : list.map(a=>`<tr data-actn="${a.n}"><td><span class="badge muted">${esc(srcLabel(a.src))}</span></td><td><div class="wname">${esc(a.ref)}</div><div class="wsub">${esc(a.where||'')}</div></td>
       <td>${esc(String(a.text||'').slice(0,160))}${a.tag?`<div class="wsub">${esc(a.tag)}</div>`:''}</td><td>${esc(a.owner||'—')}</td><td class="mono" style="white-space:nowrap;">${esc(a.targetDate||'—')}</td><td>${complaintBadges(a)}</td>
       <td><button type="button" class="btn btn-sm" data-actopen="${a.n}">Open</button></td></tr>`).join('');
+  renderActDupNote();   // Batch 144
 }
+/* ================= Batch 144: Duplicate check — the whole tracker =================
+   Finds the same thing saved more than once:
+   • a line repeated inside one record (an action, a toolbox talk, a training record…),
+   • a whole record saved twice (e.g. a double tap while the connection was slow),
+   • a Monthly Report entry typed in twice.
+   Exact copies are removed safely: the most complete copy is kept, lines that only the extra copy has are moved into it,
+   register records go to that register's Trash (can be restored). Things that only look alike (same number with different
+   details, same Civil ID on two workers…) are listed to check by hand — nothing is changed for those. */
+const DUP_META=new Set(['id','createdAt','createdBy','updatedAt','updatedBy','deleted','deletedAt','deletedBy','deletedReason','at','by','addedAt','addedBy','uploadedAt','_v']);
+const DUP_STAT=new Set(['status','closedDate','closedBy','closeOut','closeNotes','rectifiedDate','rectifiedBy','evidence','verifiedBy','verifiedDate']);
+const DUP_REG_EXTRA={sv:['obs','good'], alerts:['briefings'], legal:['evaluations'], subcons:['evaluations'], scaff:['inspections','modifications']};
+const DUP_REG_HAND=new Set(['scaff','civil','lift','ptw','waste','trs']);   // two look-alike records can be real here (two identical towers, two loads…) → check by hand
+const DUP_SITE_F=['toolboxTalks','permits','actions','complaints','hseDocs'];
+const DUP_WORKER_F=['inductions','trainings','competency','medical','licenses','contracts','warnings','violations'];
+const DUP_VEH_F=['documents','inspections','services'];
+function dupNorm(v){ return String(v==null?'':v).trim().replace(/\s+/g,' ').toLowerCase(); }
+function dupIsFile(v){ return !!(v && typeof v==='object' && !Array.isArray(v) && (v.url || v.path)); }
+function dupFilled(v){ return !(v===undefined || v===null || v==='' || (Array.isArray(v)&&!v.length) || (typeof v==='object' && !Array.isArray(v) && !Object.keys(v).length)); }
+function dupContentKey(o, skip){ const out={}; for(const [k,v] of Object.entries(o||{})){ if(DUP_META.has(k) || (skip&&skip.has(k)) || Array.isArray(v) || dupIsFile(v) || !dupFilled(v)) continue; out[k]=typeof v==='string'?dupNorm(v):v; } return Object.keys(out).length?stableStr(out):''; }
+function dupItemKey(field, x){ if(!x || typeof x!=='object') return '';
+  if(typeof x.action==='string' && x.action.trim()) return 'a|'+dupNorm(x.action)+'|'+dupNorm(x.owner)+'|'+(x.targetDate||'');
+  if(field==='toolboxTalks') return x.tricId ? 't|'+x.tricId : 'b|'+dupNorm(x.topic)+'|'+(x.date||'')+'|'+(x.attendeeIds||[]).slice().sort().join(',')+'|'+dupNorm(x.conductedBy)+'|'+(x.extraAttendees||'');
+  return dupContentKey(x, DUP_STAT); }
+function dupScore(o){ let s=0; for(const [k,v] of Object.entries(o||{})){ if(DUP_META.has(k) || !dupFilled(v)) continue; if(dupIsFile(v)) s+=50; else if(Array.isArray(v)) s+=v.length*3+(v.some(dupIsFile)?50:0); else s+=1; } if(o && o.status==='Closed') s+=10; return s; }
+function dupItemText(x){ if(!x || typeof x!=='object') return String(x||''); const t=x.action||x.topic||x.name||x.course||x.title||x.description||x.issue||x.type||x.documentType||x.desc||Object.values(x).find(v=>typeof v==='string' && v.length>2 && !/^\d{4}-\d\d-\d\d/.test(v))||'—';
+  const d=x.targetDate||x.date||x.expiry||''; return String(t).slice(0,140)+(d?' · '+isoToDmy(String(d).slice(0,10)):'')+(x.status?' · '+x.status:''); }
+function dupNav(sec){ const b=document.querySelector(`.sidenav-btn[data-section="${sec}"]`); if(b) b.click(); }
+/* every list that can hold a repeated line */
+function dupItemSources(){ const S=[];
+  for(const [k,cfg] of Object.entries(REG)){ const subs=Object.entries(cfg.subs||{}).filter(([sk,sc])=>sc.isAction || (DUP_REG_EXTRA[k]||[]).includes(sk)); if(!subs.length) continue;
+    for(const r of regActive(k)) for(const [sk,sc] of subs) S.push({area:cfg.title||cfg.singular, col:cfg.collection, reg:k, doc:r, field:sk, fl:sc.label||sk, ref:r[cfg.noField]||cfg.singular, where:cfg.titleOf(r), action:!!sc.isAction, open:()=>openRegDrawer(k, r.id, 'sub:'+sk)}); }
+  for(const i of activeIncidents()) for(const f of ['capa','persons']) S.push({area:'Incidents', col:'incidents', doc:i, field:f, fl:f==='capa'?'Actions':'People involved', ref:i.incNo||'Incident', where:i.type||'', action:f==='capa', open:()=>{ dupNav('incidents'); openIncDrawer(i.id, f==='capa'?'actions':'people'); }});
+  for(const a of activeAudits()) S.push({area:'Audits', col:'audits', doc:a, field:'findings', fl:'Findings', ref:a.auditNo||'Audit', where:a.title||'', action:true, open:()=>{ dupNav('audits'); openAudDrawer(a.id,'findings'); }});
+  for(const s of activeSites()) for(const f of DUP_SITE_F) S.push({area:'Projects', col:'siteEquipment', doc:s, field:f, fl:(SITE_RECORD_TYPES[f]||{}).title||f, ref:s.siteName||'Project', where:'', action:f==='actions'||f==='complaints', open:()=>{ dupNav('site'); openSiteDrawer(s.id); activeSiteTab=f; renderSiteDrawer(); }});
+  for(const w of workers.filter(x=>!x.deleted)) for(const f of DUP_WORKER_F) S.push({area:'Workforce', col:'workers', doc:w, field:f, fl:(RECORD_TYPES[f]||{}).title||f, ref:w.fullName||'Worker', where:w.civilId||'', open:()=>{ dupNav('workforce'); openDrawer(w.id); activeTab=f; renderDrawerBody(); }});
+  for(const v of activeVehicles()) for(const f of DUP_VEH_F) S.push({area:'Fleet', col:'vehicles', doc:v, field:f, fl:f==='inspections'?'Inspections':f==='services'?'Services':((VEHICLE_RECORD_TYPES[f]||{}).title||f), ref:v.vehicleNumber||'Vehicle', where:'', action:f==='inspections', open:()=>{ dupNav('vehicles'); openVehicleDrawer(v.id); activeVehicleTab=f; renderVehicleDrawer(); }});
+  return S; }
+function dupItemGroups(){ const G=[];
+  for(const src of dupItemSources()){ const arr=src.doc[src.field]; if(!Array.isArray(arr) || arr.length<2) continue; const m=new Map();
+    arr.forEach((x,i)=>{ const k=dupItemKey(src.field, x); if(!k) return; if(!m.has(k)) m.set(k, []); m.get(k).push(i); });
+    for(const [k,idx] of m) if(idx.length>1){ const keep=idx.slice().sort((a,b)=>dupScore(arr[b])-dupScore(arr[a]) || a-b)[0];
+      G.push({kind:'item', gid:'i|'+src.col+'|'+src.doc.id+'|'+src.field+'|'+k, src, idx, keep, extra:idx.length-1, acts:src.action?idx.length-1:0}); } }
+  return G; }
+/* whole records saved twice */
+function dupRecordSets(){ const S=[];
+  for(const [k,cfg] of Object.entries(REG)) S.push({area:cfg.title||cfg.singular, col:cfg.collection, reg:k, list:regActive(k), no:cfg.noField, hand:DUP_REG_HAND.has(k),
+    title:r=>cfg.titleOf(r), date:r=>r[cfg.dateField||'date']||'', acts:r=>Object.entries(cfg.subs||{}).filter(([,sc])=>sc.isAction).reduce((n,[sk])=>n+(r[sk]||[]).length,0), open:r=>openRegDrawer(k, r.id)});
+  S.push({area:'Incidents', col:'incidents', list:activeIncidents(), no:'incNo', title:i=>i.type||'Incident', date:i=>i.date||'', acts:i=>(i.capa||[]).length, open:i=>{ dupNav('incidents'); openIncDrawer(i.id); }});
+  S.push({area:'Audits', col:'audits', list:activeAudits(), no:'auditNo', title:a=>a.title||'Audit', date:a=>a.startDate||'', acts:a=>(a.findings||[]).filter(isActionFinding).length, open:a=>{ dupNav('audits'); openAudDrawer(a.id); }});
+  return S; }
+function dupRecordGroups(){ const G=[], H=[];
+  for(const set of dupRecordSets()){ const skip=new Set(set.no?[set.no]:[]), byC=new Map(), byNo=new Map(), gOf=new Map();
+    for(const r of set.list){ const k=dupContentKey(r, skip); if(k){ if(!byC.has(k)) byC.set(k,[]); byC.get(k).push(r); } const n=set.no?dupNorm(r[set.no]):''; if(n){ if(!byNo.has(n)) byNo.set(n,[]); byNo.get(n).push(r); } }
+    let gi=0; for(const L of byC.values()) if(L.length>1){ gi++; L.forEach(r=>gOf.set(r.id, gi));
+      const ids=L.map(r=>r.id).sort().join(',');
+      if(set.hand){ H.push({kind:'look', gid:'h|'+set.col+'|'+ids, set, list:L, why:'Same details saved more than once — check whether both are real'}); continue; }
+      const keep=L.slice().sort((a,b)=>dupScore(b)-dupScore(a) || String(a.createdAt||'').localeCompare(String(b.createdAt||'')))[0];
+      G.push({kind:'record', gid:'r|'+set.col+'|'+ids, set, list:L, keep, extra:L.length-1, acts:L.filter(r=>r.id!==keep.id).reduce((n,r)=>n+set.acts(r),0)}); }
+    for(const L of byNo.values()) if(L.length>1 && !(gOf.get(L[0].id) && L.every(r=>gOf.get(r.id)===gOf.get(L[0].id))))
+      H.push({kind:'look', gid:'n|'+set.col+'|'+L.map(r=>r.id).sort().join(','), set, list:L, why:`The number ${L[0][set.no]} is used by ${L.length} different records — give one of them a new number`}); }
+  return {G, H}; }
+/* Monthly Report entries typed in twice (only entries typed by hand — the automatic ones have their own fixed ids) */
+function dupLogGroups(){ const m=new Map();
+  for(const e of reportEntries){ if(e.source || /_/.test(e.id)) continue; const k=dupContentKey(e); if(!k) continue; if(!m.has(k)) m.set(k,[]); m.get(k).push(e); }
+  const G=[]; for(const L of m.values()) if(L.length>1){ const keep=L.slice().sort((a,b)=>dupScore(b)-dupScore(a) || String(a.createdAt||'').localeCompare(String(b.createdAt||'')))[0];
+    const fileOf=e=>Object.values(e).find(dupIsFile), kf=fileOf(keep);
+    if(L.some(e=>e.id!==keep.id && fileOf(e) && (!kf || fileOf(e).url!==kf.url))) continue;   // a copy with its own file → leave it
+    G.push({kind:'log', gid:'l|'+L.map(e=>e.id).sort().join(','), list:L, keep, extra:L.length-1, acts:0}); }
+  return G; }
+/* look-alikes to check by hand */
+function dupHandGroups(){ const H=[]; const by=(list, keyOf, mk)=>{ const m=new Map(); for(const x of list){ const k=keyOf(x); if(!k) continue; if(!m.has(k)) m.set(k,[]); m.get(k).push(x); } for(const L of m.values()) if(L.length>1) H.push(mk(L)); };
+  by(workers.filter(w=>!w.deleted), w=>String(w.civilId||'').replace(/[^0-9a-z]/gi,'').toLowerCase(), L=>({kind:'look', gid:'w|'+L.map(x=>x.id).sort().join(','), area:'Workforce', why:`Same Civil ID ${L[0].civilId} on ${L.length} workers`, rows:L.map(w=>({t:w.fullName||'Worker', s:[w.designation, w.status].filter(Boolean).join(' · '), open:()=>{ dupNav('workforce'); openDrawer(w.id); }}))}));
+  by(activeVehicles(), v=>String(v.vehicleNumber||'').replace(/[^0-9a-z]/gi,'').toLowerCase(), L=>({kind:'look', gid:'v|'+L.map(x=>x.id).sort().join(','), area:'Fleet', why:`Vehicle number ${L[0].vehicleNumber} is listed ${L.length} times`, rows:L.map(v=>({t:v.vehicleNumber, s:[v.model, v.vehicleType].filter(Boolean).join(' · '), open:()=>{ dupNav('vehicles'); openVehicleDrawer(v.id); }}))}));
+  by(equipmentList.filter(e=>!e.deleted), e=>{ const s=String(e.serial||'').replace(/[^0-9a-z]/gi,'').toLowerCase(); return s.length>2 ? (e.category||'')+'|'+s : ''; }, L=>({kind:'look', gid:'e|'+L.map(x=>x.id).sort().join(','), area:'Plant & Equipment', why:`Serial no. ${L[0].serial} is listed ${L.length} times`, rows:L.map(e=>({t:equipTitle(e), s:equipLoc(e), open:()=>openEquipDrawer(e.id)}))}));
+  by(activeSites(), s=>dupNorm(s.siteName)+'|'+dupNorm(s.clientName), L=>({kind:'look', gid:'p|'+L.map(x=>x.id).sort().join(','), area:'Projects', why:`Project "${L[0].siteName}" is listed ${L.length} times`, rows:L.map(s=>({t:s.siteName, s:[divLabel(s.division), s.status, s.startDate].filter(Boolean).join(' · '), open:()=>{ dupNav('site'); openSiteDrawer(s.id); }}))}));
+  // the same action written in two different places (e.g. an observation and a project action for the same problem)
+  let acts=[]; try{ acts=collectAllActions().filter(a=>a.src!=='insp' && a.src!=='vehicle'); }catch(e){}
+  by(acts.map(a=>({...a, _r:a.src+'|'+a.ref+'|'+a.where})), a=>{ const t=dupNorm(a.text); return t.length>=12 ? t+'|'+dupNorm(a.owner) : ''; }, L=>{ if(new Set(L.map(a=>a._r)).size<2) return null;
+    return {kind:'look', gid:'a|'+dupNorm(L[0].text).slice(0,60)+'|'+L.map(a=>a._r).sort().join(','), area:'Action Tracker', why:'The same action is written in more than one place — keep it in one place if it is the same job', rows:L.map(a=>({t:`${(ACT_SOURCES.find(s=>s.key===a.src)||{}).label||a.src} · ${a.ref}`, s:[String(a.text||'').slice(0,90), a.owner, a.targetDate, a.status].filter(Boolean).join(' · '), open:a.open}))}; });
+  return H.filter(Boolean); }
+function dupScan(noHand){ const I=dupItemGroups(), R=dupRecordGroups(), L=dupLogGroups(), H=noHand?[]:[...R.H.map(g=>({kind:'look', gid:g.gid, area:g.set.area, why:g.why, rows:g.list.map(r=>({t:`${r[g.set.no]||''} ${g.set.title(r)}`.trim(), s:[isoToDmy(String(g.set.date(r)).slice(0,10)), r.status].filter(Boolean).join(' · '), open:()=>g.set.open(r)}))})), ...dupHandGroups()];
+  const fix=[...R.G, ...I, ...L]; return {fix, hand:H, extra:fix.reduce((n,g)=>n+g.extra,0), acts:fix.reduce((n,g)=>n+g.acts,0)}; }
+/* ---- repair ---- */
+function dupMergeArrays(keep, extras){ const upd={};
+  for(const x of extras) for(const [f,v] of Object.entries(x)){ if(!Array.isArray(v) || !v.length || DUP_META.has(f)) continue;
+    const cur=upd[f] || (Array.isArray(keep[f])?keep[f].slice():[]), have=new Set(cur.map(it=>dupItemKey(f, it) || stableStr(it)));
+    let ch=false; for(const it of v){ const k=dupItemKey(f, it) || stableStr(it); if(have.has(k)) continue; have.add(k); cur.push(it); ch=true; }
+    if(ch || upd[f]) upd[f]=cur; }
+  return upd; }
+async function dupFix(groups){ const now=new Date().toISOString(); let lines=0, recs=0, logs=0, fail=0;
+  // 1. repeated lines — one write per record
+  const byDoc=new Map();
+  for(const g of groups.filter(g=>g.kind==='item')){ const k=g.src.col+'/'+g.src.doc.id; if(!byDoc.has(k)) byDoc.set(k, {src:g.src, rm:{}}); const e=byDoc.get(k); if(!e.rm[g.src.field]) e.rm[g.src.field]=new Set(); g.idx.forEach(i=>{ if(i!==g.keep) e.rm[g.src.field].add(i); }); }
+  for(const {src, rm} of byDoc.values()){ const upd={}, gone=[];
+    for(const [f,set] of Object.entries(rm)){ const arr=src.doc[f]||[]; upd[f]=arr.filter((_,i)=>!set.has(i)); arr.forEach((x,i)=>{ if(set.has(i)) gone.push({f, x, keptIds:new Set(upd[f].map(y=>y&&y.id))}); }); }
+    try{ await db.collection(src.col).doc(src.doc.id).update(stamp(upd)); lines+=gone.length;
+      for(const {f,x,keptIds} of gone){ if(!x || !x.id || keptIds.has(x.id)) continue;
+        if(src.col==='siteEquipment' && f==='toolboxTalks') await removeToolboxFromReport(src.doc.id, x.id);
+        if(src.col==='vehicles' && f==='inspections') await viRemoveReport(src.doc.id, x.id); } }
+    catch(e){ console.error('duplicate lines', e); fail++; } }
+  // 2. records saved twice — lines of the extra copy move into the kept one, the extra copy goes to the Trash
+  for(const g of groups.filter(g=>g.kind==='record')){ const keep=g.keep, extras=g.list.filter(r=>r.id!==keep.id), set=g.set, no=set.no?keep[set.no]:'';
+    try{ const mu=dupMergeArrays(keep, extras); if(Object.keys(mu).length) await db.collection(set.col).doc(keep.id).update(stamp(mu));
+      for(const r of extras){ const del={deleted:true, deletedAt:now, deletedReason:'Duplicate of '+(no||keep.id)};
+        if(set.reg){ if(await regUpdate(set.reg, r.id, del, true)) recs++; else fail++; continue; }
+        await db.collection(set.col).doc(r.id).update(stamp(del)); recs++;
+        if(set.col==='incidents') await removeIncidentFromReport(r.id);
+        if(set.col==='audits') try{ await db.collection('hseLogs').doc('aud_'+r.id).delete(); }catch(_){} } }
+    catch(e){ console.error('duplicate record', e); fail++; } }
+  // 3. Monthly Report entries typed twice — identical copies are deleted
+  for(const g of groups.filter(g=>g.kind==='log')) for(const e of g.list){ if(e.id===g.keep.id) continue; try{ await db.collection('hseLogs').doc(e.id).delete(); logs++; }catch(err){ console.error(err); fail++; } }
+  return {lines, recs, logs, fail}; }
+let dupBusy=false;
+async function dupFixRun(btn, which){ if(!canEdit() || dupBusy) return; if(!compArm(btn, 'Tap again — remove the extra copies')) return; dupBusy=true; btn.disabled=true;
+  try{ const S=dupScan(true); const groups=which==='all'?S.fix : which==='acts'?S.fix.filter(g=>g.acts>0) : S.fix.filter(g=>g.gid===which);
+    if(!groups.length){ toast('Nothing to remove — already fixed'); return; }
+    const r=await dupFix(groups);
+    toast(`Duplicates removed — ${[r.lines?`${r.lines} repeated line${r.lines===1?'':'s'}`:'', r.recs?`${r.recs} record${r.recs===1?'':'s'} moved to Trash`:'', r.logs?`${r.logs} Monthly Report entr${r.logs===1?'y':'ies'}`:''].filter(Boolean).join(' · ')||'nothing changed'}${r.fail?` · ${r.fail} failed`:''}`); }
+  catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:'Could not remove the duplicates'); }
+  finally{ dupBusy=false; btn.disabled=false; setTimeout(()=>{ renderActDupNote(); if(!document.getElementById('dupDrawer').hidden) renderDupDrawer(); }, 400); } }
+/* ---- screens ---- */
+function renderActDupNote(){ const el=document.getElementById('actDupNote'); if(!el) return; let S; try{ S=dupScan(true); }catch(e){ console.warn('duplicate check', e); el.hidden=true; return; }
+  const a=S.acts; el.hidden=!a; if(!a) return;
+  el.innerHTML=`${ic('alert')} <strong>${a} action${a===1?' is':'s are'} listed more than once</strong> — the same action saved twice. ${canEdit()?`<button type="button" class="btn btn-sm btn-primary" id="actDupFix" data-armed="0">Remove the extra copies</button> `:''}<button type="button" class="btn btn-sm" data-dup-open="1">See the duplicate check</button>`; }
+function openDupDrawer(){ raiseDrawer('dupOverlay','dupDrawer'); document.getElementById('dupOverlay').hidden=false; document.getElementById('dupDrawer').hidden=false; renderDupDrawer(); }
+function closeDupDrawer(){ document.getElementById('dupOverlay').hidden=true; document.getElementById('dupDrawer').hidden=true; }
+let dupOpenFns={};
+function renderDupDrawer(){ const b=document.getElementById('dupBody'); if(!b) return; const S=dupScan(), ed=canEdit(); dupOpenFns={}; let n=0; const op=fn=>{ const k='o'+(n++); dupOpenFns[k]=fn; return k; };
+  const keepB='<span class="badge ok">Keep</span>', goB='<span class="badge danger">Extra copy</span>';
+  const card=(g)=>{ let head='', rows='';
+    if(g.kind==='item'){ const arr=g.src.doc[g.src.field]||[]; head=`${esc(g.src.area)} · <strong>${esc(g.src.ref)}</strong> · ${esc(g.src.fl)}${g.src.where?` <span class="wsub">${esc(String(g.src.where).slice(0,60))}</span>`:''}`;
+      rows=g.idx.map(i=>`<div class="dup-row">${i===g.keep?keepB:goB} ${esc(dupItemText(arr[i]))}</div>`).join(''); }
+    else if(g.kind==='record'){ const s=g.set; head=`${esc(s.area)} · the same record saved ${g.list.length} times`;
+      rows=g.list.map(r=>`<div class="dup-row">${r.id===g.keep.id?keepB:goB} <strong>${esc(r[s.no]||'')}</strong> ${esc(s.title(r))} <span class="wsub">${esc(isoToDmy(String(s.date(r)).slice(0,10)))}${s.acts(r)?` · ${s.acts(r)} action${s.acts(r)===1?'':'s'}`:''}</span></div>`).join('');
+      rows+='<p class="wsub" style="margin:4px 0 0;">The extra copy goes to the Trash; any line only it has is moved into the kept one.</p>'; }
+    else { head=`Monthly Report · ${esc((REPORT_CATEGORIES[g.keep.category]||{}).label||g.keep.category||'Entry')} typed in ${g.list.length} times`;
+      rows=g.list.map(e=>`<div class="dup-row">${e.id===g.keep.id?keepB:goB} ${esc(isoToDmy(String(e.date||'').slice(0,10))||e.date||'')} · ${esc(String(e.description||e.topic||e.area||e.hours||'').slice(0,100))}${e.projectId?' · '+esc(projectName(e.projectId)):''}</div>`).join(''); }
+    const o=g.kind==='item'?g.src.open:g.kind==='record'?()=>g.set.open(g.keep):null;
+    return `<div class="panel dup-card"><div class="dup-head">${head}</div>${rows}<div class="dup-btns">${o?`<button type="button" class="btn btn-sm" data-dup-go="${op(o)}">Open</button>`:''}${ed?`<button type="button" class="btn btn-sm btn-primary" data-dup-fix="${esc(g.gid)}" data-armed="0">Remove the extra cop${g.extra===1?'y':'ies'}</button>`:''}</div></div>`; };
+  const hand=g=>`<div class="panel dup-card"><div class="dup-head">${esc(g.area)} · ${esc(g.why)}</div>${g.rows.map(r=>`<div class="dup-row"><strong>${esc(r.t)}</strong> <span class="wsub">${esc(r.s||'')}</span> <button type="button" class="att-link" data-dup-go="${op(r.open)}">Open</button></div>`).join('')}</div>`;
+  const areas=[...new Set(S.fix.map(g=>g.kind==='item'?g.src.area:g.kind==='record'?g.set.area:'Monthly Report'))];
+  b.innerHTML=`<p class="wsub" style="margin-top:0;">Looks through actions, registers, projects, workers, vehicles and the Monthly Report for things saved more than once.</p>
+    ${S.fix.length?`<div class="notice" style="margin-bottom:12px;">${ic('alert')} <strong>${S.extra} extra cop${S.extra===1?'y':'ies'}</strong> found in ${S.fix.length} place${S.fix.length===1?'':'s'}${S.acts?` (${S.acts} in the Action Tracker)`:''}. ${ed?`<button type="button" class="btn btn-sm btn-primary" data-dup-fix="all" data-armed="0">Remove all extra copies</button>`:''}</div>`
+      :'<div class="notice" style="margin-bottom:12px; background:var(--ok-bg); color:var(--ok); border-color:var(--ok);">✓ No copies saved twice were found.</div>'}
+    ${areas.map(a=>`<div class="subhead">${esc(a)}</div>${S.fix.filter(g=>(g.kind==='item'?g.src.area:g.kind==='record'?g.set.area:'Monthly Report')===a).map(card).join('')}`).join('')}
+    ${S.hand.length?`<div class="subhead" style="margin-top:18px;">Check by hand (${S.hand.length})</div><p class="wsub">These look alike but are not exact copies — nothing is changed automatically. Open them and decide.</p>${S.hand.map(hand).join('')}`:''}`; }
+document.addEventListener('click', e=>{ const t=e.target.closest && e.target.closest('#actDupFix, [data-dup-fix], [data-dup-open], [data-dup-go], #dupClose, #dupOverlay, #dupBtn'); if(!t) return;
+  if(t.id==='actDupFix') return dupFixRun(t, 'acts');
+  if(t.dataset.dupFix) return dupFixRun(t, t.dataset.dupFix);
+  if(t.dataset.dupOpen || t.id==='dupBtn') return openDupDrawer();
+  if(t.id==='dupClose' || t.id==='dupOverlay') return closeDupDrawer();
+  if(t.dataset.dupGo){ const fn=dupOpenFns[t.dataset.dupGo]; closeDupDrawer(); if(fn) try{ fn(); }catch(err){ console.error(err); } } });
+/* ---- prevention: the same line / record is not saved twice ---- */
+function dupAlready(field, list, data){ const k=dupItemKey(field, data); if(!k) return false; const hit=(list||[]).some(x=>dupItemKey(field, x)===k); if(hit) toast('This is already saved — the same details are in the list (edit that one instead)'); return hit; }
+const regCreating=new Set();
+function regRecentTwin(key, data){ const t=Date.now(); return regActive(key).find(r=>{ const c=Date.parse(r.createdAt||''); if(!(t-c<120000)) return false;
+  let n=0; for(const [f,v] of Object.entries(data||{})){ if(DUP_META.has(f) || Array.isArray(v) || (v && typeof v==='object') || !dupFilled(v)) continue; n++; if(dupNorm(r[f])!==dupNorm(v)) return false; } return n>=2; }); }
+
 function downloadActionsPdf(){
   if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
   const list=actCache.filter(actMatches).sort((a,b)=>String(a.targetDate||'9999').localeCompare(String(b.targetDate||'9999')));
@@ -7666,8 +7837,10 @@ regDefine({
       {label:'With a legal obligation', num:cur.filter(r=>r.legal==='Yes').length, sub:'linked to the Legal Register', icon:'books'},
       {label:'Review overdue', num:od.length, cls:od.length?'danger':'ok', sub:`${cur.filter(r=>aspSig(r).score===null).length} not rated yet`, icon:'clock'}]; },
 });
+let aspTypBusy=false;
 async function aspLoadTypical(){
-  if(!canEdit()) return; const have=new Set(regActive('aspects').map(r=>(String(r.activity||'')+'|'+String(r.aspect||'')).toLowerCase())), u=auth.currentUser;
+  if(!canEdit() || aspTypBusy) return; if(!regState.aspects.loaded){ toast('Still loading the register — try again in a moment'); return; } aspTypBusy=true; try{ await aspLoadTypicalRun(); } finally{ aspTypBusy=false; } }
+async function aspLoadTypicalRun(){ const have=new Set(regActive('aspects').map(r=>(String(r.activity||'')+'|'+String(r.aspect||'')).toLowerCase())), u=auth.currentUser;
   let n=0, max=0; for(const r of regState.aspects.list){ const m=/^ASP-(\d+)$/.exec(r.aspNo||''); if(m) max=Math.max(max, Number(m[1])); }
   const next=compAddMonths(localToday(), 12);
   try{ for(const [activity, aspect, impact, condition, s, f, legal, concern, controls] of ASP_TYPICAL){ if(have.has((activity+'|'+aspect).toLowerCase())) continue; max++;
@@ -7947,8 +8120,10 @@ regDefine({
       {label:'Review overdue', num:od, cls:od?'danger':'ok', sub:'review the HRA at least yearly', icon:'clock'}]; },
 });
 ACT_SOURCES.push({key:'hra', label:'Health risks (HRA)'});
+let hraTypBusy=false;
 async function hraLoadTypical(){
-  if(!canEdit()) return; const have=new Set(regActive('hra').map(r=>(String(r.activity||'')+'|'+String(r.hazardType||'')).toLowerCase())), u=auth.currentUser;
+  if(!canEdit() || hraTypBusy) return; if(!regState.hra.loaded){ toast('Still loading the register — try again in a moment'); return; } hraTypBusy=true; try{ await hraLoadTypicalRun(); } finally{ hraTypBusy=false; } }
+async function hraLoadTypicalRun(){ const have=new Set(regActive('hra').map(r=>(String(r.activity||'')+'|'+String(r.hazardType||'')).toLowerCase())), u=auth.currentUser;
   let n=0, max=0; for(const r of regState.hra.list){ const m=/^HRA-(\d+)$/.exec(r.hraNo||''); if(m) max=Math.max(max, Number(m[1])); }
   const next=compAddMonths(localToday(), 12);
   try{ for(const [activity, hazardType, designations, healthEffect, controls, s, l, additionalControls, rs, rl, checks] of HRA_TYPICAL){ if(have.has((activity+'|'+hazardType).toLowerCase())) continue; max++;
@@ -21293,6 +21468,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const idx=arr.findIndex(r=>r.id===editingRecordId);
         if(idx>-1) arr[idx]={...arr[idx], ...data};
       } else {
+        if(DUP_WORKER_F.includes(activeTab) && dupAlready(activeTab, arr, data)) return;   // Batch 144
         arr.push({id:genId(), ...data});
       }
       editingRecordId=null; addFormOpen=false; recordPrefill=null;
@@ -21600,6 +21776,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const idx=arr.findIndex(r=>r.id===editingVehicleRecordId);
         if(idx>-1) arr[idx]={...arr[idx], ...data};
       } else {
+        if(DUP_VEH_F.includes(activeVehicleTab) && dupAlready(activeVehicleTab, arr, data)) return;   // Batch 144
         arr.push({id:genId(), ...data});
       }
       editingVehicleRecordId=null; vehicleAddFormOpen=false;
@@ -21826,6 +22003,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const idx=arr.findIndex(r=>r.id===editingSiteRecordId);
         if(idx>-1){ arr[idx]={...arr[idx], ...data}; saved=arr[idx]; }
       } else {
+        if(DUP_SITE_F.includes(key) && dupAlready(key, arr, data)) return;   // Batch 144
         saved={id:genId(), ...data};
         arr.push(saved);
       }
@@ -22692,7 +22870,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       if(d.status!=='Closed') d.closedDate='';
       const list=(i.capa||[]).slice();
       if(incEditCapa){ const n=list.findIndex(a=>a.id===incEditCapa); if(n>-1) list[n]={...list[n], ...d}; }
-      else list.push({id:genId(), ...d});
+      else { if(dupAlready('capa', list, d)) return; list.push({id:genId(), ...d}); }   // Batch 144
       incEditCapa=null; incCapaFormOpen=false;
       const upd={capa:list};
       if(i.status==='Reported' || (i.status==='Under investigation' && i.invCompleted)) upd.status='Actions in progress';
@@ -23089,6 +23267,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const sk=f.dataset.regSubform, sc=cfg.subs[sk], d=regReadForm(f, sc.fields, 'data-sf');
       if(sc.isAction && d.status==='Closed' && !d.closedDate) d.closedDate=localToday();
       let list=(r[sk]||[]).slice();
+      if(!regSubEdit && (sc.isAction || (DUP_REG_EXTRA[activeReg]||[]).includes(sk)) && dupAlready(sk, list, d)) return;   // Batch 144
       if(regSubEdit) list=list.map(x=>x.id===regSubEdit?{...x, ...d}:x); else list.push({id:sk.slice(0,1)+Date.now().toString(36)+Math.random().toString(36).slice(2,6), ...d});
       const upd={[sk]:list, ...(sc.onSave?sc.onSave({...r}, list):{})};
       regSubOpen=null; regSubEdit=null; await regUpdate(activeReg, r.id, upd);
@@ -23124,12 +23303,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
       if(activeReg==='scaff' && scaffOlder.delete(r.id) && scaffRefresh) scaffRefresh(); if(activeReg==='civil' && cwOlder.delete(r.id) && cwRefresh) cwRefresh(); } catch(err){ console.error(err); toast('Could not delete'); }
   });
   // legal template
+  let legalTplBusy=false;
   $('legalTemplateBtn').addEventListener('click', async ()=>{
-    if(!canEdit()) return; const have=new Set(regActive('legal').map(r=>String(r.title||'').toLowerCase())); let n=0;
+    if(!canEdit() || legalTplBusy) return; if(!regState.legal.loaded){ toast('Still loading the register — try again in a moment'); return; } legalTplBusy=true; try{ await legalTplRun(); } finally{ legalTplBusy=false; } });
+  async function legalTplRun(){ const have=new Set(regActive('legal').map(r=>String(r.title||'').toLowerCase())); let n=0;
     for(const t of LEGAL_TEMPLATE){ if(have.has(t.title.toLowerCase())) continue; const d={...t, status:'Not evaluated', appliesTo:['All divisions'], deleted:false, evaluations:[], actions:[], legNo:regNextNo('legal'), createdAt:new Date().toISOString(), createdBy:(auth.currentUser&&auth.currentUser.email)||''};
       try{ await db.collection('legalReqs').add(stamp(d)); n++; }catch(err){ console.error(err); toast(err&&err.code==='permission-denied'?RULES_UPDATE_MSG:'Could not add'); return; } }
     toast(n?`${n} requirements added — check each reference is the current version, then record an evaluation`:'All common requirements are already in the register');
-  });
+  }
   // incident → safety alert
   $('incAlertBtn').addEventListener('click', ()=>{ const i=incidentList.find(x=>x.id===activeIncId); if(i){ closeIncDrawer(); openAlertForIncident(i); } });
   // KPI panel
