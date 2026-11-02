@@ -1252,6 +1252,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .vk-check{border-left:3px solid var(--ok);} .vk-check.vk-bad{border-left-color:var(--danger);} .vk-tbl td,.vk-tbl th{border:1px solid var(--line); padding:6px 10px;} .vk-tbl{border-collapse:collapse; width:100%;} .vk-row-miss td{background:var(--danger-bg);}
 .vk-head{display:flex; gap:10px; align-items:center; flex-wrap:wrap;} .vk-fold{padding-top:10px; padding-bottom:10px;} .vk-grid th{font-size:11px; text-align:center; white-space:normal; min-width:70px;} .vk-grid td{text-align:center;} .vk-grid td:first-child,.vk-grid th:first-child{text-align:left;} .vk-grid .vk-m{background:var(--danger-bg); color:var(--danger); font-weight:800;} .vk-grid .vk-y{color:var(--ok);}
 .mf-panel{margin:10px 0;} .mf-head{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;} .mf-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px;}
+.mf-sub{border-style:dashed;} .mf-cos{margin-top:6px; border-top:1px dashed var(--line); padding-top:5px;} .mf-co{font-size:11.5px; line-height:1.5;} .mf-co span{color:var(--muted, #94a3b8);}
 .mf-card{border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:var(--surface);} .mf-all{border-color:var(--accent);} .mf-l{font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-muted);}
 .mf-p{font-size:28px; font-weight:800; line-height:1.15;} .mf-p.ok{color:var(--ok);} .mf-p.warn{color:var(--warn);} .mf-p.danger{color:var(--danger);} .mf-s{font-size:12px; color:var(--ink-muted);}
 .mf-bar{display:flex; height:8px; border-radius:6px; overflow:hidden; margin:6px 0 4px; background:var(--muted-bg); gap:2px;} .mf-seg{display:block;} .mf-fit{background:var(--ok);} .mf-soon{background:var(--warn);} .mf-exp,.mf-unfit{background:var(--danger);} .mf-pend{background:var(--accent);} .mf-none{background:var(--line);}
@@ -3155,7 +3156,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b144';
+const APP_BUILD='b145';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -17583,22 +17584,30 @@ function renderAll(){
    Fit = current medical valid (incl. expiring in 30 days and "Fit with restrictions"); not fit = expired, unfit, pending or no record. */
 function medFitOf(w){ const st=medicalStatus(w).status, cur=currentRecs(w.medical||[], 'medical');
   if(st==='unfit') return 'unfit'; if(st==='none') return 'none'; if(cur.length && cur.every(r=>r.result==='Pending')) return 'pending'; if(st==='expired') return 'expired'; if(st==='expiring') return 'soon'; return 'fit'; }
-function medFitHtml(){ const D=['Scaffolding','Civil','Rental','Office staff',''], by={};
-  for(const w of activeWorkers()){ if((w.status||'active')!=='active') continue; const d=D.includes(workerDivKey(w))?workerDivKey(w):''; const o=by[d]||(by[d]={n:0, fit:0, soon:0, expired:0, unfit:0, pending:0, none:0, restr:0}); o.n++; const f=medFitOf(w); o[f]++; if(f==='fit'||f==='soon'){ if(currentRecs(w.medical||[],'medical').some(r=>r.result==='Fit with restrictions')) o.restr++; } }
-  const keys=D.filter(d=>by[d] && by[d].n); if(!keys.length) return ''; const all=keys.reduce((a,d)=>{ for(const k of Object.keys(a)) a[k]+=by[d][k]; return a; }, {n:0, fit:0, soon:0, expired:0, unfit:0, pending:0, none:0, restr:0});
-  const card=(lbl, o, cls)=>{ const ok=o.fit+o.soon, pct=o.n?Math.round(ok*100/o.n):0, tone=pct>=95?'ok':pct>=80?'warn':'danger', seg=(v,c,t)=>v?`<span class="mf-seg mf-${c}" style="flex:${v}" title="${v} ${t}"></span>`:'';
+/* Batch 145: sub-contractor workers are shown on their own card — the division and "All divisions" % are Burhan staff only (own + temporary) */
+function medFitIsSub(w){ return typeof wlKind==='function' && wlKind(w)==='sub'; }
+function medFitHtml(){ const D=['Scaffolding','Civil','Rental','Office staff',''], by={}, Z=()=>({n:0, fit:0, soon:0, expired:0, unfit:0, pending:0, none:0, restr:0}), sub=Z(), subCo={};
+  for(const w of activeWorkers()){ if((w.status||'active')!=='active') continue;
+    if(medFitIsSub(w)){ const f=medFitOf(w); sub.n++; sub[f]++; if((f==='fit'||f==='soon') && currentRecs(w.medical||[],'medical').some(r=>r.result==='Fit with restrictions')) sub.restr++;
+      const c=String(w.contractor||'').trim()||'Company not entered', dv=workerDivKey(w), co=subCo[c]||(subCo[c]={n:0, ok:0, dv:{}}); co.n++; if(f==='fit'||f==='soon') co.ok++; if(dv) co.dv[dv]=1; continue; }
+    const d=D.includes(workerDivKey(w))?workerDivKey(w):''; const o=by[d]||(by[d]={n:0, fit:0, soon:0, expired:0, unfit:0, pending:0, none:0, restr:0}); o.n++; const f=medFitOf(w); o[f]++; if(f==='fit'||f==='soon'){ if(currentRecs(w.medical||[],'medical').some(r=>r.result==='Fit with restrictions')) o.restr++; } }
+  const keys=D.filter(d=>by[d] && by[d].n); if(!keys.length && !sub.n) return ''; const all=keys.reduce((a,d)=>{ for(const k of Object.keys(a)) a[k]+=by[d][k]; return a; }, {n:0, fit:0, soon:0, expired:0, unfit:0, pending:0, none:0, restr:0});
+  const card=(lbl, o, cls, more)=>{ const ok=o.fit+o.soon, pct=o.n?Math.round(ok*100/o.n):0, tone=pct>=95?'ok':pct>=80?'warn':'danger', seg=(v,c,t)=>v?`<span class="mf-seg mf-${c}" style="flex:${v}" title="${v} ${t}"></span>`:'';
     const notes=[o.soon?`${o.soon} expiring`:'', o.expired?`${o.expired} expired`:'', o.unfit?`${o.unfit} unfit`:'', o.pending?`${o.pending} pending`:'', o.none?`${o.none} no record`:'', o.restr?`${o.restr} with restrictions`:''].filter(Boolean).join(' · ');
     return `<div class="mf-card ${cls||''}"><div class="mf-l">${esc(lbl)}</div><div class="mf-p ${tone}">${pct} %</div><div class="mf-s">${ok} of ${o.n} fit to work</div>
-      <div class="mf-bar">${seg(o.fit,'fit','fit')}${seg(o.soon,'soon','fit — expiring in 30 days')}${seg(o.expired,'exp','expired')}${seg(o.unfit,'unfit','unfit')}${seg(o.pending,'pend','pending')}${seg(o.none,'none','no medical record')}</div><div class="mf-n">${esc(notes||'all fit and valid')}</div></div>`; };
-  return `<div class="panel mf-panel"><div class="mf-head">${ic('heart')} <b>Medical fitness to work</b> <span class="wsub">active workers · current medical valid = fit (expiring and "fit with restrictions" still count)</span></div>
-    <div class="mf-grid">${card('All divisions', all, 'mf-all')}${keys.map(d=>card(d?divLabel(d).replace(/ Division$/,''):'No division', by[d])).join('')}</div></div>`; }
+      <div class="mf-bar">${seg(o.fit,'fit','fit')}${seg(o.soon,'soon','fit — expiring in 30 days')}${seg(o.expired,'exp','expired')}${seg(o.unfit,'unfit','unfit')}${seg(o.pending,'pend','pending')}${seg(o.none,'none','no medical record')}</div><div class="mf-n">${esc(notes||'all fit and valid')}</div>${more||''}</div>`; };
+  const coTxt=Object.entries(subCo).sort((a,b)=>b[1].n-a[1].n).map(([c,o])=>`<div class="mf-co"><b>${esc(c)}</b> ${o.ok}/${o.n} fit${Object.keys(o.dv).length?` <span>· ${esc(Object.keys(o.dv).map(d=>divLabel(d).replace(/ Division$/,'')).join(', '))}</span>`:''}</div>`).join('');
+  return `<div class="panel mf-panel"><div class="mf-head">${ic('heart')} <b>Medical fitness to work</b> <span class="wsub">Burhan staff (own + temporary) by division · sub-contractor workers on their own card, not in the division % · current medical valid = fit (expiring and "fit with restrictions" still count)</span></div>
+    <div class="mf-grid">${keys.length?card('All divisions — Burhan staff', all, 'mf-all'):''}${keys.map(d=>card(d?divLabel(d).replace(/ Division$/,''):'No division', by[d])).join('')}${sub.n?card('Sub-contractors', sub, 'mf-sub', coTxt?`<div class="mf-cos">${coTxt}</div>`:''):''}</div></div>`; }
 // Monthly Report dashboard panel (follows the report's division filter) — fitness today
-function renderCcMed(){ const el=document.getElementById('ccMed'); if(!el || !auth.currentUser) return; const D=['Scaffolding','Civil','Rental','Office staff'], by={};
-  for(const w of activeWorkers()){ if((w.status||'active')!=='active') continue; const d=workerDivKey(w); if(!D.includes(d)) continue; const o=by[d]||(by[d]={n:0, ok:0, bad:0}); o.n++; const f=medFitOf(w); if(f==='fit'||f==='soon') o.ok++; else o.bad++; }
-  const ks=D.filter(d=>by[d] && (reportDivision==='all' || reportDivision===d)); if(!ks.length){ el.innerHTML=''; return; }
+function renderCcMed(){ const el=document.getElementById('ccMed'); if(!el || !auth.currentUser) return; const D=['Scaffolding','Civil','Rental','Office staff'], by={}, sub={n:0, ok:0};
+  for(const w of activeWorkers()){ if((w.status||'active')!=='active') continue; const d=workerDivKey(w); const f=medFitOf(w), good=f==='fit'||f==='soon';
+    if(medFitIsSub(w)){ if(reportDivision==='all' || reportDivision===d){ sub.n++; if(good) sub.ok++; } continue; }   // Batch 145: sub-contractors apart
+    if(!D.includes(d)) continue; const o=by[d]||(by[d]={n:0, ok:0, bad:0}); o.n++; if(good) o.ok++; else o.bad++; }
+  const ks=D.filter(d=>by[d] && (reportDivision==='all' || reportDivision===d)); if(!ks.length && !sub.n){ el.innerHTML=''; return; }
   const all=ks.reduce((a,d)=>({n:a.n+by[d].n, ok:a.ok+by[d].ok}),{n:0, ok:0}), pc=o=>o.n?Math.round(o.ok*100/o.n):0, tone=p=>p>=95?'ok':p>=80?'warn':'danger';
   el.innerHTML=`<div class="cc-title">Medical fitness to work <small>active workers with a valid medical · today</small></div>
-    <div class="wl-cc">${ks.map(d=>`<div><span>${esc(divLabel(d))}</span><b class="${tone(pc(by[d]))}">${pc(by[d])} %</b><small class="wsub">${by[d].ok}/${by[d].n} fit</small></div>`).join('')}${ks.length>1?`<div><span>All</span><b class="${tone(pc(all))}">${pc(all)} %</b><small class="wsub">${all.ok}/${all.n} fit</small></div>`:''}</div>`; }
+    <div class="wl-cc">${ks.map(d=>`<div><span>${esc(divLabel(d))}</span><b class="${tone(pc(by[d]))}">${pc(by[d])} %</b><small class="wsub">${by[d].ok}/${by[d].n} fit</small></div>`).join('')}${ks.length>1?`<div><span>All — Burhan staff</span><b class="${tone(pc(all))}">${pc(all)} %</b><small class="wsub">${all.ok}/${all.n} fit</small></div>`:''}${sub.n?`<div class="mf-subcc"><span>Sub-contractors</span><b class="${tone(pc(sub))}">${pc(sub)} %</b><small class="wsub">${sub.ok}/${sub.n} fit · not in the division %</small></div>`:''}</div>`; }
 function renderMedFit(){ const el=document.getElementById('medFitStrip'); if(el) el.innerHTML=medFitHtml(); }
 function renderTiles(){
   try{ renderMedFit(); }catch(e){ console.warn('medical fitness', e); }   // Batch 127
