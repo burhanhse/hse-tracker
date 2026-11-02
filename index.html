@@ -3116,7 +3116,7 @@ function startSettingsData(){
   try{
     unsubscribeSettings = db.collection('settings').onSnapshot(snap=>{
       settingsLoadError=null;
-      const map={}; snap.docs.forEach(d=>{ map[d.id]=d.data()||{}; }); settingsDocs=map; settingsSnapLoaded=true; if(typeof reportSnapSoon==='function') reportSnapSoon();
+      const map={}; snap.docs.forEach(d=>{ map[d.id]=d.data()||{}; }); settingsDocs=map; settingsSnapLoaded=true; if(typeof plan2027BtnSync==='function') setTimeout(plan2027BtnSync, 0); if(typeof reportSnapSoon==='function') reportSnapSoon();
       appSettings=map.app||{};
       trainingReq=map.trainingMatrix||{trainings:[]};
       appTargets=map.targets||{};
@@ -3147,7 +3147,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b142';
+const APP_BUILD='b142b';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -6656,7 +6656,7 @@ function regMatches(key, r){
   const q=f.q.trim().toLowerCase(); if(q && !cfg.searchText(r).toLowerCase().includes(q)) return false;
   return true;
 }
-function renderRegAll(key){
+function renderRegAll(key){ if((key==='objectives'||key==='drills') && typeof plan2027BtnSync==='function') setTimeout(plan2027BtnSync, 0);   // b142b
   const cfg=REG[key], st=regState[key];
   const tb=document.getElementById(key+'Rows'); if(!tb || !auth.currentUser) return;
   const tbtn=document.querySelector(`[data-reg-trash="${key}"]`); if(tbtn) tbtn.innerHTML=ic('trash')+` Deleted (${regDeleted(key).length})`;
@@ -6869,6 +6869,15 @@ async function ms2027Load(btn){ if(!canEdit() || !btn || btn.disabled) return; i
     if(await msSave({tasks:add})){ toast(`${n} monthly task${n===1?'':'s'} added — they repeat every month from January to December 2027`); msRender(); } }
   finally{ btn.disabled=false; } }
 document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#drill2027Btn,#ms2027Btn'); if(!b) return; if(b.id==='drill2027Btn') drill2027Load(b); else ms2027Load(b); });
+// b142b: each "Load 2027 draft" button disappears once that part is in the tracker
+function plan2027State(){ const T=(appTargets||{})['2027']||{}, objs=new Set(regActive('objectives').map(r=>String(r.objNo||''))), as=((appAssurance['2027']||{}).items||[]).map(x=>String(x.activity||'').trim().toLowerCase()),
+    ms=Object.values(msData().tasks||{}).filter(t=>String(t.date||'').startsWith('2027')||(t.rep && String(t.until||'9999')>='2027')).map(t=>String(t.title||'').trim().toLowerCase());
+  return {obj:PLAN_2027.objectives.every(o=>objs.has(o.objNo)) && Object.keys(PLAN_2027.targets).every(k=>T[k]!==undefined && T[k]!==''),
+    aud:!!audProgData('2027'), as:PLAN_2027.assurance.every(x=>as.includes(x.activity.toLowerCase())), drill:!!((((settingsDocs.drillPlan||{}).years)||{})['2027']),
+    ms:plan2027Tasks().every(t=>ms.includes(String(t[1]).toLowerCase())) }; }
+function plan2027BtnSync(){ let S; try{ S=plan2027State(); }catch(e){ return; } const ed=canEdit();
+  for(const [id,k] of [['plan2027Btn','obj'],['aud2027Btn','aud'],['as2027Btn','as'],['drill2027Btn','drill'],['ms2027Btn','ms']]){ const b=document.getElementById(id); if(b) b.hidden=!ed || !!S[k]; } }
+setInterval(plan2027BtnSync, 3000);
 let plan2027Busy=false;
 async function plan2027Load(btn){ if(!canEdit() || plan2027Busy) return; if(!compArm(btn, 'Tap again — add the 2027 plan')) return; plan2027Busy=true; btn.disabled=true;
   let addedO=0, skippedO=0, tN=0; const now=new Date().toISOString(), me=(auth.currentUser&&auth.currentUser.email)||'';
@@ -10490,7 +10499,7 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
 function msRender(){ const el=document.getElementById('msBody'); if(!el || !auth.currentUser) return; const sec=document.getElementById('scheduleSection'); if(sec && sec.hidden) return;
   if(formDirtyIn('msBody')) return;
   const ym=msYm(), cur=localToday().slice(0,7), ed=canEdit(), own=msOwnRows(ym), car=msCarried(ym), as=msAssuranceRows(ym), ins=msInspRows(ym), ex=msExpiryRows(ym), act=msActionRows(ym), S=msStats(ym);
-  const ab=document.getElementById('msAddBtn'); if(ab) ab.hidden=!ed; const qb=document.getElementById('msQuickBtn'); if(qb) qb.hidden=!ed; const lb=document.getElementById('ms2027Btn'); if(lb) lb.hidden=!ed;
+  const ab=document.getElementById('msAddBtn'); if(ab) ab.hidden=!ed; const qb=document.getElementById('msQuickBtn'); if(qb) qb.hidden=!ed; if(typeof plan2027BtnSync==='function') plan2027BtnSync();
   const tiles=[{label:'Planned', num:S.planned, sub:'tasks + plan + inspections + expiries', icon:'clipboard'},
     {label:'Done', num:S.done, sub:S.late?`${S.late} done late`:'ticked / recorded', icon:'checkcircle', cls:S.done?'ok':''},
     {label:ym<cur?'Missed':'Missed / overdue', num:S.miss, sub:ym<cur?'not done in the month':'date passed, not done', icon:'alert', cls:S.miss?'danger':'ok'},
