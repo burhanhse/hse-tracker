@@ -1943,6 +1943,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
       </div>
 
       <div class="panel" id="docCtlPanel" hidden></div>
+      <div class="notice" id="libDupNote" hidden style="margin-bottom:12px;"></div>
       <div class="tiles tiles-4" id="libTiles"></div>
 
       <div class="report-grid">
@@ -3147,7 +3148,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b142b';
+const APP_BUILD='b143';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -4574,7 +4575,7 @@ const LIB_FIELDS = [
   {key:'activity', label:'Activity / task covered', type:'text', placeholder:'e.g. scaffold erection at height'},
   {key:'status', label:'Status', type:'select', options:LIB_STATUSES},
 ];
-let libDocs=[], libLoadError=null, unsubscribeLib=null;
+let libDocs=[], libLoadError=null, unsubscribeLib=null, libLoaded=false;
 let libFilters={group:'all', type:'all', q:'', status:'all'};
 let activeLibId=null, libRevFormOpen=false, libBusy=false;
 
@@ -4748,14 +4749,16 @@ function libSubParts(d){
 let imsLoading=false;
 async function imsLoadMasterList(btn){
   if(!canEdit() || imsLoading) return;
-  const have=new Set(libDocs.map(d=>String(d.docNo||'').trim().toLowerCase()));
+  if(!libLoaded){ toast('The library is still loading — try again in a moment'); return; }   // Batch 143: pressed before the list arrived = everything added twice
+  let have=new Set(libDocs.map(d=>String(d.docNo||'').trim().toLowerCase()));
+  try{ const snap=await db.collection('qhseDocs').get(); have=new Set([...have, ...snap.docs.map(d=>String((d.data()||{}).docNo||'').trim().toLowerCase())]); }catch(e){ console.warn('master list check', e); }
   const todo=imsMasterList().filter(x=>!have.has(x.docNo.toLowerCase()));
   const cur=((settingsDocs.docControl||{}).docs)||{}, upd={};
   for(const [k,no] of Object.entries(IMS_PDF_NUMBERS)) if(PDF_DOCS[k] && !String((cur[k]||{}).no||'').trim()) upd[k]={no, rev:(cur[k]||{}).rev||(/^ck_/.test(k)?'01':'00'), date:(cur[k]||{}).date||''};
   if(!todo.length && !Object.keys(upd).length){ toast('The BHN master list is already in the library and every PDF has its number'); return; }
   if(btn && btn.dataset.armed!=='1'){ btn.dataset.armed='1'; const old=btn.innerHTML; btn.textContent=`Click again — add ${todo.length} documents${Object.keys(upd).length?' + '+Object.keys(upd).length+' PDF numbers':''}`; setTimeout(()=>{ btn.dataset.armed='0'; btn.innerHTML=old; }, 4000); return; }
   if(btn){ btn.dataset.armed='0'; }
-  imsLoading=true; const u=auth.currentUser, now=new Date().toISOString(); let n=0, failed=0;
+  imsLoading=true; btn.disabled=true; const u=auth.currentUser, now=new Date().toISOString(); let n=0, failed=0;
   try{
     if(todo.length) toast(`Adding ${todo.length} documents to the library…`);
     for(let i=0;i<todo.length;i+=20){
@@ -4765,7 +4768,7 @@ async function imsLoadMasterList(btn){
     let pdfOk=true; if(Object.keys(upd).length) pdfOk=await saveSettings('docControl', {docs:upd}, settingsStamp('docControl'));
     toast(`${n} documents added as Draft${failed?` (${failed} could not be saved — click again to retry)`:''}${Object.keys(upd).length&&pdfOk?` · ${Object.keys(upd).length} PDFs now show their BHN number`:''}`);
   }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'?RULES_UPDATE_MSG:`Stopped after ${n} documents — click again to add the rest`); }
-  finally{ imsLoading=false; }
+  finally{ imsLoading=false; if(btn) btn.disabled=false; }
 }
 document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#imsLoadBtn'); if(b) imsLoadMasterList(b); });
 
@@ -4789,7 +4792,7 @@ function startLibraryData(){
   try{
     unsubscribeLib = db.collection('qhseDocs').onSnapshot(snap=>{
       libLoadError=null;
-      libDocs=snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})}));
+      libDocs=snap.docs.map(d=>renameOldLabels({id:d.id, ...(d.data()||{})})); libLoaded=true;
       renderLibraryAll(); renderReportAll();
     }, err=>{
       console.error(err); if(!auth.currentUser) return;
@@ -4798,8 +4801,23 @@ function startLibraryData(){
     });
   }catch(e){ console.error(e); }
 }
+/* Batch 143: the same document number twice (e.g. the BHN master list loaded twice) — keep the copy with the most information */
+function libDupGroups(){ const g=new Map(); for(const d of activeLibDocs()){ const k=String(d.docNo||'').trim().toLowerCase(); if(!k) continue; if(!g.has(k)) g.set(k, []); g.get(k).push(d); } return [...g.values()].filter(l=>l.length>1); }
+function libDocScore(d){ return (d.file&&d.file.url?100:0)+(d.revision?10:0)+(d.lastRevDate?10:0)+(d.nextRevDate?10:0)+(d.owner?5:0)+(d.approvedBy?5:0)+((d.history||[]).length*3)+((d.status||'Draft')!=='Draft'?5:0); }
+function libDocBare(d){ return !(d.file&&d.file.url) && !d.revision && !d.lastRevDate && !d.nextRevDate && !d.owner && !d.approvedBy && !(d.history||[]).length && (d.status||'Draft')==='Draft'; }
+function renderLibDupNote(){ const el=document.getElementById('libDupNote'); if(!el) return; const G=libDupGroups(), extra=G.reduce((n,l)=>n+l.length-1,0);
+  el.hidden=!G.length; el.innerHTML=G.length?`${ic('alert')} <strong>${G.length} document${G.length===1?' is':'s are'} listed more than once</strong> (same document number — ${extra} extra cop${extra===1?'y':'ies'}). ${canEdit()?`<button type="button" class="btn btn-sm btn-primary" id="libDupFix" data-armed="0">Remove the extra copies</button> <span class="wsub" style="display:inline;">The copy with a file / revision / dates is kept; empty extra copies are removed, extra copies with any information go to Deleted documents.</span>`:''}`:''; }
+let libDupBusy=false;
+async function libDupFix(btn){ if(!canEdit() || libDupBusy) return; if(!compArm(btn, 'Tap again — remove the extra copies')) return; libDupBusy=true; btn.disabled=true; let del=0, bin=0, fail=0;
+  try{ for(const L of libDupGroups()){ const keep=L.slice().sort((a,b)=>libDocScore(b)-libDocScore(a) || String(a.createdAt||'').localeCompare(String(b.createdAt||'')))[0];
+      for(const d of L){ if(d.id===keep.id) continue;
+        try{ if(libDocBare(d)){ await db.collection('qhseDocs').doc(d.id).delete(); del++; } else { await db.collection('qhseDocs').doc(d.id).update(stamp({deleted:true, deletedAt:new Date().toISOString(), deletedReason:'Duplicate of '+(keep.docNo||'')})); bin++; } }
+        catch(e){ console.error(e); fail++; } } }
+    toast(`Duplicates removed — ${del} empty cop${del===1?'y':'ies'} deleted${bin?` · ${bin} moved to Deleted documents`:''}${fail?` · ${fail} failed`:''}`); }
+  finally{ libDupBusy=false; btn.disabled=false; } }
+document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('#libDupFix'); if(b) libDupFix(b); });
 function renderLibraryAll(){
-  renderLibTiles(); renderLibCharts(); renderLibTypeTabs(); renderLibTable();
+  renderLibDupNote(); renderLibTiles(); renderLibCharts(); renderLibTypeTabs(); renderLibTable();
   document.getElementById('libTrashBtn').innerHTML=ic('trash')+` Deleted documents (${deletedLibDocs().length})`;
   if(activeLibId) renderLibDrawer();
   if(!document.getElementById('libTrashDrawer').hidden) renderLibTrashBody();
