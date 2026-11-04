@@ -3162,7 +3162,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b148';
+const APP_BUILD='b149';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -17680,7 +17680,8 @@ function renderTiles(){
   const trNeed={opal:0, client:0, internal:0}, trNoRole={n:0};
   let unfit=0, missingInd=0, finalWarn=0, totalWarnings=0, vio90=0, vioCrit=0;
   const put=(r,st)=>{ if(st==='valid') r.ok++; else if(st==='expiring') r.soon++; else if(st==='expired'||st==='missing'||st==='unfit') r.bad++; else r.none++; };
-  for(const w of list){
+  const cur=list.filter(w=>(w.status||'active')!=='inactive');   // Batch 149: compliance = active workers only (left / inactive workers not counted)
+  for(const w of cur){
     put(R.civil, w.civilIdExpiry ? statusFor(w.civilIdExpiry) : 'none');
     const ia=aggFor(w,'inductions'); if(ia.status==='missing') missingInd++; put(R.ind, ia.status);
     if((w.status||'active')!=='inactive'){ let nr=false; for(const g of TRAINING_CAT_KEYS){ const st=workerCatStatus(w, g); if(st==='norole'){ nr=true; R['tr_'+g].none++; continue; } if(st==='na') continue; trNeed[g]++; put(R['tr_'+g], st==='ok'?'valid':st==='soon'?'expiring':'expired'); } if(nr) trNoRole.n++; }
@@ -17716,8 +17717,8 @@ function renderTiles(){
     const other=list.filter(w=>!order.some(o=>o[0]===w.trade)).length; if(other) segs.push({label:'No division', trade:'', value:other, color:'var(--line)'});
     donutTitle='By division';
   } else {
-    const issues=list.filter(w=>workerIssues(w).length).length;
-    segs=[{label:'Ready to work', value:list.length-issues, color:'var(--ok)'},{label:'Needs attention', value:issues, color:'var(--danger)'}];
+    const issues=cur.filter(w=>workerIssues(w).length).length;
+    segs=[{label:'Ready to work', value:cur.length-issues, color:'var(--ok)'},{label:'Needs attention', value:issues, color:'var(--danger)'}];
     donutTitle='Documents';
   }
   const tot=segs.reduce((n,s)=>n+s.value,0), R0=52, C=2*Math.PI*R0, gap=segs.filter(s=>s.value).length>1 ? 2 : 0;
@@ -17733,12 +17734,12 @@ function renderTiles(){
           <div class="wf-donut-c"><div class="wf-big">${total}</div><div class="wf-sub">${active} active${total-active?` · ${total-active} inactive`:''}</div></div></div>
         <div class="wf-legend"><div class="wf-leg-title">${donutTitle}</div>${legend}${(()=>{ const T=list.filter(w=>isTemp(w) && (w.status||'active')==='active'), n=T.length, nl=T.filter(w=>tempTermOf(w)==='long').length; return n?`<div class="wsub" style="margin:6px 6px 0;">incl. <strong>${n}</strong> temporary contract worker${n===1?'':'s'} — <span class="tt-txt-l">${nl} long term</span> · <span class="tt-txt-s">${n-nl} short term</span></div>`:''; })()}</div>
       </div>
-      ${div==='all' && total ? (()=>{ const iss=list.filter(w=>workerIssues(w).length).length, ok=total-iss; return `<div class="wf-ready"><div class="wf-leg-title">Documents</div>
+      ${div==='all' && cur.length ? (()=>{ const iss=cur.filter(w=>workerIssues(w).length).length, ok=cur.length-iss; return `<div class="wf-ready"><div class="wf-leg-title">Documents</div>
         <div class="wf-bar" role="img" aria-label="${ok} ready to work, ${iss} need attention">${ok?`<span class="wf-seg ok" style="flex:${ok}" title="${ok} ready to work"></span>`:''}${iss?`<span class="wf-seg bad" style="flex:${iss}" title="${iss} need attention"></span>`:''}</div>
         <div class="wf-ready-l"><span><i class="wf-dot" style="background:var(--ok)"></i> Ready to work <b>${ok}</b></span><span><i class="wf-dot" style="background:var(--danger)"></i> Needs attention <b>${iss}</b></span></div></div>`; })() : ''}
     </div>
     <div class="wf-rows">
-      <div class="wf-rows-head"><span>Compliance by worker${div!=='all'?' — '+esc(divShort(div)):''}</span><span class="wf-key"><i class="ok"></i>OK <i class="soon"></i>Expiring <i class="bad"></i>Problem <i class="none"></i>Not recorded</span></div>
+      <div class="wf-rows-head"><span>Compliance by worker${div!=='all'?' — '+esc(divShort(div)):''} · ${cur.length} active${total-cur.length?` (${total-cur.length} left / inactive not counted)`:''}</span><span class="wf-key"><i class="ok"></i>OK <i class="soon"></i>Expiring <i class="bad"></i>Problem <i class="none"></i>Not recorded</span></div>
       ${rowsHtml}
     </div>`;
 }
