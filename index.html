@@ -2461,8 +2461,13 @@ function pdfFrameDraw(d){
     else { d.setFont('helvetica','bold'); d.setFontSize(11); d.setTextColor(200,16,46); d.__rawText('BURHAN', x0+logoW/2, y0+F.head/2+4, {align:'center'}); }
     const mx=(x0+logoW+x1-boxW)/2;
     d.setFont('helvetica','bold'); d.setFontSize(8.5); d.setTextColor(200,16,46); d.__rawText('BURHAN OIL & TRADE SERVICES', mx, y0+17, {align:'center'});
-    d.setFontSize(meta.sub?12.5:14); d.setTextColor(20,30,48); d.__rawText(pdfSafe(title).toUpperCase(), mx, y0+(meta.sub?34:38), {align:'center', maxWidth:x1-boxW-x0-logoW-16});
-    if(meta.sub){ d.setFont('helvetica','normal'); d.setFontSize(8.5); d.setTextColor(90,96,106); d.__rawText(pdfSafe(meta.sub), mx, y0+47, {align:'center', maxWidth:x1-boxW-x0-logoW-16}); }
+    // Batch 148: a long title is made smaller to fit one line; if it still does not fit it goes on two lines and the sub-line moves down (no overlap)
+    const tMax=x1-boxW-x0-logoW-16, TT=pdfSafe(title).toUpperCase(); let tfs=meta.sub?12.5:14; d.setFontSize(tfs); d.setTextColor(20,30,48);
+    while(tfs>10 && d.getTextWidth(TT)>tMax){ tfs-=0.5; d.setFontSize(tfs); }
+    let subY=y0+47;
+    if(d.getTextWidth(TT)<=tMax) d.__rawText(TT, mx, y0+(meta.sub?34:38), {align:'center'});
+    else { tfs=meta.sub?9.5:11; d.setFontSize(tfs); const tl=d.splitTextToSize(TT, tMax).slice(0,2); const ty=meta.sub?28:31; tl.forEach((ln,j)=>d.__rawText(ln, mx, y0+ty+j*(tfs+1.5), {align:'center'})); subY=y0+ty+tl.length*(tfs+1.5)+1.5; }
+    if(meta.sub){ d.setFont('helvetica','normal'); d.setFontSize(8); d.setTextColor(90,96,106); d.__rawText(pdfSafe(meta.sub), mx, Math.min(subY, y0+F.head-4), {align:'center', maxWidth:tMax}); }
     const rows=[['Doc. No.', dc.no||'—'],['Revision', dc.rev||'—'],['Issue date', issue],['Page', `${i} of ${n}`]], rh=F.head/rows.length, bx=x1-boxW;
     rows.forEach(([k,v],r)=>{ const ry=y0+r*rh; if(r) d.line(bx, ry, x1, ry); d.setFont('helvetica','bold'); d.setFontSize(7.5); d.setTextColor(90,96,106); d.__rawText(k, bx+6, ry+rh/2+2.6);
       d.setFont('helvetica','normal'); d.setFontSize(8); d.setTextColor(20,20,20); d.__rawText(pdfSafe(String(v)), bx+60, ry+rh/2+2.8, {maxWidth:boxW-66}); });
@@ -3157,7 +3162,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b147';
+const APP_BUILD='b148';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -9898,7 +9903,7 @@ const CK_TPL=[
   result:'Well head left in a safe condition', signs:['Technician','Supervisor']},
  {key:'harness', no:'BHN-FBH-CH-08', title:'Full Body Harness Inspection Checklist', short:'Full body harness',
   head:[['comp','Company / project'],['eqno','Serial no.'],['make','Make / model'],['cap','Standard & capacity (e.g. EN 361, 140 kg)'],['loc','Location / user']],
-  secs:[[null,['Fall indicator not showing (harness has not stopped a fall)','Labels and markings legible and attached','Inspection tag / record in date','Metal parts (D-rings, buckles, hooks) free from cracks, sharp edges, deformation and corrosion','Springs and gates on hooks and buckles working','Quick-connect buckles engage properly (tug test)','Buckle attachments free from unusual wear, frayed or cut fibres','Stitching and sewn terminations complete — no pulled, cut or missing stitches','Webbing checked along its full length (bend into a "U") — no cuts, tears, fraying, burns, holes, hardness or discolouration','Webbing hidden under pads, keepers and D-ring checked','Lanyard / shock absorber free from cuts and damage — shock pack not opened']]], signs:['Inspected by','Reviewed by (HSE)']},
+  secs:[[null,['Fall indicator not showing (harness has not stopped a fall)','Labels and markings legible and attached','Inspection tag / record in date','Metal parts (D-rings, buckles, hooks) free from cracks, sharp edges, deformation and corrosion','Springs and gates on hooks and buckles working','Quick-connect buckles engage properly (tug test)','Buckle attachments free from unusual wear, frayed or cut fibres','Stitching and sewn terminations complete — no pulled, cut or missing stitches','Webbing checked along its full length (bend into a "U") — no cuts, tears, fraying, burns, holes, hardness or discolouration','Webbing hidden under pads, keepers and D-ring checked','Lanyard / shock absorber free from cuts and damage — shock pack not opened']]], signs:['Inspected by (HSE)']},
  {key:'grind', no:'BHN-GM-CH-09', title:'Grinding Machine Inspection Checklist', short:'Grinding machine', head:CK_HEAD_TOOL, ppe:CK_PPE_TOOL,
   secs:[[null,['Grinder in good working condition', CK_TOOL_COMMON.cable, CK_TOOL_COMMON.sleeve,'Machine speed (RPM) marked on the rating plate', CK_TOOL_COMMON.dms,'Side handle fitted for good control','Wheel guard fitted and secure — covers at least half of the wheel','Grinding / cutting disc free from cracks or defects — max. RPM marked','Disc max. RPM is higher than the machine RPM','Correct key / spanner used to change the disc', CK_TOOL_COMMON.dbl, CK_TOOL_COMMON.body, CK_TOOL_COMMON.comp,'Work area free from flammable materials','Fire extinguisher available at the work location']]], signs:['Inspected by','Reviewed by (HSE)']},
  {key:'ply', no:'BHN-CM-CH-10', title:'Plywood Cutting Machine Inspection Checklist', short:'Plywood cutting machine', head:CK_HEAD_TOOL, ppe:CK_PPE_TOOL,
