@@ -1227,7 +1227,7 @@ label.ind-topic, .ind-ed label.hse-sig-file{flex-direction:row !important;} .ind
 .ms-g-dsum{font-weight:500; font-size:12px; color:var(--ink-muted); margin-left:8px;} .ms-g-dsum b.ok{color:var(--ok);} .ms-g-dsum b.warn{color:var(--warn);} .ms-g-dsum b.danger{color:var(--danger);}
 .ms-auto{color:var(--ok); font-weight:600;} .ms-qrow{display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:5px 0; border-bottom:1px dashed var(--line);} .ms-qrow label{font-size:12.5px;} .ms-qrow .chk{flex:1; min-width:220px;}
 .ms-today{margin:12px 0;} .ms-proj{margin-top:14px;} .ms-psum{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin:6px 0;} .ms-psum>div{display:flex; flex-direction:column; padding:8px 10px; border:1px solid var(--line); border-radius:10px;} .ms-psum b{font-size:18px;} .ms-psum b.ok{color:var(--ok);} .ms-psum b.warn{color:var(--warn);} .ms-psum b.danger{color:var(--danger);}
-.ppe-signpanel{border-left:3px solid var(--accent);} .ppe-signrow{display:flex; gap:12px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; padding:8px 0; border-bottom:1px dashed var(--line);} .ppe-signwho{flex:1; min-width:220px;} .ppe-signact{min-width:240px; max-width:440px; flex:1;} .ppe-padbtns{display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;}
+.ppe-signpanel{border-left:3px solid var(--accent);} .ppe-issrow{border-top:2px solid var(--line); margin-top:4px;} .ppe-ympick{flex-direction:row; align-items:center; gap:6px; font-size:12px;} .ppe-ympick input{width:auto; padding:4px 6px;} .ppe-ympick.on input{border-color:var(--accent);} .ppe-regbtns{display:inline-flex; gap:6px; flex-wrap:wrap;} .ppe-signrow{display:flex; gap:12px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; padding:8px 0; border-bottom:1px dashed var(--line);} .ppe-signwho{flex:1; min-width:220px;} .ppe-signact{min-width:240px; max-width:440px; flex:1;} .ppe-padbtns{display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;}
 .sv-ph{display:inline-flex; gap:4px; align-items:center; flex-wrap:wrap;} .sv-ph img{width:34px; height:34px; object-fit:cover; border-radius:6px; border:1px solid var(--line);} .sv-phadd{cursor:pointer; font-size:16px; padding:2px 6px; border:1px dashed var(--line); border-radius:6px;}
 .sv-one{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:8px 0;} .sv-one input{flex:1; min-width:220px;}
 .sv-topic{padding:10px 12px; margin:0 0 10px; border:1px solid var(--line); border-left:4px solid var(--line); border-radius:10px;} .sv-topic textarea{width:100%; margin:6px 0 4px;}
@@ -2425,7 +2425,7 @@ const PDF_DOCS={
   monthlyReport:{title:'Monthly HSE Report'}, yearlyReport:{title:'Yearly HSE Report'}, clientPack:{title:'HSE Monthly Report — Client'},
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
-  ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
+  ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, ppeRegister:{title:'PPE Issue Register'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
   liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'}, warnLetter:{title:'HSE Warning Letter'}, ck_veh:{title:'Vehicle Inspection Checklist'}, ck_cut14:{title:'14-inch Cutting Machine Inspection Checklist'}, ck_blower:{title:'Air Blower Inspection Checklist'}, ck_boom:{title:'Boom Lift Inspection Checklist'}, ck_drill:{title:'Drilling Machine Inspection Checklist'}, ck_vib:{title:'Concrete Vibrator Inspection Checklist'}, ck_fire:{title:'Fire Extinguisher Inspection Checklist'}, ck_whm:{title:'Well Head Maintenance Checklist'}, ck_harness:{title:'Full Body Harness Inspection Checklist'}, ck_grind:{title:'Grinding Machine Inspection Checklist'}, ck_ply:{title:'Plywood Cutting Machine Inspection Checklist'}, ck_scissor:{title:'Scissor Lift Inspection Checklist'},
 };
 PDF_DOCS.schedule={title:'Monthly HSE Schedule'};   // Batch 119
@@ -3177,7 +3177,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b150b';
+const APP_BUILD='b151';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -12037,7 +12037,7 @@ function ppeLifeText(x){ return x.life ? `${x.life} month${Number(x.life)===1?''
 function ppeAddMonths(d, n){ if(!d || !n) return ''; const [y,m,dd]=d.split('-').map(Number); const t=new Date(y, m-1+Number(n), dd); if(t.getDate()!==dd) t.setDate(0); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
 function ppeLastSize(w, item){ const r=(w.ppeIssued||[]).filter(x=>x.item===item && x.size).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0]; return r?r.size:''; }
 function ppeRecordsIn(fromD, toD){ const out=[]; for(const w of activeWorkers()) for(const r of (w.ppeIssued||[])) if(r.date && r.date>=fromD && r.date<=toD) out.push({...r, w}); return out; }
-function ppePeriodRange(){ const t=localToday(); if(ppeUi.period==='year') return [t.slice(0,4)+'-01-01', t, 'this year']; if(ppeUi.period==='12m') return [dateAdd(t,-365), t, 'last 12 months']; return [t.slice(0,7)+'-01', t, 'this month']; }
+function ppePeriodRange(){ const t=localToday(); if(ppeUi.period==='ym' && /^\d{4}-\d{2}$/.test(ppeUi.ym||'')){ const e=msMonthEnd(ppeUi.ym); return [ppeUi.ym+'-01', e<t?e:t, periodLabel(ppeUi.ym)]; } if(ppeUi.period==='year') return [t.slice(0,4)+'-01-01', t, 'this year']; if(ppeUi.period==='12m') return [dateAdd(t,-365), t, 'last 12 months']; return [t.slice(0,7)+'-01', t, 'this month']; }
 // basic kit check: each active worker should have every kit item at least once (and not past its replacement date)
 /* Batch 59: designations that don't need the basic kit (e.g. Accountant, Accounts Manager) — set by HSE on the PPE tab */
 function ppeKitExemptList(){ return ((settingsDocs.ppeStandards||{}).kitExempt)||[]; }
@@ -12082,6 +12082,8 @@ function renderPpe(live){
   pane.innerHTML=`
     <div class="pane-head" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;"><h2 style="margin:0;">PPE</h2>
       <div class="seg-tabs" style="margin-left:8px;">${[['month','This month'],['year','This year'],['12m','Last 12 months']].map(([k,l])=>`<button type="button" class="seg-btn ${ppeUi.period===k?'active':''}" data-ppe-period="${k}">${l}</button>`).join('')}</div>
+      <label class="ppe-ympick ${ppeUi.period==='ym'?'on':''}" title="Pick a month">Month <input type="month" id="ppeYm" value="${esc(ppeUi.period==='ym'?ppeUi.ym:'')}" max="${esc(localToday().slice(0,7))}"></label>
+      <span class="ppe-regbtns"><button type="button" class="btn btn-sm" id="ppeRegXlsx" title="Every PPE item issued in ${esc(word)}">${ic('download')} PPE issued — Excel</button><button type="button" class="btn btn-sm" id="ppeRegPdf">${ic('download')} PPE issued — PDF</button></span>
       <span style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">${ed?`<button type="button" class="btn btn-primary btn-sm" id="ppeIssueOpen">Issue PPE to crew</button>`:''}<button type="button" class="btn btn-sm" id="ppeListPdf">${ic('download')} Approved PPE list (PDF)</button><button type="button" class="btn btn-sm" id="ppeListXlsx">${ic('download')} Excel</button></span></div>
     ${ppeReqPanelHtml()}
     ${ppeUi.issueOpen?ppeIssueFormHtml():''}
@@ -12177,7 +12179,7 @@ async function ppeSaveIssue(){
   ppeUi.saving=true; renderPpe();
   for(const id of selW){ const w=workers.find(x=>x.id===id); const add=[];
     for(const it of selI){ if(ppeUi.limit && ppeUi.limit[id] && !ppeUi.limit[id].includes(it)) continue; const v=ppeUi.sizes[id+'|'+it]||{size:ppeLastSize(w,it), qty:1}, std=ppeStdOf(it);
-      add.push({id:genId(), batchId, item:it, size:String(v.size||'').trim(), quantity:Math.max(1, Number(v.qty)||1), date, expiry:std&&std.life?ppeAddMonths(date, std.life):'', issuedBy:ppeUi.issuedBy.trim(), condition:ppeUi.condition, notes:'Crew issue'+(ppeUi.project!=='all'?' — '+projectName(ppeUi.project):''), projectId:ppeUi.project!=='all'?ppeUi.project:(w.projectId||''), batchId, ...(ppeLinks.some(l=>l.active && l.projectId && l.projectId===(ppeUi.project!=='all'?ppeUi.project:(w.projectId||'')))?{needConfirm:true}:{})}); }
+      add.push({id:genId(), batchId, item:it, size:String(v.size||'').trim(), quantity:Math.max(1, Number(v.qty)||1), date, expiry:std&&std.life?ppeAddMonths(date, std.life):'', issuedBy:ppeUi.issuedBy.trim(), issEmail:String(((auth.currentUser||{}).email)||'').toLowerCase(), condition:ppeUi.condition, notes:'Crew issue'+(ppeUi.project!=='all'?' — '+projectName(ppeUi.project):''), projectId:ppeUi.project!=='all'?ppeUi.project:(w.projectId||''), batchId, ...(ppeLinks.some(l=>l.active && l.projectId && l.projectId===(ppeUi.project!=='all'?ppeUi.project:(w.projectId||'')))?{needConfirm:true}:{})}); }
     if(!add.length) continue;
     try{ const FV=fsFieldValue(); await db.collection('workers').doc(id).update(stamp({ppeIssued: FV ? FV.arrayUnion(...add) : [...(w.ppeIssued||[]), ...add]})); n+=add.length; rows.push({w, add}); }
     catch(e){ console.error(e); toast('Could not save for '+(w.fullName||'a worker')+' — '+(e.code||'error')); }
@@ -12234,6 +12236,27 @@ function ppeListPdf(){
   ppePdfTable(doc, PPE_TABLE_HEAD, ppeTableRows(), [70,160,120,100,120,100,60,48], 54, 32);
   doc.save(`Approved_PPE_list_${localToday()}.pdf`);
 }
+/* Batch 151: PPE Issue Register — every item issued in the period picked (month / this year / 12 months), Excel + PDF */
+function ppeRegisterRows(){ const [from, to, word]=ppePeriodRange(), R=ppeRecordsIn(from, to).sort((a,b)=>String(a.date).localeCompare(String(b.date)) || String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
+  const rows=R.map((r,i)=>{ const pid=r.projectId||r.w.projectId||''; return [i+1, isoToDmy(r.date), r.w.fullName||'—', r.w.civilId||'', divLabel(workerDivKey(r.w)||''), pid?projectName(pid):'—', r.item||'', r.size||'', Math.max(1, Number(r.quantity)||1), r.condition||'', r.issuedBy||'', r.sigId?'Signed'+(r.receivedDate?' '+isoToDmy(r.receivedDate):''):r.receivedAt?'Confirmed':'Not signed']; });
+  const by=new Map(); for(const r of R){ const k=r.item||'—'; by.set(k,(by.get(k)||0)+Math.max(1, Number(r.quantity)||1)); }
+  const sum=[...by].sort((a,b)=>b[1]-a[1]), people=new Set(R.map(r=>r.w.id)).size, total=sum.reduce((n,x)=>n+x[1],0);
+  return {from, to, word, rows, sum, people, total}; }
+const PPE_REG_HEAD=['#','Date','Worker','Civil ID','Division','Project','PPE item','Size','Qty','Issue type','Issued by','Worker signature'];
+async function ppeRegisterXlsx(){ const D=ppeRegisterRows(); if(!D.rows.length){ toast(`No PPE issued ${D.word}`); return; }
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
+  const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([[`Burhan Oil & Trade Services — PPE Issue Register · ${D.word}`],[`${isoToDmy(D.from)} to ${isoToDmy(D.to)} · ${D.total} items to ${D.people} workers`],[],PPE_REG_HEAD,...D.rows]);
+  sh['!cols']=[{wch:5},{wch:11},{wch:26},{wch:14},{wch:22},{wch:26},{wch:26},{wch:8},{wch:5},{wch:18},{wch:18},{wch:20}];
+  const s2=XLSX.utils.aoa_to_sheet([['PPE item','Quantity issued'],...D.sum,[],['Total',D.total]]); s2['!cols']=[{wch:30},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, sh, 'PPE issued'); XLSX.utils.book_append_sheet(wb, s2, 'Totals by item');
+  XLSX.writeFile(wb, `PPE_issued_${D.from.slice(0,7)}${D.to.slice(0,7)!==D.from.slice(0,7)?'_to_'+D.to.slice(0,7):''}.xlsx`); }
+function ppeRegisterPdf(){ const D=ppeRegisterRows(); if(!D.rows.length){ toast(`No PPE issued ${D.word}`); return; } if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'ppeRegister', docSub:`${D.word} · ${isoToDmy(D.from)} to ${isoToDmy(D.to)}`}); doc.setLineWidth(0.5); doc.setDrawColor(190);
+  doc.setTextColor(20,20,20); doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text(`${D.total} PPE items issued to ${D.people} worker${D.people===1?'':'s'}`, 32, 40);
+  let y=ppePdfTable(doc, PPE_REG_HEAD, D.rows.map(r=>r.map(String)), [22,52,110,62,74,96,96,34,26,66,70,70], 52, 32);
+  y+=18; if(y+40>doc.internal.pageSize.getHeight()-36){ doc.addPage(); y=40; } doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('Totals by PPE item', 32, y);
+  ppePdfTable(doc, ['PPE item','Quantity'], [...D.sum.map(([k,n])=>[k, String(n)]), ['Total', String(D.total)]], [240,80], y+8, 32);
+  doc.save(`PPE_issued_${D.from.slice(0,7)}${D.to.slice(0,7)!==D.from.slice(0,7)?'_to_'+D.to.slice(0,7):''}.pdf`); }
 function ppeExemptFormHtml(){
   const sel=new Set(ppeKitExemptList().map(x=>String(x).toLowerCase())), list=ppeDesignations();
   return `<form id="ppeExemptForm" class="ppe-exempt"><p class="wsub" style="margin:0 0 6px;">Tick the designations that do <strong>not</strong> need the basic kit (helmet, coverall, shoes, glasses). They are left out of "Basic kit complete" and "Issue missing kit".</p>
@@ -12249,6 +12272,7 @@ function ppeIssueSessions(fromD, toD){
     let s=g.get(key); if(!s){ s={key, date:r.date, issuedBy:r.issuedBy||'', condition:r.condition||'', project:pid||'all', ws:new Map(), n:0}; g.set(key,s); }
     let x=s.ws.get(w.id); if(!x){ x={wid:w.id, name:w.fullName||'—', civilId:w.civilId||'', designation:w.designation||'', items:[]}; s.ws.set(w.id,x); }
     if(r.sigId && !x.sigId){ x.sigId=r.sigId; x.signed=r.receivedDate||''; x.via=r.signedIn||'link'; }
+    if(r.issSigId && !s.issSigId){ s.issSigId=r.issSigId; s.issName=r.issName||''; s.issDate=r.issDate||''; } if(r.issEmail && !s.issEmail) s.issEmail=r.issEmail;   // Batch 151: issuer
     x.items.push({item:r.item, size:r.size||'', qty:Number(r.quantity)||1}); s.n+=1; }
   return [...g.values()].map(s=>({...s, workers:[...s.ws.values()].sort((a,b)=>a.name.localeCompare(b.name))})).sort((a,b)=>String(b.date).localeCompare(String(a.date)) || b.n-a.n);
 }
@@ -12267,7 +12291,25 @@ function ppeSignPanelHtml(){ const S=ppeSignSess(); if(!S) return ''; const ed=c
     <p class="wsub" style="margin:-4px 0 8px;">The worker checks the items, then signs in the box with a finger (or the mouse). "I have received the PPE listed in good condition…" — the signature is printed on the PPE Issue Record. ${left?`<b>${left}</b> still to sign.`:'<b>Everyone has signed.</b>'}</p>
     ${S.workers.map(x=>`<div class="ppe-signrow"><div class="ppe-signwho"><strong>${esc(x.name)}</strong> <span class="wsub">${esc([x.designation, x.civilId].filter(Boolean).join(' · '))}</span><div class="wsub">${esc(x.items.map(i=>i.item+(i.size?' ('+i.size+')':'')+(i.qty>1?' ×'+i.qty:'')).join(', '))}</div></div>
       <div class="ppe-signact">${x.sigId?`<span class="badge ok">✓ Signed${x.signed?' '+esc(isoToDmy(x.signed)):''}${x.via==='office'?'':' (on the link)'}</span>`:ppeUi.pad===x.wid?pad(x.wid):ed?`<button type="button" class="btn btn-sm btn-primary" data-ppe-signw="${esc(x.wid)}">✍ Sign now</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`).join('')}
+    ${ppeIssuerHtml(S)}
     <div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm" id="ppeSignPdf">${ic('printer')} PPE Issue Record (PDF)</button></div></div>`; }
+/* Batch 151: the issuer signs too — by default the saved HSE signature of the person who issued (or of you); a different issuer
+   (e.g. storekeeper) signs on the screen: ppeSignatures/iss_<time> {kind:'issuer'}; the records of that issue get issSigId / issName / issDate. */
+function ppeIssDefault(S){ const em=(S&&S.issEmail)||String(((auth.currentUser||{}).email)||'').toLowerCase(), h=hseSigOf(em)||hseSigOf((auth.currentUser||{}).email); return h&&h.img?{img:h.img, name:h.name||plWho()}:null; }
+function ppeIssuerHtml(S){ const ed=canEdit(), d=ppeIssDefault(S);
+  if(ppeUi.pad==='__iss') return `<div class="ppe-signrow ppe-issrow"><div class="ppe-signwho"><strong>Issued by</strong><div class="wsub">The person who handed over the PPE signs here.</div></div><div class="ppe-signact" style="flex:1 1 300px;"><input id="ppeIssName" maxlength="60" placeholder="Issuer name" value="${esc(S.issuedBy||'')}" style="margin-bottom:6px;"><div class="hse-sig-pad"><canvas id="ppeSigPad" width="600" height="200" aria-label="Issuer signature pad"></canvas></div><div class="ppe-padbtns"><button type="button" class="btn btn-sm" data-ppe-padx="1">Cancel</button><button type="button" class="btn btn-sm" data-ppe-padclr="__iss">Clear</button><button type="button" class="btn btn-sm btn-primary" data-ppe-isssave="1">Save issuer signature</button></div></div></div>`;
+  const who=S.issSigId ? `<span class="badge ok">✓ ${esc(S.issName||'Issuer')} signed on the screen${S.issDate?' '+esc(isoToDmy(S.issDate)):''}</span>${ed&&d?' <button type="button" class="att-link" data-ppe-issdef="1" data-armed="0">Use my saved signature instead</button>':''}`
+    : d ? `<span class="badge ok">✓ ${esc(d.name)} — saved HSE signature (prints on the PDF)</span>` : `<span class="badge warn">Issuer signature needed</span> <span class="wsub">no saved HSE signature yet — the issuer signs here (or add yours with "Add my signature" in a project's TBT panel)</span>`;
+  return `<div class="ppe-signrow ppe-issrow"><div class="ppe-signwho"><strong>Issued by</strong><div class="wsub">${esc(S.issuedBy||'')}</div></div><div class="ppe-signact">${who}${ed?` <button type="button" class="btn btn-sm" data-ppe-issw="1">${S.issSigId||!d?'✍ Issuer signs now':'Different issuer signs here'}</button>`:''}</div></div>`; }
+async function ppeIssSave(){ const S=ppeSignSess(); if(!S) return; const img=ppeUi.padImg, name=String((document.getElementById('ppeIssName')||{}).value||'').trim().slice(0,60);
+  if(!name){ toast('Write the issuer name'); return; } if(!img){ toast('Let the issuer sign in the box first'); return; }
+  const sid='iss_'+Date.now().toString(36), date=localToday(), now=new Date().toISOString();
+  try{ await db.collection('ppeSignatures').doc(sid).set({kind:'issuer', name, img, date, sessionKey:S.key, createdAt:now, createdBy:((auth.currentUser||{}).email)||''}); ppeSigCache.set(sid, {img});
+    await ppeIssApply(S, {issSigId:sid, issName:name, issDate:date}); ppeUi.pad=''; ppeUi.padImg=''; toast(`${name} signed as the issuer ✓`); renderPpe(); }
+  catch(e){ console.error(e); toast('Could not save the signature — '+((e&&e.code)||'error')); } }
+async function ppeIssApply(S, patch){ for(const x of S.workers){ const w=workers.find(y=>y.id===x.wid); if(!w) continue; let ch=false;
+    const next=(w.ppeIssued||[]).map(r=>{ if(ppeSessKey(r)!==S.key || r.date!==S.date) return r; ch=true; const o={...r, ...patch}; for(const k of Object.keys(patch)) if(patch[k]===null) delete o[k]; return o; });
+    if(ch){ await db.collection('workers').doc(w.id).update(stamp({ppeIssued:next})); w.ppeIssued=next; } } }
 function ppeWireSigPad(){ const cv=document.getElementById('ppeSigPad'); ppeUi.padImg=''; if(cv){ compPadWire(cv, img=>{ ppeUi.padImg=img; }); cv.scrollIntoView({block:'center'}); } }
 async function ppeSignSave(wid){ const S=ppeSignSess(), w=workers.find(x=>x.id===wid); if(!S || !w) return; const img=ppeUi.padImg; if(!img){ toast('Let him sign in the box first'); return; }
   const now=new Date().toISOString(), date=localToday(), recs=(w.ppeIssued||[]).filter(r=>ppeSessKey(r)===S.key && !r.sigId), x=S.workers.find(y=>y.wid===wid);
@@ -12285,15 +12327,24 @@ async function ppeSigImg(id){
   return s.img||'';
 }
 async function ppeSheetPdf(batch){
-  const b=batch||ppeUi.lastBatch; if(!b) return; if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
+  let b=batch||ppeUi.lastBatch; if(!b) return; if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF tools are still loading — try again in a moment'); return; }
+  if(!b.workers || !b.workers.some(x=>x.wid)){ const s=ppeIssueSessions(b.date, b.date).find(x=>x.key===b.key); if(s) b=s; }   // Batch 151: the saved records (signatures, issuer)
+  const dflt=ppeIssDefault(b), issImg=b.issSigId?await ppeSigImg(b.issSigId):(dflt?dflt.img:''), issName=b.issSigId?(b.issName||''):(dflt?dflt.name:'');
+  if(!issImg){ toast('The issuer must sign first — tap "✍ Issuer signs now" in the sign panel'); if(b.key){ ppeUi.signKey=b.key; ppeUi.signDate=b.date; ppeUi.pad=''; renderPpe(); } return; }
+  const hse=hseSigOf((auth.currentUser||{}).email)||hseSigOf(b.issEmail)||null;
   const imgs=[]; for(const w of b.workers) imgs.push(await ppeSigImg(w.sigId));   // Batch 74: signatures given on the worker PPE link
   const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'ppeIssue', docSub:`${isoToDmy(b.date)}${b.project!=='all'?' · '+projectName(b.project):''}`}); doc.setLineWidth(0.5); doc.setDrawColor(150);
   doc.setTextColor(20,20,20); doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
-  doc.text(`Date: ${b.date}   ·   Project: ${b.project!=='all'?projectName(b.project):'—'}   ·   Issue type: ${b.condition}   ·   Issued by: ${b.issuedBy||'________________'}`, 32, 58);
+  doc.text(`Date: ${b.date}   ·   Project: ${b.project!=='all'?projectName(b.project):'—'}   ·   Issue type: ${b.condition}   ·   Issued by: ${b.issuedBy||issName||'________________'}`, 32, 58);
   doc.text('I have received the PPE listed below in good condition. I will wear it as instructed, look after it and return it for replacement when worn or damaged.', 32, 72);
   const rows=b.workers.map((w,i)=>[String(i+1), w.name, w.civilId, w.designation, w.items.map(x=>`${x.item}${x.size?' ('+x.size+')':''}${x.qty>1?' ×'+x.qty:''}`).join(', ')+(w.sigId?`\n(signed ${w.via==='office'?'at the issue':'on the PPE link'}${w.signed?' '+isoToDmy(w.signed):''})`:''), '']);
   const y=ppePdfTable(doc, ['#','Name','Civil ID','Designation','PPE issued (size)','Signature'], rows, [24,140,70,100,300,140], 86, 32, imgs);
-  doc.setFontSize(9.5); let yy=y+30; if(yy>doc.internal.pageSize.getHeight()-30){ doc.addPage(); yy=60; } doc.text('Issued by (name & signature): ______________________________          HSE: ______________________________', 32, yy);
+  let yy=y+16; if(yy+70>doc.internal.pageSize.getHeight()-30){ doc.addPage(); yy=50; }
+  const box=(x, title, name, img, date)=>{ const W=260, H=62; doc.setDrawColor(150); doc.rect(x, yy, W, H); doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.text(title, x+6, yy+12);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text(pdfSafe(name||'________________'), x+6, yy+26); doc.setFontSize(8); doc.text('Date: '+(date?isoToDmy(date):'__________'), x+6, yy+54);
+    if(img){ try{ let iw=120, ih=40; try{ const pr=doc.getImageProperties(img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+W-iw-8, yy+(H-ih)/2, iw, ih); }catch(e){ console.warn(e); } } };
+  box(32, 'ISSUED BY (name & signature)', issName, issImg, b.issSigId?(b.issDate||b.date):b.date);
+  box(312, 'HSE (name & signature)', hse?hse.name||'':'', hse?hse.img:'', b.date);
   doc.save(`PPE_issue_${b.date}.pdf`);
 }
 
@@ -22545,8 +22596,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(b.id==='ppeSignClose'){ ppeUi.signKey=''; ppeUi.pad=''; renderPpe(); return; }
     if(b.dataset.ppeSignw){ if(!canEdit()) return; ppeUi.pad=b.dataset.ppeSignw; renderPpe(); ppeWireSigPad(); return; }
     if(b.dataset.ppePadx){ ppeUi.pad=''; renderPpe(); return; }
-    if(b.dataset.ppePadclr){ renderPpe(); ppeWireSigPad(); return; }
+    if(b.dataset.ppePadclr){ const iss=ppeUi.pad==='__iss', nm=iss?String((document.getElementById('ppeIssName')||{}).value||''):''; renderPpe(); if(iss){ const i=document.getElementById('ppeIssName'); if(i) i.value=nm; } ppeWireSigPad(); return; }
     if(b.dataset.ppeSignsave){ await ppeSignSave(b.dataset.ppeSignsave); return; }
+    if(b.dataset.ppeIssw){ if(!canEdit()) return; ppeUi.pad='__iss'; renderPpe(); ppeWireSigPad(); return; }   // Batch 151
+    if(b.dataset.ppeIsssave){ await ppeIssSave(); return; }
+    if(b.dataset.ppeIssdef){ if(!canEdit() || !compArm(b, 'Tap again — use my saved signature')) return; const S=ppeSignSess(); if(S){ await ppeIssApply(S, {issSigId:null, issName:null, issDate:null}); toast('Your saved signature will print as the issuer'); renderPpe(); } return; }
+    if(b.id==='ppeRegXlsx'){ await ppeRegisterXlsx(); return; }
+    if(b.id==='ppeRegPdf'){ ppeRegisterPdf(); return; }
     if(b.id==='ppeSignPdf'){ const S=ppeSignSess(); if(S) ppeSheetPdf(S); return; }
     if(b.dataset.ppeSheet){ const [f,t]=ppePeriodRange(), s=ppeIssueSessions(f,t).find(x=>x.key===b.dataset.ppeSheet); if(s) ppeSheetPdf(s); return; }
     if(b.id==='ppeSessAll'){ ppeUi.sessAll=true; renderPpe(); return; }
@@ -22573,6 +22629,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(t.dataset.ppeItem!==undefined){ ppeReadIssueInputs(); t.checked?ppeUi.items.add(t.dataset.ppeItem):ppeUi.items.delete(t.dataset.ppeItem); renderPpe(); return; }
     if(t.dataset.ppeW!==undefined){ ppeReadIssueInputs(); t.checked?ppeUi.workers.add(t.dataset.ppeW):ppeUi.workers.delete(t.dataset.ppeW); renderPpe(); return; }
     if(t.id==='ppeProj'){ ppeReadIssueInputs(); ppeUi.project=t.value; renderPpe(); return; }
+    if(t.id==='ppeYm'){ ppeReadIssueInputs(); if(/^\d{4}-\d{2}$/.test(t.value)){ ppeUi.period='ym'; ppeUi.ym=t.value; } else ppeUi.period='month'; renderPpe(); return; }   // Batch 151
   });
   document.addEventListener('input', e=>{ if(e.target.matches && e.target.matches('#recordForm [data-field="hours"], #recordForm [data-field="expiry"]')) e.target.dataset.auto=''; });
   document.getElementById('ppePane').addEventListener('input', e=>{ if(e.target.id!=='ppeQ') return; const q=e.target.value.toLowerCase(); ppeUi.q=e.target.value; document.querySelectorAll('.ppe-wlist .pick-row').forEach(r=>{ r.hidden=!!q && !String(r.dataset.text||'').includes(q); }); });
