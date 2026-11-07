@@ -3177,7 +3177,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b151';
+const APP_BUILD='b152';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -9392,8 +9392,8 @@ document.addEventListener('click', async e=>{
   if(D.ckSign!==undefined){ if(formDirtyIn('regDrawerBody')){ toast('Save the checklist first'); return; } ckUi.pad=D.ckSign; redraw(); return; }
   if(D.ckPadcancel){ ckUi.pad=''; redraw(); return; }
   const save=async(i, x)=>{ const sg={...(r.ckSigns||{}), [i]:x}; if(await regUpdate('insp', r.id, {ckSigns:sg}, true)){ r.ckSigns=sg; ckUi.pad=''; toast('Signed'); redraw(); } };
-  if(D.ckPadsave!==undefined){ if(!ckPadImg){ toast('Sign in the box first'); return; } const n=(document.getElementById('ckSignN')||{}).value||''; if(!n.trim()){ toast('Write the name first'); return; } await save(D.ckPadsave, {n:n.trim(), s:ckPadImg, d:localToday()}); return; }
-  if(D.ckMysig!==undefined){ const hs=hseSigOf((auth.currentUser||{}).email); if(!hs||!hs.img) return; await save(D.ckMysig, {n:hs.name||'', s:hs.img, d:localToday()}); return; }
+  if(D.ckPadsave!==undefined){ if(!ckPadImg){ toast('Sign in the box first'); return; } const n=(document.getElementById('ckSignN')||{}).value||''; if(!n.trim()){ toast('Write the name first'); return; } await save(D.ckPadsave, {n:n.trim(), s:ckPadImg, d:sigDay(r.date)}); return; }
+  if(D.ckMysig!==undefined){ const hs=hseSigOf((auth.currentUser||{}).email); if(!hs||!hs.img) return; await save(D.ckMysig, {n:hs.name||'', s:hs.img, d:sigDay(r.date)}); return; }
   if(D.ckUnsign!==undefined){ if(!compArm(b,'tap again')) return; const sg={...(r.ckSigns||{})}; delete sg[D.ckUnsign]; if(await regUpdate('insp', r.id, {ckSigns:sg}, true)){ r.ckSigns=sg; redraw(); } return; }
 });
 
@@ -9610,7 +9610,7 @@ function svSigHtml(r){ const ed=canEdit(), me=hseSigOf((auth.currentUser||{}).em
   const box=(role, inner)=>`<div class="panel sv-sigbox"><div class="subhead" style="margin-top:0;">${role}</div>${inner}</div>`;
   const hse=me.img?`<img src="${esc(me.img)}" alt="signature" class="trs-sigimg"><div class="wsub">${esc(me.name||plWho())} — your saved HSE signature is printed on the PDF</div>`:`<p class="wsub">${esc(plWho())} — no saved HSE signature yet (add it with "Add my signature" in a project's TBT panel); the PDF shows a blank line.</p>`;
   const ops = svUi.pad==='ops' ? `<div class="hse-sig-pad"><canvas id="svPad" width="600" height="200" aria-label="Operations Executive signature"></canvas></div><div class="ppe-padbtns"><button type="button" class="btn btn-sm" data-sv-padx="1">Cancel</button><button type="button" class="btn btn-sm" data-sv-padclr="1">Clear</button><button type="button" class="btn btn-sm btn-primary" data-sv-padsave="1">Save signature</button></div>`
-    : o && o.img ? `<img src="${esc(o.img)}" alt="signature" class="trs-sigimg"><div class="wsub"><b>${esc(o.n||r.opsName||'')}</b> · signed ${esc(isoToDmy(String(o.at||'').slice(0,10)))}</div>${ed?'<button type="button" class="att-link" data-sv-sign="1">Sign again</button> · <button type="button" class="att-link" data-sv-unsign="1" data-armed="0">Remove</button>':''}`
+    : o && o.img ? `<img src="${esc(o.img)}" alt="signature" class="trs-sigimg"><div class="wsub"><b>${esc(o.n||r.opsName||'')}</b> · signed ${esc(isoToDmy(o.d||String(o.at||'').slice(0,10)))}</div>${ed?'<button type="button" class="att-link" data-sv-sign="1">Sign again</button> · <button type="button" class="att-link" data-sv-unsign="1" data-armed="0">Remove</button>':''}`
     : ed ? `<p class="wsub" style="margin:0 0 6px;">${r.opsName?`<b>${esc(r.opsName)}</b> signs here with a finger or the mouse.`:'Write the Operations Executive name in Visit details, then he signs here.'}</p><button type="button" class="btn btn-sm btn-primary" data-sv-sign="1" ${r.opsName?'':'disabled'}>✍ Operations Executive signs</button>` : '<span class="badge warn">Not signed</span>';
   return `<div class="sv-sigs">${box('Prepared by (HSE)', hse)}${box('Operations Executive'+(r.opsName?' — '+esc(r.opsName):''), ops)}</div>`; }
 function svWirePad(){ const cv=document.getElementById('svPad'); svUi.padImg=''; svUi.padObj=cv?compPadWire(cv, img=>{ svUi.padImg=img; }):null; if(cv) cv.scrollIntoView({block:'center'}); }
@@ -9619,7 +9619,7 @@ document.addEventListener('click', async e=>{ const b=e.target.closest && e.targ
   if(D.svPadx){ svUi.pad=''; svUi.padObj=null; renderRegDrawer(); return; }
   if(D.svPadclr){ svUi.padObj=null; renderRegDrawer(); return; }
   if(D.svUnsign){ if(!compArm(b,'Tap again — remove')) return; const FV=fsFieldValue(); await regUpdate('sv', r.id, {opsSig:FV?FV.delete():null}, true); toast('Signature removed'); return; }
-  if(D.svPadsave){ if(!svUi.padImg){ toast('Sign in the box first'); return; } const sig={img:svUi.padImg, n:r.opsName||'', at:new Date().toISOString()}; svUi.pad=''; svUi.padObj=null;
+  if(D.svPadsave){ if(!svUi.padImg){ toast('Sign in the box first'); return; } const sig={img:svUi.padImg, n:r.opsName||'', at:new Date().toISOString(), d:sigDay(r.date)}; svUi.pad=''; svUi.padObj=null;
     if(await regUpdate('sv', r.id, {opsSig:sig}, true)) toast('Operations Executive signed ✓'); renderRegDrawer(); } }, true);
 const SV_FU_FIELDS=(what, ph, cats)=>[
   {key:'action', label:what, type:'textarea', required:true, wide:true, placeholder:ph},
@@ -10992,8 +10992,8 @@ document.addEventListener('click', async e=>{
   const setSig=async(k, v)=>{ const list=(w.warnings||[]).map(y=>{ if(y.id!==x.id) return y; const sg={...(y.sigs||{})}; if(v) sg[k]=v; else delete sg[k]; return {...y, sigs:sg}; }); if(await wlSave(w, list, v?'Signed':'Removed')){ wlUi.pad=''; wlRedraw(); } };
   if(D.wlSign){ wlUi.pad=D.wlSign; wlRedraw(); return; }
   if(D.wlPadcancel){ wlUi.pad=''; wlRedraw(); return; }
-  if(D.wlPadsave){ if(!wlPadImg){ toast('Sign in the box first'); return; } const n=((document.getElementById('wlSignN')||{}).value||'').trim(); if(!n){ toast('Write the name first'); return; } await setSig(D.wlPadsave, {n, s:wlPadImg, d:localToday()}); return; }
-  if(D.wlMysig){ const hs=hseSigOf((auth.currentUser||{}).email); if(hs&&hs.img) await setSig('h', {n:hs.name||'', s:hs.img, d:localToday()}); return; }
+  if(D.wlPadsave){ if(!wlPadImg){ toast('Sign in the box first'); return; } const n=((document.getElementById('wlSignN')||{}).value||'').trim(); if(!n){ toast('Write the name first'); return; } await setSig(D.wlPadsave, {n, s:wlPadImg, d:sigDay(x.date)}); return; }
+  if(D.wlMysig){ const hs=hseSigOf((auth.currentUser||{}).email); if(hs&&hs.img) await setSig('h', {n:hs.name||'', s:hs.img, d:sigDay(x.date)}); return; }
   if(D.wlUnsign){ if(!compArm(b,'tap again')) return; await setSig(D.wlUnsign, null); return; }
 });
 document.addEventListener('change', async e=>{ const t=e.target; if(!t || !t.closest) return;
@@ -12290,7 +12290,7 @@ function ppeSignPanelHtml(){ const S=ppeSignSess(); if(!S) return ''; const ed=c
   return `<div class="panel ppe-signpanel" id="ppeSignPanel"><div class="section-head"><h3>✍ Workers sign — ${esc(S.condition||'PPE issue')} · ${esc(isoToDmy(S.date))}</h3><button type="button" class="btn btn-sm" id="ppeSignClose">Close</button></div>
     <p class="wsub" style="margin:-4px 0 8px;">The worker checks the items, then signs in the box with a finger (or the mouse). "I have received the PPE listed in good condition…" — the signature is printed on the PPE Issue Record. ${left?`<b>${left}</b> still to sign.`:'<b>Everyone has signed.</b>'}</p>
     ${S.workers.map(x=>`<div class="ppe-signrow"><div class="ppe-signwho"><strong>${esc(x.name)}</strong> <span class="wsub">${esc([x.designation, x.civilId].filter(Boolean).join(' · '))}</span><div class="wsub">${esc(x.items.map(i=>i.item+(i.size?' ('+i.size+')':'')+(i.qty>1?' ×'+i.qty:'')).join(', '))}</div></div>
-      <div class="ppe-signact">${x.sigId?`<span class="badge ok">✓ Signed${x.signed?' '+esc(isoToDmy(x.signed)):''}${x.via==='office'?'':' (on the link)'}</span>`:ppeUi.pad===x.wid?pad(x.wid):ed?`<button type="button" class="btn btn-sm btn-primary" data-ppe-signw="${esc(x.wid)}">✍ Sign now</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`).join('')}
+      <div class="ppe-signact">${x.sigId?`<span class="badge ok">✓ Signed${x.via==='office'?' '+esc(isoToDmy(S.date)):x.signed?' '+esc(isoToDmy(x.signed)):''}${x.via==='office'?'':' (on the link)'}</span>`:ppeUi.pad===x.wid?pad(x.wid):ed?`<button type="button" class="btn btn-sm btn-primary" data-ppe-signw="${esc(x.wid)}">✍ Sign now</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`).join('')}
     ${ppeIssuerHtml(S)}
     <div class="form-actions" style="justify-content:flex-start;"><button type="button" class="btn btn-sm" id="ppeSignPdf">${ic('printer')} PPE Issue Record (PDF)</button></div></div>`; }
 /* Batch 151: the issuer signs too — by default the saved HSE signature of the person who issued (or of you); a different issuer
@@ -12298,12 +12298,12 @@ function ppeSignPanelHtml(){ const S=ppeSignSess(); if(!S) return ''; const ed=c
 function ppeIssDefault(S){ const em=(S&&S.issEmail)||String(((auth.currentUser||{}).email)||'').toLowerCase(), h=hseSigOf(em)||hseSigOf((auth.currentUser||{}).email); return h&&h.img?{img:h.img, name:h.name||plWho()}:null; }
 function ppeIssuerHtml(S){ const ed=canEdit(), d=ppeIssDefault(S);
   if(ppeUi.pad==='__iss') return `<div class="ppe-signrow ppe-issrow"><div class="ppe-signwho"><strong>Issued by</strong><div class="wsub">The person who handed over the PPE signs here.</div></div><div class="ppe-signact" style="flex:1 1 300px;"><input id="ppeIssName" maxlength="60" placeholder="Issuer name" value="${esc(S.issuedBy||'')}" style="margin-bottom:6px;"><div class="hse-sig-pad"><canvas id="ppeSigPad" width="600" height="200" aria-label="Issuer signature pad"></canvas></div><div class="ppe-padbtns"><button type="button" class="btn btn-sm" data-ppe-padx="1">Cancel</button><button type="button" class="btn btn-sm" data-ppe-padclr="__iss">Clear</button><button type="button" class="btn btn-sm btn-primary" data-ppe-isssave="1">Save issuer signature</button></div></div></div>`;
-  const who=S.issSigId ? `<span class="badge ok">✓ ${esc(S.issName||'Issuer')} signed on the screen${S.issDate?' '+esc(isoToDmy(S.issDate)):''}</span>${ed&&d?' <button type="button" class="att-link" data-ppe-issdef="1" data-armed="0">Use my saved signature instead</button>':''}`
+  const who=S.issSigId ? `<span class="badge ok">✓ ${esc(S.issName||'Issuer')} signed on the screen ${esc(isoToDmy(S.date))}</span>${ed&&d?' <button type="button" class="att-link" data-ppe-issdef="1" data-armed="0">Use my saved signature instead</button>':''}`
     : d ? `<span class="badge ok">✓ ${esc(d.name)} — saved HSE signature (prints on the PDF)</span>` : `<span class="badge warn">Issuer signature needed</span> <span class="wsub">no saved HSE signature yet — the issuer signs here (or add yours with "Add my signature" in a project's TBT panel)</span>`;
   return `<div class="ppe-signrow ppe-issrow"><div class="ppe-signwho"><strong>Issued by</strong><div class="wsub">${esc(S.issuedBy||'')}</div></div><div class="ppe-signact">${who}${ed?` <button type="button" class="btn btn-sm" data-ppe-issw="1">${S.issSigId||!d?'✍ Issuer signs now':'Different issuer signs here'}</button>`:''}</div></div>`; }
 async function ppeIssSave(){ const S=ppeSignSess(); if(!S) return; const img=ppeUi.padImg, name=String((document.getElementById('ppeIssName')||{}).value||'').trim().slice(0,60);
   if(!name){ toast('Write the issuer name'); return; } if(!img){ toast('Let the issuer sign in the box first'); return; }
-  const sid='iss_'+Date.now().toString(36), date=localToday(), now=new Date().toISOString();
+  const sid='iss_'+Date.now().toString(36), date=sigDay(S.date), now=new Date().toISOString();
   try{ await db.collection('ppeSignatures').doc(sid).set({kind:'issuer', name, img, date, sessionKey:S.key, createdAt:now, createdBy:((auth.currentUser||{}).email)||''}); ppeSigCache.set(sid, {img});
     await ppeIssApply(S, {issSigId:sid, issName:name, issDate:date}); ppeUi.pad=''; ppeUi.padImg=''; toast(`${name} signed as the issuer ✓`); renderPpe(); }
   catch(e){ console.error(e); toast('Could not save the signature — '+((e&&e.code)||'error')); } }
@@ -12312,7 +12312,7 @@ async function ppeIssApply(S, patch){ for(const x of S.workers){ const w=workers
     if(ch){ await db.collection('workers').doc(w.id).update(stamp({ppeIssued:next})); w.ppeIssued=next; } } }
 function ppeWireSigPad(){ const cv=document.getElementById('ppeSigPad'); ppeUi.padImg=''; if(cv){ compPadWire(cv, img=>{ ppeUi.padImg=img; }); cv.scrollIntoView({block:'center'}); } }
 async function ppeSignSave(wid){ const S=ppeSignSess(), w=workers.find(x=>x.id===wid); if(!S || !w) return; const img=ppeUi.padImg; if(!img){ toast('Let him sign in the box first'); return; }
-  const now=new Date().toISOString(), date=localToday(), recs=(w.ppeIssued||[]).filter(r=>ppeSessKey(r)===S.key && !r.sigId), x=S.workers.find(y=>y.wid===wid);
+  const now=new Date().toISOString(), date=sigDay(S.date), recs=(w.ppeIssued||[]).filter(r=>ppeSessKey(r)===S.key && !r.sigId), x=S.workers.find(y=>y.wid===wid);
   if(!recs.length){ toast('Already signed'); ppeUi.pad=''; renderPpe(); return; }
   const sid='is_'+wid+'_'+Date.now().toString(36);
   try{ await db.collection('ppeSignatures').doc(sid).set({workerId:w.id, name:w.fullName||'', civilId:w.civilId||'', designation:w.designation||'', projectId:w.projectId||'', img, date, kind:'office', items:x?x.items:[],
@@ -12337,13 +12337,13 @@ async function ppeSheetPdf(batch){
   doc.setTextColor(20,20,20); doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
   doc.text(`Date: ${b.date}   ·   Project: ${b.project!=='all'?projectName(b.project):'—'}   ·   Issue type: ${b.condition}   ·   Issued by: ${b.issuedBy||issName||'________________'}`, 32, 58);
   doc.text('I have received the PPE listed below in good condition. I will wear it as instructed, look after it and return it for replacement when worn or damaged.', 32, 72);
-  const rows=b.workers.map((w,i)=>[String(i+1), w.name, w.civilId, w.designation, w.items.map(x=>`${x.item}${x.size?' ('+x.size+')':''}${x.qty>1?' ×'+x.qty:''}`).join(', ')+(w.sigId?`\n(signed ${w.via==='office'?'at the issue':'on the PPE link'}${w.signed?' '+isoToDmy(w.signed):''})`:''), '']);
+  const rows=b.workers.map((w,i)=>[String(i+1), w.name, w.civilId, w.designation, w.items.map(x=>`${x.item}${x.size?' ('+x.size+')':''}${x.qty>1?' ×'+x.qty:''}`).join(', ')+(w.sigId?`\n(signed ${w.via==='office'?'at the issue '+isoToDmy(b.date):'on the PPE link'+(w.signed?' '+isoToDmy(w.signed):'')})`:''), '']);
   const y=ppePdfTable(doc, ['#','Name','Civil ID','Designation','PPE issued (size)','Signature'], rows, [24,140,70,100,300,140], 86, 32, imgs);
   let yy=y+16; if(yy+70>doc.internal.pageSize.getHeight()-30){ doc.addPage(); yy=50; }
   const box=(x, title, name, img, date)=>{ const W=260, H=62; doc.setDrawColor(150); doc.rect(x, yy, W, H); doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.text(title, x+6, yy+12);
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text(pdfSafe(name||'________________'), x+6, yy+26); doc.setFontSize(8); doc.text('Date: '+(date?isoToDmy(date):'__________'), x+6, yy+54);
     if(img){ try{ let iw=120, ih=40; try{ const pr=doc.getImageProperties(img); const k=Math.min(iw/pr.width, ih/pr.height); iw=pr.width*k; ih=pr.height*k; }catch(e){} doc.addImage(img, /^data:image\/png/i.test(img)?'PNG':'JPEG', x+W-iw-8, yy+(H-ih)/2, iw, ih); }catch(e){ console.warn(e); } } };
-  box(32, 'ISSUED BY (name & signature)', issName, issImg, b.issSigId?(b.issDate||b.date):b.date);
+  box(32, 'ISSUED BY (name & signature)', issName, issImg, b.date);   // b152: the issue date (also for records signed before b152)
   box(312, 'HSE (name & signature)', hse?hse.name||'':'', hse?hse.img:'', b.date);
   doc.save(`PPE_issue_${b.date}.pdf`);
 }
@@ -12662,6 +12662,8 @@ async function sitePpeXlsx(pid){
 
 
 /* ---- Batch 83: HSE reviewer's saved signature (one per HSE login) — Batch 84: upload a scanned / photographed signature too ---- */
+/* Batch 152: a signature added to an older record is dated with that record's date (entering past records), not today */
+function sigDay(recDate){ const t=localToday(), d=String(recDate||'').slice(0,10); return /^\d{4}-\d{2}-\d{2}$/.test(d) && d<t ? d : t; }
 function hseSigOf(email){ return (((settingsDocs.hseSignatures||{}).sigs||{})[String(email||'').toLowerCase()])||null; }
 let hseSigPad=null, hseSigUp=null;
 function hseSigBoxHtml(){
