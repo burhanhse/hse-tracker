@@ -3177,7 +3177,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b152';
+const APP_BUILD='b153';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -9339,7 +9339,7 @@ let ckUi={id:'', pad:''};
 function ckFormHtml(r, cl){
   const T=cl.bhn, ed=canEdit(), H=r.ckH||{}, a=r.answers||{}, cm=r.comments||{}, vals=r.values||{}, C=T.cols||['OK','Not OK','N/A'];
   if(ckUi.id!==r.id) ckUi={id:r.id, pad:''};
-  const ppe=r.ckPpe||T.ppe||[], eq=r.ckEq||[], next=r.nextDate||(r.date?compAddMonths(r.date,1):'');
+  const ppe=r.ckPpe||T.ppe||[], eq=r.ckEq||[], next=ckNext(r);
   const hf=f=>{ const [k,l]=f, list=k==='veh'?'ckVehList':k==='driver'||k==='op'?'ckWkList':''; return `<label>${esc(l)}<input data-ckh="${k}" value="${esc(H[k]||(k===ckSubjKey(T)?r.subject||'':''))}" maxlength="80" ${list?`list="${list}"`:''} ${ed?'':'disabled'}></label>`; };
   let last=null, rows='';
   for(const it of ckItems(T)){ const i=it.n-1;
@@ -9360,7 +9360,7 @@ function ckFormHtml(r, cl){
       <div class="ck-fit"><label class="ck-opt ck-yes"><input type="radio" name="ckFit" value="1" ${r.fit===true?'checked':''} ${ed?'':'disabled'}><span>${esc(T.result?T.result+' — Yes':'Fit for use')}</span></label><label class="ck-opt ck-no"><input type="radio" name="ckFit" value="0" ${r.fit===false?'checked':''} ${ed?'':'disabled'}><span>${esc(T.result?'No':'NOT fit — do not use')}</span></label></div>
       <label style="display:block; margin-top:8px;">Defects / action needed<textarea data-ck-defects rows="2" maxlength="600" ${ed?'':'disabled'}>${esc(r.defects||'')}</textarea></label></div>
     ${ed?`<div class="form-actions"><button type="submit" class="btn btn-primary">Save checklist</button></div>`:''}</form>
-  <div class="panel"><div class="subhead" style="margin-top:0;">Sign-off</div>${(T.signs||[]).map((l,i)=>{ const x=sigs[i]; return `<div class="trs-row"><div class="trs-who"><strong>${esc(l)}</strong>${x?` <span class="wsub">${esc(x.n||'')} · ${esc(isoToDmy(x.d)||'')}</span>`:''}</div><div class="trs-sig">${x&&x.s?`<img src="${esc(x.s)}" alt="" class="trs-sigimg">${ed?` <button type="button" class="att-link" data-ck-unsign="${i}" data-armed="0">remove</button>`:''}`
+  <div class="panel"><div class="subhead" style="margin-top:0;">Sign-off</div>${(T.signs||[]).map((l,i)=>{ const x=sigs[i]; return `<div class="trs-row"><div class="trs-who"><strong>${esc(l)}</strong>${x?` <span class="wsub">${esc(x.n||'')} · ${esc(isoToDmy(r.date||x.d)||'')}</span>`:''}</div><div class="trs-sig">${x&&x.s?`<img src="${esc(x.s)}" alt="" class="trs-sigimg">${ed?` <button type="button" class="att-link" data-ck-unsign="${i}" data-armed="0">remove</button>`:''}`
       :ckUi.pad===String(i)?`<div style="flex:1 1 280px;"><input id="ckSignN" placeholder="Name" maxlength="60" value="${esc(i===0?(r.inspector||''):(/HSE/.test(l)?(hs.name||''):''))}" style="margin-bottom:4px; width:100%;"><div class="hse-sig-pad"><canvas id="ckPad" width="600" height="200"></canvas></div><div style="display:flex; gap:6px; margin-top:4px;"><button type="button" class="btn btn-sm" data-ck-padcancel="1">Cancel</button><button type="button" class="btn btn-sm btn-primary" data-ck-padsave="${i}">Save signature</button></div></div>`
       :ed?`${/HSE/.test(l)&&hs.img?`<button type="button" class="btn btn-sm btn-primary" data-ck-mysig="${i}">Use my saved signature</button> `:''}<button type="button" class="btn btn-sm" data-ck-sign="${i}">✍ Sign</button>`:'<span class="badge warn">Not signed</span>'}</div></div>`; }).join('')}</div>`; }
 let ckPadImg='';
@@ -9372,7 +9372,7 @@ function ckCollect(r, form){ const T=ckSnapOf(r), out={answers:{}, comments:{}, 
   if(T.eq){ out.ckEq=T.eq.items.map((_,i)=>{ const o={}; form.querySelectorAll(`[data-cke^="${i}|"]`).forEach(el=>{ const k=el.dataset.cke.split('|')[1]; if(el.value.trim()) o[k]=el.value.trim(); }); return o; }); }
   const f=form.querySelector('input[name="ckFit"]:checked'); out.fit=f?f.value==='1':null; const d=form.querySelector('[data-ck-defects]'); out.defects=d?d.value.trim():'';
   const sk=ckSubjKey(T); if(out.ckH[sk]) out.subject=out.ckH[sk];
-  out.nextDate=r.date?compAddMonths(r.date,1):'';
+  out.nextDate=ckNext(r);
   return out; }
 async function inspPdf(r){ if(!compPdfReady()) return; const cl=checklistOf(r); if(!cl) return;
   if(ckSnapOf(r)){ const doc=ckPdfDoc(r.ckSnap, ckRecData(r), false); doc.save(`${compSafeName(r.ckSnap.no)}_${compSafeName(r.subject||r.inspNo)}_${r.date||''}.pdf`); return; }
@@ -9991,9 +9991,11 @@ function ckSubjKey(T){ return (T.head.find(h=>['veh','eqno','unit','well'].inclu
 function ckQTotal(cl){ return cl&&cl.bhn ? ckItems(cl.bhn).filter(it=>!it.num).length : (cl?cl.items.length:0); }
 // Batch 100b: the template copy is stored as JSON text (ckSnapJ); read it once per record
 function ckSnapOf(r){ if(!r) return null; if(r.ckSnap) return r.ckSnap; if(r.ckSnapJ){ try{ Object.defineProperty(r, 'ckSnap', {value:JSON.parse(r.ckSnapJ), enumerable:false, configurable:true, writable:true}); }catch(e){ return null; } } return r.ckSnap||null; }
+/* Batch 153: a checklist is all on its inspection date — next inspection = inspection date + the checklist frequency, sign-off dates = the inspection date */
+function ckNext(r){ return r && r.date ? compAddMonths(r.date, inspFreq(inspTplKeyOf(r)||'gen')) : ''; }
 function ckRecData(r){ const T=ckSnapOf(r), A={Yes:'ok', No:'no', 'N/A':'na'}, ans={}, rm={}, val={};
   for(const it of ckItems(T)){ const a=(r.answers||{})[it.n-1]; if(a) ans[it.n]=A[a]; const c=(r.comments||{})[it.n-1]; if(c) rm[it.n]=c; const v=(r.values||{})[it.n-1]; if(v!==undefined && v!=='') val[it.n]=v; }
-  return {h:{...(r.ckH||{}), ...(r.projectId && !(r.ckH||{}).loc?{}:{})}, date:r.date, next:r.nextDate||(r.date?compAddMonths(r.date,1):''), ppe:r.ckPpe||T.ppe, eq:r.ckEq||[], ans, rm, val, fit:r.fit===true?true:r.fit===false?false:undefined, defects:r.defects||'', signs:(T.signs||[]).map((_,i)=>(r.ckSigns||{})[i]||{})}; }
+  return {h:{...(r.ckH||{}), ...(r.projectId && !(r.ckH||{}).loc?{}:{})}, date:r.date, next:ckNext(r), ppe:r.ckPpe||T.ppe, eq:r.ckEq||[], ans, rm, val, fit:r.fit===true?true:r.fit===false?false:undefined, defects:r.defects||'', signs:(T.signs||[]).map((_,i)=>{ const x=(r.ckSigns||{})[i]||{}; return (x.n||x.s)&&r.date?{...x, d:r.date}:x; })}; }
 
 // Old built-in checklists — kept only so inspections saved with them still open (not offered for new inspections any more)
 const LEGACY_CHECKLISTS=[
@@ -10070,7 +10072,10 @@ regDefine({
 /* ---- inspections: save the checklist, raise an action for every "No" ---- */
 REG.insp.validate = d=>!d.item && !d.template ? 'Choose the item inspected (or a checklist for an area)' : null;   // Batch 109
 REG.insp.prepare = d=>{ if(d.id) return; const it=inspItemOf(d.item); if(it){ if(!d.template) d.template='bhn_'+it.tpl; d.subject=it.subject; if(!d.projectId) d.projectId=it.projectId||''; } };
-REG.insp.beforeUpdate = (data, cur)=>{ if('item' in data){ const it=inspItemOf(data.item); if(it) data.subject=it.subject; } return data; };
+REG.insp.beforeUpdate = (data, cur)=>{ if('item' in data){ const it=inspItemOf(data.item); if(it) data.subject=it.subject; }
+  if(data.date && data.date!==cur.date && (cur.ckSnapJ || cur.ckSnap)) data.nextDate=ckNext({...cur, ...data});   // Batch 153
+  if(data.date && cur.ckSigns && Object.keys(cur.ckSigns).length) data.ckSigns=Object.fromEntries(Object.entries(cur.ckSigns).map(([k,v])=>[k, v&&(v.n||v.s)?{...v, d:data.date}:v]));
+  return data; };
 REG.insp.afterSave = r=>{ if(typeof inspVehReport==='function') inspVehReport(r); };
 REG.insp.beforeCreate = d=>{ const c=allChecklists().find(x=>x.key===d.template); if(c){ d.itemsSnapshot=c.items.slice(); d.templateName=c.name; if(c.bhn){ d.ckSnapJ=JSON.stringify(c.bhn);   /* Firestore cannot store arrays inside arrays — the template copy is kept as text */ d.nextDate=d.date?compAddMonths(d.date, inspFreq(c.bhn.key)):''; const it=inspItemOf(d.item); d.ckH={[ckSubjKey(c.bhn)]:d.subject||'', ...(it?inspPrefillH(c.bhn, it):{})}; } } };
 REG.insp.customSubmit = {
