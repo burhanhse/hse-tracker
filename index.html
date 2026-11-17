@@ -959,6 +959,9 @@ th.mx-cat-opal{box-shadow:inset 0 3px 0 var(--cat-1);} th.mx-cat-client{box-shad
 .rc-win-body{display:flex; gap:10px; align-items:center; margin-top:8px;} .rc-win-act{display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;}
 .star-av{width:42px; height:42px; border-radius:50%; flex:none; display:inline-flex; align-items:center; justify-content:center; object-fit:cover; background:var(--muted-bg); color:var(--ink); font-weight:800; font-size:14px; border:2px solid var(--band-yellow);}
 .rc-chip{display:inline-block; font-size:11.5px; padding:2px 8px; margin:2px 4px 2px 0; border-radius:999px; background:var(--muted-bg); color:var(--ink);} .rc-chip b{color:var(--ok);} .rc-chip.neg b{color:var(--danger);}
+.pc-tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:8px; margin-bottom:10px;} .pc-tile{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 10px; display:flex; flex-direction:column; gap:2px;} .pc-tile strong{font-size:20px; color:var(--ink); font-variant-numeric:tabular-nums;}
+.pc-dl{display:flex; gap:6px; flex-wrap:wrap;} .pc-act{display:inline-flex; align-items:center; gap:8px; white-space:nowrap;} .pc-spark{display:inline-flex; align-items:flex-end; gap:2px; height:18px;} .pc-spark i{display:block; width:5px; background:var(--accent); border-radius:2px 2px 0 0;} .pc-spark i.z{background:var(--line);}
+.pc-table td.num, .pc-table th.num{text-align:right;} .pc-none{margin-top:10px;} .pc-none summary{cursor:pointer; font-size:12.5px; color:var(--ink-muted);}
 .rc-table select{width:auto; min-width:120px;} #rcYear{width:auto;} tr.rc-picked td{background:var(--muted-bg);} .rc-form-row td{background:var(--surface-2);}
 .star-strip{display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:12px; box-shadow:inset 3px 0 0 var(--band-yellow), var(--shadow);}
 .star-title{font-weight:800; font-size:13px; color:var(--ink); margin-right:6px;}
@@ -2425,7 +2428,7 @@ const PDF_DOCS={
   monthlyReport:{title:'Monthly HSE Report'}, yearlyReport:{title:'Yearly HSE Report'}, clientPack:{title:'HSE Monthly Report — Client'},
   incident:{title:'Incident Investigation Report'}, audit:{title:'Audit Report'}, assurance:{title:'HSE Assurance Plan'}, kpi:{title:'HSE KPI Scorecard'},
   actions:{title:'HSE Action Tracker'}, alert:{title:'Safety Alert'}, star:{title:'Safety Star Certificate'},
-  ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, ppeRegister:{title:'PPE Issue Register'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
+  ppeList:{title:'Approved PPE List'}, ppeIssue:{title:'PPE Issue Record'}, ppeRegister:{title:'PPE Issue Register'}, particip:{title:'Monthly HSE Participation Report'}, workerProfile:{title:'Employee HSE Record'}, vehicle:{title:'Vehicle HSE Record'}, site:{title:'Project HSE Record'},
   liftPlan:{title:'Lift Plan'}, scaffJob:{title:'Scaffolding Rig Up and Rig Down Form'}, vehInsp:{title:'Vehicle Inspection Checklist'}, tric:{title:'Toolbox Talk Record (TBT)'}, comp:{title:'Competency Assessment'}, auditProg:{title:'Internal Audit Programme'}, auditPlan:{title:'Internal Audit Plan'}, induction:{title:'Employee Induction Checklist'}, compMatrix:{title:'Departmental Competency Matrix'}, aspects:{title:'Aspect Identification Register'}, waste:{title:'Waste Disposal Log'}, critEquip:{title:'HSE-Critical Equipment Register'}, hra:{title:'Health Risk Assessment Register'}, drill:{title:'Emergency Drill Report'}, drillPlan:{title:'Emergency Drill Plan'}, mrPack:{title:'Management Review Pack'}, trs:{title:'Training Attendance Record'}, mom:{title:'Minutes of Meeting (MOM)'}, ptw:{title:'Permit to Work (PTW)'}, warnLetter:{title:'HSE Warning Letter'}, ck_veh:{title:'Vehicle Inspection Checklist'}, ck_cut14:{title:'14-inch Cutting Machine Inspection Checklist'}, ck_blower:{title:'Air Blower Inspection Checklist'}, ck_boom:{title:'Boom Lift Inspection Checklist'}, ck_drill:{title:'Drilling Machine Inspection Checklist'}, ck_vib:{title:'Concrete Vibrator Inspection Checklist'}, ck_fire:{title:'Fire Extinguisher Inspection Checklist'}, ck_whm:{title:'Well Head Maintenance Checklist'}, ck_harness:{title:'Full Body Harness Inspection Checklist'}, ck_grind:{title:'Grinding Machine Inspection Checklist'}, ck_ply:{title:'Plywood Cutting Machine Inspection Checklist'}, ck_scissor:{title:'Scissor Lift Inspection Checklist'},
 };
 PDF_DOCS.schedule={title:'Monthly HSE Schedule'};   // Batch 119
@@ -3177,7 +3180,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b153';
+const APP_BUILD='b154';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -10413,11 +10416,91 @@ function renderRecognition(){
           <div class="form-actions span-all"><button type="button" class="btn btn-sm" id="rcCancel">Cancel</button><button type="submit" class="btn btn-primary btn-sm">Save as Safety Star${cur&&cur.workerId!==w.id?' (replaces '+esc(cur.workerName)+')':''}</button></div></form></td></tr>`:''}`).join('')}
     </tbody></table></div>`:'<p class="wsub">No active workers in this division.</p>'}
   </div>
+  ${participationHtml()}
   <div class="panel">
     <div class="sj-head"><h3>Yearly ranking — ${esc(recogYear)}</h3><select id="rcYear" aria-label="Year">${[...new Set([String(new Date().getFullYear()), ...recogItems().map(x=>x.month.slice(0,4))])].sort().reverse().map(y=>`<option ${y===recogYear?'selected':''}>${y}</option>`).join('')}</select></div>
     ${rank.length?`<div class="sj-mini">${rank.map((x,i)=>`<div class="sj-r rc-rank"><span>${i+1}. <strong>${esc(x.it.workerName)}</strong> <span class="wsub">${esc(divShort(x.it.division))} · ${x.months.sort().map(monthLabel).map(m=>m.split(' ')[0]).join(', ')}</span></span><span class="num"><strong>${x.n}</strong> ⭐</span></div>`).join('')}</div>`:'<p class="wsub">No Safety Stars recorded this year yet.</p>'}
   </div>`;
 }
+/* ================= Batch 154: Monthly participation (exact counts for recognition) =================
+   Per active worker, for the month shown in Recognition: TBTs attended, TBTs conducted, trainings (training records dated
+   that month — training sessions + outside certificates), emergency drills taken part in, observations reported.
+   Consistency = months with any participation in the last 6 months (this month included). Screen + Excel + PDF. */
+let pcDiv='all', pcAll=false;
+const PC_KEYS=[{k:'tbt', label:'TBT attended', short:'TBT'},{k:'tbtc', label:'TBT conducted', short:'TBT given'},{k:'trn', label:'Trainings', short:'Training'},{k:'drl', label:'Drills', short:'Drills'},{k:'obs', label:'Observations', short:'Obs.'}];
+function pcNameHit(nk, name){ const k=nameKey(name); return !!(nk && k && (k===nk || k.includes(nk) || (nk.length>5 && k.length>5 && nk.includes(k)))); }
+function pcData(month){
+  const months=[]; for(let i=5;i>=0;i--) months.push(monthAdd(month,-i));
+  const first=months[0]+'-01', last=month+'-31', inWin=d=>{ d=String(d||'').slice(0,10); return d>=first && d<=last; };
+  const ws=activeWorkers().filter(w=>(w.status||'active')==='active');
+  const by=new Map(ws.map(w=>[w.id, {w, m:Object.fromEntries(months.map(x=>[x,{tbt:0,tbtc:0,trn:0,drl:0,obs:0}])), lines:[]}]));
+  const keys=ws.map(w=>({id:w.id, nk:nameKey(w.fullName)})).filter(x=>x.nk);
+  const add=(wid, d, k, what, where)=>{ const x=by.get(wid); if(!x) return; const ym=String(d).slice(0,7), c=x.m[ym]; if(!c) return; c[k]++; if(ym===month) x.lines.push({date:String(d).slice(0,10), k, what:what||'', where:where||''}); };
+  const byName=(name, d, k, what, where)=>{ const hit=keys.filter(x=>pcNameHit(x.nk, name)); if(hit.length===1) add(hit[0].id, d, k, what, where); };
+  const tbts=[]; for(const s of activeSites()) for(const t of (s.toolboxTalks||[])) tbts.push({...t, where:s.siteName||'Project'});
+  if(typeof locTbtLogs==='function') for(const e of locTbtLogs()) tbts.push({...e, where:e.locName||projectName('loc:'+e.locId)});
+  for(const t of tbts){ if(!inWin(t.date)) continue; const ids=[...new Set(t.attendeeIds||[])]; for(const id of ids) add(id, t.date, 'tbt', t.topic, t.where);
+    if(t.conductedBy){ const hit=keys.filter(x=>pcNameHit(x.nk, t.conductedBy)); if(hit.length===1) add(hit[0].id, t.date, 'tbtc', t.topic, t.where); } }
+  for(const x of by.values()) for(const r of (x.w.trainings||[])) if(r && inWin(r.date)) add(x.w.id, r.date, 'trn', r.name, r.provider);
+  if(regState.drills) for(const r of regActive('drills')) if(inWin(r.date)) for(const id of new Set(r.attendeeIds||[])) add(id, r.date, 'drl', r.drillType||'Drill', drillPlaceLabel(drillPlaceKey(r)));
+  if(regState.obs) for(const o of regActive('obs')) if(inWin(o.date) && o.observedBy) byName(o.observedBy, o.date, 'obs', `${o.obsType||'Observation'}${o.category?' — '+o.category:''}`, o.projectId?projectName(o.projectId):(o.location||''));
+  const sum=c=>PC_KEYS.reduce((n,p)=>n+c[p.k],0);
+  const rows=[...by.values()].map(x=>{ const c=x.m[month], spark=months.map(m=>sum(x.m[m])); return {w:x.w, c, total:sum(c), spark, active:spark.filter(Boolean).length, lines:x.lines.sort((a,b)=>a.date.localeCompare(b.date))}; });
+  return {month, months, rows};
+}
+function pcRows(D){ return D.rows.filter(r=>pcDiv==='all' || r.w.trade===pcDiv); }
+function pcSorted(list){ return list.filter(r=>r.total>0).sort((a,b)=>b.total-a.total || b.active-a.active || String(a.w.fullName||'').localeCompare(String(b.w.fullName||''))); }
+function pcSparkHtml(r, months){ const mx=Math.max(1,...r.spark); return `<span class="pc-spark" title="${esc(months.map((m,i)=>monthLabel(m).split(' ')[0].slice(0,3)+': '+r.spark[i]).join(' · '))}">${r.spark.map(v=>`<i style="height:${v?Math.max(3,Math.round(v*18/mx)):1}px" class="${v?'':'z'}"></i>`).join('')}</span>`; }
+function participationHtml(){
+  const D=pcData(recogMonth), list=pcRows(D), top=pcSorted(list), none=list.filter(r=>!r.total);
+  const tot=Object.fromEntries(PC_KEYS.map(p=>[p.k, list.reduce((n,r)=>n+r.c[p.k],0)]));
+  const divs=['all', ...TRADE_CATEGORIES.filter(d=>D.rows.some(r=>r.w.trade===d))];
+  const shown=pcAll?top:top.slice(0,25);
+  return `<div class="panel" id="pcPanel">
+    <div class="sj-head"><h3>Participation — ${esc(monthLabel(recogMonth))}</h3><span class="pc-dl"><button type="button" class="btn btn-sm" id="pcXlsx">${ic('download')} Excel</button><button type="button" class="btn btn-sm" id="pcPdf">${ic('download')} PDF</button></span></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Exact counts from the records — toolbox talks (attended / given), trainings dated this month, emergency drills and observations reported. “Active months” = months with any participation in the last 6 months.</p>
+    <div class="seg-tabs" style="margin-bottom:10px;">${divs.map(d=>`<button type="button" class="seg-btn ${d===pcDiv?'active':''}" data-pc-div="${esc(d)}">${d==='all'?'All divisions':esc(divShort(d))}</button>`).join('')}</div>
+    <div class="pc-tiles">${PC_KEYS.map(p=>`<div class="pc-tile"><span class="wsub">${esc(p.label)}</span><strong>${tot[p.k]}</strong></div>`).join('')}<div class="pc-tile"><span class="wsub">People who took part</span><strong>${top.length} <span class="wsub">of ${list.length}</span></strong></div></div>
+    ${top.length?`<div class="table-wrap"><table class="grid-table pc-table"><thead><tr><th class="num">#</th><th>Worker</th>${PC_KEYS.map(p=>`<th class="num">${esc(p.short)}</th>`).join('')}<th class="num">Total</th><th>Active months</th></tr></thead><tbody>
+      ${shown.map((r,i)=>`<tr><td class="num">${i+1}</td><td><div class="wname"><button type="button" class="att-link" data-open-star="${esc(r.w.id)}">${esc(r.w.fullName||'—')}</button></div><div class="wsub">${esc([r.w.designation, divShort(r.w.trade||''), r.w.projectId?projectName(r.w.projectId):''].filter(Boolean).join(' · '))}</div></td>
+        ${PC_KEYS.map(p=>`<td class="num">${r.c[p.k]||'<span class="wsub">0</span>'}</td>`).join('')}<td class="num"><strong>${r.total}</strong></td>
+        <td><span class="pc-act">${pcSparkHtml(r, D.months)} <span class="${r.active>=5?'badge ok':r.active>=3?'badge muted':'wsub'}">${r.active} of 6</span></span></td></tr>`).join('')}
+    </tbody></table></div>${top.length>25?`<button type="button" class="att-link" id="pcMore">${pcAll?'Show top 25 only':`Show all ${top.length}`}</button>`:''}`:'<p class="wsub">No participation recorded for this month yet.</p>'}
+    ${none.length?`<details class="pc-none"><summary>${none.length} active worker${none.length===1?'':'s'} with no participation this month</summary><p class="wsub">${none.sort((a,b)=>String(a.w.fullName||'').localeCompare(String(b.w.fullName||''))).map(r=>esc(r.w.fullName||'—')).join(', ')}</p></details>`:''}
+  </div>`;
+}
+function pcExport(){ const D=pcData(recogMonth), list=pcRows(D), top=pcSorted(list), none=list.filter(r=>!r.total).sort((a,b)=>String(a.w.fullName||'').localeCompare(String(b.w.fullName||'')));
+  const scope=pcDiv==='all'?'All divisions':divShort(pcDiv), mLab=m=>monthLabel(m).split(' ')[0].slice(0,3);
+  const head=['#','Worker','Civil ID','Designation','Division','Project',...PC_KEYS.map(p=>p.label),'Total','Active months (of 6)',...D.months.map(mLab)];
+  const rows=top.map((r,i)=>[i+1, r.w.fullName||'—', r.w.civilId||'', r.w.designation||'', divShort(r.w.trade||''), r.w.projectId?projectName(r.w.projectId):'', ...PC_KEYS.map(p=>r.c[p.k]), r.total, r.active, ...r.spark]);
+  const lines=[]; for(const r of top) for(const l of r.lines) lines.push([isoToDmy(l.date), r.w.fullName||'—', (PC_KEYS.find(p=>p.k===l.k)||{}).label||'', l.what, l.where]);
+  lines.sort((a,b)=>dmyToIso(a[0]).localeCompare(dmyToIso(b[0])) || String(a[1]).localeCompare(String(b[1])));
+  const tot=PC_KEYS.map(p=>list.reduce((n,r)=>n+r.c[p.k],0));
+  return {D, scope, head, rows, lines, none, tot, people:top.length, of:list.length}; }
+async function pcXlsx(){ const E=pcExport(); if(!E.rows.length){ toast(`No participation recorded in ${monthLabel(recogMonth)}`); return; }
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
+  const wb=XLSX.utils.book_new(), sh=XLSX.utils.aoa_to_sheet([[`Burhan Oil & Trade Services — HSE Participation · ${monthLabel(recogMonth)} · ${E.scope}`],[`${E.people} of ${E.of} active workers took part · ${PC_KEYS.map((p,i)=>p.label+' '+E.tot[i]).join(' · ')}`],[],E.head,...E.rows]);
+  sh['!cols']=[{wch:5},{wch:26},{wch:13},{wch:22},{wch:16},{wch:24},...PC_KEYS.map(()=>({wch:12})),{wch:7},{wch:11},...E.D.months.map(()=>({wch:6}))];
+  const s2=XLSX.utils.aoa_to_sheet([['Date','Worker','Activity','Topic / training / type','Where / provider'],...E.lines]); s2['!cols']=[{wch:11},{wch:26},{wch:14},{wch:42},{wch:28}];
+  const s3=XLSX.utils.aoa_to_sheet([['Active workers with no participation this month'],...E.none.map(r=>[r.w.fullName||'—', r.w.designation||'', divShort(r.w.trade||'')])]); s3['!cols']=[{wch:28},{wch:22},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, sh, 'Ranking'); XLSX.utils.book_append_sheet(wb, s2, 'Details'); XLSX.utils.book_append_sheet(wb, s3, 'No participation');
+  XLSX.writeFile(wb, `HSE_Participation_${recogMonth}${pcDiv==='all'?'':'_'+compSafeName(divShort(pcDiv))}.xlsx`); }
+function pcPdf(){ const E=pcExport(); if(!E.rows.length){ toast(`No participation recorded in ${monthLabel(recogMonth)}`); return; } if(!compPdfReady()) return;
+  const doc=pdfDoc({unit:'pt', format:'a4', orientation:'landscape', docKey:'particip', docSub:`${monthLabel(recogMonth)} · ${E.scope}`}); doc.setLineWidth(0.5); doc.setDrawColor(190);
+  doc.setTextColor(20,20,20); doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text(`${E.people} of ${E.of} active workers took part — ${PC_KEYS.map((p,i)=>p.label+' '+E.tot[i]).join(' · ')}`, 32, 40);
+  const mL=E.D.months.map(m=>monthLabel(m).split(' ')[0].slice(0,3));
+  const head=['#','Worker','Designation','Division',...PC_KEYS.map(p=>p.short),'Total','Active (of 6)',...mL];
+  const body=E.rows.map(r=>[r[0], r[1], r[3], r[4], ...r.slice(6, 6+PC_KEYS.length), r[6+PC_KEYS.length], r[7+PC_KEYS.length], ...r.slice(8+PC_KEYS.length)].map(String));
+  let y=ppePdfTable(doc, head, body, [22,130,100,70,...PC_KEYS.map(()=>46),38,52,...mL.map(()=>26)], 52, 32);
+  if(E.none.length){ y+=16; const txt=doc.splitTextToSize(E.none.map(r=>r.w.fullName||'—').join(', '), doc.internal.pageSize.getWidth()-64);
+    if(y+30>doc.internal.pageSize.getHeight()-36){ doc.addPage(); y=40; } doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.text(`No participation this month (${E.none.length})`, 32, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); for(const ln of txt){ y+=11; if(y>doc.internal.pageSize.getHeight()-36){ doc.addPage(); y=40; } doc.text(ln, 32, y); } }
+  doc.save(`HSE_Participation_${recogMonth}${pcDiv==='all'?'':'_'+compSafeName(divShort(pcDiv))}.pdf`); }
+document.addEventListener('click', e=>{ if(!e.target.closest || !e.target.closest('#pcPanel')) return;
+  const d=e.target.closest('[data-pc-div]'); if(d){ pcDiv=d.dataset.pcDiv; pcAll=false; renderRecognition(); return; }
+  if(e.target.closest('#pcMore')){ pcAll=!pcAll; renderRecognition(); return; }
+  const x=e.target.closest('#pcXlsx'); if(x){ x.disabled=true; pcXlsx().finally(()=>{ x.disabled=false; }); return; }
+  if(e.target.closest('#pcPdf')){ pcPdf(); return; } });
 async function saveRecogItems(items){ const ok=await saveSettings('recognition', {items}); if(ok){ recogPick=null; renderRecognition(); renderStarStrip(); } return ok; }
 
 // certificate (A4 landscape)
