@@ -960,7 +960,11 @@ th.mx-cat-opal{box-shadow:inset 0 3px 0 var(--cat-1);} th.mx-cat-client{box-shad
 .star-av{width:42px; height:42px; border-radius:50%; flex:none; display:inline-flex; align-items:center; justify-content:center; object-fit:cover; background:var(--muted-bg); color:var(--ink); font-weight:800; font-size:14px; border:2px solid var(--band-yellow);}
 .rc-chip{display:inline-block; font-size:11.5px; padding:2px 8px; margin:2px 4px 2px 0; border-radius:999px; background:var(--muted-bg); color:var(--ink);} .rc-chip b{color:var(--ok);} .rc-chip.neg b{color:var(--danger);}
 .pc-tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:8px; margin-bottom:10px;} .pc-tile{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 10px; display:flex; flex-direction:column; gap:2px;} .pc-tile strong{font-size:20px; color:var(--ink); font-variant-numeric:tabular-nums;}
-.ind-kinds .seg-btn.active .wsub{color:inherit; opacity:.75;}   /* Batch 155 */
+.ind-kinds .seg-btn.active .wsub{color:inherit; opacity:.75;}
+.ppe-imp-bar{display:flex; gap:10px 18px; align-items:center; flex-wrap:wrap; margin:-2px 0 10px;} .ppe-imp-bar select{width:auto;} .ppe-imp-t td{vertical-align:top;} .ppe-imp-t tr.off td{opacity:.5;}
+.ppe-imp-t select, .ppe-imp-t input[type=date]{min-width:150px; width:100%;} .ppe-imp-it{display:flex; gap:6px; align-items:center; margin:0 0 4px; flex-wrap:wrap;} .ppe-imp-it.off{opacity:.5;}
+.ppe-imp-it select{flex:1 1 150px; min-width:140px;} .ppe-imp-it input[data-pi-size]{width:64px;} .ppe-imp-it input[type=number]{width:56px;} .t-danger{color:var(--danger);}
+.ppe-sigsum{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:10px 0 2px; font-size:12.5px; color:var(--ink);} .ppe-wait > div{display:flex; gap:8px; align-items:center; flex-wrap:wrap;} .ppe-wa{margin-left:auto;}   /* Batch 155 */
 .pc-dl{display:flex; gap:6px; flex-wrap:wrap;} .pc-act{display:inline-flex; align-items:center; gap:8px; white-space:nowrap;} .pc-spark{display:inline-flex; align-items:flex-end; gap:2px; height:18px;} .pc-spark i{display:block; width:5px; background:var(--accent); border-radius:2px 2px 0 0;} .pc-spark i.z{background:var(--line);}
 .pc-table td.num, .pc-table th.num{text-align:right;} .pc-none{margin-top:10px;} .pc-none summary{cursor:pointer; font-size:12.5px; color:var(--ink-muted);}
 .rc-table select{width:auto; min-width:120px;} #rcYear{width:auto;} tr.rc-picked td{background:var(--muted-bg);} .rc-form-row td{background:var(--surface-2);}
@@ -3181,7 +3185,7 @@ function startSettingsData(){
 /* Batch 31: an old copy of the tracker left open (another tab / phone) must not overwrite newer settings.
    1) Every few minutes the page checks whether a newer version is on GitHub → banner "Refresh".
    2) Settings forms remember the version they were opened on; if someone saved in between, the save is refused. */
-const APP_BUILD='b157';
+const APP_BUILD='b158';
 let appOutdated=false;
 // Batch 36: light version check — a tiny HEAD request (file fingerprint); the full page is downloaded only when it changed
 let _verTag=null, _verLast=0;
@@ -12157,6 +12161,7 @@ function renderPpe(live){
   ppeKitFix();
   if(live && (ppeUi.edit || ppeUi.exemptOpen)) return;   // don't wipe the item form while someone is typing in it
   if(live && ppeUi.pad) return;   // Batch 121: a worker is signing
+  if(live && ppeImp && ppeImp.rows) return;   // Batch 158: the import check screen is open
   if(live && ppeUi.issueOpen && document.activeElement && pane.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
   if(live && document.activeElement && document.activeElement.closest && document.activeElement.closest('#ppeReqPanel') && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;   // Batch 73: typing in a request card
   const prArmed=[...pane.querySelectorAll('[data-armed="1"]')].map(el=>{ const at=[...el.attributes].find(x=>x.name.startsWith('data-pr-')); return at?[at.name, at.value, el.textContent]:null; }).filter(Boolean);
@@ -12179,9 +12184,10 @@ function renderPpe(live){
       <div class="seg-tabs" style="margin-left:8px;">${[['month','This month'],['year','This year'],['12m','Last 12 months']].map(([k,l])=>`<button type="button" class="seg-btn ${ppeUi.period===k?'active':''}" data-ppe-period="${k}">${l}</button>`).join('')}</div>
       <label class="ppe-ympick ${ppeUi.period==='ym'?'on':''}" title="Pick a month">Month <input type="month" id="ppeYm" value="${esc(ppeUi.period==='ym'?ppeUi.ym:'')}" max="${esc(localToday().slice(0,7))}"></label>
       <span class="ppe-regbtns"><button type="button" class="btn btn-sm" id="ppeRegXlsx" title="Every PPE item issued in ${esc(word)}">${ic('download')} PPE issued — Excel</button><button type="button" class="btn btn-sm" id="ppeRegPdf">${ic('download')} PPE issued — PDF</button></span>
-      <span style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">${ed?`<button type="button" class="btn btn-primary btn-sm" id="ppeIssueOpen">Issue PPE to crew</button>`:''}<button type="button" class="btn btn-sm" id="ppeListPdf">${ic('download')} Approved PPE list (PDF)</button><button type="button" class="btn btn-sm" id="ppeListXlsx">${ic('download')} Excel</button></span></div>
+      <span style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">${ed?`<button type="button" class="btn btn-primary btn-sm" id="ppeIssueOpen">Issue PPE to crew</button><button type="button" class="btn btn-sm" id="ppeImpOpen" title="PPE you gave from the office on WhatsApp requests — your MATERIAL FOR SITE sheet">${ic('upload')} Import Excel (office issue)</button>`:''}<button type="button" class="btn btn-sm" id="ppeListPdf">${ic('download')} Approved PPE list (PDF)</button><button type="button" class="btn btn-sm" id="ppeListXlsx">${ic('download')} Excel</button></span></div>
     ${ppeReqPanelHtml()}
     ${ppeUi.issueOpen?ppeIssueFormHtml():''}
+    ${typeof ppeImpHtml==='function'?ppeImpHtml():''}
     ${ppeUi.lastBatch?`<div class="notice">${ic('checkcircle')} <strong>${ppeUi.lastBatch.n} PPE record${ppeUi.lastBatch.n===1?'':'s'} saved</strong> for ${ppeUi.lastBatch.workers.length} worker${ppeUi.lastBatch.workers.length===1?'':'s'} (${esc(ppeUi.lastBatch.date)}). ${canEdit()&&ppeUi.lastBatch.key?`<button type="button" class="btn btn-sm btn-primary" data-ppe-signsess="${esc(ppeUi.lastBatch.key+'|'+ppeUi.lastBatch.date)}">✍ Workers sign now</button> `:''}<button type="button" class="btn btn-sm" id="ppeSheetPdf">${ic('printer')} Signature sheet (PDF)</button> <button type="button" class="att-link" id="ppeBatchClose">Close</button></div>`:''}
     ${typeof ppeSignPanelHtml==='function'?ppeSignPanelHtml():''}
     <div class="tiles tiles-4">
@@ -12190,6 +12196,7 @@ function renderPpe(live){
       <div class="tile"><div class="tile-head"><div class="tile-icon">${ic('clock')}</div><div class="tile-label">Replacement due</div></div><div class="tile-num ${soon.length?'warn':''}">${soon.length}</div><div class="tile-sub">in the next 30 days</div></div>
       <div class="tile"><div class="tile-head"><div class="tile-icon">${ic('alert')}</div><div class="tile-label">Replacement overdue</div></div><div class="tile-num ${overdue.length?'danger':''}">${overdue.length}</div><div class="tile-sub">past the replacement date</div></div>
     </div>
+    ${(S=>recs.length?`<div class="ppe-sigsum">${ic('pencil')} <b>Signatures — ${esc(word)}:</b> <span class="badge ok">${S.link} signed on the link</span> <span class="badge ok">${S.office} signed in the office</span> <span class="badge ${S.wait?'warn':'muted'}">${S.wait} waiting for the worker</span>${S.paper?` <span class="badge muted">${S.paper} paper</span>`:''}${S.none?` <span class="badge muted">${S.none} no signature recorded</span>`:''}</div>`:'')(ppeSigSummary(recs))}
     <div class="ppe-grid">
       <div class="panel"><div class="subhead" style="margin-top:0;">Issued by item — ${esc(word)}</div>${bars(byItem,'--cat-1')}</div>
       <div class="panel"><div class="subhead" style="margin-top:0;">Issued by project — ${esc(word)}</div>${bars(byProj,'--cat-4')}</div>
@@ -12274,7 +12281,7 @@ async function ppeSaveIssue(){
   ppeUi.saving=true; renderPpe();
   for(const id of selW){ const w=workers.find(x=>x.id===id); const add=[];
     for(const it of selI){ if(ppeUi.limit && ppeUi.limit[id] && !ppeUi.limit[id].includes(it)) continue; const v=ppeUi.sizes[id+'|'+it]||{size:ppeLastSize(w,it), qty:1}, std=ppeStdOf(it);
-      add.push({id:genId(), batchId, item:it, size:String(v.size||'').trim(), quantity:Math.max(1, Number(v.qty)||1), date, expiry:std&&std.life?ppeAddMonths(date, std.life):'', issuedBy:ppeUi.issuedBy.trim(), issEmail:String(((auth.currentUser||{}).email)||'').toLowerCase(), condition:ppeUi.condition, notes:'Crew issue'+(ppeUi.project!=='all'?' — '+projectName(ppeUi.project):''), projectId:ppeUi.project!=='all'?ppeUi.project:(w.projectId||''), batchId, ...(ppeLinks.some(l=>l.active && l.projectId && l.projectId===(ppeUi.project!=='all'?ppeUi.project:(w.projectId||'')))?{needConfirm:true}:{})}); }
+      add.push({id:genId(), batchId, item:it, size:String(v.size||'').trim(), quantity:Math.max(1, Number(v.qty)||1), date, expiry:std&&std.life?ppeAddMonths(date, std.life):'', issuedBy:ppeUi.issuedBy.trim(), issEmail:String(((auth.currentUser||{}).email)||'').toLowerCase(), condition:ppeUi.condition, notes:'Crew issue'+(ppeUi.project!=='all'?' — '+projectName(ppeUi.project):''), projectId:ppeUi.project!=='all'?ppeUi.project:(w.projectId||''), batchId, ...((ppeLinks.some(l=>l.active && l.projectId && l.projectId===(ppeUi.project!=='all'?ppeUi.project:(w.projectId||''))) || ppeOnAnyLink(w))?{needConfirm:true}:{})}); }   // Batch 158: any active link (project / division / location)
     if(!add.length) continue;
     try{ const FV=fsFieldValue(); await db.collection('workers').doc(id).update(stamp({ppeIssued: FV ? FV.arrayUnion(...add) : [...(w.ppeIssued||[]), ...add]})); n+=add.length; rows.push({w, add}); }
     catch(e){ console.error(e); toast('Could not save for '+(w.fullName||'a worker')+' — '+(e.code||'error')); }
@@ -12600,6 +12607,141 @@ async function ppeLinkPayload(token, pid){
   const vs=vehicles.filter(v=>!v.deleted && v.vehicleNumber), vehs=[...new Set([...vs.filter(v=>v.projectId===pid), ...vs.filter(v=>v.projectId!==pid)].map(v=>String(v.vehicleNumber).trim()))].slice(0,300);
   return {projectId:pid, projectName:(site&&site.siteName)||'', division:div, clientName:(site&&site.clientName)||'', clients, vehs, incTypes:INC_SITE_TYPES[div]||INC_SITE_TYPES.Civil, comp:compLinkPayload(pid), train:typeof trsLinkPayload==='function'?trsLinkPayload(pid):{}, workers:list, items:ppeLinkItems(), board, locs, docCtl:{no:dc.no||'', rev:dc.rev||'', date:dc.date||''}, tbtDocCtl:{no:dt.no||'', rev:dt.rev||'', date:dt.date||''}};
 }
+/* ================= Batch 158: PPE given from the office on WhatsApp requests — import the "MATERIAL FOR SITE" Excel =================
+   Columns found by their header: S.R. · MR · Request Date · Location · Requested by · Crew · Materials Ordered · Note (row of headers can be anywhere at the top).
+   Each person (requester + every name in Crew) gets his own issue records → they show on HIS link under "I received PPE" (same links, nothing changes on the phone).
+   The check screen comes first: worker found? item matched to the approved PPE list? already issued (duplicate)? — nothing is saved until you press Save. */
+let ppeImp=null;   // {file, rows:[{key, inc, date, wid, raw, crewOf, mr, loc, note, items:[{item, raw, size, qty, inc}]}], cond, busy}
+function ppeOnAnyLink(w){ if(!w || (w.status||'active')!=='active') return false;
+  for(const l of ppeLinks){ if(!l.active || !l.projectId) continue; const pid=l.projectId;
+    if(isLocPid(pid)) return true;
+    if(isDivPid(pid)){ const dv=pid.slice(4); if(workerDivKey(w)===dv || civProjects(dv).some(s=>s.id===w.projectId)) return true; continue; }
+    if(w.projectId===pid) return true; }
+  return false; }
+function ppeLinkTokenFor(w){ if(!w) return '';
+  const act=ppeLinks.filter(l=>l.active && l.projectId), p=act.find(l=>l.projectId===w.projectId); if(p) return p.id;
+  const d=act.find(l=>isDivPid(l.projectId) && (workerDivKey(w)===l.projectId.slice(4) || civProjects(l.projectId.slice(4)).some(s=>s.id===w.projectId))); if(d) return d.id;
+  const lc=act.find(l=>isLocPid(l.projectId)); return lc?lc.id:''; }
+function ppeImpNameKey(n){ return nameKey(String(n||'').replace(/\b(mr|mrs|mohd|md)\.?\s/gi,' ')); }
+function ppeImpFindWorker(name){ const nk=ppeImpNameKey(name); if(!nk) return {id:'', cands:[]};
+  const ws=activeWorkers().filter(w=>(w.status||'active')==='active');
+  const ex=ws.filter(w=>ppeImpNameKey(w.fullName)===nk); if(ex.length===1) return {id:ex[0].id, cands:ex};
+  const inc=ws.filter(w=>{ const k=ppeImpNameKey(w.fullName); return k && (k.includes(nk) || (nk.length>4 && nk.includes(k))); }); if(inc.length===1) return {id:inc[0].id, cands:inc};
+  const tk=nk.split(' ').filter(t=>t.length>2), sc=ws.map(w=>{ const wt=ppeImpNameKey(w.fullName).split(' '); return {w, n:tk.filter(t=>wt.includes(t)).length}; }).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  if(sc.length && (sc.length===1 || sc[0].n>sc[1].n) && (sc[0].n>=2 || tk.length===1)) return {id:sc[0].w.id, cands:[sc[0].w]};
+  return {id:'', cands:(inc.length?inc:sc.slice(0,5).map(x=>x.w))}; }
+const PPE_IMP_KEYS=[[/shoe|boot|footwear/,'shoe|boot'],[/go+g+le|googl/,'goggle'],[/glass|spectacle/,'glass'],[/cover ?all|over ?all|boiler ?suit/,'coverall'],[/helmet|hard ?hat/,'helmet'],[/glove/,'glove'],[/vest|reflect/,'vest'],[/ear ?(plug|muff|defender)|ear\b/,'ear'],[/face ?shield/,'face shield'],[/respirator/,'respirator'],[/mask|n95|ffp/,'mask'],[/harness/,'harness'],[/rain|winter|jacket/,'jacket|rain'],[/apron/,'apron'],[/welding/,'welding']];
+function ppeImpMatchItem(txt){ const t=' '+String(txt||'').toLowerCase()+' ', names=ppeItemOptions().filter(n=>n!=='Other');
+  const exact=names.find(n=>n.toLowerCase()===t.trim()); if(exact) return exact;
+  for(const [re, keys] of PPE_IMP_KEYS){ if(!re.test(t)) continue; const kre=new RegExp(keys), hits=names.filter(n=>kre.test(n.toLowerCase())); if(!hits.length) continue;
+    const words=t.split(/[^a-z0-9]+/).filter(w=>w.length>2), best=hits.map(n=>({n, s:words.filter(w=>n.toLowerCase().includes(w)).length+(/general|standard/i.test(n)?0.5:0)})).sort((a,b)=>b.s-a.s)[0]; return best.n; }
+  return ''; }
+const PPE_IMP_SIZE=/^(xs|s|m|l|xl|xxl|xxxl|[2-5]xl)$/i;
+function ppeImpParseItems(cell){ const out=[];
+  for(let part of String(cell||'').split(/[,;\n+]+|\s&\s|\band\b/i)){ part=part.trim(); if(!part || part==='-') continue; let size='', qty=1, s=part;
+    const sz=s.match(/\bsize\s*[:\-]?\s*([a-z0-9.\/]+)/i); if(sz){ size=sz[1].toUpperCase(); s=s.replace(sz[0],' '); }
+    const q=s.match(/(?:\bx\s*(\d{1,3})\b|\b(\d{1,3})\s*(?:x|nos?\.?|pcs?|pieces|pairs?|sets?)\b|^\s*(\d{1,3})\s+(?=[a-z]))/i); if(q){ qty=Math.max(1, Number(q[1]||q[2]||q[3])||1); s=s.replace(q[0],' '); }
+    if(!size){ const tk=s.trim().split(/[\s\-–(),]+/), z=tk.find(x=>PPE_IMP_SIZE.test(x)) || tk.find(x=>/^(3[5-9]|4[0-9]|50)$/.test(x)); if(z){ size=z.toUpperCase(); s=s.replace(new RegExp('\\b'+z+'\\b'),' '); } }
+    const raw=s.replace(/[\-–:()]+/g,' ').replace(/\s+/g,' ').trim(); if(!raw) continue;
+    out.push({raw, item:ppeImpMatchItem(raw), size, qty, inc:true}); }
+  return out; }
+function ppeImpDate(v){ if(typeof v==='number' && v>20000 && v<80000){ const d=new Date(Math.round((v-25569)*864e5)); return d.toISOString().slice(0,10); }
+  const s=String(v||'').trim(); let m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/); if(m){ const y=m[3].length===2?'20'+m[3]:m[3]; const dd=+m[1], mm=+m[2]; if(mm>=1&&mm<=12&&dd>=1&&dd<=31) return `${y}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`; }
+  m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); return m?m[0].slice(0,10):''; }
+function ppeImpDup(wid, date, it){ const w=workers.find(x=>x.id===wid); if(!w || !it.item) return false; const k=String(it.item).toLowerCase(), z=String(it.size||'').toLowerCase();
+  return (w.ppeIssued||[]).some(r=>r.date===date && String(r.item||'').toLowerCase()===k && String(r.size||'').toLowerCase()===z); }
+async function ppeImpRead(file){
+  try{ await loadScriptOnce(XLSX_URL); }catch(e){ toast('Could not load the Excel tools — check your internet connection'); return; }
+  let rows; try{ const wb=XLSX.read(await file.arrayBuffer(), {type:'array'}); const sh=wb.Sheets[wb.SheetNames[0]]; rows=XLSX.utils.sheet_to_json(sh, {header:1, raw:true, defval:''}); }
+  catch(e){ console.warn(e); toast('Could not read this file — save it as .xlsx and try again'); return; }
+  const hi=rows.findIndex(r=>r.some(c=>/requested\s*by/i.test(String(c))) && r.some(c=>/material|item|ppe/i.test(String(c))));
+  if(hi<0){ toast('Header row not found — the sheet needs “Requested by” and “Materials Ordered” columns'); return; }
+  const H=rows[hi].map(c=>String(c).trim().toLowerCase()), col=re=>H.findIndex(h=>re.test(h));
+  const C={mr:col(/^mr\b|m\.r/), date:col(/date/), loc:col(/location|site/), by:col(/requested/), crew:col(/crew|other|for\b/), mat:col(/material|item|ppe/), note:col(/note|remark/)};
+  const out=[]; let n=0;
+  for(const r of rows.slice(hi+1)){ const by=String(r[C.by]||'').trim(), mat=String(C.mat>=0?r[C.mat]:'').trim(); if(!by && !mat) continue; n++;
+    const date=ppeImpDate(C.date>=0?r[C.date]:'')||localToday(), items=ppeImpParseItems(mat), base={mr:String(C.mr>=0?r[C.mr]:'').trim(), loc:String(C.loc>=0?r[C.loc]:'').trim(), note:String(C.note>=0?r[C.note]:'').trim(), date, mat};
+    const crew=String(C.crew>=0?r[C.crew]:'').split(/[,;\/\n&]+|\band\b/i).map(x=>x.trim()).filter(x=>x && x!=='-');
+    for(const [i,nm] of [by, ...crew].entries()){ if(!nm) continue; const f=ppeImpFindWorker(nm);
+      out.push({...base, key:n+'_'+i, raw:nm, crewOf:i?by:'', wid:f.id, cands:f.cands.map(w=>w.id), items:items.map(x=>({...x})), inc:true}); } }
+  for(const r of out) for(const it of r.items) if(r.wid && ppeImpDup(r.wid, r.date, it)){ it.inc=false; it.dup=true; }
+  ppeImp={file:file.name, rows:out, cond:'New issue', busy:false, open:true}; renderPpe();
+  if(!out.length) toast('No rows with a name and materials under the header'); }
+function ppeImpRowState(r){ const w=workers.find(x=>x.id===r.wid);
+  if(!r.inc) return {cls:'muted', t:'Skipped'}; if(!w) return {cls:'danger', t:'Choose the worker'};
+  const its=r.items.filter(x=>x.inc); if(!its.length) return {cls:'muted', t:r.items.some(x=>x.dup)?'Already issued':'No items'};
+  if(its.some(x=>!String(x.item||'').trim())) return {cls:'warn', t:'Pick the PPE item'};
+  return {cls:'ok', t:ppeOnAnyLink(w)?'Ready — signs on the link':'Ready — sign in the office (not on a link)'}; }
+function ppeImpHtml(){ const I=ppeImp; if(!I || !I.open || !canEdit()) return '';
+  const names=ppeItemOptions().filter(n=>n!=='Other'), ws=activeWorkers().filter(w=>(w.status||'active')==='active').sort((a,b)=>String(a.fullName||'').localeCompare(String(b.fullName||'')));
+  if(!I.rows) return `<div class="panel ppe-imp"><div class="section-head"><h3>${ic('upload')} Import PPE issued from the office (Excel)</h3><button type="button" class="btn btn-sm" id="ppeImpClose">Close</button></div>
+    <p class="wsub" style="margin:-4px 0 8px;">Your “MATERIAL FOR SITE” sheet: <b>S.R. · MR · Request Date · Location · Requested by · Crew · Materials Ordered · Note</b>. Each person — the requester and every name in <b>Crew</b> — gets his own record and signs on his own link under “I received PPE”. Nothing is saved until you check and press Save.</p>
+    <label class="btn btn-primary btn-sm" style="display:inline-flex;">${ic('upload')} Choose the Excel file<input type="file" id="ppeImpFile" accept=".xlsx,.xls,.csv" hidden></label></div>`;
+  const ready=I.rows.filter(r=>ppeImpRowState(r).cls==='ok'), nRec=ready.reduce((n,r)=>n+r.items.filter(x=>x.inc).length,0), bad=I.rows.filter(r=>['danger','warn'].includes(ppeImpRowState(r).cls)).length;
+  const wOpt=r=>`<option value="">Choose the worker…</option>${(r.cands||[]).length&&!r.wid?`<optgroup label="Close names">${r.cands.map(id=>{ const w=workers.find(x=>x.id===id); return w?`<option value="${esc(w.id)}">${esc(w.fullName)}</option>`:''; }).join('')}</optgroup>`:''}<optgroup label="All active workers">${ws.map(w=>`<option value="${esc(w.id)}" ${w.id===r.wid?'selected':''}>${esc(w.fullName||'—')}${w.designation?' — '+esc(w.designation):''}</option>`).join('')}</optgroup>`;
+  const iOpt=it=>`<option value="">Pick…</option>${names.map(n=>`<option ${n===it.item?'selected':''}>${esc(n)}</option>`).join('')}${it.item && !names.includes(it.item)?`<option selected>${esc(it.item)}</option>`:''}<option value="__raw">Keep as written: ${esc(it.raw)}</option>`;
+  return `<div class="panel ppe-imp"><div class="section-head"><h3>${ic('upload')} Check before saving — ${esc(I.file)}</h3><button type="button" class="btn btn-sm" id="ppeImpClose">Close</button></div>
+    <div class="ppe-imp-bar"><span><b>${I.rows.length}</b> people · <b>${ready.length}</b> ready · ${bad?`<b class="t-danger">${bad}</b> to fix`:'nothing to fix'}</span>
+      <label>Issue type <select id="ppeImpCond">${PPE_ISSUE_TYPES.map(c=>`<option ${c===I.cond?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
+      <span class="wsub">Issued by: <b>${esc((ppeIssDefault(null)||{}).name||plWho())}</b></span></div>
+    <div class="table-wrap"><table class="ppe-imp-t"><thead><tr><th></th><th>Date</th><th>Worker</th><th>Items (item · size · qty)</th><th>From the sheet</th><th>Status</th></tr></thead><tbody>
+    ${I.rows.map((r,ri)=>{ const st=ppeImpRowState(r); return `<tr class="${r.inc?'':'off'}"><td><input type="checkbox" data-pi-inc="${ri}" ${r.inc?'checked':''} aria-label="Include"></td>
+      <td><input type="date" data-pi-date="${ri}" value="${esc(r.date)}" max="${esc(localToday())}"></td>
+      <td><div class="wsub">${esc(r.raw)}${r.crewOf?` · <span class="badge muted">crew of ${esc(r.crewOf)}</span>`:''}</div><select data-pi-w="${ri}">${wOpt(r)}</select></td>
+      <td>${r.items.map((it,ii)=>`<div class="ppe-imp-it ${it.inc?'':'off'}"><input type="checkbox" data-pi-iinc="${ri}|${ii}" ${it.inc?'checked':''} aria-label="Include item"><select data-pi-item="${ri}|${ii}">${iOpt(it)}</select><input data-pi-size="${ri}|${ii}" value="${esc(it.size)}" placeholder="size" maxlength="12"><input type="number" min="1" max="99" data-pi-qty="${ri}|${ii}" value="${esc(it.qty)}">${it.dup?'<span class="badge muted">already issued</span>':''}</div>`).join('')||'<span class="wsub">no items read</span>'}</td>
+      <td class="wsub">${esc([r.mr?'MR '+r.mr:'', r.loc, r.note].filter(Boolean).join(' · '))}<div>“${esc(String(r.mat||'').slice(0,90))}”</div></td>
+      <td><span class="badge ${st.cls}">${esc(st.t)}</span></td></tr>`; }).join('')}
+    </tbody></table></div>
+    <div class="form-actions"><button type="button" class="btn btn-sm" id="ppeImpAgain">Choose another file</button><button type="button" class="btn btn-primary btn-sm" id="ppeImpSave" ${nRec&&!I.busy?'':'disabled'}>Save ${nRec} PPE record${nRec===1?'':'s'} for ${ready.length} worker${ready.length===1?'':'s'}</button></div></div>`; }
+async function ppeImpSave(){ const I=ppeImp; if(!I || I.busy || !canEdit()) return; const ready=I.rows.filter(r=>ppeImpRowState(r).cls==='ok'); if(!ready.length) return;
+  I.busy=true; renderPpe(); const batch='imp_'+Date.now().toString(36), em=String(((auth.currentUser||{}).email)||'').toLowerCase(), by=(ppeIssDefault(null)||{}).name||plWho(); let n=0, ppl=0; const byW=new Map();
+  for(const r of ready){ if(!byW.has(r.wid)) byW.set(r.wid, []); byW.get(r.wid).push(r); }
+  for(const [wid, rs] of byW){ const w=workers.find(x=>x.id===wid); if(!w) continue; const link=ppeOnAnyLink(w), add=[];
+    for(const r of rs) for(const it of r.items.filter(x=>x.inc)){ const std=ppeStdOf(it.item);
+      add.push({id:genId(), batchId:batch+'_'+r.date, item:String(it.item).trim(), size:String(it.size||'').trim(), quantity:Math.max(1, Math.round(Number(it.qty)||1)), date:r.date, expiry:std&&std.life?ppeAddMonths(r.date, std.life):'', issuedBy:by, issEmail:em, condition:I.cond,
+        notes:['Office issue — Excel import', r.mr?'MR '+r.mr:'', r.loc, r.crewOf?'requested by '+r.crewOf:'', r.note].filter(Boolean).join(' · ').slice(0,200), projectId:w.projectId||'', source:'excelImport', ...(link?{needConfirm:true}:{})}); }
+    if(!add.length) continue;
+    try{ const FV=fsFieldValue(); await db.collection('workers').doc(wid).update(stamp({ppeIssued: FV ? FV.arrayUnion(...add) : [...(w.ppeIssued||[]), ...add]})); n+=add.length; ppl++; }
+    catch(e){ console.error(e); toast('Could not save for '+(w.fullName||'a worker')+' — '+((e&&e.code)||'error')); } }
+  ppeImp=null; toast(`${n} PPE record${n===1?'':'s'} saved for ${ppl} worker${ppl===1?'':'s'} — they sign on their link under “I received PPE”`); renderPpe(); if(typeof ppeLinkSyncSoon==='function') ppeLinkSyncSoon(); }
+document.addEventListener('click', async e=>{ const b=e.target.closest && e.target.closest('#ppeImpOpen,#ppeImpClose,#ppeImpAgain,#ppeImpSave'); if(!b || !canEdit()) return;
+  if(b.id==='ppeImpOpen'){ ppeImp={open:true}; renderPpe(); return; }
+  if(b.id==='ppeImpClose'){ ppeImp=null; renderPpe(); return; }
+  if(b.id==='ppeImpAgain'){ ppeImp={open:true}; renderPpe(); return; }
+  if(b.id==='ppeImpSave'){ await ppeImpSave(); return; } });
+document.addEventListener('change', async e=>{ const el=e.target; if(!el || !el.closest || !el.closest('.ppe-imp')) return; const I=ppeImp; if(!I) return;
+  if(el.id==='ppeImpFile'){ const f=el.files&&el.files[0]; if(f) await ppeImpRead(f); return; }
+  if(el.id==='ppeImpCond'){ I.cond=el.value; return; }
+  const D=el.dataset, rp=v=>String(v).split('|').map(Number);
+  if(D.piInc!==undefined){ I.rows[+D.piInc].inc=el.checked; }
+  else if(D.piDate!==undefined){ const r=I.rows[+D.piDate]; r.date=el.value||r.date; for(const it of r.items){ it.dup=!!(r.wid && ppeImpDup(r.wid, r.date, it)); } }
+  else if(D.piW!==undefined){ const r=I.rows[+D.piW]; r.wid=el.value; for(const it of r.items){ const d=!!(r.wid && ppeImpDup(r.wid, r.date, it)); if(d && !it.dup) it.inc=false; it.dup=d; } }
+  else if(D.piIinc!==undefined){ const [a,c]=rp(D.piIinc); I.rows[a].items[c].inc=el.checked; }
+  else if(D.piItem!==undefined){ const [a,c]=rp(D.piItem), it=I.rows[a].items[c]; it.item=el.value==='__raw'?it.raw:el.value; }
+  else if(D.piSize!==undefined){ const [a,c]=rp(D.piSize); I.rows[a].items[c].size=el.value.trim(); }
+  else if(D.piQty!==undefined){ const [a,c]=rp(D.piQty); I.rows[a].items[c].qty=Math.max(1, Math.round(Number(el.value)||1)); }
+  else return;
+  const y=window.scrollY; renderPpe(); window.scrollTo(0,y); });
+/* signatures this period: signed on the link / in the office / waiting / not needed */
+function ppeSigSummary(recs){ const s={link:0, office:0, wait:0, paper:0, none:0};
+  for(const r of recs){ if(r.sigId || r.receivedAt){ if(r.signedIn==='office') s.office++; else s.link++; } else if(r.needConfirm) s.wait++; else if(/paper/i.test(r.notes||'')) s.paper++; else s.none++; }
+  return s; }
+/* WhatsApp reminder: opens WhatsApp with a ready message + his link (HSE presses Send) */
+function ppeWaNumber(w){ let d=String((w&&w.mobileNumber)||'').replace(/[^\d+]/g,''); if(!d) return ''; if(d.startsWith('+')) d=d.slice(1); else if(d.startsWith('00')) d=d.slice(2); else if(d.length===8 && /^[79]/.test(d)) d='968'+d; return /^\d{9,15}$/.test(d)?d:''; }
+function ppeWaHref(w, list){ const tok=ppeLinkTokenFor(w), url=tok?ppeReqLinkUrl(tok):'', first=String(w.fullName||'').split(' ')[0]||'';
+  const txt=`Hello ${first}, PPE was issued to you: ${list.map(x=>`${x.item||''}${x.size?' '+x.size:''}${Number(x.quantity)>1?' ×'+x.quantity:''}`).join(', ')}.\nPlease open the PPE link, choose your name and press "I received PPE" to sign.${url?'\n'+url:''}\n— Burhan HSE`;
+  return `https://wa.me/${ppeWaNumber(w)}?text=${encodeURIComponent(txt)}`; }
+/* Batch 158: office / Excel issues signed on the link — last 30 days, PDF with his signature */
+function ppeSignedRecentHtml(){ const from=dateAdd(localToday(), -30), g=new Map();
+  for(const w of activeWorkers()) for(const r of (w.ppeIssued||[])){ if(!r.sigId || !r.receivedAt || String(r.receivedDate||r.date||'')<from) continue; if(!(r.source==='excelImport' || /crew issue|office issue/i.test(r.notes||''))) continue;
+    if(!g.has(r.sigId)) g.set(r.sigId, {w, sig:r.sigId, d:r.receivedDate||'', xs:[], office:r.signedIn==='office'}); g.get(r.sigId).xs.push(r); }
+  const L=[...g.values()].sort((a,b)=>String(b.d).localeCompare(String(a.d))); if(!L.length) return '';
+  return `<div class="subhead">Signed — office / Excel issues, last 30 days (${L.length})</div><div class="ppe-gaps ppe-wait">${L.slice(0,30).map(x=>`<div><button type="button" class="att-link" data-ppe-worker="${esc(x.w.id)}">${esc(x.w.fullName||'—')}</button> <span class="wsub">${esc(x.xs.map(r=>`${r.item||''}${r.size?' '+r.size:''}`).join(', '))} · signed ${esc(isoToDmy(x.d))}${x.office?' in the office':' on the link'}</span> <button type="button" class="btn btn-sm" data-ppe-rcpt="${esc(x.sig)}">${ic('download')} PDF with signature</button></div>`).join('')}${L.length>30?`<div class="wsub">… and ${L.length-30} more — open the worker → PPE</div>`:''}</div>`; }
+function ppeConfHtml(conf){ if(!conf.length) return ''; const g=new Map(); for(const c of conf){ if(!g.has(c.w.id)) g.set(c.w.id, {w:c.w, xs:[]}); g.get(c.w.id).xs.push(c.x); }
+  const from=dateAdd(localToday(), -60), L=[...g.values()].sort((a,b)=>String(b.xs[0].date||'').localeCompare(String(a.xs[0].date||'')));
+  return `<div class="subhead">Waiting for the worker's signature on the link (${conf.length} item${conf.length===1?'':'s'} · ${L.length} worker${L.length===1?'':'s'})</div><div class="ppe-gaps ppe-wait">${L.slice(0,30).map(({w,xs})=>{ const old=xs.every(x=>String(x.date||'')<from), on=ppeOnAnyLink(w);
+    return `<div><button type="button" class="att-link" data-ppe-worker="${esc(w.id)}">${esc(w.fullName||'—')}</button> <span class="wsub">${esc(xs.map(x=>`${x.item||''}${x.size?' '+x.size:''}`).join(', '))} · issued ${esc(isoToDmy(xs[0].date||''))}${old?' · <b>off the link (60 days) — sign in the office</b>':!on?' · <b>not on an active link — sign in the office</b>':''}</span>
+      ${on&&!old?`<a class="btn btn-sm ppe-wa" href="${esc(ppeWaHref(w, xs))}" target="_blank" rel="noopener" title="${ppeWaNumber(w)?'Opens WhatsApp to '+esc(w.mobileNumber):'No mobile number saved — WhatsApp asks you to choose the contact'}">WhatsApp reminder</a>`:''}</div>`; }).join('')}${L.length>30?`<div class="wsub">… and ${L.length-30} more workers</div>`:''}</div>`; }
 function ppeLinkSyncSoon(){ clearTimeout(ppeLinkTimer); ppeLinkTimer=setTimeout(ppeLinkSync, 1500); }
 async function ppeLinkSync(){
   if(!canEdit() || !workersLoaded || !sitesLoaded || !workers.length){ return; } if(ppeLinkBusy){ ppeLinkAgain=true; return; } ppeLinkBusy=true;
@@ -12970,7 +13112,7 @@ function ppeReqPanelHtml(){
     ${sec('Waiting for HSE review', nNew, 'new', 'Nothing to review.')}
     ${sec(md?'Waiting for your approval':'Waiting for MD approval', nMd, 'md', 'Nothing waiting for the MD.')}
     ${sec('Approved — worker to collect and sign', nAp, 'approved', 'Nothing waiting for collection.')}
-    ${conf.length?`<div class="subhead">Crew issues — worker to confirm on the link (${conf.length})</div><div class="ppe-gaps">${conf.slice(0,20).map(c=>`<div><button type="button" class="att-link" data-ppe-worker="${esc(c.w.id)}">${esc(c.w.fullName||'—')}</button> <span class="wsub">${esc(c.x.item||'')}${c.x.size?' '+esc(c.x.size):''} · issued ${esc(isoToDmy(c.x.date||''))}</span></div>`).join('')}${conf.length>20?`<div class="wsub">… and ${conf.length-20} more</div>`:''}</div>`:''}
+    ${ppeConfHtml(conf)}${ppeSignedRecentHtml()}
     <div class="subhead">Delivered / not approved — last 30 days (${done.length})</div>${done.length?shownDone.map(r=>ppeReqCardHtml(r, 'done')).join('')+(done.length>shownDone.length?`<button type="button" class="att-link" data-pr-all="1">Show all ${done.length}</button>`:''):'<p class="wsub" style="margin:0;">Nothing yet.</p>'}
   </div>`;
 }
